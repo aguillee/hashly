@@ -1,0 +1,188 @@
+{
+  "common": {
+    "connectWallet": "Connect Wallet",
+    "disconnect": "Disconnect",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "submit": "Submit",
+    "close": "Close",
+    "viewAll": "View All",
+    "learnMore": "Learn More",
+    "comingSoon": "Coming Soon"
+  },
+  "nav": {
+    "calendar": "Calendar",
+    "leaderboard": "Leaderboard",
+    "missions": "Missions",
+    "admin": "Admin",
+    "profile": "Profile"
+  },
+  "home": {
+    "hero": {
+      "title": "Discover NFT Mints on",
+      "titleHighlight": "Hedera",
+      "description": "Your gateway to the best NFT collections on Hedera. Vote for your favorites, never miss a mint, and join our growing community.",
+      "connectToSubmit": "Connect to Submit",
+      "submitEvent": "Submit Event",
+      "exploreCalendar": "Explore Calendar"
+    },
+    "stats": {
+      "upcomingMints": "Upcoming Mints",
+      "activeVoters": "Active Voters",
+      "totalVotes": "Total Votes"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Discover, vote and participate in the best NFT collections on Hedera",
+      "step1Title": "Discover",
+      "step1Desc": "Browse upcoming NFT mints on the Hedera network. Filter by category, date, or popularity.",
+      "step2Title": "Vote",
+      "step2Desc": "Support your favorite projects. Your votes help quality projects stand out in the community.",
+      "step3Title": "Participate",
+      "step3Desc": "Never miss a mint! Get reminders and be ready to collect your favorite NFTs."
+    },
+    "nftBenefits": {
+      "title": "NFT Holder Benefits",
+      "subtitle": "Own NFTs from our partner collections and unlock exclusive benefits",
+      "dragonsTitle": "Santuario Hedera",
+      "dragonsSubtitle": "Dragon Collection",
+      "dragonsBenefit": "+1 extra vote per NFT per project",
+      "santuarioTitle": "El Santuario",
+      "santuarioSubtitle": "Exclusive Collection",
+      "santuarioBenefit1": "+20 extra votes per project",
+      "santuarioBenefit2": "Auto-approve submitted events",
+      "viewCollection": "View Collection"
+    },
+    "upcomingMints": "Upcoming Mints",
+    "noEvents": "No events found",
+    "noEventsDesc": "Be the first to submit an event!"
+  },
+  "events": {
+    "upcoming": "Upcoming",
+    "live": "Live Now",
+    "ended": "Ended",
+    "mint": "Mint",
+    "price": "Price",
+    "supply": "Supply",
+    "unlimited": "Unlimited",
+    "votes": "votes",
+    "viewDetails": "View Details",
+    "submitEvent": "Submit Event",
+    "category": {
+      "all": "All Categories",
+      "pfp": "PFP",
+      "art": "Art",
+      "gaming": "Gaming",
+      "music": "Music",
+      "utility": "Utility",
+      "metaverse": "Metaverse",
+      "collectibles": "Collectibles",
+      "other": "Other"
+    },
+    "filter": {
+      "all": "All",
+      "upcoming": "Upcoming",
+      "live": "Live",
+      "ended": "Ended"
+    },
+    "sort": {
+      "date": "By Date",
+      "votes": "By Votes",
+      "newest": "Newest"
+    }
+  },
+  "voting": {
+    "vote": "Vote",
+    "voted": "Voted",
+    "voteUp": "Vote Up",
+    "voteDown": "Vote Down",
+    "connectToVote": "Connect wallet to vote",
+    "voteAgainIn": "Vote again in",
+    "nftVotesAvailable": "NFT votes available",
+    "useNftVotes": "Use NFT Votes",
+    "regularVote": "Regular Vote",
+    "votesFromDragons": "votes from Dragons",
+    "votesFromSantuario": "votes from El Santuario"
+  },
+  "profile": {
+    "title": "Profile",
+    "wallet": "Wallet",
+    "points": "Points",
+    "loginStreak": "Login Streak",
+    "days": "days",
+    "eventsSubmitted": "Events Submitted",
+    "totalVotes": "Total Votes",
+    "nftsDetected": "NFTs Detected",
+    "noNfts": "No NFTs from partner collections detected",
+    "benefits": "Your Benefits",
+    "extraVotesPerProject": "extra votes per project",
+    "autoApproveEvents": "Auto-approve submitted events",
+    "votingHistory": "Voting History",
+    "noVotes": "No votes yet",
+    "submittedEvents": "Submitted Events",
+    "noSubmissions": "No events submitted yet"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "Top contributors in the Hedera Mint Calendar community",
+    "yourRank": "Your Rank",
+    "yourPoints": "Your Points",
+    "top50": "Top 50",
+    "noRankings": "No rankings yet",
+    "beFirst": "Be the first to earn points!",
+    "you": "You"
+  },
+  "missions": {
+    "title": "Missions",
+    "subtitle": "Complete missions to earn points and climb the leaderboard",
+    "daily": "Daily Missions",
+    "weekly": "Weekly Missions",
+    "achievements": "Achievements",
+    "claim": "Claim",
+    "claimed": "Claimed",
+    "progress": "Progress",
+    "completed": "Completed",
+    "locked": "Locked"
+  },
+  "submit": {
+    "title": "Submit Event",
+    "subtitle": "Share an upcoming NFT mint with the community",
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "Enter event title",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the NFT collection",
+      "mintDate": "Mint Date",
+      "mintPrice": "Mint Price",
+      "mintPricePlaceholder": "e.g., 100 HBAR or $10 USDC",
+      "supply": "Supply",
+      "supplyPlaceholder": "Total supply (leave empty for unlimited)",
+      "imageUrl": "Image URL",
+      "imageUrlPlaceholder": "https://example.com/image.png",
+      "websiteUrl": "Website URL",
+      "twitterUrl": "Twitter/X URL",
+      "discordUrl": "Discord URL",
+      "category": "Category",
+      "submit": "Submit Event",
+      "submitting": "Submitting..."
+    },
+    "success": "Event submitted successfully!",
+    "successApproved": "Event created and published!",
+    "successPending": "Event submitted for review",
+    "error": "Failed to submit event"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "pendingEvents": "Pending Events",
+    "approve": "Approve",
+    "reject": "Reject",
+    "noPending": "No pending events"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "builtOn": "Built on Hedera"
+  }
+}

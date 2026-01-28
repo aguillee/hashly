@@ -1,0 +1,188 @@
+{
+  "common": {
+    "connectWallet": "Conectar Wallet",
+    "disconnect": "Desconectar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "submit": "Enviar",
+    "close": "Cerrar",
+    "viewAll": "Ver Todos",
+    "learnMore": "Saber Más",
+    "comingSoon": "Próximamente"
+  },
+  "nav": {
+    "calendar": "Calendario",
+    "leaderboard": "Ranking",
+    "missions": "Misiones",
+    "admin": "Admin",
+    "profile": "Perfil"
+  },
+  "home": {
+    "hero": {
+      "title": "Descubre NFT Mints en",
+      "titleHighlight": "Hedera",
+      "description": "Tu puerta de entrada a las mejores colecciones NFT en Hedera. Vota por tus favoritos, no te pierdas ningún mint y únete a nuestra comunidad.",
+      "connectToSubmit": "Conectar para Enviar",
+      "submitEvent": "Enviar Evento",
+      "exploreCalendar": "Explorar Calendario"
+    },
+    "stats": {
+      "upcomingMints": "Próximos Mints",
+      "activeVoters": "Votantes Activos",
+      "totalVotes": "Votos Totales"
+    },
+    "howItWorks": {
+      "title": "Cómo Funciona",
+      "subtitle": "Descubre, vota y participa en las mejores colecciones NFT en Hedera",
+      "step1Title": "Descubre",
+      "step1Desc": "Explora los próximos mints de NFT en la red Hedera. Filtra por categoría, fecha o popularidad.",
+      "step2Title": "Vota",
+      "step2Desc": "Apoya tus proyectos favoritos. Tus votos ayudan a que los proyectos de calidad destaquen en la comunidad.",
+      "step3Title": "Participa",
+      "step3Desc": "¡No te pierdas ningún mint! Recibe recordatorios y prepárate para coleccionar tus NFTs favoritos."
+    },
+    "nftBenefits": {
+      "title": "Beneficios para Holders de NFT",
+      "subtitle": "Posee NFTs de nuestras colecciones asociadas y desbloquea beneficios exclusivos",
+      "dragonsTitle": "Santuario Hedera",
+      "dragonsSubtitle": "Colección de Dragones",
+      "dragonsBenefit": "+1 voto extra por NFT por proyecto",
+      "santuarioTitle": "El Santuario",
+      "santuarioSubtitle": "Colección Exclusiva",
+      "santuarioBenefit1": "+20 votos extra por proyecto",
+      "santuarioBenefit2": "Auto-aprobar eventos enviados",
+      "viewCollection": "Ver Colección"
+    },
+    "upcomingMints": "Próximos Mints",
+    "noEvents": "No se encontraron eventos",
+    "noEventsDesc": "¡Sé el primero en enviar un evento!"
+  },
+  "events": {
+    "upcoming": "Próximo",
+    "live": "En Vivo",
+    "ended": "Finalizado",
+    "mint": "Mint",
+    "price": "Precio",
+    "supply": "Supply",
+    "unlimited": "Ilimitado",
+    "votes": "votos",
+    "viewDetails": "Ver Detalles",
+    "submitEvent": "Enviar Evento",
+    "category": {
+      "all": "Todas las Categorías",
+      "pfp": "PFP",
+      "art": "Arte",
+      "gaming": "Gaming",
+      "music": "Música",
+      "utility": "Utilidad",
+      "metaverse": "Metaverso",
+      "collectibles": "Coleccionables",
+      "other": "Otros"
+    },
+    "filter": {
+      "all": "Todos",
+      "upcoming": "Próximos",
+      "live": "En Vivo",
+      "ended": "Finalizados"
+    },
+    "sort": {
+      "date": "Por Fecha",
+      "votes": "Por Votos",
+      "newest": "Más Recientes"
+    }
+  },
+  "voting": {
+    "vote": "Votar",
+    "voted": "Votado",
+    "voteUp": "Voto Positivo",
+    "voteDown": "Voto Negativo",
+    "connectToVote": "Conecta tu wallet para votar",
+    "voteAgainIn": "Votar de nuevo en",
+    "nftVotesAvailable": "Votos NFT disponibles",
+    "useNftVotes": "Usar Votos NFT",
+    "regularVote": "Voto Regular",
+    "votesFromDragons": "votos de Dragones",
+    "votesFromSantuario": "votos de El Santuario"
+  },
+  "profile": {
+    "title": "Perfil",
+    "wallet": "Wallet",
+    "points": "Puntos",
+    "loginStreak": "Racha de Login",
+    "days": "días",
+    "eventsSubmitted": "Eventos Enviados",
+    "totalVotes": "Votos Totales",
+    "nftsDetected": "NFTs Detectados",
+    "noNfts": "No se detectaron NFTs de las colecciones asociadas",
+    "benefits": "Tus Beneficios",
+    "extraVotesPerProject": "votos extra por proyecto",
+    "autoApproveEvents": "Auto-aprobar eventos enviados",
+    "votingHistory": "Historial de Votos",
+    "noVotes": "Sin votos todavía",
+    "submittedEvents": "Eventos Enviados",
+    "noSubmissions": "No has enviado eventos todavía"
+  },
+  "leaderboard": {
+    "title": "Ranking",
+    "subtitle": "Los mejores contribuidores de la comunidad Hedera Mint Calendar",
+    "yourRank": "Tu Posición",
+    "yourPoints": "Tus Puntos",
+    "top50": "Top 50",
+    "noRankings": "Sin rankings todavía",
+    "beFirst": "¡Sé el primero en ganar puntos!",
+    "you": "Tú"
+  },
+  "missions": {
+    "title": "Misiones",
+    "subtitle": "Completa misiones para ganar puntos y subir en el ranking",
+    "daily": "Misiones Diarias",
+    "weekly": "Misiones Semanales",
+    "achievements": "Logros",
+    "claim": "Reclamar",
+    "claimed": "Reclamado",
+    "progress": "Progreso",
+    "completed": "Completado",
+    "locked": "Bloqueado"
+  },
+  "submit": {
+    "title": "Enviar Evento",
+    "subtitle": "Comparte un próximo mint de NFT con la comunidad",
+    "form": {
+      "title": "Título",
+      "titlePlaceholder": "Ingresa el título del evento",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Describe la colección NFT",
+      "mintDate": "Fecha del Mint",
+      "mintPrice": "Precio del Mint",
+      "mintPricePlaceholder": "ej., 100 HBAR o $10 USDC",
+      "supply": "Supply",
+      "supplyPlaceholder": "Supply total (dejar vacío para ilimitado)",
+      "imageUrl": "URL de la Imagen",
+      "imageUrlPlaceholder": "https://ejemplo.com/imagen.png",
+      "websiteUrl": "URL del Sitio Web",
+      "twitterUrl": "URL de Twitter/X",
+      "discordUrl": "URL de Discord",
+      "category": "Categoría",
+      "submit": "Enviar Evento",
+      "submitting": "Enviando..."
+    },
+    "success": "¡Evento enviado exitosamente!",
+    "successApproved": "¡Evento creado y publicado!",
+    "successPending": "Evento enviado para revisión",
+    "error": "Error al enviar el evento"
+  },
+  "admin": {
+    "title": "Panel de Admin",
+    "pendingEvents": "Eventos Pendientes",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "noPending": "No hay eventos pendientes"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados",
+    "builtOn": "Construido en Hedera"
+  }
+}
