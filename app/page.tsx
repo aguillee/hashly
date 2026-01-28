@@ -12,6 +12,7 @@ import {
   Gift,
   Loader2,
   Sparkles,
+  Infinity,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
@@ -35,6 +36,7 @@ interface FeaturedEvent {
 interface FeaturedData {
   mostVoted: FeaturedEvent | null;
   nextUp: FeaturedEvent | null;
+  topForeverMint: FeaturedEvent | null;
 }
 
 export default function HomePage() {
@@ -126,27 +128,43 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* Next Up - Takes 1 column */}
-              {featured.nextUp && (
-                <div className="flex flex-col">
-                  <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-orange-400" />
-                    Minting Soon
-                  </h3>
-                  <FeaturedEventCard event={featured.nextUp} variant="nextUp" />
+              {/* Next Up + Top Forever Mint - Takes 1 column */}
+              {(featured.nextUp || featured.topForeverMint) && (
+                <div className="flex flex-col gap-6">
+                  {/* Minting Soon */}
+                  {featured.nextUp && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-orange-400" />
+                        Minting Soon
+                      </h3>
+                      <FeaturedEventCard event={featured.nextUp} variant="nextUp" />
+                    </div>
+                  )}
+
+                  {/* Top Forever Mint */}
+                  {featured.topForeverMint && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                        <Infinity className="h-5 w-5 text-purple-400" />
+                        Top Forever Mint
+                      </h3>
+                      <FeaturedEventCard event={featured.topForeverMint} variant="foreverMint" />
+                    </div>
+                  )}
 
                   {/* View All Link */}
                   <Link
                     href="/calendar"
-                    className="mt-4 text-center text-sm text-accent-primary hover:underline"
+                    className="text-center text-sm text-accent-primary hover:underline"
                   >
                     View all events →
                   </Link>
                 </div>
               )}
 
-              {/* If only mostVoted exists */}
-              {featured.mostVoted && !featured.nextUp && (
+              {/* If only mostVoted exists (no nextUp and no topForeverMint) */}
+              {featured.mostVoted && !featured.nextUp && !featured.topForeverMint && (
                 <div className="flex items-center justify-center">
                   <Link
                     href="/calendar"

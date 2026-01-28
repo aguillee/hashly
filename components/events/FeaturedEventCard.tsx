@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Calendar, Clock, Trophy, TrendingUp, ArrowRight } from "lucide-react";
+import { Calendar, Clock, Trophy, TrendingUp, ArrowRight, Infinity } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HbarIcon } from "@/components/ui/HbarIcon";
@@ -25,7 +25,7 @@ interface FeaturedEvent {
 
 interface FeaturedEventCardProps {
   event: FeaturedEvent;
-  variant: "mostVoted" | "nextUp";
+  variant: "mostVoted" | "nextUp" | "foreverMint";
 }
 
 export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
@@ -112,6 +112,57 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
                 View Details
                 <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
               </Button>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  // Forever Mint card
+  if (variant === "foreverMint") {
+    return (
+      <Link href={`/events/${event.id}`} className="block group">
+        <div className="flex gap-4 p-4 rounded-2xl bg-bg-card border border-purple-500/30 hover:border-purple-500/50 transition-all">
+          {/* Image */}
+          <div
+            className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"
+            style={{
+              backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : undefined,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {!event.imageUrl && (
+              <div className="w-full h-full flex items-center justify-center">
+                <Infinity className="h-8 w-8 text-purple-400" />
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 gap-1">
+                <Infinity className="h-3 w-3" />
+                Always Live
+              </Badge>
+            </div>
+
+            <h3 className="font-semibold text-text-primary group-hover:text-purple-400 transition-colors truncate mb-1">
+              {event.title}
+            </h3>
+
+            <div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
+              <span className="flex items-center gap-1">
+                {priceInfo.isHbar ? (
+                  <HbarIcon className="h-3.5 w-3.5" />
+                ) : (
+                  <UsdcIcon className="h-3.5 w-3.5" />
+                )}
+                {priceInfo.value}
+              </span>
+              <span className="text-purple-400">+{score} votes</span>
             </div>
           </div>
         </div>

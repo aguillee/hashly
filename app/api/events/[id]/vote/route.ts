@@ -72,43 +72,69 @@ export async function POST(
     let nftVoteWeight = 0;
     let nftVotesUsed: { tokenId: string; serialNumber: number; weight: number }[] = [];
 
+    // Forever mints use permanent voting (like collections) - no 24h cooldown
+    const isForeverMint = event.isForeverMint;
+
     // Handle regular vote
     if (existingVote) {
-      // Check 24h cooldown for regular vote
-      const hoursSinceVote =
-        (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
-
-      if (hoursSinceVote < 24) {
-        // Can't update regular vote yet, but can still use NFT votes
-        if (!useNftVotes) {
-          const hoursRemaining = Math.ceil(24 - hoursSinceVote);
-          return NextResponse.json(
-            {
-              error: `You can vote again in ${hoursRemaining} hours`,
-              hoursRemaining,
-            },
-            { status: 429 }
-          );
-        }
-      } else {
-        // Update existing regular vote
+      if (isForeverMint) {
+        // Forever mint: can change vote anytime (like collections)
         const oldVoteType = existingVote.voteType;
 
-        await prisma.vote.update({
-          where: { id: existingVote.id },
-          data: {
-            voteType: voteType as VoteType,
-            createdAt: new Date(),
-          },
-        });
+        if (voteType !== oldVoteType) {
+          await prisma.vote.update({
+            where: { id: existingVote.id },
+            data: {
+              voteType: voteType as VoteType,
+              createdAt: new Date(),
+            },
+          });
 
-        // Calculate vote change
-        if (voteType === "UP" && oldVoteType === "DOWN") {
-          regularVoteWeight = 2; // -1 becomes +1
-        } else if (voteType === "DOWN" && oldVoteType === "UP") {
-          regularVoteWeight = -2; // +1 becomes -1
+          // Calculate vote change
+          if (voteType === "UP" && oldVoteType === "DOWN") {
+            regularVoteWeight = 2; // -1 becomes +1
+          } else if (voteType === "DOWN" && oldVoteType === "UP") {
+            regularVoteWeight = -2; // +1 becomes -1
+          }
         }
-        // If same vote type, no change
+        // If same vote type, no change needed
+      } else {
+        // Regular event: Check 24h cooldown
+        const hoursSinceVote =
+          (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
+
+        if (hoursSinceVote < 24) {
+          // Can't update regular vote yet, but can still use NFT votes
+          if (!useNftVotes) {
+            const hoursRemaining = Math.ceil(24 - hoursSinceVote);
+            return NextResponse.json(
+              {
+                error: `You can vote again in ${hoursRemaining} hours`,
+                hoursRemaining,
+              },
+              { status: 429 }
+            );
+          }
+        } else {
+          // Update existing regular vote
+          const oldVoteType = existingVote.voteType;
+
+          await prisma.vote.update({
+            where: { id: existingVote.id },
+            data: {
+              voteType: voteType as VoteType,
+              createdAt: new Date(),
+            },
+          });
+
+          // Calculate vote change
+          if (voteType === "UP" && oldVoteType === "DOWN") {
+            regularVoteWeight = 2; // -1 becomes +1
+          } else if (voteType === "DOWN" && oldVoteType === "UP") {
+            regularVoteWeight = -2; // +1 becomes -1
+          }
+          // If same vote type, no change
+        }
       }
     } else {
       // Create new regular vote

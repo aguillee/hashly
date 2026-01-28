@@ -28,15 +28,13 @@ export async function GET(request: NextRequest) {
     const where: any = {};
 
     if (search) {
-      // When searching, search ALL collections (including those with 0 votes)
+      // When searching, search ALL collections
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
       ];
-    } else {
-      // When not searching, only show collections with votes (positive or negative)
-      where.NOT = { totalVotes: 0 };
     }
+    // Show all collections, not just voted ones
 
     // Build orderBy
     let orderBy: any = { totalVotes: "desc" };
@@ -145,11 +143,11 @@ export async function POST(request: NextRequest) {
 
 /**
  * Sync collections from Kabila API to database
- * Only includes collections with >= 300 HBAR volume (from Kabila networkVolume)
+ * Only includes collections with >= 10,000 HBAR volume (from Kabila networkVolume)
  * Links point to SentX marketplace
  */
 async function syncCollectionsFromKabila() {
-  const MIN_VOLUME_HBAR = 300;
+  const MIN_VOLUME_HBAR = 20000;
 
   // Fetch all collections from Kabila
   const kabilaCollections = await fetchKabilaCollections();
@@ -172,9 +170,9 @@ async function syncCollectionsFromKabila() {
   // Process collections
   for (const collection of kabilaCollections) {
     try {
-      // Get volume from Kabila (networkVolume is in tinybars, convert to HBAR)
+      // Get volume from Kabila (networkVolume is already in HBAR)
       const volumeHbar = collection.networkVolume
-        ? Math.round(collection.networkVolume / 100000000)
+        ? Math.round(collection.networkVolume)
         : 0;
 
       // Skip collections with less than MIN_VOLUME_HBAR volume
@@ -238,6 +236,6 @@ async function syncCollectionsFromKabila() {
     updated,
     skipped,
     errors: errors.length > 0 ? errors : undefined,
-    message: `Synced ${created} new, updated ${updated} existing. Skipped ${skipped} with <${MIN_VOLUME_HBAR} HBAR volume.`,
+    message: `Synced ${created} new, updated ${updated} existing. Skipped ${skipped} with <20k HBAR volume.`,
   };
 }
