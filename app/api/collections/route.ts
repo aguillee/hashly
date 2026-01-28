@@ -6,6 +6,7 @@ import { fetchKabilaCollections, resolveKabilaImageUrl } from "@/lib/kabila";
 import { resolveImageUrl } from "@/lib/sentx";
 
 // GET /api/collections - List collections with rankings
+// Returns top 30 best voted + top 10 worst voted (or search results)
 export async function GET(request: NextRequest) {
   // Rate limiting
   const rateLimitResponse = checkRateLimit(request, "public");
@@ -13,10 +14,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const sortBy = searchParams.get("sortBy") || "votes";
     const search = searchParams.get("search");
-    const limit = parseInt(searchParams.get("limit") || "50");
-    const offset = parseInt(searchParams.get("offset") || "0");
     const shouldSync = searchParams.get("sync") === "true";
 
     // Optionally sync from Kabila (called less frequently)
@@ -24,38 +22,25 @@ export async function GET(request: NextRequest) {
       await syncCollectionsFromKabila();
     }
 
-    // Build where clause
-    const where: any = {};
+    // Get total count of all collections
+    const total = await prisma.collection.count();
 
+    // Get user for vote mapping
+    const user = await getCurrentUser();
+
+    // If searching, return search results
     if (search) {
-      // When searching, search ALL collections
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
-    }
-    // Show all collections, not just voted ones
+      const searchWhere = {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { description: { contains: search, mode: "insensitive" as const } },
+        ],
+      };
 
-    // Build orderBy
-    let orderBy: any = { totalVotes: "desc" };
-
-    if (sortBy === "floor") {
-      orderBy = { floor: "desc" };
-    } else if (sortBy === "volume") {
-      orderBy = { volume: "desc" };
-    } else if (sortBy === "newest") {
-      orderBy = { createdAt: "desc" };
-    } else if (sortBy === "stars") {
-      orderBy = { sentxStars: "desc" };
-    }
-
-    // Fetch collections
-    const [collections, total] = await Promise.all([
-      prisma.collection.findMany({
-        where,
-        orderBy,
-        take: limit,
-        skip: offset,
+      const searchResults = await prisma.collection.findMany({
+        where: searchWhere,
+        orderBy: { totalVotes: "desc" },
+        take: 50,
         select: {
           id: true,
           tokenAddress: true,
@@ -72,47 +57,94 @@ export async function GET(request: NextRequest) {
           lastSyncedAt: true,
           createdAt: true,
         },
-      }),
-      prisma.collection.count({ where }),
-    ]);
-
-    // Get user votes if authenticated
-    const user = await getCurrentUser();
-    let userVotesMap: Record<string, { voteWeight: number; nftTokenId?: string }> = {};
-
-    if (user) {
-      const userVotes = await prisma.collectionVote.findMany({
-        where: {
-          walletAddress: user.walletAddress,
-          collectionId: { in: collections.map((c) => c.id) },
-        },
-        select: {
-          collectionId: true,
-          voteWeight: true,
-          nftTokenId: true,
-        },
       });
 
-      userVotesMap = userVotes.reduce((acc, v) => {
-        acc[v.collectionId] = {
-          voteWeight: v.voteWeight,
-          nftTokenId: v.nftTokenId || undefined,
-        };
-        return acc;
-      }, {} as Record<string, { voteWeight: number; nftTokenId?: string }>);
+      const userVotesMap = await getUserVotesMap(user, searchResults.map(c => c.id));
+
+      return NextResponse.json({
+        collections: searchResults.map((c, index) => ({
+          ...c,
+          rank: index + 1,
+          image: resolveImageUrl(c.image || ""),
+          userVote: userVotesMap[c.id] || null,
+          lastSyncedAt: c.lastSyncedAt?.toISOString() || null,
+          createdAt: c.createdAt.toISOString(),
+        })),
+        total,
+        isSearch: true,
+      });
     }
 
+    // Get top 30 best voted
+    const topCollections = await prisma.collection.findMany({
+      orderBy: { totalVotes: "desc" },
+      take: 30,
+      select: {
+        id: true,
+        tokenAddress: true,
+        name: true,
+        description: true,
+        image: true,
+        slug: true,
+        floor: true,
+        volume: true,
+        owners: true,
+        supply: true,
+        totalVotes: true,
+        sentxStars: true,
+        lastSyncedAt: true,
+        createdAt: true,
+      },
+    });
+
+    // Get top 10 worst voted (lowest votes, excluding those already in top)
+    const topIds = topCollections.map(c => c.id);
+    const worstCollections = await prisma.collection.findMany({
+      where: {
+        id: { notIn: topIds },
+      },
+      orderBy: { totalVotes: "asc" },
+      take: 10,
+      select: {
+        id: true,
+        tokenAddress: true,
+        name: true,
+        description: true,
+        image: true,
+        slug: true,
+        floor: true,
+        volume: true,
+        owners: true,
+        supply: true,
+        totalVotes: true,
+        sentxStars: true,
+        lastSyncedAt: true,
+        createdAt: true,
+      },
+    });
+
+    // Get user votes for all collections
+    const allCollectionIds = [...topCollections, ...worstCollections].map(c => c.id);
+    const userVotesMap = await getUserVotesMap(user, allCollectionIds);
+
     return NextResponse.json({
-      collections: collections.map((c, index) => ({
+      top: topCollections.map((c, index) => ({
         ...c,
-        rank: offset + index + 1,
+        rank: index + 1,
+        image: resolveImageUrl(c.image || ""),
+        userVote: userVotesMap[c.id] || null,
+        lastSyncedAt: c.lastSyncedAt?.toISOString() || null,
+        createdAt: c.createdAt.toISOString(),
+      })),
+      worst: worstCollections.map((c, index) => ({
+        ...c,
+        rank: total - 9 + index, // Rank from bottom
         image: resolveImageUrl(c.image || ""),
         userVote: userVotesMap[c.id] || null,
         lastSyncedAt: c.lastSyncedAt?.toISOString() || null,
         createdAt: c.createdAt.toISOString(),
       })),
       total,
-      hasMore: offset + collections.length < total,
     });
   } catch (error) {
     console.error("Get collections error:", error);
@@ -121,6 +153,34 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Helper to get user votes map
+async function getUserVotesMap(
+  user: { walletAddress: string } | null,
+  collectionIds: string[]
+): Promise<Record<string, { voteWeight: number; nftTokenId?: string }>> {
+  if (!user || collectionIds.length === 0) return {};
+
+  const userVotes = await prisma.collectionVote.findMany({
+    where: {
+      walletAddress: user.walletAddress,
+      collectionId: { in: collectionIds },
+    },
+    select: {
+      collectionId: true,
+      voteWeight: true,
+      nftTokenId: true,
+    },
+  });
+
+  return userVotes.reduce((acc, v) => {
+    acc[v.collectionId] = {
+      voteWeight: v.voteWeight,
+      nftTokenId: v.nftTokenId || undefined,
+    };
+    return acc;
+  }, {} as Record<string, { voteWeight: number; nftTokenId?: string }>);
 }
 
 // POST /api/collections/sync - Sync collections from Kabila
