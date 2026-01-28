@@ -153,8 +153,18 @@ export interface KabilaCollection {
   tokenId: string;
   name: string;
   description?: string;
-  logo?: string;
-  banner?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  networkVolume?: number;
+  minPrice?: number;
+  holders?: number;
+  supply?: number;
+  minted?: number;
+  salesVolume?: {
+    last24h: number;
+    last7d: number;
+    last30d: number;
+  };
 }
 
 /**
