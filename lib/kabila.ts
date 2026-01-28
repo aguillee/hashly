@@ -169,22 +169,43 @@ export interface KabilaCollection {
 
 /**
  * Fetch all NFT collections from Kabila API
+ * Uses pagination to get ALL collections
  */
 export async function fetchKabilaCollections(): Promise<KabilaCollection[]> {
-  try {
-    const response = await fetch(`${KABILA_BASE_URL}/nft-collections`, {
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
+  const allCollections: KabilaCollection[] = [];
+  const limit = 500;
+  let offset = 0;
+  let hasMore = true;
 
-    if (!response.ok) {
-      throw new Error(`Kabila collections API error: ${response.status}`);
+  try {
+    while (hasMore) {
+      const response = await fetch(
+        `${KABILA_BASE_URL}/nft-collections?limit=${limit}&offset=${offset}`,
+        { next: { revalidate: 300 } }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Kabila collections API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const collections = data || [];
+
+      allCollections.push(...collections);
+
+      // If we got fewer than limit, we've reached the end
+      if (collections.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
     }
 
-    const data = await response.json();
-    return data || [];
+    console.log(`Fetched ${allCollections.length} total collections from Kabila`);
+    return allCollections;
   } catch (error) {
     console.error("Error fetching Kabila collections:", error);
-    return [];
+    return allCollections; // Return what we got so far
   }
 }
 

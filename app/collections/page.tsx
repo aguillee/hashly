@@ -241,7 +241,7 @@ export default function CollectionsPage() {
             <span className="text-sm text-text-secondary">
               {isSearching
                 ? `${collections.length} results for "${search}"`
-                : `${collections.length} collections with votes`}
+                : `${total} collections with 20k+ HBAR volume`}
             </span>
             {isSearching && (
               <Button variant="ghost" size="sm" onClick={clearSearch}>
