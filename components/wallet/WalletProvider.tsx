@@ -33,40 +33,65 @@ const network = process.env.NEXT_PUBLIC_HEDERA_NETWORK || "mainnet";
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isConnecting, setIsConnecting] = React.useState(false);
-  const [dAppConnector, setDAppConnector] = React.useState<DAppConnector | null>(null);
-  const { setConnected, setDisconnected, setUser, walletAddress } = useWalletStore();
+  const [dAppConnector, setDAppConnector] =
+    React.useState<DAppConnector | null>(null);
+  const [isInitialized, setIsInitialized] = React.useState(false);
+  const { setConnected, setDisconnected, setUser, walletAddress } =
+    useWalletStore();
 
   // Initialize DAppConnector on mount
   React.useEffect(() => {
-    initConnector();
-  }, []);
+    if (!isInitialized) {
+      initConnector();
+    }
+  }, [isInitialized]);
 
   // Try to reconnect on mount if we have a stored wallet address
   React.useEffect(() => {
-    if (walletAddress && dAppConnector) {
+    if (walletAddress && dAppConnector && isInitialized) {
       verifySession();
     }
-  }, [walletAddress, dAppConnector]);
+  }, [walletAddress, dAppConnector, isInitialized]);
 
   async function initConnector() {
+    if (!projectId) {
+      console.error("WalletConnect Project ID not configured");
+      return;
+    }
+
     try {
-      const ledgerId = network === "mainnet" ? LedgerId.MAINNET : LedgerId.TESTNET;
+      const ledgerId =
+        network === "mainnet" ? LedgerId.MAINNET : LedgerId.TESTNET;
+      const chainId =
+        network === "mainnet" ? HederaChainId.Mainnet : HederaChainId.Testnet;
+
+      const metadata = {
+        name: "Hashly",
+        description: "Discover and vote on upcoming NFT mints on Hedera",
+        url:
+          typeof window !== "undefined"
+            ? window.location.origin
+            : "https://hash-ly.com",
+        icons: [
+          typeof window !== "undefined"
+            ? `${window.location.origin}/logo-navbar.png`
+            : "https://hash-ly.com/logo-navbar.png",
+        ],
+      };
 
       const connector = new DAppConnector(
-        {
-          name: "Hashly",
-          description: "Discover and vote on upcoming NFT mints on Hedera",
-          url: typeof window !== "undefined" ? window.location.origin : "https://hash-ly.com",
-          icons: [typeof window !== "undefined" ? `${window.location.origin}/logo-navbar.png` : "https://hash-ly.com/logo-navbar.png"],
-        },
+        metadata,
         ledgerId,
         projectId,
         Object.values(HederaJsonRpcMethod),
-        [HederaSessionEvent.ChainChanged, HederaSessionEvent.AccountsChanged]
+        [HederaSessionEvent.ChainChanged, HederaSessionEvent.AccountsChanged],
+        [chainId]
       );
 
-      await connector.init();
+      // Initialize with logger set to error only
+      await connector.init({ logger: "error" });
       setDAppConnector(connector);
+      setIsInitialized(true);
 
       // Check for existing sessions
       const existingSessions = connector.walletConnectClient?.session.getAll();
@@ -79,12 +104,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Failed to initialize DAppConnector:", error);
+      // Retry after a delay
+      setTimeout(() => {
+        setIsInitialized(false);
+      }, 3000);
     }
   }
 
   function getAccountIdFromSession(session: any): string | null {
     try {
-      const chainId = network === "mainnet" ? HederaChainId.Mainnet : HederaChainId.Testnet;
+      const chainId =
+        network === "mainnet" ? HederaChainId.Mainnet : HederaChainId.Testnet;
       const accounts = session.namespaces?.hedera?.accounts || [];
       for (const account of accounts) {
         if (account.includes(chainId)) {
@@ -149,7 +179,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   async function connect() {
     if (!dAppConnector) {
-      throw new Error("Wallet connector not initialized. Please refresh the page.");
+      // Try to reinitialize
+      await initConnector();
+      if (!dAppConnector) {
+        throw new Error(
+          "Wallet connector not initialized. Please refresh the page."
+        );
+      }
     }
 
     setIsConnecting(true);
@@ -195,7 +231,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <WalletContext.Provider value={{ connect, disconnect, isConnecting, dAppConnector }}>
+    <WalletContext.Provider
+      value={{ connect, disconnect, isConnecting, dAppConnector }}
+    >
       {children}
     </WalletContext.Provider>
   );
