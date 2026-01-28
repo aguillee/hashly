@@ -12,6 +12,7 @@ import {
   Clock,
   LayoutGrid,
   CalendarDays,
+  Infinity,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -29,12 +30,13 @@ interface Event {
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
-  category: string;
   status: "UPCOMING" | "LIVE" | "ENDED";
   votesUp: number;
   votesDown: number;
   canVote?: boolean;
   voteLockedUntil?: string | null;
+  isForeverMint?: boolean;
+  source?: "SENTX" | "KABILA";
 }
 
 interface UserVote {
@@ -42,31 +44,26 @@ interface UserVote {
   voteType: "UP" | "DOWN";
 }
 
-const categories = [
-  { value: "all", label: "All" },
-  { value: "pfp", label: "PFP" },
-  { value: "art", label: "Art" },
-  { value: "gaming", label: "Gaming" },
-  { value: "utility", label: "Utility" },
-  { value: "metaverse", label: "Metaverse" },
-];
-
 const statusFilters = [
   { value: "all", label: "All Events", icon: Sparkles },
   { value: "live", label: "Live Now", icon: TrendingUp },
   { value: "upcoming", label: "Upcoming", icon: Clock },
+  { value: "forever", label: "Forever Mints", icon: Infinity },
+];
+
+const sourceFilters = [
+  { value: "all", label: "All Sources" },
+  { value: "SENTX", label: "SentX" },
+  { value: "KABILA", label: "Kabila" },
 ];
 
 export default function CalendarPage() {
   const { isConnected } = useWalletStore();
   const {
     status,
-    categories: selectedCategories,
     sortBy,
     searchQuery,
     setStatus,
-    toggleCategory,
-    clearCategories,
     setSortBy,
     setSearchQuery,
   } = useEventsFilterStore();
@@ -76,42 +73,66 @@ export default function CalendarPage() {
   const [loading, setLoading] = React.useState(true);
   const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("grid");
   const [showFilters, setShowFilters] = React.useState(false);
+  const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA">("all");
+  const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
 
-  // Fetch events
+  // Track if initial URL params have been processed
+  const initialLoadRef = React.useRef(false);
+
+  // Check URL params for foreverMints filter (only once on mount)
   React.useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const params = new URLSearchParams();
+    if (initialLoadRef.current) return;
+    initialLoadRef.current = true;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("foreverMints") === "only") {
+      setForeverMintsOnly(true);
+      setStatus("forever");
+    }
+  }, [setStatus]);
+
+  // Fetch events - use useCallback to avoid recreating the function
+  const fetchEvents = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+
+      // Handle forever mints filter
+      if (status === "forever") {
+        params.append("foreverMints", "only");
+      } else {
         if (status !== "all") params.append("status", status);
-        if (selectedCategories.length > 0) {
-          selectedCategories.forEach((cat) => params.append("category", cat));
-        }
-        if (searchQuery) params.append("search", searchQuery);
-        params.append("sortBy", sortBy);
-
-        const response = await fetch(`/api/events?${params.toString()}`);
-        const data = await response.json();
-
-        if (data.events) {
-          setEvents(data.events);
-          if (data.userVotes) {
-            const votesMap: Record<string, "UP" | "DOWN"> = {};
-            data.userVotes.forEach((vote: UserVote) => {
-              votesMap[vote.eventId] = vote.voteType;
-            });
-            setUserVotes(votesMap);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch events:", error);
-      } finally {
-        setLoading(false);
+        params.append("foreverMints", "exclude"); // Exclude forever mints from regular listing
       }
-    };
 
+      if (searchQuery) params.append("search", searchQuery);
+      if (sourceFilter !== "all") params.append("source", sourceFilter);
+      params.append("sortBy", sortBy);
+
+      const response = await fetch(`/api/events?${params.toString()}`);
+      const data = await response.json();
+
+      if (data.events) {
+        setEvents(data.events);
+        if (data.userVotes) {
+          const votesMap: Record<string, "UP" | "DOWN"> = {};
+          data.userVotes.forEach((vote: UserVote) => {
+            votesMap[vote.eventId] = vote.voteType;
+          });
+          setUserVotes(votesMap);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch events:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [status, sortBy, searchQuery, sourceFilter]);
+
+  // Fetch events when params change
+  React.useEffect(() => {
     fetchEvents();
-  }, [status, selectedCategories, sortBy, searchQuery]);
+  }, [fetchEvents]);
 
   // Handle vote
   const handleVote = async (eventId: string, voteType: "UP" | "DOWN") => {
@@ -235,7 +256,7 @@ export default function CalendarPage() {
                   return (
                     <button
                       key={filter.value}
-                      onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "ended")}
+                      onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "ended" | "forever")}
                       className={cn(
                         "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
                         status === filter.value
@@ -251,34 +272,24 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            {/* Category Filters */}
+            {/* Source Filter */}
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-text-primary">
-                  Categories
-                </label>
-                {selectedCategories.length > 0 && (
-                  <button
-                    onClick={clearCategories}
-                    className="text-xs text-accent-primary hover:underline"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
+              <label className="block text-sm font-medium text-text-primary mb-3">
+                Source
+              </label>
               <div className="flex flex-wrap gap-2">
-                {categories.slice(1).map((cat) => (
+                {sourceFilters.map((filter) => (
                   <button
-                    key={cat.value}
-                    onClick={() => toggleCategory(cat.value)}
+                    key={filter.value}
+                    onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
                     className={cn(
                       "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                      selectedCategories.includes(cat.value)
+                      sourceFilter === filter.value
                         ? "bg-accent-primary text-white"
                         : "bg-bg-secondary text-text-secondary hover:text-text-primary"
                     )}
                   >
-                    {cat.label}
+                    {filter.label}
                   </button>
                 ))}
               </div>

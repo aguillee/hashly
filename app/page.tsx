@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
+import { ForeverMintsSection } from "@/components/events/ForeverMintsSection";
 import { useWalletStore } from "@/store";
 
 interface FeaturedEvent {
@@ -25,7 +26,6 @@ interface FeaturedEvent {
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
-  category: string;
   status: "UPCOMING" | "LIVE" | "ENDED";
   votesUp: number;
   votesDown: number;
@@ -178,6 +178,13 @@ export default function HomePage() {
               )}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Forever Mints Section */}
+      <section className="py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ForeverMintsSection />
         </div>
       </section>
 

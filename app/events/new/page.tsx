@@ -13,14 +13,6 @@ import { useWalletStore } from "@/store";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-const categories = [
-  { value: "pfp", label: "PFP", color: "bg-purple-500" },
-  { value: "art", label: "Art", color: "bg-blue-500" },
-  { value: "gaming", label: "Gaming", color: "bg-green-500" },
-  { value: "utility", label: "Utility", color: "bg-orange-500" },
-  { value: "metaverse", label: "Metaverse", color: "bg-pink-500" },
-];
-
 interface MintPhase {
   id: string;
   name: string;
@@ -72,7 +64,6 @@ export default function NewEventPage() {
     websiteUrl: "",
     twitterUrl: "",
     discordUrl: "",
-    category: "pfp",
   });
 
   React.useEffect(() => {
@@ -184,7 +175,6 @@ export default function NewEventPage() {
           websiteUrl: formData.websiteUrl || null,
           twitterUrl: formData.twitterUrl || null,
           discordUrl: formData.discordUrl || null,
-          category: formData.category,
           phases: phasesData,
         }),
       });
@@ -272,30 +262,6 @@ export default function NewEventPage() {
                 rows={4}
                 className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
               />
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Category <span className="text-error">*</span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.value}
-                    type="button"
-                    onClick={() => setFormData((prev) => ({ ...prev, category: cat.value }))}
-                    className={cn(
-                      "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                      formData.category === cat.value
-                        ? `${cat.color} text-white`
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                    )}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Mint Phases Toggle */}

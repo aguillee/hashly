@@ -13,6 +13,23 @@ export async function GET(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
+    const now = new Date();
+
+    // === Auto-update event statuses based on time ===
+    // Update UPCOMING events that should now be LIVE (mintDate has passed)
+    // Only for events WITH a mint date (not TBA), and not Forever Mints
+    await prisma.event.updateMany({
+      where: {
+        status: "UPCOMING",
+        isForeverMint: false,
+        mintDate: {
+          not: null,
+          lte: now,
+        },
+      },
+      data: { status: "LIVE" },
+    });
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const categoriesParam = searchParams.get("categories"); // comma-separated
@@ -20,11 +37,26 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
+    const source = searchParams.get("source"); // SENTX or KABILA
+    const foreverMints = searchParams.get("foreverMints"); // "only", "exclude", or "include"
 
     // Build where clause
     const where: Prisma.EventWhereInput = {
       isApproved: true,
     };
+
+    // Handle forever mints filter
+    if (foreverMints === "only") {
+      where.isForeverMint = true;
+    } else if (foreverMints === "exclude") {
+      where.isForeverMint = false;
+    }
+    // "include" or not specified means show all
+
+    // Source filter
+    if (source && (source === "SENTX" || source === "KABILA")) {
+      where.source = source;
+    }
 
     if (status && status !== "all") {
       where.status = status.toUpperCase() as EventStatus;
@@ -74,6 +106,8 @@ export async function GET(request: NextRequest) {
           votesUp: true,
           votesDown: true,
           createdAt: true,
+          isForeverMint: true,
+          source: true,
         },
       }),
       prisma.event.count({ where }),
@@ -115,7 +149,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       events: events.map((e) => ({
         ...e,
-        mintDate: e.mintDate.toISOString(),
+        mintDate: e.mintDate?.toISOString() || null, // Can be null for TBA events
         createdAt: e.createdAt.toISOString(),
         userVote: userVotesData[e.id]?.voteType || null,
         canVote: userVotesData[e.id]?.canVote ?? true,
@@ -170,7 +204,6 @@ export async function POST(request: NextRequest) {
       websiteUrl,
       twitterUrl,
       discordUrl,
-      category,
       phases,
     } = validation.data;
 
@@ -190,7 +223,6 @@ export async function POST(request: NextRequest) {
         websiteUrl,
         twitterUrl,
         discordUrl,
-        category: category || "pfp",
         isApproved: shouldAutoApprove, // Auto-approve if admin or has El Santuario NFT
         createdById: user.id,
         // Create phases if provided

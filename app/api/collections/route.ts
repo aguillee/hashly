@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { fetchCollectionsBatch, resolveImageUrl } from "@/lib/sentx";
+import { fetchKabilaCollections } from "@/lib/kabila";
+import { resolveImageUrl, fetchCollectionStats } from "@/lib/sentx";
 
 // GET /api/collections - List collections with rankings
 export async function GET(request: NextRequest) {
@@ -16,11 +17,11 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
-    const syncFromSentX = searchParams.get("sync") === "true";
+    const shouldSync = searchParams.get("sync") === "true";
 
-    // Optionally sync from SentX (called less frequently)
-    if (syncFromSentX) {
-      await syncCollectionsFromSentX();
+    // Optionally sync from Kabila (called less frequently)
+    if (shouldSync) {
+      await syncCollectionsFromKabila();
     }
 
     // Build where clause
@@ -124,14 +125,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/collections/sync - Sync collections from SentX
+// POST /api/collections/sync - Sync collections from Kabila
 export async function POST(request: NextRequest) {
   // Rate limiting - stricter for sync operations
   const rateLimitResponse = checkRateLimit(request, "write");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const result = await syncCollectionsFromSentX();
+    const result = await syncCollectionsFromKabila();
     return NextResponse.json(result);
   } catch (error) {
     console.error("Sync collections error:", error);
@@ -143,86 +144,105 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Sync collections from SentX API to database
- * Incremental sync - processes batches of tokens each call
- * Top collections get full data, others get basic data from Mirror Node
+ * Sync collections from Kabila API to database
+ * Links point to SentX marketplace
  */
-async function syncCollectionsFromSentX() {
-  // Get existing token addresses from database
-  const existingCollections = await prisma.collection.findMany({
-    select: { tokenAddress: true },
-  });
-  const existingTokens = existingCollections.map(c => c.tokenAddress);
+async function syncCollectionsFromKabila() {
+  // Fetch all collections from Kabila
+  const kabilaCollections = await fetchKabilaCollections();
 
-  // Fetch a batch of collections
-  const { collections: sentxCollections, hasMore, totalRemaining } = await fetchCollectionsBatch(
-    existingTokens,
-    200 // Process 200 tokens per sync
-  );
-
-  if (sentxCollections.length === 0) {
+  if (kabilaCollections.length === 0) {
     return {
       synced: 0,
       created: 0,
       updated: 0,
-      hasMore: false,
-      message: "All collections synced!",
+      message: "No collections found from Kabila API",
     };
   }
 
   let created = 0;
   let updated = 0;
+  const errors: string[] = [];
 
   // Process collections
-  for (const collection of sentxCollections) {
+  for (const collection of kabilaCollections) {
     try {
       const existing = await prisma.collection.findUnique({
-        where: { tokenAddress: collection.token },
+        where: { tokenAddress: collection.tokenId },
       });
 
-      const data = {
-        name: collection.name,
-        description: collection.description || null,
-        image: collection.image || null,
-        slug: collection.slug || null,
-        floor: Math.round(collection.floor || 0),
-        volume: Math.round(collection.volumetotal || 0),
-        owners: collection.owners || 0,
-        supply: collection.supply || 0,
-        sentxStars: collection.stars || 0,
-        lastSyncedAt: new Date(),
-      };
+      // Fetch image and stats from SentX
+      let image: string | null = null;
+      let floor: number | null = null;
+      let volume: number | null = null;
+      let owners: number | null = null;
+      let supply: number | null = null;
+      let sentxStars: number | null = null;
+      let slug: string | null = null;
+
+      try {
+        const sentxInfo = await fetchCollectionStats(collection.tokenId);
+        if (sentxInfo) {
+          image = sentxInfo.image || null;
+          floor = sentxInfo.floor ? Math.round(sentxInfo.floor) : null;
+          volume = sentxInfo.volumetotal ? Math.round(sentxInfo.volumetotal) : null;
+          owners = sentxInfo.owners || null;
+          supply = sentxInfo.supply || null;
+          sentxStars = sentxInfo.stars || null;
+          slug = sentxInfo.slug || null;
+        }
+      } catch (e) {
+        // SentX may not have this collection - that's ok
+      }
 
       if (existing) {
+        // Only update fields we have values for
         await prisma.collection.update({
           where: { id: existing.id },
-          data,
+          data: {
+            name: collection.name,
+            description: collection.description || undefined,
+            // Only update these if we got values from SentX
+            ...(image && { image }),
+            ...(slug && { slug }),
+            ...(floor !== null && { floor }),
+            ...(volume !== null && { volume }),
+            ...(owners !== null && { owners }),
+            ...(supply !== null && { supply }),
+            ...(sentxStars !== null && { sentxStars }),
+            lastSyncedAt: new Date(),
+          },
         });
         updated++;
       } else {
         await prisma.collection.create({
           data: {
-            tokenAddress: collection.token,
-            ...data,
+            tokenAddress: collection.tokenId,
+            name: collection.name,
+            description: collection.description || undefined,
+            image: image || undefined,
+            slug: slug || collection.tokenId,
+            floor: floor || 0,
+            volume: volume || 0,
+            owners: owners || 0,
+            supply: supply || 0,
+            sentxStars: sentxStars || 0,
+            lastSyncedAt: new Date(),
           },
         });
         created++;
       }
     } catch (err) {
-      console.error(`Error syncing collection ${collection.token}:`, err);
+      console.error(`Error syncing collection ${collection.tokenId}:`, err);
+      errors.push(collection.name || collection.tokenId);
     }
   }
 
-  const message = hasMore
-    ? `Synced ${created} new collections. ${totalRemaining} remaining - click Sync again.`
-    : `Synced ${created} new collections. All done!`;
-
   return {
-    synced: sentxCollections.length,
+    synced: kabilaCollections.length,
     created,
     updated,
-    hasMore,
-    totalRemaining,
-    message,
+    errors: errors.length > 0 ? errors : undefined,
+    message: `Synced ${created} new, updated ${updated} existing collections from Kabila`,
   };
 }

@@ -49,7 +49,6 @@ interface EventDetail {
   websiteUrl: string | null;
   twitterUrl: string | null;
   discordUrl: string | null;
-  category: string;
   status: "UPCOMING" | "LIVE" | "ENDED";
   votesUp: number;
   votesDown: number;
@@ -289,15 +288,15 @@ export default function EventDetailPage() {
             <CardContent className={event.imageUrl ? "pt-6" : "pt-6"}>
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
-                  <Badge variant="secondary" className="mb-2 capitalize">
-                    {event.category}
-                  </Badge>
                   <h1 className="text-2xl font-bold">{event.title}</h1>
                 </div>
                 {!event.imageUrl && getStatusBadge(event.status)}
               </div>
 
-              <p className="text-text-secondary whitespace-pre-wrap">{event.description}</p>
+              <div
+                className="text-text-secondary prose prose-sm prose-invert max-w-none [&>p]:mb-3 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4 [&_strong]:text-text-primary [&_a]:text-accent-primary [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: event.description }}
+              />
 
               {/* Links */}
               <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t border-border">

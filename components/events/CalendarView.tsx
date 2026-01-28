@@ -24,7 +24,6 @@ interface Event {
   id: string;
   title: string;
   mintDate: string;
-  category: string;
   status: string;
   imageUrl: string | null;
 }

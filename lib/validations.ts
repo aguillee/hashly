@@ -54,7 +54,7 @@ export const createEventSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  category: z.enum(["pfp", "art", "gaming", "utility", "music", "other"]),
+  category: z.enum(["pfp", "art", "gaming", "utility", "music", "other"]).optional().nullable(),
   phases: z
     .array(
       z.object({

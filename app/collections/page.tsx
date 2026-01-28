@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import {
   Trophy,
   Medal,
@@ -13,6 +12,7 @@ import {
   Loader2,
   RefreshCw,
   Search,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useWalletStore } from "@/store";
@@ -23,7 +23,6 @@ interface Collection {
   id: string;
   tokenAddress: string;
   name: string;
-  image: string | null;
   owners: number;
   supply: number;
   totalVotes: number;
@@ -40,7 +39,7 @@ export default function CollectionsPage() {
   const [total, setTotal] = React.useState(0);
   const [isSearching, setIsSearching] = React.useState(false);
 
-  const { isConnected } = useWalletStore();
+  const { isConnected, user } = useWalletStore();
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -206,16 +205,18 @@ export default function CollectionsPage() {
             Explore new and existing collections, vote on your favorites, and see what the community ranks at the top
           </p>
 
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => fetchCollections(true)}
-            disabled={syncing}
-            className="gap-2"
-          >
-            <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />
-            {syncing ? "Syncing..." : "Sync"}
-          </Button>
+          {user?.isAdmin && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => fetchCollections(true)}
+              disabled={syncing}
+              className="gap-2"
+            >
+              <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />
+              {syncing ? "Syncing..." : "Sync"}
+            </Button>
+          )}
         </div>
       </section>
 
@@ -258,10 +259,12 @@ export default function CollectionsPage() {
               <div className="text-center py-12">
                 <Layers className="h-8 w-8 mx-auto text-text-secondary mb-3" />
                 <p className="text-text-secondary text-sm mb-3">No collections yet</p>
-                <Button size="sm" onClick={() => fetchCollections(true)} className="gap-2">
-                  <RefreshCw className="h-3 w-3" />
-                  Sync Now
-                </Button>
+                {user?.isAdmin && (
+                  <Button size="sm" onClick={() => fetchCollections(true)} className="gap-2">
+                    <RefreshCw className="h-3 w-3" />
+                    Sync Now
+                  </Button>
+                )}
               </div>
             ) : (
               <>
@@ -282,29 +285,19 @@ export default function CollectionsPage() {
                         {/* Rank */}
                         {getRankIcon(collection.rank)}
 
-                        {/* Image */}
-                        <div className="w-10 h-10 rounded-lg bg-bg-secondary overflow-hidden flex-shrink-0">
-                          {collection.image ? (
-                            <Image
-                              src={collection.image}
-                              alt={collection.name}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Layers className="h-4 w-4 text-text-secondary" />
-                            </div>
-                          )}
-                        </div>
-
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-text-primary text-sm truncate">
+                          <a
+                            href={`https://sentx.io/nft-marketplace/${collection.tokenAddress}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-text-primary text-sm truncate hover:text-accent-primary flex items-center gap-1"
+                          >
                             {collection.name}
-                          </p>
+                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                          </a>
                           <div className="flex items-center gap-3 text-xs text-text-secondary">
+                            <span className="font-mono">{collection.tokenAddress}</span>
                             <span className="flex items-center gap-1">
                               <Users className="h-3 w-3" />
                               {collection.owners.toLocaleString()}

@@ -17,7 +17,6 @@ interface FeaturedEvent {
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
-  category: string;
   status: "UPCOMING" | "LIVE" | "ENDED";
   votesUp: number;
   votesDown: number;
@@ -86,7 +85,6 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
 
             {/* Bottom content */}
             <div>
-              <p className="text-sm text-white/70 mb-1 capitalize">{event.category}</p>
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 group-hover:text-accent-primary transition-colors">
                 {event.title}
               </h3>

@@ -61,9 +61,10 @@ export default function AdminPage() {
   const [addingAdmin, setAddingAdmin] = React.useState(false);
   const [removingAdmin, setRemovingAdmin] = React.useState<string | null>(null);
   const [syncingLaunchpads, setSyncingLaunchpads] = React.useState(false);
+  const [syncingKabila, setSyncingKabila] = React.useState(false);
   const [syncingCollections, setSyncingCollections] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "collections";
+    type: "launchpads" | "kabila" | "collections";
     message: string;
   } | null>(null);
 
@@ -212,6 +213,40 @@ export default function AdminPage() {
     }
   }
 
+  async function handleSyncKabila() {
+    setSyncingKabila(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/admin/sync/kabila", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "kabila",
+          message: data.message || `Kabila: Imported ${data.created} events`,
+        });
+        // Refresh pending events
+        fetchPendingEvents();
+      } else {
+        setSyncResult({
+          type: "kabila",
+          message: data.error || "Kabila sync failed",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to sync Kabila launchpads:", error);
+      setSyncResult({
+        type: "kabila",
+        message: "Failed to sync Kabila launchpads",
+      });
+    } finally {
+      setSyncingKabila(false);
+    }
+  }
+
   async function handleSyncCollections() {
     setSyncingCollections(true);
     setSyncResult(null);
@@ -308,8 +343,9 @@ export default function AdminPage() {
         </Link>
       </div>
 
-      {/* SentX Sync Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      {/* Sync Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* SentX Launchpads */}
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -318,8 +354,8 @@ export default function AdminPage() {
                   <Calendar className="h-6 w-6 text-purple-500" />
                 </div>
                 <div>
-                  <p className="font-medium">Sync Launchpads</p>
-                  <p className="text-xs text-text-secondary">Import mint events from SentX</p>
+                  <p className="font-medium">Sync SentX</p>
+                  <p className="text-xs text-text-secondary">Import from SentX</p>
                 </div>
               </div>
               <Button
@@ -338,16 +374,46 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
+        {/* Kabila Launchpads */}
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-lg bg-blue-500/10">
-                  <Layers className="h-6 w-6 text-blue-500" />
+                  <Calendar className="h-6 w-6 text-blue-500" />
+                </div>
+                <div>
+                  <p className="font-medium">Sync Kabila</p>
+                  <p className="text-xs text-text-secondary">Import from Kabila</p>
+                </div>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={handleSyncKabila}
+                loading={syncingKabila}
+                className="gap-2"
+              >
+                <RefreshCw className={syncingKabila ? "animate-spin" : ""} />
+                Sync
+              </Button>
+            </div>
+            {syncResult?.type === "kabila" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Collections */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-green-500/10">
+                  <Layers className="h-6 w-6 text-green-500" />
                 </div>
                 <div>
                   <p className="font-medium">Sync Collections</p>
-                  <p className="text-xs text-text-secondary">Import top collections from SentX</p>
+                  <p className="text-xs text-text-secondary">Import from Kabila</p>
                 </div>
               </div>
               <Button

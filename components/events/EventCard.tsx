@@ -21,7 +21,6 @@ interface EventCardProps {
     mintPrice: string;
     supply: number | null;
     imageUrl: string | null;
-    category: string;
     status: "UPCOMING" | "LIVE" | "ENDED";
     votesUp: number;
     votesDown: number;
@@ -61,16 +60,6 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
       setIsVoting(false);
     }
   };
-
-  const categoryConfig: Record<string, { bg: string; text: string; border: string }> = {
-    pfp: { bg: "bg-purple-500/10", text: "text-purple-500", border: "border-purple-500/30" },
-    art: { bg: "bg-blue-500/10", text: "text-blue-500", border: "border-blue-500/30" },
-    gaming: { bg: "bg-emerald-500/10", text: "text-emerald-500", border: "border-emerald-500/30" },
-    utility: { bg: "bg-orange-500/10", text: "text-orange-500", border: "border-orange-500/30" },
-    metaverse: { bg: "bg-pink-500/10", text: "text-pink-500", border: "border-pink-500/30" },
-  };
-
-  const catStyle = categoryConfig[event.category] || categoryConfig.pfp;
 
   return (
     <div className="group relative">
@@ -125,16 +114,6 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   Upcoming
                 </Badge>
               )}
-            </div>
-
-            {/* Category */}
-            <div className="absolute top-4 right-4">
-              <span className={cn(
-                "text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur-sm",
-                catStyle.bg, catStyle.text, catStyle.border
-              )}>
-                {event.category.toUpperCase()}
-              </span>
             </div>
 
             {/* Countdown */}

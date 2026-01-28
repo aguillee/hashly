@@ -67,7 +67,7 @@ export const useWalletStore = create<WalletState>()(
 
 // Events filter store
 interface EventsFilterState {
-  status: "all" | "upcoming" | "live" | "ended";
+  status: "all" | "upcoming" | "live" | "ended" | "forever";
   categories: string[]; // Multiple categories
   sortBy: "date" | "votes" | "newest";
   searchQuery: string;

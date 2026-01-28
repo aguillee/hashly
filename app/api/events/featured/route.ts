@@ -35,9 +35,10 @@ export async function GET() {
     }
 
     // Find next up (closest mint date in the future)
+    // Only consider events with a mint date (not TBA)
     const upcomingEvents = events
-      .filter((e) => new Date(e.mintDate) > now)
-      .sort((a, b) => new Date(a.mintDate).getTime() - new Date(b.mintDate).getTime());
+      .filter((e) => e.mintDate && new Date(e.mintDate) > now)
+      .sort((a, b) => new Date(a.mintDate!).getTime() - new Date(b.mintDate!).getTime());
 
     // Make sure nextUp is different from mostVoted if possible
     let nextUp = upcomingEvents[0] || null;
