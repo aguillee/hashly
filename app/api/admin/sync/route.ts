@@ -3,6 +3,23 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchMintEvents, resolveImageUrl } from "@/lib/sentx";
 
+/**
+ * Strip HTML tags from a string
+ */
+function stripHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")  // Remove HTML tags
+    .replace(/&nbsp;/g, " ")   // Replace &nbsp;
+    .replace(/&amp;/g, "&")    // Replace &amp;
+    .replace(/&lt;/g, "<")     // Replace &lt;
+    .replace(/&gt;/g, ">")     // Replace &gt;
+    .replace(/&quot;/g, '"')   // Replace &quot;
+    .replace(/&#39;/g, "'")    // Replace &#39;
+    .replace(/\s+/g, " ")      // Collapse whitespace
+    .trim();
+}
+
 // POST /api/admin/sync - Import launchpads from SentX
 export async function POST(request: NextRequest) {
   try {
@@ -120,24 +137,23 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     data: { status: "LIVE" }
   });
 
-  // 2. Mark LIVE events older than 15 days as ENDED (except Forever Mints)
-  // Only for events WITH a mint date
-  const fifteenDaysAgo = new Date();
-  fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+  // 2. Delete LIVE events older than 7 days directly (except Forever Mints)
+  // No ENDED status - just delete them
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const updatedToEnded = await prisma.event.updateMany({
+  const deletedOld = await prisma.event.deleteMany({
     where: {
       status: "LIVE",
       isForeverMint: false,
       mintDate: {
         not: null,
-        lt: fifteenDaysAgo
+        lt: sevenDaysAgo
       }
-    },
-    data: { status: "ENDED" }
+    }
   });
 
-  // 3. Delete ENDED events (cleanup - they're no longer relevant)
+  // 3. Delete any ENDED events that might exist (cleanup legacy)
   const deletedEnded = await prisma.event.deleteMany({
     where: {
       status: "ENDED",
@@ -145,7 +161,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     }
   });
 
-  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${updatedToEnded.count} LIVE→ENDED, ${deletedEnded.count} ENDED deleted`);
+  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${deletedEnded.count} ENDED deleted`);
 
   // === FETCH AND SYNC ===
 
@@ -197,6 +213,9 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
       // Create title
       const title = event.mintEventName || event.collectionName || "SentX Mint";
 
+      // Clean description (strip HTML)
+      const description = stripHtml(event.description) || `Mint event for ${event.collectionName}. ${event.availableCount} of ${event.totalCount} available.`;
+
       // Upsert event
       const result = await prisma.event.upsert({
         where: {
@@ -207,7 +226,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
         },
         create: {
           title,
-          description: event.description || `Mint event for ${event.collectionName}. ${event.availableCount} of ${event.totalCount} available.`,
+          description,
           mintDate,
           mintPrice,
           supply: event.totalCount || null,
@@ -222,7 +241,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
         },
         update: {
           title,
-          description: event.description || `Mint event for ${event.collectionName}. ${event.availableCount} of ${event.totalCount} available.`,
+          description,
           mintPrice,
           supply: event.totalCount || null,
           imageUrl: resolveImageUrl(event.image),
@@ -259,6 +278,9 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
       // Create title
       const title = event.mintEventName || event.collectionName || "Forever Mint";
 
+      // Clean description (strip HTML)
+      const foreverDescription = stripHtml(event.description) || `Forever mint for ${event.collectionName}. Always available to mint.`;
+
       // Upsert forever mint (always LIVE status)
       const result = await prisma.event.upsert({
         where: {
@@ -269,7 +291,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
         },
         create: {
           title,
-          description: event.description || `Forever mint for ${event.collectionName}. Always available to mint.`,
+          description: foreverDescription,
           mintDate,
           mintPrice,
           supply: event.totalCount || null,
@@ -284,7 +306,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
         },
         update: {
           title,
-          description: event.description || `Forever mint for ${event.collectionName}. Always available to mint.`,
+          description: foreverDescription,
           mintPrice,
           supply: event.totalCount || null,
           imageUrl: resolveImageUrl(event.image),
@@ -313,10 +335,10 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     foreverMints: foreverMints.length,
     cleanup: {
       updatedToLive: updatedToLive.count,
-      updatedToEnded: updatedToEnded.count,
-      deleted: deletedEnded.count,
+      deletedOld: deletedOld.count,
+      deletedEnded: deletedEnded.count,
     },
     errors: errors.length > 0 ? errors : undefined,
-    message: `Imported ${created} new, updated ${updated} existing (${foreverMints.length} forever mints). Cleanup: ${deletedEnded.count} old events removed.`,
+    message: `Imported ${created} new, updated ${updated} existing (${foreverMints.length} forever mints). Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
   };
 }

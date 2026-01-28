@@ -74,10 +74,14 @@ export async function POST(request: NextRequest) {
       },
       checkin: checkin.success ? checkin : null,
     });
-  } catch (error) {
-    console.error("Auth error:", error);
+  } catch (error: any) {
+    console.error("Auth error:", error?.message || error);
+    // Return more details to help debug
     return NextResponse.json(
-      { error: "Authentication failed" },
+      {
+        error: "Authentication failed",
+        details: process.env.NODE_ENV === "development" ? error?.message : undefined
+      },
       { status: 500 }
     );
   }

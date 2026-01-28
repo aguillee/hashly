@@ -48,7 +48,7 @@ export async function getCurrentUser() {
 }
 
 export async function getOrCreateUser(walletAddress: string) {
-  const isAdmin = ADMIN_WALLETS.includes(walletAddress);
+  const shouldBeAdmin = ADMIN_WALLETS.includes(walletAddress);
 
   let user = await prisma.user.findUnique({
     where: { walletAddress },
@@ -58,14 +58,15 @@ export async function getOrCreateUser(walletAddress: string) {
     user = await prisma.user.create({
       data: {
         walletAddress,
-        isAdmin,
+        isAdmin: shouldBeAdmin,
       },
     });
-  } else if (user.isAdmin !== isAdmin) {
-    // Update admin status if changed
+  } else if (shouldBeAdmin && !user.isAdmin) {
+    // Only upgrade to admin, never downgrade
+    // This preserves manually set admin status in DB
     user = await prisma.user.update({
       where: { id: user.id },
-      data: { isAdmin },
+      data: { isAdmin: true },
     });
   }
 

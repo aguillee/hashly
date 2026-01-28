@@ -10,6 +10,23 @@ import {
   formatKabilaPrice,
 } from "@/lib/kabila";
 
+/**
+ * Strip HTML tags from a string
+ */
+function stripHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // POST /api/admin/sync/kabila - Import launchpads from Kabila
 export async function POST(request: NextRequest) {
   try {
@@ -114,24 +131,22 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
     data: { status: "LIVE" }
   });
 
-  // 2. Mark LIVE events older than 15 days as ENDED (except Forever Mints)
-  // Only for events WITH a mint date
-  const fifteenDaysAgo = new Date();
-  fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+  // 2. Delete LIVE events older than 7 days directly (except Forever Mints)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const updatedToEnded = await prisma.event.updateMany({
+  const deletedOld = await prisma.event.deleteMany({
     where: {
       status: "LIVE",
       isForeverMint: false,
       mintDate: {
         not: null,
-        lt: fifteenDaysAgo
+        lt: sevenDaysAgo
       }
-    },
-    data: { status: "ENDED" }
+    }
   });
 
-  // 3. Delete ENDED events (cleanup - they're no longer relevant)
+  // 3. Delete any ENDED events that might exist (cleanup legacy)
   const deletedEnded = await prisma.event.deleteMany({
     where: {
       status: "ENDED",
@@ -139,7 +154,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
     }
   });
 
-  console.log(`Kabila Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${updatedToEnded.count} LIVE→ENDED, ${deletedEnded.count} ENDED deleted`);
+  console.log(`Kabila Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${deletedEnded.count} ENDED deleted`);
 
   // === FETCH AND SYNC ===
 
@@ -151,8 +166,8 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
       synced: 0,
       cleanup: {
         updatedToLive: updatedToLive.count,
-        updatedToEnded: updatedToEnded.count,
-        deleted: deletedEnded.count,
+        deletedOld: deletedOld.count,
+        deletedEnded: deletedEnded.count,
       },
       message: "No launchpads found from Kabila API",
     };
@@ -182,6 +197,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
 
       const mintPrice = formatKabilaPrice(lp.price, lp.currency);
       const imageUrl = resolveKabilaImageUrl(lp.logoUrl || lp.bannerUrl);
+      const description = stripHtml(lp.description) || `Kabila launchpad: ${lp.name}`;
 
       // Upsert event
       const result = await prisma.event.upsert({
@@ -193,7 +209,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
         },
         create: {
           title: lp.name,
-          description: lp.description || `Kabila launchpad: ${lp.name}`,
+          description,
           mintDate,
           mintPrice,
           supply: lp.numNftForSale || null,
@@ -208,7 +224,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
         },
         update: {
           title: lp.name,
-          description: lp.description || `Kabila launchpad: ${lp.name}`,
+          description,
           mintPrice,
           supply: lp.numNftForSale || null,
           imageUrl,
@@ -235,10 +251,10 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
     skipped: launchpads.length - activeLaunchpads.length,
     cleanup: {
       updatedToLive: updatedToLive.count,
-      updatedToEnded: updatedToEnded.count,
-      deleted: deletedEnded.count,
+      deletedOld: deletedOld.count,
+      deletedEnded: deletedEnded.count,
     },
     errors: errors.length > 0 ? errors : undefined,
-    message: `Imported ${created} new, updated ${updated} existing from Kabila. Cleanup: ${deletedEnded.count} old events removed.`,
+    message: `Imported ${created} new, updated ${updated} existing from Kabila. Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
   };
 }
