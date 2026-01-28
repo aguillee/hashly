@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { Calendar, Trophy, Sparkles, Menu, X, Shield, Zap, Wallet } from "lucide-react";
+import { Calendar, Trophy, Sparkles, Menu, X, Shield, Zap, Wallet, Layers } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useWalletStore } from "@/store";
@@ -27,6 +27,7 @@ const ConnectButton = dynamic(
 
 const navLinks = [
   { href: "/calendar", label: "Calendar", icon: Calendar },
+  { href: "/collections", label: "Collections", icon: Layers },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/missions", label: "Missions", icon: Sparkles },
 ];

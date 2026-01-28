@@ -165,3 +165,47 @@ model NftVote {
   @@unique([tokenId, serialNumber, eventId]) // Each serial can only vote once per event
   @@map("nft_votes")
 }
+
+// NFT Collections from SentX
+model Collection {
+  id            String   @id @default(cuid())
+  tokenAddress  String   @unique @map("token_address") // Hedera token ID (0.0.xxx)
+  name          String
+  description   String?  @db.Text
+  image         String?
+  slug          String?
+  floor         Int      @default(0)           // Floor price in HBAR (tinybars)
+  volume        Int      @default(0)           // Total volume
+  owners        Int      @default(0)
+  supply        Int      @default(0)
+  totalVotes    Int      @default(0) @map("total_votes")
+  sentxStars    Int      @default(0) @map("sentx_stars") // Stars from SentX
+  lastSyncedAt  DateTime? @map("last_synced_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  votes         CollectionVote[]
+
+  @@map("collections")
+}
+
+// Permanent votes for collections (no reset)
+model CollectionVote {
+  id            String   @id @default(cuid())
+  walletAddress String   @map("wallet_address")
+  voteWeight    Int      @default(1) @map("vote_weight") // 1 = normal, 1 per dragon, 20 for santuario
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  collection    Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId  String   @map("collection_id")
+
+  // NFT-based vote tracking (optional)
+  nftTokenId    String?  @map("nft_token_id")    // Which NFT collection was used
+  nftSerials    String?  @map("nft_serials")     // Comma-separated serial numbers used
+
+  @@unique([walletAddress, collectionId]) // Each wallet can only vote once per collection
+  @@map("collection_votes")
+}

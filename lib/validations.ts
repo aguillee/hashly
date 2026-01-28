@@ -83,6 +83,15 @@ export const voteSchema = z.object({
 });
 
 // ============================================
+// COLLECTION VOTE VALIDATIONS
+// ============================================
+
+export const collectionVoteSchema = z.object({
+  voteType: z.enum(["UP", "DOWN"]),
+  useNftVotes: z.boolean().optional(),
+});
+
+// ============================================
 // ADMIN VALIDATIONS
 // ============================================
 

@@ -13,6 +13,8 @@ import {
   Plus,
   Trash2,
   Loader2,
+  RefreshCw,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -58,6 +60,12 @@ export default function AdminPage() {
   const [newAdminWallet, setNewAdminWallet] = React.useState("");
   const [addingAdmin, setAddingAdmin] = React.useState(false);
   const [removingAdmin, setRemovingAdmin] = React.useState<string | null>(null);
+  const [syncingLaunchpads, setSyncingLaunchpads] = React.useState(false);
+  const [syncingCollections, setSyncingCollections] = React.useState(false);
+  const [syncResult, setSyncResult] = React.useState<{
+    type: "launchpads" | "collections";
+    message: string;
+  } | null>(null);
 
   React.useEffect(() => {
     if (!isConnected || !user?.isAdmin) {
@@ -170,6 +178,70 @@ export default function AdminPage() {
     }
   }
 
+  async function handleSyncLaunchpads() {
+    setSyncingLaunchpads(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/admin/sync", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "launchpads",
+          message: data.message || `Imported ${data.created} events`,
+        });
+        // Refresh pending events
+        fetchPendingEvents();
+      } else {
+        setSyncResult({
+          type: "launchpads",
+          message: data.error || "Sync failed",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to sync launchpads:", error);
+      setSyncResult({
+        type: "launchpads",
+        message: "Failed to sync launchpads",
+      });
+    } finally {
+      setSyncingLaunchpads(false);
+    }
+  }
+
+  async function handleSyncCollections() {
+    setSyncingCollections(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/collections?sync=true");
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "collections",
+          message: `Synced ${data.collections?.length || 0} collections`,
+        });
+      } else {
+        setSyncResult({
+          type: "collections",
+          message: data.error || "Sync failed",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to sync collections:", error);
+      setSyncResult({
+        type: "collections",
+        message: "Failed to sync collections",
+      });
+    } finally {
+      setSyncingCollections(false);
+    }
+  }
+
   if (!isConnected || !user?.isAdmin) {
     return null;
   }
@@ -234,6 +306,65 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         </Link>
+      </div>
+
+      {/* SentX Sync Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-purple-500/10">
+                  <Calendar className="h-6 w-6 text-purple-500" />
+                </div>
+                <div>
+                  <p className="font-medium">Sync Launchpads</p>
+                  <p className="text-xs text-text-secondary">Import mint events from SentX</p>
+                </div>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={handleSyncLaunchpads}
+                loading={syncingLaunchpads}
+                className="gap-2"
+              >
+                <RefreshCw className={syncingLaunchpads ? "animate-spin" : ""} />
+                Sync
+              </Button>
+            </div>
+            {syncResult?.type === "launchpads" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-blue-500/10">
+                  <Layers className="h-6 w-6 text-blue-500" />
+                </div>
+                <div>
+                  <p className="font-medium">Sync Collections</p>
+                  <p className="text-xs text-text-secondary">Import top collections from SentX</p>
+                </div>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={handleSyncCollections}
+                loading={syncingCollections}
+                className="gap-2"
+              >
+                <RefreshCw className={syncingCollections ? "animate-spin" : ""} />
+                Sync
+              </Button>
+            </div>
+            {syncResult?.type === "collections" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">

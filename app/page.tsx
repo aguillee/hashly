@@ -74,15 +74,12 @@ export default function HomePage() {
           <div className="text-center max-w-4xl mx-auto">
             {/* Title */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              <span className="gradient-text">Discover NFT Mints</span>
-              <br />
-              <span className="text-text-primary">on Hedera</span>
+              <span className="gradient-text">Discover NFTs on Hedera</span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto mb-10">
-              The community-driven calendar for upcoming NFT drops on Hedera.
-              Vote for your favorites and never miss a mint.
+              Explore new and existing collections, vote on your favorites, and see what the community ranks at the top.
             </p>
 
             {/* CTA Buttons */}
