@@ -168,44 +168,29 @@ export interface KabilaCollection {
 }
 
 /**
- * Fetch all NFT collections from Kabila API
- * Uses pagination to get ALL collections
+ * Fetch NFT collections from Kabila API
+ * Note: Kabila API ignores offset parameter and max limit is 500
  */
 export async function fetchKabilaCollections(): Promise<KabilaCollection[]> {
-  const allCollections: KabilaCollection[] = [];
-  const limit = 500;
-  let offset = 0;
-  let hasMore = true;
-
   try {
-    while (hasMore) {
-      const response = await fetch(
-        `${KABILA_BASE_URL}/nft-collections?limit=${limit}&offset=${offset}`,
-        { next: { revalidate: 300 } }
-      );
+    // Kabila API max limit is 500, offset is ignored
+    const response = await fetch(
+      `${KABILA_BASE_URL}/nft-collections?limit=500`,
+      { next: { revalidate: 300 } }
+    );
 
-      if (!response.ok) {
-        throw new Error(`Kabila collections API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const collections = data || [];
-
-      allCollections.push(...collections);
-
-      // If we got fewer than limit, we've reached the end
-      if (collections.length < limit) {
-        hasMore = false;
-      } else {
-        offset += limit;
-      }
+    if (!response.ok) {
+      throw new Error(`Kabila collections API error: ${response.status}`);
     }
 
-    console.log(`Fetched ${allCollections.length} total collections from Kabila`);
-    return allCollections;
+    const data = await response.json();
+    const collections = Array.isArray(data) ? data : [];
+
+    console.log(`Fetched ${collections.length} collections from Kabila`);
+    return collections;
   } catch (error) {
     console.error("Error fetching Kabila collections:", error);
-    return allCollections; // Return what we got so far
+    return [];
   }
 }
 
