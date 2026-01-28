@@ -29,7 +29,8 @@ export function useWallet() {
 }
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "";
-const network = process.env.NEXT_PUBLIC_HEDERA_NETWORK || "mainnet";
+// Force mainnet - ignore environment variable
+const network = "mainnet";
 const MAX_RETRIES = 3;
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
