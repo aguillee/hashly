@@ -3,9 +3,15 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { EventStatus, Prisma } from "@prisma/client";
 import { hasElSantuario } from "@/lib/hedera";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { createEventSchema, validateRequest } from "@/lib/validations";
 
 // GET /api/events - List events
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = checkRateLimit(request, "public");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
@@ -129,6 +135,10 @@ export async function GET(request: NextRequest) {
 
 // POST /api/events - Create event (user submission)
 export async function POST(request: NextRequest) {
+  // Rate limiting - stricter for write operations
+  const rateLimitResponse = checkRateLimit(request, "write");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const user = await getCurrentUser();
 
@@ -140,6 +150,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Validate input with Zod
+    const validation = validateRequest(createEventSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
 
     const {
       title,
@@ -153,15 +172,7 @@ export async function POST(request: NextRequest) {
       discordUrl,
       category,
       phases,
-    } = body;
-
-    // Validation
-    if (!title || !description || !mintDate || !mintPrice || !imageUrl) {
-      return NextResponse.json(
-        { error: "Missing required fields (title, description, mintDate, mintPrice, imageUrl)" },
-        { status: 400 }
-      );
-    }
+    } = validation.data;
 
     // Check if user has El Santuario NFT for auto-approval
     const hasSantuarioNFT = await hasElSantuario(user.walletAddress);
@@ -185,22 +196,13 @@ export async function POST(request: NextRequest) {
         // Create phases if provided
         ...(phases && phases.length > 0 && {
           phases: {
-            create: phases.map((phase: {
-              name: string;
-              startDate: string;
-              endDate: string | null;
-              price: string;
-              supply: number | null;
-              maxPerWallet: number | null;
-              isWhitelist: boolean;
-              order: number;
-            }) => ({
+            create: phases.map((phase) => ({
               name: phase.name,
               startDate: new Date(phase.startDate),
               endDate: phase.endDate ? new Date(phase.endDate) : null,
               price: phase.price,
-              supply: phase.supply,
-              maxPerWallet: phase.maxPerWallet,
+              supply: phase.supply ?? null,
+              maxPerWallet: phase.maxPerWallet ?? null,
               isWhitelist: phase.isWhitelist,
               order: phase.order,
             })),

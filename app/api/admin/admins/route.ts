@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { addAdminSchema, validateRequest } from "@/lib/validations";
 
 // GET /api/admin/admins - Get all admin users
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = checkRateLimit(request, "admin");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const user = await getCurrentUser();
 
@@ -37,6 +43,10 @@ export async function GET() {
 
 // POST /api/admin/admins - Add new admin
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = checkRateLimit(request, "admin");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const user = await getCurrentUser();
 
@@ -47,14 +57,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { walletAddress } = await request.json();
+    const body = await request.json();
 
-    if (!walletAddress || !walletAddress.match(/^0\.0\.\d+$/)) {
+    // Validate input with Zod
+    const validation = validateRequest(addAdminSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Invalid wallet address format (expected 0.0.XXXXX)" },
+        { error: validation.error },
         { status: 400 }
       );
     }
+
+    const { walletAddress } = validation.data;
 
     // Check if user exists
     let targetUser = await prisma.user.findUnique({

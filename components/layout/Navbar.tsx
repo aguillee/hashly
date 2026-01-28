@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { Calendar, Trophy, Sparkles, Menu, X, Shield, Zap, Wallet } from "lucide-react";
@@ -57,9 +58,14 @@ export function Navbar() {
         <div className="flex items-center justify-between h-18 py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center shadow-lg shadow-accent-primary/20 group-hover:shadow-xl group-hover:shadow-accent-primary/30 transition-all duration-300">
-              <Calendar className="h-5 w-5 text-white" />
-            </div>
+            <Image
+              src="/logo-navbar.png"
+              alt="Hashly"
+              width={48}
+              height={48}
+              className="group-hover:scale-105 transition-transform duration-300"
+              priority
+            />
             <div className="hidden sm:block">
               <span className="font-bold text-xl gradient-text">Hashly</span>
             </div>

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { ClientProviders } from "@/components/wallet/ClientProviders";
 
@@ -19,6 +21,10 @@ export const metadata: Metadata = {
   description:
     "The ultimate calendar for upcoming NFT mints on Hedera. Vote, discover, and never miss a mint.",
   keywords: ["hedera", "nft", "mint", "calendar", "crypto", "hashgraph", "hashly"],
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -34,6 +40,8 @@ export default function RootLayout({
           <main className="pt-16">{children}</main>
           <Toaster />
         </ClientProviders>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -9,6 +9,8 @@ import {
   DRAGON_VOTE_WEIGHT,
   SANTUARIO_VOTE_WEIGHT,
 } from "@/lib/hedera";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { voteSchema, validateRequest } from "@/lib/validations";
 
 const POINTS_PER_VOTE = 10;
 
@@ -16,6 +18,10 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Rate limiting - stricter for vote manipulation prevention
+  const rateLimitResponse = checkRateLimit(request, "vote");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const user = await getCurrentUser();
 
@@ -27,14 +33,18 @@ export async function POST(
     }
 
     const { id: eventId } = await params;
-    const { voteType, useNftVotes } = await request.json();
+    const body = await request.json();
 
-    if (!voteType || !["UP", "DOWN"].includes(voteType)) {
+    // Validate input with Zod
+    const validation = validateRequest(voteSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Invalid vote type" },
+        { error: validation.error },
         { status: 400 }
       );
     }
+
+    const { voteType, useNftVotes } = validation.data;
 
     // Check if event exists and is approved
     const event = await prisma.event.findUnique({

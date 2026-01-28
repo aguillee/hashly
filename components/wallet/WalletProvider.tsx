@@ -56,8 +56,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         {
           name: "Hashly",
           description: "Discover and vote on upcoming NFT mints on Hedera",
-          url: typeof window !== "undefined" ? window.location.origin : "https://hashly.app",
-          icons: ["https://hashly.app/icon.png"],
+          url: typeof window !== "undefined" ? window.location.origin : "https://hash-ly.com",
+          icons: [typeof window !== "undefined" ? `${window.location.origin}/logo-navbar.png` : "https://hash-ly.com/logo-navbar.png"],
         },
         ledgerId,
         projectId,

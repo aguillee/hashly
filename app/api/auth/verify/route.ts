@@ -2,17 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createToken, getOrCreateUser, verifyWalletSignature } from "@/lib/auth";
 import { handleDailyCheckin } from "@/lib/points";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { walletAddressSchema } from "@/lib/validations";
+import { z } from "zod";
+
+const verifySchema = z.object({
+  walletAddress: walletAddressSchema,
+  message: z.string().min(1).max(500),
+  signature: z.string().min(1).max(1000),
+});
 
 export async function POST(request: NextRequest) {
-  try {
-    const { walletAddress, message, signature } = await request.json();
+  // Rate limiting - strict for auth to prevent brute force
+  const rateLimitResponse = checkRateLimit(request, "auth");
+  if (rateLimitResponse) return rateLimitResponse;
 
-    if (!walletAddress || !message || !signature) {
+  try {
+    const body = await request.json();
+
+    // Validate input
+    const validation = verifySchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Invalid input format" },
         { status: 400 }
       );
     }
+
+    const { walletAddress, message, signature } = validation.data;
 
     // Verify the signature
     const isValid = await verifyWalletSignature(walletAddress, message, signature);
