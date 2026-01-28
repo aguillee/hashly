@@ -28,8 +28,13 @@ export function ConnectButton() {
   const handleConnect = async () => {
     try {
       await connect();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Connection error:", error);
+      // Show user-friendly error message
+      const message = error?.message || "Connection failed";
+      if (message.includes("Subscribing") || message.includes("failed")) {
+        alert("Unable to connect to wallet. Please try again in a few moments.");
+      }
     }
   };
 

@@ -30,6 +30,7 @@ export function useWallet() {
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "";
 const network = process.env.NEXT_PUBLIC_HEDERA_NETWORK || "mainnet";
+const MAX_RETRIES = 3;
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isConnecting, setIsConnecting] = React.useState(false);
@@ -53,7 +54,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   }, [walletAddress, dAppConnector, isInitialized]);
 
-  async function initConnector() {
+  async function initConnector(retryCount = 0) {
     if (!projectId) {
       console.error("WalletConnect Project ID not configured");
       return;
@@ -88,10 +89,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         [chainId]
       );
 
-      // Initialize with logger set to error only
+      // Initialize with logger
       await connector.init({ logger: "error" });
       setDAppConnector(connector);
       setIsInitialized(true);
+      console.log("WalletConnect initialized successfully");
 
       // Check for existing sessions
       const existingSessions = connector.walletConnectClient?.session.getAll();
@@ -102,12 +104,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           await authenticateWithBackend(accountId);
         }
       }
-    } catch (error) {
-      console.error("Failed to initialize DAppConnector:", error);
-      // Retry after a delay
-      setTimeout(() => {
-        setIsInitialized(false);
-      }, 3000);
+    } catch (error: any) {
+      console.error(`Failed to initialize DAppConnector (attempt ${retryCount + 1}/${MAX_RETRIES}):`, error);
+
+      // Retry with exponential backoff
+      if (retryCount < MAX_RETRIES) {
+        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+        console.log(`Retrying in ${delay}ms...`);
+        setTimeout(() => {
+          initConnector(retryCount + 1);
+        }, delay);
+      } else {
+        console.error("Max retries reached. WalletConnect initialization failed.");
+      }
     }
   }
 
@@ -178,10 +187,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function connect() {
-    if (!dAppConnector) {
+    let currentConnector = dAppConnector;
+
+    if (!currentConnector) {
       // Try to reinitialize
       await initConnector();
-      if (!dAppConnector) {
+      // Wait a bit for initialization
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      currentConnector = dAppConnector;
+      if (!currentConnector) {
         throw new Error(
           "Wallet connector not initialized. Please refresh the page."
         );
@@ -192,7 +206,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
     try {
       // Open WalletConnect modal
-      const session = await dAppConnector.openModal();
+      const session = await currentConnector.openModal();
 
       if (!session) {
         throw new Error("No session established");
@@ -207,8 +221,38 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
       // Authenticate with backend
       await authenticateWithBackend(accountId);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to connect:", error);
+
+      const message = error?.message || "";
+
+      // If subscription failed, try to reinitialize and retry once
+      if (message.includes("Subscribing") && message.includes("failed")) {
+        console.log("Subscription failed, reinitializing connector...");
+        setIsInitialized(false);
+        setDAppConnector(null);
+
+        // Wait and reinitialize
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await initConnector();
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        if (dAppConnector) {
+          try {
+            const retrySession = await dAppConnector.openModal();
+            if (retrySession) {
+              const accountId = getAccountIdFromSession(retrySession);
+              if (accountId) {
+                await authenticateWithBackend(accountId);
+                return; // Success on retry
+              }
+            }
+          } catch (retryError) {
+            console.error("Retry also failed:", retryError);
+          }
+        }
+      }
+
       throw error;
     } finally {
       setIsConnecting(false);
