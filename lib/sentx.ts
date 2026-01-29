@@ -76,6 +76,7 @@ export async function fetchMintEvents(options?: {
   const params = new URLSearchParams();
 
   // Add API key if available (required despite "public" in URL)
+  console.log(`[SENTX] API Key configured: ${SENTX_API_KEY ? "YES (length: " + SENTX_API_KEY.length + ")" : "NO"}`);
   if (SENTX_API_KEY) {
     params.append("apikey", SENTX_API_KEY);
   }
@@ -102,6 +103,7 @@ export async function fetchMintEvents(options?: {
     }
 
     const data: MintEventsResponse = await response.json();
+    console.log(`[SENTX] API returned ${data.mintEvents?.length || 0} events, success: ${data.success}`);
     return data.mintEvents || [];
   } catch (error) {
     console.error("Error fetching SentX mint events:", error);
