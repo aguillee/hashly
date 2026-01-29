@@ -113,15 +113,13 @@ export async function fetchMintEvents(options?: {
 
 /**
  * Fetch top NFT collections from SentX marketplace
+ * Note: This endpoint is public and doesn't require API key
  */
 export async function fetchTopCollections(): Promise<SentXCollection[]> {
-  const params = new URLSearchParams({
-    apikey: SENTX_API_KEY,
-  });
-
   try {
+    // Public endpoint - no API key required
     const response = await fetch(
-      `${SENTX_API_URL}/v1/public/market/topcollections?${params}`,
+      `${SENTX_API_URL}/v1/public/market/topcollections`,
       {
         next: { revalidate: 300 }, // Cache for 5 minutes
       }
@@ -141,15 +139,13 @@ export async function fetchTopCollections(): Promise<SentXCollection[]> {
 
 /**
  * Get collection stats for a specific token
+ * Note: This endpoint is public and doesn't require API key
  */
 export async function fetchCollectionStats(tokenAddress: string): Promise<SentXCollection | null> {
-  const params = new URLSearchParams({
-    apikey: SENTX_API_KEY,
-  });
-
   try {
+    // Public endpoint - no API key required
     const response = await fetch(
-      `${SENTX_API_URL}/v1/public/market/stats/token?${params}&token=${tokenAddress}`,
+      `${SENTX_API_URL}/v1/public/market/stats/token?token=${tokenAddress}`,
       {
         next: { revalidate: 300 },
       }
@@ -169,15 +165,13 @@ export async function fetchCollectionStats(tokenAddress: string): Promise<SentXC
 
 /**
  * Fetch ALL supported token IDs from SentX
+ * Note: This endpoint is public and doesn't require API key
  */
 export async function fetchSupportedTokenList(): Promise<string[]> {
-  const params = new URLSearchParams({
-    apikey: SENTX_API_KEY,
-  });
-
   try {
+    // Public endpoint - no API key required
     const response = await fetch(
-      `${SENTX_API_URL}/v1/public/token/supportedlist?${params}`,
+      `${SENTX_API_URL}/v1/public/token/supportedlist`,
       {
         next: { revalidate: 3600 }, // Cache for 1 hour
       }

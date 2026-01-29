@@ -63,9 +63,10 @@ export default function AdminPage() {
   const [syncingLaunchpads, setSyncingLaunchpads] = React.useState(false);
   const [syncingKabila, setSyncingKabila] = React.useState(false);
   const [syncingCollections, setSyncingCollections] = React.useState(false);
+  const [deletingCollections, setDeletingCollections] = React.useState(false);
   const [cleaningUp, setCleaningUp] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "collections" | "cleanup";
+    type: "launchpads" | "kabila" | "collections" | "cleanup" | "delete-collections";
     message: string;
   } | null>(null);
 
@@ -252,14 +253,16 @@ export default function AdminPage() {
     setSyncingCollections(true);
     setSyncResult(null);
     try {
-      const response = await fetch("/api/collections?sync=true");
+      const response = await fetch("/api/collections", {
+        method: "POST",
+      });
 
       const data = await response.json();
 
       if (response.ok) {
         setSyncResult({
           type: "collections",
-          message: `Synced ${data.collections?.length || 0} collections`,
+          message: data.message || `Synced ${data.synced || 0} collections`,
         });
       } else {
         setSyncResult({
@@ -275,6 +278,42 @@ export default function AdminPage() {
       });
     } finally {
       setSyncingCollections(false);
+    }
+  }
+
+  async function handleDeleteCollections() {
+    if (!confirm("This will DELETE ALL collections and their votes. Are you sure?")) {
+      return;
+    }
+
+    setDeletingCollections(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/collections", {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "delete-collections",
+          message: data.message || `Deleted ${data.deleted || 0} collections`,
+        });
+      } else {
+        setSyncResult({
+          type: "delete-collections",
+          message: data.error || "Delete failed",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete collections:", error);
+      setSyncResult({
+        type: "delete-collections",
+        message: "Failed to delete collections",
+      });
+    } finally {
+      setDeletingCollections(false);
     }
   }
 
@@ -383,7 +422,7 @@ export default function AdminPage() {
       </div>
 
       {/* Sync Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         {/* SentX Launchpads */}
         <Card>
           <CardContent className="p-6">
@@ -442,7 +481,7 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        {/* Collections */}
+        {/* Collections Sync */}
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -452,7 +491,7 @@ export default function AdminPage() {
                 </div>
                 <div>
                   <p className="font-medium">Sync Collections</p>
-                  <p className="text-xs text-text-secondary">Import from Kabila</p>
+                  <p className="text-xs text-text-secondary">Import from SentX (20k+ vol)</p>
                 </div>
               </div>
               <Button
@@ -466,6 +505,35 @@ export default function AdminPage() {
               </Button>
             </div>
             {syncResult?.type === "collections" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Delete Collections */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-orange-500/10">
+                  <Trash2 className="h-6 w-6 text-orange-500" />
+                </div>
+                <div>
+                  <p className="font-medium">Delete Collections</p>
+                  <p className="text-xs text-text-secondary">Remove all collections</p>
+                </div>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteCollections}
+                loading={deletingCollections}
+                className="gap-2"
+              >
+                <Trash2 className={deletingCollections ? "animate-spin" : ""} />
+                Delete
+              </Button>
+            </div>
+            {syncResult?.type === "delete-collections" && (
               <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
             )}
           </CardContent>
