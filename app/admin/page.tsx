@@ -65,8 +65,10 @@ export default function AdminPage() {
   const [syncingCollections, setSyncingCollections] = React.useState(false);
   const [deletingCollections, setDeletingCollections] = React.useState(false);
   const [cleaningUp, setCleaningUp] = React.useState(false);
+  const [addingCollection, setAddingCollection] = React.useState(false);
+  const [newCollectionTokenId, setNewCollectionTokenId] = React.useState("");
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "collections" | "cleanup" | "delete-collections";
+    type: "launchpads" | "kabila" | "collections" | "cleanup" | "delete-collections" | "add-collection";
     message: string;
   } | null>(null);
 
@@ -253,7 +255,8 @@ export default function AdminPage() {
     setSyncingCollections(true);
     setSyncResult(null);
     try {
-      const response = await fetch("/api/collections", {
+      // Use Kabila API for full collection sync
+      const response = await fetch("/api/admin/sync/collections", {
         method: "POST",
       });
 
@@ -262,7 +265,7 @@ export default function AdminPage() {
       if (response.ok) {
         setSyncResult({
           type: "collections",
-          message: data.message || `Synced ${data.synced || 0} collections`,
+          message: data.message || `Synced ${data.synced || 0} collections from Kabila`,
         });
       } else {
         setSyncResult({
@@ -278,6 +281,44 @@ export default function AdminPage() {
       });
     } finally {
       setSyncingCollections(false);
+    }
+  }
+
+  async function handleAddCollection(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCollectionTokenId.trim()) return;
+
+    setAddingCollection(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/admin/collections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tokenId: newCollectionTokenId.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "add-collection",
+          message: data.message || `Added collection ${data.collection?.name}`,
+        });
+        setNewCollectionTokenId("");
+      } else {
+        setSyncResult({
+          type: "add-collection",
+          message: data.error || "Failed to add collection",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to add collection:", error);
+      setSyncResult({
+        type: "add-collection",
+        message: "Failed to add collection",
+      });
+    } finally {
+      setAddingCollection(false);
     }
   }
 
@@ -422,7 +463,7 @@ export default function AdminPage() {
       </div>
 
       {/* Sync Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {/* SentX Launchpads */}
         <Card>
           <CardContent className="p-6">
@@ -491,7 +532,7 @@ export default function AdminPage() {
                 </div>
                 <div>
                   <p className="font-medium">Sync Collections</p>
-                  <p className="text-xs text-text-secondary">Import from SentX (20k+ vol)</p>
+                  <p className="text-xs text-text-secondary">Import ALL from Kabila</p>
                 </div>
               </div>
               <Button
@@ -505,6 +546,35 @@ export default function AdminPage() {
               </Button>
             </div>
             {syncResult?.type === "collections" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Add Collection Manually */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-lg bg-cyan-500/10">
+                <Plus className="h-6 w-6 text-cyan-500" />
+              </div>
+              <div>
+                <p className="font-medium">Add Collection</p>
+                <p className="text-xs text-text-secondary">Add by Token ID</p>
+              </div>
+            </div>
+            <form onSubmit={handleAddCollection} className="flex gap-2">
+              <Input
+                placeholder="0.0.XXXXX"
+                value={newCollectionTokenId}
+                onChange={(e) => setNewCollectionTokenId(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" size="sm" loading={addingCollection}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </form>
+            {syncResult?.type === "add-collection" && (
               <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
             )}
           </CardContent>

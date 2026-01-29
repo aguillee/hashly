@@ -160,6 +160,13 @@ export interface KabilaCollection {
   holders?: number;
   supply?: number;
   minted?: number;
+  slug?: string;
+  verificationType?: string;
+  socialNetworks?: {
+    twitter?: string;
+    discord?: string;
+    website?: string;
+  };
   salesVolume?: {
     last24h: number;
     last7d: number;
@@ -168,15 +175,20 @@ export interface KabilaCollection {
 }
 
 /**
- * Fetch NFT collections from Kabila API
- * Note: Kabila API ignores offset parameter and max limit is 500
+ * Fetch NFT collections from Kabila API with pagination
+ * Uses skip parameter to paginate through all results
  */
-export async function fetchKabilaCollections(): Promise<KabilaCollection[]> {
+export async function fetchKabilaCollections(options?: {
+  limit?: number;
+  skip?: number;
+}): Promise<KabilaCollection[]> {
+  const limit = options?.limit ?? 500;
+  const skip = options?.skip ?? 0;
+
   try {
-    // Kabila API max limit is 500, offset is ignored
     const response = await fetch(
-      `${KABILA_BASE_URL}/nft-collections?limit=500`,
-      { next: { revalidate: 300 } }
+      `${KABILA_BASE_URL}/nft-collections?limit=${limit}&skip=${skip}`,
+      { cache: "no-store" } // Don't cache for sync operations
     );
 
     if (!response.ok) {
@@ -186,12 +198,59 @@ export async function fetchKabilaCollections(): Promise<KabilaCollection[]> {
     const data = await response.json();
     const collections = Array.isArray(data) ? data : [];
 
-    console.log(`Fetched ${collections.length} collections from Kabila`);
+    console.log(`Fetched ${collections.length} collections from Kabila (skip=${skip}, limit=${limit})`);
     return collections;
   } catch (error) {
     console.error("Error fetching Kabila collections:", error);
     return [];
   }
+}
+
+/**
+ * Fetch ALL NFT collections from Kabila API with pagination
+ * Iterates through all pages until no more results
+ */
+export async function fetchAllKabilaCollections(options?: {
+  batchSize?: number;
+  onProgress?: (fetched: number, total: number) => void;
+}): Promise<KabilaCollection[]> {
+  const batchSize = options?.batchSize ?? 500;
+  const allCollections: KabilaCollection[] = [];
+  let skip = 0;
+  let hasMore = true;
+
+  console.log(`[KABILA] Starting full collections sync with batchSize=${batchSize}`);
+
+  while (hasMore) {
+    const batch = await fetchKabilaCollections({ limit: batchSize, skip });
+
+    if (batch.length === 0) {
+      hasMore = false;
+    } else {
+      allCollections.push(...batch);
+      skip += batchSize;
+
+      // Report progress
+      if (options?.onProgress) {
+        options.onProgress(allCollections.length, skip);
+      }
+
+      console.log(`[KABILA] Progress: ${allCollections.length} collections fetched`);
+
+      // If we got fewer than batchSize, we've reached the end
+      if (batch.length < batchSize) {
+        hasMore = false;
+      }
+
+      // Small delay between batches to be nice to the API
+      if (hasMore) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+  }
+
+  console.log(`[KABILA] Completed: ${allCollections.length} total collections fetched`);
+  return allCollections;
 }
 
 /**
