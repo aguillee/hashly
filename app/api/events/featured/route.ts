@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/events/featured - Get featured events (most voted + next up + top forever mint)
 export async function GET() {
   try {

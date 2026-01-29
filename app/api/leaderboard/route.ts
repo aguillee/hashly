@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getLeaderboard, getUserRank } from "@/lib/points";
 import { getCurrentUser } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

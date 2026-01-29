@@ -19,6 +19,7 @@ import { EventCard } from "@/components/events/EventCard";
 import { CalendarView } from "@/components/events/CalendarView";
 import { useWalletStore, useEventsFilterStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { mutate } from "@/lib/swr";
 
 // Types
 interface Event {
@@ -154,6 +155,10 @@ export default function CalendarPage() {
           )
         );
         setUserVotes((prev) => ({ ...prev, [eventId]: voteType }));
+
+        // Invalidate featured and forever mints cache so homepage updates
+        mutate("/api/events/featured");
+        mutate((key: string) => typeof key === "string" && key.startsWith("/api/forever-mints"), undefined, { revalidate: true });
       }
     } catch (error) {
       console.error("Failed to vote:", error);

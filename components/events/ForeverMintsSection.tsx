@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/Button";
 import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { parseMintPrice } from "@/lib/utils";
+import { useForeverMints } from "@/lib/swr";
 
 interface ForeverMint {
   id: string;
@@ -30,18 +31,8 @@ interface ForeverMint {
 }
 
 export function ForeverMintsSection() {
-  const [mints, setMints] = React.useState<ForeverMint[]>([]);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    fetch("/api/forever-mints?limit=6")
-      .then((res) => res.json())
-      .then((data) => {
-        setMints(data.items || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { data, isLoading: loading } = useForeverMints({ limit: 6 });
+  const mints: ForeverMint[] = data?.items || [];
 
   if (loading) {
     return (

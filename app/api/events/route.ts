@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { EventStatus, Prisma } from "@prisma/client";
 import { hasElSantuario } from "@/lib/hedera";
+
+export const dynamic = "force-dynamic";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createEventSchema, validateRequest } from "@/lib/validations";
 

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 
+export const dynamic = "force-dynamic";
+
 // Mission definitions - points are earned automatically when conditions are met
 const MISSION_DEFINITIONS = [
   // Daily

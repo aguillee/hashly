@@ -25,6 +25,7 @@ import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { useWalletStore } from "@/store";
 import { cn, parseMintPrice } from "@/lib/utils";
+import { mutate } from "@/lib/swr";
 
 interface MintPhase {
   id: string;
@@ -149,6 +150,9 @@ export default function EventDetailPage() {
 
       if (response.ok) {
         await loadEvent();
+        // Invalidate featured and forever mints cache so homepage updates
+        mutate("/api/events/featured");
+        mutate((key: string) => typeof key === "string" && key.startsWith("/api/forever-mints"), undefined, { revalidate: true });
       } else {
         const data = await response.json();
         alert(data.error || "Failed to vote");

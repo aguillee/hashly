@@ -23,8 +23,9 @@ export const swrConfig: SWRConfiguration = {
 // Featured events (homepage)
 export function useFeatured() {
   return useSWR("/api/events/featured", fetcher, {
-    revalidateOnFocus: false, // Don't refetch on tab focus for featured
-    dedupingInterval: 30000, // Cache for 30 seconds
+    revalidateOnFocus: true,
+    dedupingInterval: 5000,
+    refreshInterval: 30000, // Auto-refresh every 30s
   });
 }
 
@@ -61,7 +62,10 @@ export function useForeverMints(params?: { limit?: number; offset?: number }) {
   const query = searchParams.toString();
   const url = `/api/forever-mints${query ? `?${query}` : ""}`;
 
-  return useSWR(url, fetcher);
+  return useSWR(url, fetcher, {
+    revalidateOnFocus: true,
+    refreshInterval: 30000, // Auto-refresh every 30s
+  });
 }
 
 // Collections
