@@ -73,8 +73,12 @@ export async function fetchMintEvents(options?: {
   hideSoldOut?: boolean;
   tokenAddress?: string;
 }): Promise<SentXMintEvent[]> {
-  // Public endpoint - no API key required
   const params = new URLSearchParams();
+
+  // Add API key if available (required despite "public" in URL)
+  if (SENTX_API_KEY) {
+    params.append("apikey", SENTX_API_KEY);
+  }
 
   if (options?.hideSoldOut) {
     params.append("hideSoldOut", "1");
