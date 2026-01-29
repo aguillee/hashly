@@ -23,21 +23,60 @@ export async function GET() {
       },
     });
 
-    // Get top forever mint separately
-    const topForeverMint = await prisma.event.findFirst({
-      where: {
-        isApproved: true,
-        isForeverMint: true,
-      },
-      orderBy: [
-        { votesUp: "desc" },
-      ],
-      include: {
-        createdBy: {
-          select: { walletAddress: true },
-        },
-      },
-    });
+    // Get top forever mint separately - order by score (votesUp - votesDown)
+    const topForeverMintResults = await prisma.$queryRaw<Array<{
+      id: string;
+      title: string;
+      description: string;
+      mint_date: Date | null;
+      mint_price: string;
+      supply: number | null;
+      image_url: string | null;
+      website_url: string | null;
+      twitter_url: string | null;
+      discord_url: string | null;
+      category: string | null;
+      status: string;
+      is_approved: boolean;
+      votes_up: number;
+      votes_down: number;
+      created_at: Date;
+      updated_at: Date;
+      source: string;
+      external_id: string | null;
+      is_forever_mint: boolean;
+      created_by_id: string;
+    }>>`
+      SELECT * FROM events
+      WHERE is_forever_mint = true AND is_approved = true
+      ORDER BY (votes_up - votes_down) DESC, created_at DESC
+      LIMIT 1
+    `;
+
+    // Map snake_case to camelCase
+    const topForeverMint = topForeverMintResults[0] ? {
+      id: topForeverMintResults[0].id,
+      title: topForeverMintResults[0].title,
+      description: topForeverMintResults[0].description,
+      mintDate: topForeverMintResults[0].mint_date,
+      mintPrice: topForeverMintResults[0].mint_price,
+      supply: topForeverMintResults[0].supply,
+      imageUrl: topForeverMintResults[0].image_url,
+      websiteUrl: topForeverMintResults[0].website_url,
+      twitterUrl: topForeverMintResults[0].twitter_url,
+      discordUrl: topForeverMintResults[0].discord_url,
+      category: topForeverMintResults[0].category,
+      status: topForeverMintResults[0].status,
+      isApproved: topForeverMintResults[0].is_approved,
+      votesUp: topForeverMintResults[0].votes_up,
+      votesDown: topForeverMintResults[0].votes_down,
+      createdAt: topForeverMintResults[0].created_at,
+      updatedAt: topForeverMintResults[0].updated_at,
+      source: topForeverMintResults[0].source,
+      externalId: topForeverMintResults[0].external_id,
+      isForeverMint: topForeverMintResults[0].is_forever_mint,
+      createdById: topForeverMintResults[0].created_by_id,
+    } : null;
 
     // Calculate score and find most voted (excluding forever mints)
     let mostVoted = null;

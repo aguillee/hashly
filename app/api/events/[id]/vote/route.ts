@@ -90,11 +90,42 @@ export async function POST(
             },
           });
 
-          // Calculate vote change
+          // Calculate vote change for regular vote
           if (voteType === "UP" && oldVoteType === "DOWN") {
             regularVoteWeight = 2; // -1 becomes +1
           } else if (voteType === "DOWN" && oldVoteType === "UP") {
             regularVoteWeight = -2; // +1 becomes -1
+          }
+
+          // Also update existing NFT votes for this wallet on this event
+          const existingNftVotes = await prisma.nftVote.findMany({
+            where: {
+              eventId,
+              walletAddress: user.walletAddress,
+            },
+          });
+
+          if (existingNftVotes.length > 0) {
+            // Calculate total NFT weight
+            const totalNftWeight = existingNftVotes.reduce((sum, v) => sum + v.voteWeight, 0);
+
+            // Update all NFT votes to new voteType
+            await prisma.nftVote.updateMany({
+              where: {
+                eventId,
+                walletAddress: user.walletAddress,
+              },
+              data: {
+                voteType: voteType as VoteType,
+              },
+            });
+
+            // NFT vote weight change: totalNftWeight * 2 (because changing direction)
+            if (voteType === "UP") {
+              nftVoteWeight = totalNftWeight * 2; // Was -X, now +X
+            } else {
+              nftVoteWeight = -totalNftWeight * 2; // Was +X, now -X
+            }
           }
         }
         // If same vote type, no change needed
