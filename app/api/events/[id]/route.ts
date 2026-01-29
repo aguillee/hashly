@@ -44,14 +44,20 @@ export async function GET(
         if (existingVote) {
           userVote = existingVote.voteType;
 
-          // Check 24h cooldown
-          const hoursSinceVote =
-            (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
+          // Forever Mints: no cooldown, can always change vote (like collections)
+          if (event.isForeverMint) {
+            canVote = true;
+            voteLockedUntil = null;
+          } else {
+            // Regular events: Check 24h cooldown
+            const hoursSinceVote =
+              (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
 
-          if (hoursSinceVote < 24) {
-            canVote = false;
-            const unlockTime = new Date(existingVote.createdAt.getTime() + 24 * 60 * 60 * 1000);
-            voteLockedUntil = unlockTime.toISOString();
+            if (hoursSinceVote < 24) {
+              canVote = false;
+              const unlockTime = new Date(existingVote.createdAt.getTime() + 24 * 60 * 60 * 1000);
+              voteLockedUntil = unlockTime.toISOString();
+            }
           }
         }
       }
