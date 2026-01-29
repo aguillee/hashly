@@ -22,6 +22,7 @@ interface EventCardProps {
     supply: number | null;
     imageUrl: string | null;
     status: "UPCOMING" | "LIVE" | "ENDED";
+    isForeverMint?: boolean;
     votesUp: number;
     votesDown: number;
     canVote?: boolean;
@@ -40,11 +41,22 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
   const priceInfo = parseMintPrice(event.mintPrice);
 
   // Determine actual status based on time
+  // Forever Mints are ALWAYS live, regardless of date
   const now = new Date();
   const mintDate = new Date(event.mintDate);
-  const isEnded = mintDate < now && (now.getTime() - mintDate.getTime()) > 24 * 60 * 60 * 1000;
-  const isLive = !isEnded && mintDate <= now;
-  const isUpcoming = !isEnded && !isLive;
+
+  let isEnded = false;
+  let isLive = false;
+  let isUpcoming = false;
+
+  if (event.isForeverMint) {
+    // Forever Mints are always LIVE
+    isLive = true;
+  } else {
+    isEnded = mintDate < now && (now.getTime() - mintDate.getTime()) > 24 * 60 * 60 * 1000;
+    isLive = !isEnded && mintDate <= now;
+    isUpcoming = !isEnded && !isLive;
+  }
 
   const actualStatus = isEnded ? "ENDED" : isLive ? "LIVE" : "UPCOMING";
 
