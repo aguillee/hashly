@@ -207,7 +207,7 @@ export default function CollectionsPage() {
       <section className="relative py-12 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-accent-primary/5 via-accent-secondary/5 to-transparent" />
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             <span className="gradient-text">Discover NFTs on Hedera</span>
           </h1>
@@ -230,7 +230,7 @@ export default function CollectionsPage() {
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Search */}
         <form onSubmit={handleSearch} className="mb-6">
           <div className="relative">
@@ -291,14 +291,14 @@ export default function CollectionsPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
-            {/* Top 30 Best Voted */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top 30 Best Voted - Left Column */}
             <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
               <div className="p-4 border-b border-border flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-yellow-500" />
                 <span className="font-semibold text-text-primary">Top 30 Best Voted</span>
               </div>
-              <div className="p-3">
+              <div className="p-3 max-h-[70vh] overflow-y-auto">
                 {topCollections.length === 0 ? (
                   <div className="text-center py-12">
                     <Layers className="h-8 w-8 mx-auto text-text-secondary mb-3" />
@@ -327,14 +327,19 @@ export default function CollectionsPage() {
               </div>
             </div>
 
-            {/* Top 10 Worst Voted */}
-            {worstCollections.length > 0 && (
-              <div className="rounded-2xl border border-red-500/30 bg-bg-card/50 overflow-hidden">
-                <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-red-500" />
-                  <span className="font-semibold text-text-primary">Top 10 Worst Voted</span>
-                </div>
-                <div className="p-3">
+            {/* Top 10 Worst Voted - Right Column */}
+            <div className="rounded-2xl border border-red-500/30 bg-bg-card/50 overflow-hidden">
+              <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
+                <TrendingDown className="h-5 w-5 text-red-500" />
+                <span className="font-semibold text-text-primary">Top 10 Worst Voted</span>
+              </div>
+              <div className="p-3 max-h-[70vh] overflow-y-auto">
+                {worstCollections.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Layers className="h-8 w-8 mx-auto text-text-secondary mb-3" />
+                    <p className="text-text-secondary text-sm">No worst voted yet</p>
+                  </div>
+                ) : (
                   <div className="space-y-2">
                     {worstCollections.map((collection) => (
                       <CollectionRow
@@ -351,9 +356,9 @@ export default function CollectionsPage() {
                       />
                     ))}
                   </div>
-                </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
 

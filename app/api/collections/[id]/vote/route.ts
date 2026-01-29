@@ -11,6 +11,9 @@ import {
 import { checkRateLimit } from "@/lib/rate-limit";
 import { collectionVoteSchema, validateRequest } from "@/lib/validations";
 
+// Points awarded for collection votes
+const POINTS_PER_COLLECTION_VOTE = 1;
+
 // POST /api/collections/[id]/vote - Vote on a collection
 // Collections have PERMANENT votes (no 24h reset)
 // Users can change their vote at any time
@@ -125,7 +128,7 @@ export async function POST(
         },
       });
     } else {
-      // New vote
+      // New vote - give points for first-time vote on this collection
       voteChange = newWeight;
 
       await prisma.collectionVote.create({
@@ -137,6 +140,28 @@ export async function POST(
           nftSerials,
         },
       });
+
+      // Award points for voting on a new collection
+      const dbUser = await prisma.user.findUnique({
+        where: { walletAddress: user.walletAddress },
+      });
+
+      if (dbUser) {
+        await prisma.$transaction([
+          prisma.user.update({
+            where: { id: dbUser.id },
+            data: { points: { increment: POINTS_PER_COLLECTION_VOTE } },
+          }),
+          prisma.pointHistory.create({
+            data: {
+              userId: dbUser.id,
+              points: POINTS_PER_COLLECTION_VOTE,
+              actionType: "COLLECTION_VOTE",
+              description: `Voted on collection: ${collection.name}`,
+            },
+          }),
+        ]);
+      }
     }
 
     // Update collection total votes

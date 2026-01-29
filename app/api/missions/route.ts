@@ -89,6 +89,25 @@ const MISSION_DEFINITIONS = [
     requirement: 500,
     icon: "trophy",
   },
+  // Collection voting achievements
+  {
+    id: "collection_votes_50",
+    name: "Collection Explorer",
+    description: "Vote on 50 different collections (+1 pt per vote)",
+    pointsReward: 100,
+    type: "ACHIEVEMENT" as const,
+    requirement: 50,
+    icon: "vote",
+  },
+  {
+    id: "collection_votes_100",
+    name: "Collection Master",
+    description: "Vote on 100 different collections (+1 pt per vote)",
+    pointsReward: 500,
+    type: "ACHIEVEMENT" as const,
+    requirement: 100,
+    icon: "trophy",
+  },
 ];
 
 export async function GET() {
@@ -128,12 +147,18 @@ export async function GET() {
     const totalVotes = user.votes.length;
     const approvedEvents = user.events.filter(e => e.isApproved).length;
 
+    // Get collection votes count
+    const collectionVotesCount = await prisma.collectionVote.count({
+      where: { walletAddress: payload.walletAddress as string },
+    });
+
     const stats = {
       totalVotes,
       totalEvents: approvedEvents,
       loginStreak: user.loginStreak,
       todayVotes,
       weekVotes,
+      collectionVotes: collectionVotesCount,
     };
 
     // Check if user has logged in today
@@ -180,6 +205,14 @@ export async function GET() {
         case "votes_500":
           progress = Math.min(totalVotes, def.requirement);
           completed = totalVotes >= def.requirement;
+          break;
+        case "collection_votes_50":
+          progress = Math.min(collectionVotesCount, def.requirement);
+          completed = collectionVotesCount >= def.requirement;
+          break;
+        case "collection_votes_100":
+          progress = Math.min(collectionVotesCount, def.requirement);
+          completed = collectionVotesCount >= def.requirement;
           break;
       }
 
