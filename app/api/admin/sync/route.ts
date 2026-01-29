@@ -158,6 +158,11 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
   // Fetch mint events from SentX (only active ones, not sold out)
   const allMintEvents = await fetchMintEvents({ hideSoldOut: true });
 
+  console.log(`[SYNC] Fetched ${allMintEvents.length} mint events from SentX`);
+  if (allMintEvents.length === 0) {
+    console.log("[SYNC] WARNING: No events returned from SentX API");
+  }
+
   // Separate Forever Mints from regular events
   const foreverMints = allMintEvents.filter(event => event.isForeverMint === 1);
   const regularEvents = allMintEvents.filter(event => event.isForeverMint !== 1);
@@ -180,6 +185,8 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
   let skipped = 0;
   const errors: string[] = [];
 
+  console.log(`[SYNC] Processing ${activeRegularEvents.length} active regular events (now=${now.toISOString()})`);
+
   // Process regular events - ONLY UPCOMING with a valid mint date in the future
   for (const event of activeRegularEvents) {
     try {
@@ -193,15 +200,19 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
 
       // SKIP events without a mint date (TBA) - we only want events with dates
       if (!mintDate) {
+        console.log(`[SYNC] Skipping ${event.mintEventName}: no mint date (TBA)`);
         skipped++;
         continue;
       }
 
       // SKIP events that have already started (LIVE) - we only want UPCOMING
       if (mintDate <= now) {
+        console.log(`[SYNC] Skipping ${event.mintEventName}: already live (mintDate=${mintDate.toISOString()})`);
         skipped++;
         continue;
       }
+
+      console.log(`[SYNC] Importing ${event.mintEventName} (mintDate=${mintDate.toISOString()})`)
 
       // Format price
       const mintPrice = event.mintPrice > 0 ? `${event.mintPrice} HBAR` : "Free";
