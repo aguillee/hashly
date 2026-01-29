@@ -67,19 +67,14 @@ interface TopCollectionsResponse {
 
 /**
  * Fetch active mint events from SentX launchpad
+ * Note: This endpoint is public and doesn't require API key
  */
 export async function fetchMintEvents(options?: {
   hideSoldOut?: boolean;
   tokenAddress?: string;
 }): Promise<SentXMintEvent[]> {
-  if (!SENTX_API_KEY) {
-    console.error("SENTX_API_KEY is not configured");
-    return [];
-  }
-
-  const params = new URLSearchParams({
-    apikey: SENTX_API_KEY,
-  });
+  // Public endpoint - no API key required
+  const params = new URLSearchParams();
 
   if (options?.hideSoldOut) {
     params.append("hideSoldOut", "1");
@@ -89,17 +84,16 @@ export async function fetchMintEvents(options?: {
   }
 
   try {
-    const response = await fetch(
-      `${SENTX_API_URL}/v1/public/launchpad/mintevents?${params}`,
-      {
-        next: { revalidate: 300 }, // Cache for 5 minutes
-      }
-    );
+    const queryString = params.toString();
+    const url = queryString
+      ? `${SENTX_API_URL}/v1/public/launchpad/mintevents?${queryString}`
+      : `${SENTX_API_URL}/v1/public/launchpad/mintevents`;
+
+    const response = await fetch(url, {
+      next: { revalidate: 300 }, // Cache for 5 minutes
+    });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        console.error("SentX API: Invalid or missing API key");
-      }
       throw new Error(`SentX API error: ${response.status}`);
     }
 

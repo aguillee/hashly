@@ -109,16 +109,6 @@ export async function GET() {
  * Now handles Forever Mints separately
  */
 async function syncLaunchpadsFromSentX(adminUserId: string) {
-  // Check if API key is configured
-  if (!process.env.SENTX_API_KEY) {
-    return {
-      synced: 0,
-      created: 0,
-      error: "SENTX_API_KEY not configured",
-      message: "Please add SENTX_API_KEY to environment variables"
-    };
-  }
-
   const now = new Date();
 
   // === CLEANUP: Update status based on time ===
