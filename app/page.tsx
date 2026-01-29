@@ -18,50 +18,11 @@ import { Button } from "@/components/ui/Button";
 import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
 import { ForeverMintsSection } from "@/components/events/ForeverMintsSection";
 import { useWalletStore } from "@/store";
-
-interface FeaturedEvent {
-  id: string;
-  title: string;
-  description: string;
-  mintDate: string;
-  mintPrice: string;
-  supply: number | null;
-  imageUrl: string | null;
-  status: "UPCOMING" | "LIVE" | "ENDED";
-  votesUp: number;
-  votesDown: number;
-  score?: number;
-}
-
-interface FeaturedData {
-  mostVoted: FeaturedEvent | null;
-  nextUp: FeaturedEvent | null;
-  topForeverMint: FeaturedEvent | null;
-}
+import { useFeatured } from "@/lib/swr";
 
 export default function HomePage() {
   const { isConnected } = useWalletStore();
-  const [featured, setFeatured] = React.useState<FeaturedData | null>(null);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/events/featured");
-        if (response.ok) {
-          const data = await response.json();
-          setFeatured(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch featured events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFeatured();
-  }, []);
+  const { data: featured, isLoading: loading } = useFeatured();
 
   return (
     <div className="min-h-screen">

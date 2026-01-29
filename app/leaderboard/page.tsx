@@ -5,6 +5,7 @@ import { Trophy, Medal, Crown, Zap, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { useLeaderboard } from "@/lib/swr";
 
 interface LeaderboardEntry {
   rank: number;
@@ -13,30 +14,11 @@ interface LeaderboardEntry {
 }
 
 export default function LeaderboardPage() {
-  const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
-  const [userRank, setUserRank] = React.useState<number | null>(null);
-  const [loading, setLoading] = React.useState(true);
-
   const { user } = useWalletStore();
+  const { data, isLoading: loading } = useLeaderboard();
 
-  React.useEffect(() => {
-    fetchLeaderboard();
-  }, []);
-
-  async function fetchLeaderboard() {
-    try {
-      const response = await fetch("/api/leaderboard?limit=50");
-      if (response.ok) {
-        const data = await response.json();
-        setLeaderboard(data.leaderboard);
-        setUserRank(data.userRank);
-      }
-    } catch (error) {
-      console.error("Failed to fetch leaderboard:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const leaderboard: LeaderboardEntry[] = data?.leaderboard || [];
+  const userRank: number | null = data?.userRank || null;
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
