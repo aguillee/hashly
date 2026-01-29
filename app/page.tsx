@@ -112,6 +112,85 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* How It Works Section - FIRST after Hero */}
+      <section className="py-12 bg-bg-secondary/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
+              How It Works
+            </h2>
+            <p className="text-text-secondary max-w-2xl mx-auto">
+              Community members vote on events to help surface the best projects.
+              Hold special NFTs to unlock bonus voting power.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Base Voting */}
+            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4">
+                <Vote className="h-6 w-6 text-accent-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">
+                Community Voting
+              </h3>
+              <p className="text-text-secondary text-sm">
+                Connect your wallet to vote on upcoming mints. Your votes help the
+                community discover quality projects.
+              </p>
+            </div>
+
+            {/* Santuario Hedera */}
+            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-4">
+                <Gift className="h-6 w-6 text-purple-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">
+                Santuario Hedera
+              </h3>
+              <p className="text-text-secondary text-sm mb-3">
+                Hold dragons from this collection to get{" "}
+                <span className="text-accent-primary font-semibold">+1 vote per dragon</span>{" "}
+                per project you vote on.
+              </p>
+              <a
+                href="https://sentx.io/nft-marketplace/0.0.7235629"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-accent-primary hover:underline"
+              >
+                View on SentX
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+
+            {/* El Santuario */}
+            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-secondary/30 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-4">
+                <Shield className="h-6 w-6 text-amber-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">
+                El Santuario
+              </h3>
+              <p className="text-text-secondary text-sm mb-3">
+                Premium membership with{" "}
+                <span className="text-accent-secondary font-semibold">+20 votes per project</span>{" "}
+                plus auto-approval for your submitted events.
+              </p>
+              <a
+                href="https://sentx.io/nft-marketplace/0.0.9954622"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-accent-secondary hover:underline"
+              >
+                View on SentX
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Events Section */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -206,84 +285,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Info Section - NFT Benefits */}
-      <section className="py-12 bg-bg-secondary/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
-              How It Works
-            </h2>
-            <p className="text-text-secondary max-w-2xl mx-auto">
-              Community members vote on events to help surface the best projects.
-              Hold special NFTs to unlock bonus voting power.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Base Voting */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4">
-                <Vote className="h-6 w-6 text-accent-primary" />
-              </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">
-                Community Voting
-              </h3>
-              <p className="text-text-secondary text-sm">
-                Connect your wallet to vote on upcoming mints. Your votes help the
-                community discover quality projects.
-              </p>
-            </div>
-
-            {/* Santuario Hedera */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-4">
-                <Gift className="h-6 w-6 text-purple-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">
-                Santuario Hedera
-              </h3>
-              <p className="text-text-secondary text-sm mb-3">
-                Hold dragons from this collection to get{" "}
-                <span className="text-accent-primary font-semibold">+1 vote per dragon</span>{" "}
-                per project you vote on.
-              </p>
-              <a
-                href="https://sentx.io/nft-marketplace/0.0.7235629"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-accent-primary hover:underline"
-              >
-                View on SentX
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-
-            {/* El Santuario */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-secondary/30 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-amber-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">
-                El Santuario
-              </h3>
-              <p className="text-text-secondary text-sm mb-3">
-                Premium membership with{" "}
-                <span className="text-accent-secondary font-semibold">+20 votes per project</span>{" "}
-                plus auto-approval for your submitted events.
-              </p>
-              <a
-                href="https://sentx.io/nft-marketplace/0.0.9954622"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-accent-secondary hover:underline"
-              >
-                View on SentX
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
