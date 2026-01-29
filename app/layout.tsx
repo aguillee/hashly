@@ -11,6 +11,11 @@ const Navbar = dynamic(
   { ssr: false }
 );
 
+const Footer = dynamic(
+  () => import("@/components/layout/Footer").then((mod) => mod.Footer),
+  { ssr: false }
+);
+
 const Toaster = dynamic(
   () => import("@/components/ui/Toaster").then((mod) => mod.Toaster),
   { ssr: false }
@@ -34,10 +39,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-background antialiased">
+      <body className="min-h-screen bg-background antialiased flex flex-col">
         <ClientProviders>
           <Navbar />
-          <main className="pt-16">{children}</main>
+          <main className="pt-16 flex-1">{children}</main>
+          <Footer />
           <Toaster />
         </ClientProviders>
         <Analytics />
