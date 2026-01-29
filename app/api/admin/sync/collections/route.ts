@@ -175,6 +175,7 @@ async function syncCollectionsFromKabila() {
             lastSyncedAt: new Date(),
             source: "KABILA" as const,
             externalId: collection._id,
+            isApproved: true, // Auto-approve synced collections
           };
 
           // Check if collection already exists

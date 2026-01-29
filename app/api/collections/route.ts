@@ -31,15 +31,18 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get total count of all collections
-    const total = await prisma.collection.count();
+    // Get total count of approved collections only
+    const total = await prisma.collection.count({
+      where: { isApproved: true },
+    });
 
     // Get user for vote mapping
     const user = await getCurrentUser();
 
-    // If searching, return search results
+    // If searching, return search results (only approved collections)
     if (search) {
       const searchWhere = {
+        isApproved: true,
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },
           { description: { contains: search, mode: "insensitive" as const } },
@@ -84,8 +87,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get top 30 best voted
+    // Get top 30 best voted (only approved)
     const topCollections = await prisma.collection.findMany({
+      where: { isApproved: true },
       orderBy: { totalVotes: "desc" },
       take: 30,
       select: {
@@ -106,10 +110,11 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Get top 10 worst voted (lowest votes, excluding those already in top)
+    // Get top 10 worst voted (lowest votes, excluding those already in top, only approved)
     const topIds = topCollections.map(c => c.id);
     const worstCollections = await prisma.collection.findMany({
       where: {
+        isApproved: true,
         id: { notIn: topIds },
       },
       orderBy: { totalVotes: "asc" },

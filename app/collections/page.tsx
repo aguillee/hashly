@@ -14,8 +14,11 @@ import {
   Search,
   ExternalLink,
   TrendingDown,
+  Plus,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toaster";
@@ -31,6 +34,23 @@ interface Collection {
   userVote: { voteWeight: number } | null;
 }
 
+// Custom hook for debounce
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function CollectionsPage() {
   const [topCollections, setTopCollections] = React.useState<Collection[]>([]);
   const [worstCollections, setWorstCollections] = React.useState<Collection[]>([]);
@@ -41,18 +61,43 @@ export default function CollectionsPage() {
   const [search, setSearch] = React.useState("");
   const [total, setTotal] = React.useState(0);
   const [isSearching, setIsSearching] = React.useState(false);
+  const [searchLoading, setSearchLoading] = React.useState(false);
+
+  // Modal for adding collection
+  const [showAddModal, setShowAddModal] = React.useState(false);
+  const [newTokenId, setNewTokenId] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
 
   const { isConnected, user } = useWalletStore();
   const { toast } = useToast();
 
+  // Debounce search query (300ms)
+  const debouncedSearch = useDebounce(search, 300);
+
+  // Initial load
   React.useEffect(() => {
     fetchCollections();
   }, []);
 
+  // Real-time search with debounce
+  React.useEffect(() => {
+    if (debouncedSearch.length > 0) {
+      fetchCollections(false, debouncedSearch);
+    } else if (debouncedSearch === "" && !loading) {
+      // Clear search - reload normal view
+      fetchCollections(false, "");
+    }
+  }, [debouncedSearch]);
+
   async function fetchCollections(sync = false, searchQuery?: string) {
     try {
-      if (sync) setSyncing(true);
-      else setLoading(true);
+      if (sync) {
+        setSyncing(true);
+      } else if (searchQuery !== undefined && searchQuery.length > 0) {
+        setSearchLoading(true);
+      } else if (!isSearching) {
+        setLoading(true);
+      }
 
       const isSearchMode = searchQuery !== undefined && searchQuery.length > 0;
       setIsSearching(isSearchMode);
@@ -89,6 +134,7 @@ export default function CollectionsPage() {
     } finally {
       setLoading(false);
       setSyncing(false);
+      setSearchLoading(false);
     }
   }
 
@@ -190,16 +236,56 @@ export default function CollectionsPage() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchCollections(false, search);
-  };
-
   const clearSearch = () => {
     setSearch("");
     setIsSearching(false);
-    fetchCollections(false, "");
   };
+
+  async function handleSubmitCollection(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newTokenId.trim()) return;
+
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/collections/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tokenId: newTokenId.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: data.autoApproved ? "Collection Added!" : "Collection Submitted!",
+          description: data.autoApproved
+            ? `${data.collection.name} has been added to the list`
+            : `${data.collection.name} is pending admin approval`,
+        });
+        setNewTokenId("");
+        setShowAddModal(false);
+        // Refresh collections if auto-approved
+        if (data.autoApproved) {
+          fetchCollections();
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to submit collection",
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to submit collection:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit collection",
+        variant: "error",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -231,27 +317,95 @@ export default function CollectionsPage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Search */}
-        <form onSubmit={handleSearch} className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
+        {/* Search and Add Collection */}
+        <div className="flex gap-3 mb-6">
+          <div className="relative flex-1">
+            {searchLoading ? (
+              <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent-primary animate-spin" />
+            ) : (
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
+            )}
             <input
               type="text"
-              placeholder="Search all collections..."
+              placeholder="Search collections... (results appear as you type)"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-bg-card border border-border focus:outline-none focus:ring-2 focus:ring-accent-primary/50 text-text-primary placeholder:text-text-secondary text-sm"
+              className="w-full pl-10 pr-10 py-2 rounded-xl bg-bg-card border border-border focus:outline-none focus:ring-2 focus:ring-accent-primary/50 text-text-primary placeholder:text-text-secondary text-sm"
             />
+            {search && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-        </form>
+          {isConnected && (
+            <Button
+              onClick={() => setShowAddModal(true)}
+              className="gap-2 whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4" />
+              Add Collection
+            </Button>
+          )}
+        </div>
 
         {/* Total Collections Banner */}
         <div className="mb-6 p-4 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
           <p className="text-center text-sm">
             <span className="font-bold text-accent-primary">{total}</span>
-            <span className="text-text-secondary"> collections tracked with 20k+ HBAR volume</span>
+            <span className="text-text-secondary"> collections tracked</span>
           </p>
         </div>
+
+        {/* Add Collection Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-bg-card border border-border rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold">Add Collection</h2>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="text-text-secondary hover:text-text-primary"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <p className="text-sm text-text-secondary mb-4">
+                Enter the Hedera Token ID of the NFT collection you want to add.
+                If you hold an El Santuario NFT, it will be auto-approved!
+              </p>
+              <form onSubmit={handleSubmitCollection} className="space-y-4">
+                <Input
+                  placeholder="0.0.XXXXX"
+                  value={newTokenId}
+                  onChange={(e) => setNewTokenId(e.target.value)}
+                  disabled={submitting}
+                />
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowAddModal(false)}
+                    className="flex-1"
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    loading={submitting}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
@@ -272,7 +426,17 @@ export default function CollectionsPage() {
               {searchResults.length === 0 ? (
                 <div className="text-center py-12">
                   <Search className="h-8 w-8 mx-auto text-text-secondary mb-3" />
-                  <p className="text-text-secondary text-sm">No collections found</p>
+                  <p className="text-text-secondary text-sm mb-3">No collections found</p>
+                  {isConnected && (
+                    <Button
+                      size="sm"
+                      onClick={() => setShowAddModal(true)}
+                      className="gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add this collection
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">

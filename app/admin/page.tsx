@@ -42,6 +42,17 @@ interface PendingEvent {
   createdAt: string;
 }
 
+interface PendingCollection {
+  id: string;
+  tokenAddress: string;
+  name: string;
+  description: string | null;
+  image: string | null;
+  supply: number;
+  submittedBy: string | null;
+  createdAt: string;
+}
+
 interface Admin {
   id: string;
   walletAddress: string;
@@ -53,10 +64,13 @@ export default function AdminPage() {
   const router = useRouter();
   const { user, isConnected } = useWalletStore();
   const [pendingEvents, setPendingEvents] = React.useState<PendingEvent[]>([]);
+  const [pendingCollections, setPendingCollections] = React.useState<PendingCollection[]>([]);
   const [admins, setAdmins] = React.useState<Admin[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [loadingAdmins, setLoadingAdmins] = React.useState(true);
+  const [loadingCollections, setLoadingCollections] = React.useState(true);
   const [processing, setProcessing] = React.useState<string | null>(null);
+  const [processingCollection, setProcessingCollection] = React.useState<string | null>(null);
   const [newAdminWallet, setNewAdminWallet] = React.useState("");
   const [addingAdmin, setAddingAdmin] = React.useState(false);
   const [removingAdmin, setRemovingAdmin] = React.useState<string | null>(null);
@@ -79,6 +93,7 @@ export default function AdminPage() {
     }
 
     fetchPendingEvents();
+    fetchPendingCollections();
     fetchAdmins();
   }, [isConnected, user, router]);
 
@@ -93,6 +108,39 @@ export default function AdminPage() {
       console.error("Failed to fetch pending events:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchPendingCollections() {
+    try {
+      const response = await fetch("/api/admin/collections/pending");
+      if (response.ok) {
+        const data = await response.json();
+        setPendingCollections(data.collections);
+      }
+    } catch (error) {
+      console.error("Failed to fetch pending collections:", error);
+    } finally {
+      setLoadingCollections(false);
+    }
+  }
+
+  async function handleCollectionAction(collectionId: string, action: "approve" | "reject") {
+    setProcessingCollection(collectionId);
+    try {
+      const response = await fetch("/api/admin/collections/pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ collectionId, action }),
+      });
+
+      if (response.ok) {
+        setPendingCollections((prev) => prev.filter((c) => c.id !== collectionId));
+      }
+    } catch (error) {
+      console.error(`Failed to ${action} collection:`, error);
+    } finally {
+      setProcessingCollection(null);
     }
   }
 
@@ -751,6 +799,96 @@ export default function AdminPage() {
                         >
                           <XCircle className="h-4 w-4" />
                           Reject
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pending Collections */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5" />
+                Pending Collections ({pendingCollections.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingCollections ? (
+                <div className="space-y-4">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="h-20 bg-bg-secondary animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              ) : pendingCollections.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="h-10 w-10 mx-auto text-success mb-3" />
+                  <p className="text-text-secondary text-sm">No pending collections to review</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pendingCollections.map((collection) => (
+                    <div
+                      key={collection.id}
+                      className="flex items-center gap-4 p-4 bg-bg-secondary rounded-lg"
+                    >
+                      {/* Image */}
+                      <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                        {collection.image ? (
+                          <Image
+                            src={collection.image}
+                            alt={collection.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Layers className="h-5 w-5 text-text-secondary" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">{collection.name}</h3>
+                        <div className="flex items-center gap-2 text-xs text-text-secondary">
+                          <span className="font-mono">{collection.tokenAddress}</span>
+                          {collection.supply > 0 && (
+                            <>
+                              <span>•</span>
+                              <span>{collection.supply.toLocaleString()} supply</span>
+                            </>
+                          )}
+                        </div>
+                        {collection.submittedBy && (
+                          <p className="text-xs text-text-secondary mt-1">
+                            By: {collection.submittedBy}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2 flex-shrink-0">
+                        <Button
+                          variant="success"
+                          size="sm"
+                          onClick={() => handleCollectionAction(collection.id, "approve")}
+                          loading={processingCollection === collection.id}
+                          className="gap-1"
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleCollectionAction(collection.id, "reject")}
+                          loading={processingCollection === collection.id}
+                          className="gap-1"
+                        >
+                          <XCircle className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>

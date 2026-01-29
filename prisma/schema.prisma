@@ -178,7 +178,7 @@ model NftVote {
   @@map("nft_votes")
 }
 
-// NFT Collections from SentX/Kabila
+// NFT Collections from SentX/Kabila or user-submitted
 model Collection {
   id            String     @id @default(cuid())
   tokenAddress  String     @unique @map("token_address") // Hedera token ID (0.0.xxx)
@@ -199,6 +199,10 @@ model Collection {
   // Multi-source support
   source        DataSource @default(SENTX)
   externalId    String?    @map("external_id")
+
+  // Approval system (for user-submitted collections)
+  isApproved    Boolean    @default(false) @map("is_approved")
+  submittedBy   String?    @map("submitted_by")  // Wallet address of the user who submitted
 
   // Relations
   votes         CollectionVote[]
