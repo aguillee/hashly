@@ -34,6 +34,34 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// DELETE /api/admin/cleanup - Delete ALL events (including forever mints)
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user || !user.isAdmin) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    // Delete ALL events including forever mints
+    const deleted = await prisma.event.deleteMany({});
+
+    return NextResponse.json({
+      deleted: deleted.count,
+      message: `Deleted ALL ${deleted.count} events (including forever mints).`,
+    });
+  } catch (error) {
+    console.error("Delete all events error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete all events" },
+      { status: 500 }
+    );
+  }
+}
+
 // GET /api/admin/cleanup - Preview what will be deleted
 export async function GET() {
   try {
