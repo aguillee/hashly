@@ -190,7 +190,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
   let skipped = 0;
   const errors: string[] = [];
 
-  // Process regular events
+  // Process regular events - ONLY UPCOMING with a valid mint date in the future
   for (const event of activeRegularEvents) {
     try {
       // Determine mint date (null if TBA)
@@ -200,12 +200,18 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
       } else if (event.startDate) {
         mintDate = new Date(event.startDate);
       }
-      // If no date, leave as null (TBA)
 
-      // Determine status
-      // If no mint date (TBA), set as UPCOMING
-      const status: "UPCOMING" | "LIVE" =
-        mintDate && mintDate <= now ? "LIVE" : "UPCOMING";
+      // SKIP events without a mint date (TBA) - we only want events with dates
+      if (!mintDate) {
+        skipped++;
+        continue;
+      }
+
+      // SKIP events that have already started (LIVE) - we only want UPCOMING
+      if (mintDate <= now) {
+        skipped++;
+        continue;
+      }
 
       // Format price
       const mintPrice = event.mintPrice > 0 ? `${event.mintPrice} HBAR` : "Free";
@@ -216,7 +222,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
       // Clean description (strip HTML)
       const description = stripHtml(event.description) || `Mint event for ${event.collectionName}. ${event.availableCount} of ${event.totalCount} available.`;
 
-      // Upsert event
+      // Upsert event - all imported events are UPCOMING (future mint date)
       const result = await prisma.event.upsert({
         where: {
           source_externalId: {
@@ -232,7 +238,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
           supply: event.totalCount || null,
           imageUrl: resolveImageUrl(event.image),
           websiteUrl: event.url,
-          status,
+          status: "UPCOMING",
           isApproved: true,
           isForeverMint: false,
           source: "SENTX",
@@ -245,7 +251,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
           mintPrice,
           supply: event.totalCount || null,
           imageUrl: resolveImageUrl(event.image),
-          status,
+          status: "UPCOMING",
         },
       });
 
@@ -327,7 +333,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
   }
 
   return {
-    synced: activeRegularEvents.length + foreverMints.length,
+    synced: created + updated,
     created,
     updated,
     skipped,
@@ -339,6 +345,6 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
       deletedEnded: deletedEnded.count,
     },
     errors: errors.length > 0 ? errors : undefined,
-    message: `Imported ${created} new, updated ${updated} existing (${foreverMints.length} forever mints). Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
+    message: `Imported ${created} new UPCOMING events, updated ${updated} existing (${foreverMints.length} forever mints). Skipped ${skipped} without date or already live. Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
   };
 }

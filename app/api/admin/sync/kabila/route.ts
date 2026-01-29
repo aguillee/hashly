@@ -183,23 +183,30 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
   let updated = 0;
   const errors: string[] = [];
 
+  let skipped = 0;
+
   for (const lp of activeLaunchpads) {
     try {
       // Get mint date (can be null if TBA)
       const mintDate = getKabilaMintDate(lp.accesses);
 
-      // Determine status - use Kabila's state, but if mintDate is null, keep as UPCOMING
-      let status = mapKabilaState(lp.state);
-      // If no date (TBA), override to UPCOMING regardless of Kabila state
-      if (!mintDate && status === "LIVE") {
-        status = "UPCOMING";
+      // SKIP events without a mint date (TBA) - we only want events with dates
+      if (!mintDate) {
+        skipped++;
+        continue;
+      }
+
+      // SKIP events that have already started (LIVE) - we only want UPCOMING
+      if (mintDate <= now) {
+        skipped++;
+        continue;
       }
 
       const mintPrice = formatKabilaPrice(lp.price, lp.currency);
       const imageUrl = resolveKabilaImageUrl(lp.logoUrl || lp.bannerUrl);
       const description = stripHtml(lp.description) || `Kabila launchpad: ${lp.name}`;
 
-      // Upsert event
+      // Upsert event - all imported events are UPCOMING (future mint date)
       const result = await prisma.event.upsert({
         where: {
           source_externalId: {
@@ -215,7 +222,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
           supply: lp.numNftForSale || null,
           imageUrl,
           websiteUrl: getKabilaLaunchpadUrl(lp.id),
-          status,
+          status: "UPCOMING",
           isApproved: true,
           isForeverMint: false,
           source: "KABILA",
@@ -228,7 +235,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
           mintPrice,
           supply: lp.numNftForSale || null,
           imageUrl,
-          status,
+          status: "UPCOMING",
         },
       });
 
@@ -245,16 +252,17 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
   }
 
   return {
-    synced: activeLaunchpads.length,
+    synced: created + updated,
     created,
     updated,
-    skipped: launchpads.length - activeLaunchpads.length,
+    skipped,
+    totalFromApi: activeLaunchpads.length,
     cleanup: {
       updatedToLive: updatedToLive.count,
       deletedOld: deletedOld.count,
       deletedEnded: deletedEnded.count,
     },
     errors: errors.length > 0 ? errors : undefined,
-    message: `Imported ${created} new, updated ${updated} existing from Kabila. Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
+    message: `Imported ${created} new UPCOMING events, updated ${updated} existing from Kabila. Skipped ${skipped} without date or already live. Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
   };
 }

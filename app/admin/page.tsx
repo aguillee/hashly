@@ -63,8 +63,9 @@ export default function AdminPage() {
   const [syncingLaunchpads, setSyncingLaunchpads] = React.useState(false);
   const [syncingKabila, setSyncingKabila] = React.useState(false);
   const [syncingCollections, setSyncingCollections] = React.useState(false);
+  const [cleaningUp, setCleaningUp] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "collections";
+    type: "launchpads" | "kabila" | "collections" | "cleanup";
     message: string;
   } | null>(null);
 
@@ -277,6 +278,44 @@ export default function AdminPage() {
     }
   }
 
+  async function handleCleanup() {
+    if (!confirm("This will DELETE all events except Forever Mints. Are you sure?")) {
+      return;
+    }
+
+    setCleaningUp(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/admin/cleanup", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "cleanup",
+          message: data.message || `Deleted ${data.deleted} events`,
+        });
+        // Refresh pending events
+        fetchPendingEvents();
+      } else {
+        setSyncResult({
+          type: "cleanup",
+          message: data.error || "Cleanup failed",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to cleanup:", error);
+      setSyncResult({
+        type: "cleanup",
+        message: "Failed to cleanup events",
+      });
+    } finally {
+      setCleaningUp(false);
+    }
+  }
+
   if (!isConnected || !user?.isAdmin) {
     return null;
   }
@@ -344,7 +383,7 @@ export default function AdminPage() {
       </div>
 
       {/* Sync Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {/* SentX Launchpads */}
         <Card>
           <CardContent className="p-6">
@@ -427,6 +466,35 @@ export default function AdminPage() {
               </Button>
             </div>
             {syncResult?.type === "collections" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Cleanup */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-red-500/10">
+                  <Trash2 className="h-6 w-6 text-red-500" />
+                </div>
+                <div>
+                  <p className="font-medium">Cleanup Events</p>
+                  <p className="text-xs text-text-secondary">Delete all except Forever</p>
+                </div>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={handleCleanup}
+                loading={cleaningUp}
+                className="gap-2"
+              >
+                <Trash2 className={cleaningUp ? "animate-spin" : ""} />
+                Clean
+              </Button>
+            </div>
+            {syncResult?.type === "cleanup" && (
               <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
             )}
           </CardContent>
