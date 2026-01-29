@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { fetchKabilaCollections, resolveKabilaImageUrl } from "@/lib/kabila";
-import { resolveImageUrl } from "@/lib/sentx";
+import {
+  fetchSupportedTokenList,
+  fetchCollectionStats,
+  fetchTokenFromMirrorNode,
+  resolveImageUrl,
+} from "@/lib/sentx";
+
+const MIN_VOLUME_HBAR = 20000;
 
 // GET /api/collections - List collections with rankings
 // Returns top 30 best voted + top 10 worst voted (or search results)
@@ -17,9 +23,12 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const shouldSync = searchParams.get("sync") === "true";
 
-    // Optionally sync from Kabila (called less frequently)
+    // Optionally sync from SentX (admin only, called less frequently)
     if (shouldSync) {
-      await syncCollectionsFromKabila();
+      const user = await getCurrentUser();
+      if (user?.isAdmin) {
+        await syncCollectionsFromSentX();
+      }
     }
 
     // Get total count of all collections
@@ -183,14 +192,22 @@ async function getUserVotesMap(
   }, {} as Record<string, { voteWeight: number; nftTokenId?: string }>);
 }
 
-// POST /api/collections/sync - Sync collections from Kabila
+// POST /api/collections - Sync collections from SentX
 export async function POST(request: NextRequest) {
   // Rate limiting - stricter for sync operations
   const rateLimitResponse = checkRateLimit(request, "write");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const result = await syncCollectionsFromKabila();
+    const user = await getCurrentUser();
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const result = await syncCollectionsFromSentX();
     return NextResponse.json(result);
   } catch (error) {
     console.error("Sync collections error:", error);
@@ -201,101 +218,174 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// DELETE /api/collections - Delete all collections (admin only)
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getCurrentUser();
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    // Delete all collection votes first (due to foreign key)
+    await prisma.collectionVote.deleteMany({});
+
+    // Delete all collections
+    const deleted = await prisma.collection.deleteMany({});
+
+    return NextResponse.json({
+      deleted: deleted.count,
+      message: `Deleted ${deleted.count} collections and all their votes.`,
+    });
+  } catch (error) {
+    console.error("Delete collections error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete collections" },
+      { status: 500 }
+    );
+  }
+}
+
 /**
- * Sync collections from Kabila API to database
- * Only includes collections with >= 10,000 HBAR volume (from Kabila networkVolume)
- * Links point to SentX marketplace
+ * Sync collections from SentX API to database
+ * 1. Get all supported tokens from /v1/public/token/supportedlist
+ * 2. For each token, get stats from /v1/public/market/stats/token
+ * 3. If volume >= 20k HBAR, get token info from Hedera Mirror Node
+ * 4. Save to database
  */
-async function syncCollectionsFromKabila() {
-  const MIN_VOLUME_HBAR = 20000;
+async function syncCollectionsFromSentX() {
+  console.log("Starting SentX collections sync...");
 
-  // Fetch all collections from Kabila
-  const kabilaCollections = await fetchKabilaCollections();
+  // Step 1: Get all supported tokens
+  const supportedTokens = await fetchSupportedTokenList();
 
-  if (kabilaCollections.length === 0) {
+  if (supportedTokens.length === 0) {
     return {
       synced: 0,
       created: 0,
       updated: 0,
       skipped: 0,
-      message: "No collections found from Kabila API",
+      message: "No supported tokens found from SentX API",
     };
   }
+
+  console.log(`Found ${supportedTokens.length} supported tokens from SentX`);
 
   let created = 0;
   let updated = 0;
   let skipped = 0;
+  let processed = 0;
   const errors: string[] = [];
 
-  // Process collections
-  for (const collection of kabilaCollections) {
-    try {
-      // Get volume from Kabila (networkVolume is already in HBAR)
-      const volumeHbar = collection.networkVolume
-        ? Math.round(collection.networkVolume)
-        : 0;
+  // Process tokens in batches to avoid rate limiting
+  const BATCH_SIZE = 10;
+  const DELAY_MS = 100;
 
-      // Skip collections with less than MIN_VOLUME_HBAR volume
-      if (volumeHbar < MIN_VOLUME_HBAR) {
-        skipped++;
-        continue;
-      }
+  for (let i = 0; i < supportedTokens.length; i += BATCH_SIZE) {
+    const batch = supportedTokens.slice(i, i + BATCH_SIZE);
 
-      // Use Kabila data directly
-      const image = resolveKabilaImageUrl(collection.logoUrl || collection.bannerUrl);
-      const floor = collection.minPrice ? Math.round(collection.minPrice) : 0;
-      const owners = collection.holders || 0;
-      const supply = collection.supply || 0;
+    // Process batch in parallel
+    const results = await Promise.all(
+      batch.map(async (tokenId) => {
+        try {
+          // Step 2: Get stats from SentX
+          const stats = await fetchCollectionStats(tokenId);
 
-      const existing = await prisma.collection.findUnique({
-        where: { tokenAddress: collection.tokenId },
-      });
+          if (!stats) {
+            return { status: "skipped", reason: "no_stats" };
+          }
 
-      if (existing) {
-        await prisma.collection.update({
-          where: { id: existing.id },
-          data: {
-            name: collection.name,
-            description: collection.description || undefined,
-            ...(image && { image }),
-            floor,
+          // Check volume (volumetotal is in HBAR)
+          const volumeHbar = Math.round(stats.volumetotal || stats.volume || 0);
+
+          if (volumeHbar < MIN_VOLUME_HBAR) {
+            return { status: "skipped", reason: "low_volume" };
+          }
+
+          // Step 3: Get token info from Hedera if needed
+          let name = stats.name;
+          let supply = stats.supply || 0;
+
+          if (!name || name === "Unknown") {
+            const hederaInfo = await fetchTokenFromMirrorNode(tokenId);
+            if (hederaInfo) {
+              name = hederaInfo.name || tokenId;
+              supply = parseInt(hederaInfo.total_supply) || supply;
+            }
+          }
+
+          // Step 4: Save to database
+          const existing = await prisma.collection.findUnique({
+            where: { tokenAddress: tokenId },
+          });
+
+          const collectionData = {
+            name: name || tokenId,
+            description: stats.description || undefined,
+            image: stats.image || undefined,
+            slug: stats.slug || tokenId,
+            floor: Math.round(stats.floor || 0),
             volume: volumeHbar,
-            owners,
+            owners: stats.owners || 0,
             supply,
+            sentxStars: stats.stars || 0,
             lastSyncedAt: new Date(),
-          },
-        });
-        updated++;
-      } else {
-        await prisma.collection.create({
-          data: {
-            tokenAddress: collection.tokenId,
-            name: collection.name,
-            description: collection.description || undefined,
-            image: image || undefined,
-            slug: collection.tokenId,
-            floor,
-            volume: volumeHbar,
-            owners,
-            supply,
-            sentxStars: 0,
-            lastSyncedAt: new Date(),
-          },
-        });
-        created++;
-      }
-    } catch (err) {
-      console.error(`Error syncing collection ${collection.tokenId}:`, err);
-      errors.push(collection.name || collection.tokenId);
+          };
+
+          if (existing) {
+            await prisma.collection.update({
+              where: { id: existing.id },
+              data: collectionData,
+            });
+            return { status: "updated", tokenId };
+          } else {
+            await prisma.collection.create({
+              data: {
+                tokenAddress: tokenId,
+                ...collectionData,
+              },
+            });
+            return { status: "created", tokenId };
+          }
+        } catch (err) {
+          console.error(`Error processing token ${tokenId}:`, err);
+          return { status: "error", tokenId };
+        }
+      })
+    );
+
+    // Count results
+    for (const result of results) {
+      processed++;
+      if (result.status === "created") created++;
+      else if (result.status === "updated") updated++;
+      else if (result.status === "skipped") skipped++;
+      else if (result.status === "error") errors.push(result.tokenId || "unknown");
+    }
+
+    // Log progress
+    if ((i + BATCH_SIZE) % 100 === 0 || i + BATCH_SIZE >= supportedTokens.length) {
+      console.log(`Processed ${Math.min(i + BATCH_SIZE, supportedTokens.length)}/${supportedTokens.length} tokens. Created: ${created}, Updated: ${updated}, Skipped: ${skipped}`);
+    }
+
+    // Delay between batches
+    if (i + BATCH_SIZE < supportedTokens.length) {
+      await new Promise(resolve => setTimeout(resolve, DELAY_MS));
     }
   }
+
+  console.log(`SentX sync complete. Created: ${created}, Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors.length}`);
 
   return {
     synced: created + updated,
     created,
     updated,
     skipped,
-    errors: errors.length > 0 ? errors : undefined,
-    message: `Synced ${created} new, updated ${updated} existing. Skipped ${skipped} with <20k HBAR volume.`,
+    processed,
+    totalTokens: supportedTokens.length,
+    errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
+    message: `Synced ${created} new, updated ${updated} existing. Skipped ${skipped} with <${MIN_VOLUME_HBAR / 1000}k HBAR volume.`,
   };
 }

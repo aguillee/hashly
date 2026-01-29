@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Calendar,
   Search,
-  Filter,
   Plus,
   Sparkles,
   TrendingUp,
@@ -72,7 +71,6 @@ export default function CalendarPage() {
   const [userVotes, setUserVotes] = React.useState<Record<string, "UP" | "DOWN">>({});
   const [loading, setLoading] = React.useState(true);
   const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("grid");
-  const [showFilters, setShowFilters] = React.useState(false);
   const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA">("all");
   const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
 
@@ -191,7 +189,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
+        <div className="flex flex-col lg:flex-row gap-4 mb-4">
           <div className="flex-1">
             <Input
               placeholder="Search events..."
@@ -201,128 +199,114 @@ export default function CalendarPage() {
             />
           </div>
 
-          <div className="flex gap-2">
-            {/* Filter Toggle */}
-            <Button
-              variant={showFilters ? "default" : "secondary"}
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
+          {/* View Mode Toggle */}
+          <div className="flex rounded-xl border border-border overflow-hidden">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
+                viewMode === "grid"
+                  ? "bg-accent-primary text-white"
+                  : "bg-bg-card text-text-secondary hover:text-text-primary"
+              )}
             >
-              <Filter className="h-4 w-4" />
-              Filters
-            </Button>
-
-            {/* View Mode Toggle */}
-            <div className="flex rounded-xl border border-border overflow-hidden">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
-                  viewMode === "grid"
-                    ? "bg-accent-primary text-white"
-                    : "bg-bg-card text-text-secondary hover:text-text-primary"
-                )}
-              >
-                <LayoutGrid className="h-4 w-4" />
-                Grid
-              </button>
-              <button
-                onClick={() => setViewMode("calendar")}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
-                  viewMode === "calendar"
-                    ? "bg-accent-primary text-white"
-                    : "bg-bg-card text-text-secondary hover:text-text-primary"
-                )}
-              >
-                <CalendarDays className="h-4 w-4" />
-                Calendar
-              </button>
-            </div>
+              <LayoutGrid className="h-4 w-4" />
+              Grid
+            </button>
+            <button
+              onClick={() => setViewMode("calendar")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
+                viewMode === "calendar"
+                  ? "bg-accent-primary text-white"
+                  : "bg-bg-card text-text-secondary hover:text-text-primary"
+              )}
+            >
+              <CalendarDays className="h-4 w-4" />
+              Calendar
+            </button>
           </div>
         </div>
 
-        {/* Filters Panel */}
-        {showFilters && (
-          <div className="p-6 rounded-2xl bg-bg-card border border-border mb-8 space-y-6">
-            {/* Status Filters */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-3">
-                Status
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {statusFilters.map((filter) => {
-                  const Icon = filter.icon;
-                  return (
-                    <button
-                      key={filter.value}
-                      onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "ended" | "forever")}
-                      className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                        status === filter.value
-                          ? "bg-accent-primary text-white"
-                          : "bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/80"
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {filter.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Source Filter */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-3">
-                Source
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {sourceFilters.map((filter) => (
+        {/* Compact Filters - Always Visible */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-6">
+          {/* Status Filters */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-secondary uppercase tracking-wide">Status:</span>
+            <div className="flex gap-1">
+              {statusFilters.map((filter) => {
+                const Icon = filter.icon;
+                return (
                   <button
                     key={filter.value}
-                    onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
+                    onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "ended" | "forever")}
                     className={cn(
-                      "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                      sourceFilter === filter.value
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                      status === filter.value
                         ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                        : "bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/80"
                     )}
                   >
+                    <Icon className="h-3.5 w-3.5" />
                     {filter.label}
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sort By */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-3">
-                Sort By
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { value: "date", label: "Mint Date" },
-                  { value: "votes", label: "Most Voted" },
-                  { value: "newest", label: "Recently Added" },
-                ].map((sort) => (
-                  <button
-                    key={sort.value}
-                    onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
-                    className={cn(
-                      "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                      sortBy === sort.value
-                        ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                    )}
-                  >
-                    {sort.label}
-                  </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
-        )}
+
+          {/* Divider */}
+          <div className="hidden sm:block h-6 w-px bg-border" />
+
+          {/* Source Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-secondary uppercase tracking-wide">Source:</span>
+            <div className="flex gap-1">
+              {sourceFilters.map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                    sourceFilter === filter.value
+                      ? "bg-accent-primary text-white"
+                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                  )}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="hidden sm:block h-6 w-px bg-border" />
+
+          {/* Sort By */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-secondary uppercase tracking-wide">Sort:</span>
+            <div className="flex gap-1">
+              {[
+                { value: "date", label: "Mint Date" },
+                { value: "votes", label: "Most Voted" },
+                { value: "newest", label: "Recent" },
+              ].map((sort) => (
+                <button
+                  key={sort.value}
+                  onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                    sortBy === sort.value
+                      ? "bg-accent-primary text-white"
+                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                  )}
+                >
+                  {sort.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Events Listing */}
         {loading ? (
