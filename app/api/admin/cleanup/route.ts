@@ -46,12 +46,16 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete ALL events including forever mints
-    const deleted = await prisma.event.deleteMany({});
+    // First delete all votes (they reference events)
+    const deletedVotes = await prisma.vote.deleteMany({});
+
+    // Then delete ALL events including forever mints
+    const deletedEvents = await prisma.event.deleteMany({});
 
     return NextResponse.json({
-      deleted: deleted.count,
-      message: `Deleted ALL ${deleted.count} events (including forever mints).`,
+      deletedVotes: deletedVotes.count,
+      deletedEvents: deletedEvents.count,
+      message: `Deleted ${deletedVotes.count} votes and ${deletedEvents.count} events (including forever mints).`,
     });
   } catch (error) {
     console.error("Delete all events error:", error);
