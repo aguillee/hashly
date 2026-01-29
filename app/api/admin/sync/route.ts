@@ -151,7 +151,16 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     }
   });
 
-  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${deletedEnded.count} ENDED deleted`);
+  // 4. Ensure ALL Forever Mints are LIVE (fix any that got wrong status)
+  const fixedForeverMints = await prisma.event.updateMany({
+    where: {
+      isForeverMint: true,
+      status: { not: "LIVE" }
+    },
+    data: { status: "LIVE" }
+  });
+
+  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${deletedEnded.count} ENDED deleted, ${fixedForeverMints.count} Forever Mints fixed to LIVE`);
 
   // === FETCH AND SYNC ===
 
