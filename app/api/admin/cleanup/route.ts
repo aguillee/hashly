@@ -56,7 +56,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error("Delete all events error:", error);
     return NextResponse.json(
-      { error: "Failed to delete all events" },
+      { error: "Failed to delete all events", details: String(error) },
       { status: 500 }
     );
   }
