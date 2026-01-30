@@ -199,26 +199,26 @@ export default function CollectionsPage() {
     switch (rank) {
       case 1:
         return (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/30">
-            <Crown className="h-4 w-4 text-white" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/30 flex-shrink-0">
+            <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       case 2:
         return (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg shadow-gray-400/30">
-            <Medal className="h-4 w-4 text-white" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg shadow-gray-400/30 flex-shrink-0">
+            <Medal className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       case 3:
         return (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/30">
-            <Medal className="h-4 w-4 text-white" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/30 flex-shrink-0">
+            <Medal className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       default:
         return (
-          <div className="w-8 h-8 rounded-lg bg-bg-secondary border border-border flex items-center justify-center">
-            <span className="text-text-secondary font-bold text-xs">#{rank}</span>
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+            <span className="text-text-secondary font-bold text-[10px] sm:text-xs">#{rank}</span>
           </div>
         );
     }
@@ -514,8 +514,8 @@ export default function CollectionsPage() {
                         votingId={votingId}
                         onVote={handleVote}
                         getRankIcon={() => (
-                          <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-                            <span className="text-red-400 font-bold text-xs">#{collection.rank}</span>
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0">
+                            <span className="text-red-400 font-bold text-[10px] sm:text-xs">#{collection.rank}</span>
                           </div>
                         )}
                         getRankStyle={() => "bg-red-500/5 border-red-500/20 hover:border-red-500/40"}
@@ -567,7 +567,7 @@ function CollectionRow({
       {getRankIcon(collection.rank)}
 
       {/* Collection Image */}
-      <div className="w-9 h-9 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
+      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
         {collection.image ? (
           <img
             src={collection.image}

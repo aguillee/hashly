@@ -48,24 +48,24 @@ export default function HomePage() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
               {isConnected ? (
-                <Link href="/events/new">
-                  <Button size="xl" className="gap-2 group">
+                <Link href="/events/new" className="w-full sm:w-auto">
+                  <Button size="xl" className="gap-2 group w-full sm:w-auto">
                     <Plus className="h-5 w-5" />
                     Submit a Mint Event
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
               ) : (
-                <Button size="xl" className="gap-2" disabled>
+                <Button size="xl" className="gap-2 w-full sm:w-auto" disabled>
                   <Plus className="h-5 w-5" />
                   Connect Wallet to Submit
                 </Button>
               )}
 
-              <Link href="/calendar">
-                <Button variant="secondary" size="xl" className="gap-2">
+              <Link href="/calendar" className="w-full sm:w-auto">
+                <Button variant="secondary" size="xl" className="gap-2 w-full sm:w-auto">
                   <Calendar className="h-5 w-5" />
                   Browse Calendar
                 </Button>
@@ -104,7 +104,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Base Voting */}
             <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
               <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4">
@@ -144,7 +144,7 @@ export default function HomePage() {
             </div>
 
             {/* El Santuario */}
-            <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-secondary/30 transition-colors sm:col-span-2 md:col-span-1">
+            <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-secondary/30 transition-colors">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-amber-400" />
               </div>

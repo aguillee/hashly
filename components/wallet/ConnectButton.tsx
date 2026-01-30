@@ -42,6 +42,12 @@ export function ConnectButton() {
     }
   };
 
+  // Truncate wallet for mobile: "0.0.10117827" -> "0.0...7827"
+  const truncateAddress = (addr: string) => {
+    if (addr.length <= 10) return addr;
+    return `${addr.slice(0, 3)}...${addr.slice(-4)}`;
+  };
+
   if (!isConnected || !user) {
     return (
       <Button
@@ -50,7 +56,8 @@ export function ConnectButton() {
         className="gap-2"
       >
         <Wallet className="h-4 w-4" />
-        Connect Wallet
+        <span className="hidden sm:inline">Connect Wallet</span>
+        <span className="sm:hidden">Connect</span>
       </Button>
     );
   }
@@ -59,11 +66,12 @@ export function ConnectButton() {
     <div className="relative" ref={menuRef}>
       <Button
         variant="secondary"
-        className="gap-2"
+        className="gap-1.5 sm:gap-2 px-2.5 sm:px-4"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span>{user.walletAddress}</span>
-        <ChevronDown className={cn("h-4 w-4 text-text-secondary transition-transform", isOpen && "rotate-180")} />
+        <span className="hidden sm:inline">{user.walletAddress}</span>
+        <span className="sm:hidden text-xs">{truncateAddress(user.walletAddress)}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-secondary transition-transform", isOpen && "rotate-180")} />
       </Button>
 
       {isOpen && (

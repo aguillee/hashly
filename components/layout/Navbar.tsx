@@ -113,12 +113,12 @@ export function Navbar() {
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-3">
-            {/* Points Badge (if connected) */}
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            {/* Points Badge (if connected) - hidden on mobile */}
             {user && (
               <Link
                 href="/profile"
-                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
               >
                 <Zap className="h-4 w-4 text-accent-primary" />
                 <span className="font-semibold text-text-primary">
@@ -127,7 +127,10 @@ export function Navbar() {
               </Link>
             )}
 
-            <ThemeToggle />
+            {/* Theme toggle - hidden on small mobile, shown in mobile menu instead */}
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
             <ConnectButton />
 
             {/* Mobile menu button */}
@@ -148,7 +151,7 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fade-in">
+          <div className="md:hidden py-4 border-t border-border bg-bg-card/95 backdrop-blur-xl animate-fade-in">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => {
                 const Icon = link.icon;
@@ -187,6 +190,25 @@ export function Navbar() {
                   Admin
                 </Link>
               )}
+
+              {/* Mobile-only: Points and Theme */}
+              <div className="flex items-center justify-between px-4 pt-3 mt-1 border-t border-border">
+                {user && (
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 text-sm text-text-secondary"
+                  >
+                    <Zap className="h-4 w-4 text-accent-primary" />
+                    <span className="font-semibold text-text-primary">
+                      {(user.points ?? 0).toLocaleString()} pts
+                    </span>
+                  </Link>
+                )}
+                <div className="sm:hidden">
+                  <ThemeToggle />
+                </div>
+              </div>
             </div>
           </div>
         )}
