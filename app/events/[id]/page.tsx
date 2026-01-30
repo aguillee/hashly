@@ -26,6 +26,7 @@ import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { useWalletStore } from "@/store";
 import { cn, parseMintPrice } from "@/lib/utils";
 import { mutate } from "@/lib/swr";
+import { XIcon } from "@/components/ui/XIcon";
 
 interface MintPhase {
   id: string;
@@ -553,14 +554,30 @@ export default function EventDetailPage() {
           </Card>
 
           {/* Share */}
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share Event
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share Event
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                const text = `Check out ${event.title} on @hashly_h 🗓️\n\nThe mint calendar for Hedera!`;
+                const url = `https://hash-ly.com/events/${event.id}`;
+                window.open(
+                  `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+                  "_blank",
+                  "noopener,noreferrer,width=550,height=420"
+                );
+              }}
+            >
+              <XIcon className="h-4 w-4" />
+            </Button>
+          </div>
 
           {/* Submitted By */}
           <p className="text-xs text-text-secondary text-center">

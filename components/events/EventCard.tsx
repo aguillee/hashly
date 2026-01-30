@@ -11,6 +11,7 @@ import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { formatDate, formatTimeRemaining, getVoteScore, parseMintPrice } from "@/lib/utils";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { ShareToXButton } from "@/components/ui/ShareToXButton";
 
 interface EventCardProps {
   event: {
@@ -230,12 +231,19 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
               </button>
             </div>
 
-            <Link href={`/events/${event.id}`}>
-              <Button variant="ghost" size="sm" className="gap-1.5 group/btn">
-                View Details
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-              </Button>
-            </Link>
+            <div className="flex items-center gap-1.5">
+              <ShareToXButton
+                shareText={`Check out ${event.title} on @hashly_h 🗓️\n\nThe mint calendar for Hedera!`}
+                shareUrl={`https://hash-ly.com/events/${event.id}`}
+                className="p-2.5 rounded-xl"
+              />
+              <Link href={`/events/${event.id}`}>
+                <Button variant="ghost" size="sm" className="gap-1.5 group/btn">
+                  View Details
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </Card>

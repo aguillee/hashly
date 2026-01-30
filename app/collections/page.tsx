@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/Input";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toaster";
+import { ShareToXButton } from "@/components/ui/ShareToXButton";
 
 interface Collection {
   id: string;
@@ -642,6 +643,11 @@ function CollectionRow({
         >
           <ThumbsDown className="h-3 w-3" />
         </Button>
+        <ShareToXButton
+          shareText={`I just voted for ${collection.name} on @hashly_h 🔥\n\nJoin and vote for your favorite collections!`}
+          shareUrl="https://hash-ly.com/collections"
+          className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
+        />
       </div>
     </div>
   );

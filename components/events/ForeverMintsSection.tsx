@@ -17,6 +17,7 @@ import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { parseMintPrice } from "@/lib/utils";
 import { useForeverMints } from "@/lib/swr";
+import { ShareToXButton } from "@/components/ui/ShareToXButton";
 
 interface ForeverMint {
   id: string;
@@ -171,12 +172,19 @@ function ForeverMintCard({ mint }: { mint: ForeverMint }) {
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-2 border-t border-border">
-            <Link href={`/events/${mint.id}`}>
-              <Button variant="ghost" size="sm" className="gap-1 text-xs h-8">
-                Details
-                <ArrowUpRight className="h-3 w-3" />
-              </Button>
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link href={`/events/${mint.id}`}>
+                <Button variant="ghost" size="sm" className="gap-1 text-xs h-8">
+                  Details
+                  <ArrowUpRight className="h-3 w-3" />
+                </Button>
+              </Link>
+              <ShareToXButton
+                shareText={`Check out ${mint.title} on @hashly_h ♾️\n\nAlways available to mint!`}
+                shareUrl={`https://hash-ly.com/events/${mint.id}`}
+                className="h-8 w-8 p-0 flex items-center justify-center"
+              />
+            </div>
             {mint.websiteUrl && (
               <a
                 href={mint.websiteUrl}
