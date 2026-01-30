@@ -13,10 +13,12 @@ import {
   Loader2,
   Sparkles,
   Infinity,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
 import { ForeverMintsSection } from "@/components/events/ForeverMintsSection";
+import { TopCollectionsPodium } from "@/components/collections/TopCollectionsPodium";
 import { useWalletStore } from "@/store";
 import { useFeatured } from "@/lib/swr";
 
@@ -33,15 +35,15 @@ export default function HomePage() {
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent-primary/10 rounded-full blur-3xl" />
         <div className="absolute top-20 right-1/4 w-80 h-80 bg-accent-secondary/10 rounded-full blur-3xl" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             {/* Title */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
               <span className="gradient-text">Discover NFTs on Hedera</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto mb-10">
+            <p className="text-base sm:text-lg lg:text-xl text-text-secondary max-w-2xl mx-auto mb-8 sm:mb-10">
               Explore new and existing collections, vote on your favorites, and see what the community ranks at the top.
             </p>
 
@@ -73,11 +75,27 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Collaborate CTA */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center">
+        <p className="text-sm text-text-secondary">
+          Want to collaborate with Hashly?{" "}
+          <a
+            href="https://x.com/hashly_h"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-primary hover:underline font-medium inline-flex items-center gap-1"
+          >
+            Contact us on X
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </p>
+      </div>
+
       {/* How It Works Section - FIRST after Hero */}
-      <section className="py-12 bg-bg-secondary/50">
+      <section className="py-8 sm:py-12 bg-bg-secondary/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
+          <div className="text-center mb-6 sm:mb-10">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-text-primary mb-3">
               How It Works
             </h2>
             <p className="text-text-secondary max-w-2xl mx-auto">
@@ -86,9 +104,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Base Voting */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
+            <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
               <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4">
                 <Vote className="h-6 w-6 text-accent-primary" />
               </div>
@@ -102,7 +120,7 @@ export default function HomePage() {
             </div>
 
             {/* Santuario Hedera */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
+            <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-4">
                 <Gift className="h-6 w-6 text-purple-400" />
               </div>
@@ -126,7 +144,7 @@ export default function HomePage() {
             </div>
 
             {/* El Santuario */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-secondary/30 transition-colors">
+            <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-secondary/30 transition-colors sm:col-span-2 md:col-span-1">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-amber-400" />
               </div>
@@ -152,30 +170,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Events Section */}
-      <section className="py-12">
+      {/* Featured Section: Top Collections (left) + Events (right) */}
+      <section className="py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+          <div className="grid lg:grid-cols-5 gap-8 lg:gap-6 items-stretch">
+            {/* Left: Top Collections Podium - Takes 3 of 5 columns */}
+            <div className="lg:col-span-3 flex flex-col">
+              <TopCollectionsPodium />
             </div>
-          ) : featured?.mostVoted || featured?.nextUp ? (
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Most Voted - Takes 2 columns */}
-              {featured.mostVoted && (
-                <div className="lg:col-span-2">
-                  <FeaturedEventCard event={featured.mostVoted} variant="mostVoted" />
-                </div>
-              )}
 
-              {/* Next Up + Top Forever Mint - Takes 1 column */}
-              {(featured.nextUp || featured.topForeverMint) && (
-                <div className="flex flex-col gap-6">
+            {/* Right: Featured Events - Takes 2 of 5 columns */}
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              {loading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+                </div>
+              ) : featured?.mostVoted || featured?.nextUp || featured?.topForeverMint ? (
+                <>
+                  {/* Most Voted */}
+                  {featured.mostVoted && (
+                    <div>
+                      <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-3 sm:mb-4 flex items-center gap-2">
+                        <Trophy className="h-5 w-5 text-yellow-400 flex-shrink-0" />
+                        Upcoming Most Voted
+                      </h3>
+                      <FeaturedEventCard event={featured.mostVoted} variant="nextUp" />
+                    </div>
+                  )}
+
                   {/* Minting Soon */}
                   {featured.nextUp && (
                     <div>
-                      <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-orange-400" />
+                      <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-3 sm:mb-4 flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-orange-400 flex-shrink-0" />
                         Minting Soon
                       </h3>
                       <FeaturedEventCard event={featured.nextUp} variant="nextUp" />
@@ -185,8 +212,8 @@ export default function HomePage() {
                   {/* Top Forever Mint */}
                   {featured.topForeverMint && (
                     <div>
-                      <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                        <Infinity className="h-5 w-5 text-purple-400" />
+                      <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-3 sm:mb-4 flex items-center gap-2">
+                        <Infinity className="h-5 w-5 text-purple-400 flex-shrink-0" />
                         Top Forever Mint
                       </h3>
                       <FeaturedEventCard event={featured.topForeverMint} variant="foreverMint" />
@@ -200,42 +227,30 @@ export default function HomePage() {
                   >
                     View all events →
                   </Link>
-                </div>
-              )}
-
-              {/* If only mostVoted exists (no nextUp and no topForeverMint) */}
-              {featured.mostVoted && !featured.nextUp && !featured.topForeverMint && (
-                <div className="flex items-center justify-center">
-                  <Link
-                    href="/calendar"
-                    className="text-center text-sm text-accent-primary hover:underline"
-                  >
-                    View all events →
-                  </Link>
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 rounded-2xl bg-bg-secondary flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="h-8 w-8 text-text-secondary" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-text-primary mb-2">
+                    No events yet
+                  </h3>
+                  <p className="text-text-secondary mb-6">
+                    Be the first to submit an event!
+                  </p>
+                  {isConnected && (
+                    <Link href="/events/new">
+                      <Button className="gap-2">
+                        <Plus className="h-4 w-4" />
+                        Submit Event
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 rounded-2xl bg-bg-secondary flex items-center justify-center mx-auto mb-4">
-                <Calendar className="h-8 w-8 text-text-secondary" />
-              </div>
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
-                No events yet
-              </h3>
-              <p className="text-text-secondary mb-6">
-                Be the first to submit an event!
-              </p>
-              {isConnected && (
-                <Link href="/events/new">
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Submit Event
-                  </Button>
-                </Link>
-              )}
-            </div>
-          )}
+          </div>
         </div>
       </section>
 

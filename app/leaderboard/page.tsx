@@ -10,6 +10,7 @@ import { useLeaderboard } from "@/lib/swr";
 interface LeaderboardEntry {
   rank: number;
   walletAddress: string;
+  alias: string | null;
   points: number;
 }
 
@@ -157,7 +158,7 @@ export default function LeaderboardPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-text-primary truncate">
-                            {entry.walletAddress.slice(0, 8)}...{entry.walletAddress.slice(-4)}
+                            {entry.alias || entry.walletAddress}
                           </span>
                           {isCurrentUser && (
                             <Badge variant="default" size="sm">

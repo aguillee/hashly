@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
       })),
       worst: worstCollections.map((c, index) => ({
         ...c,
-        rank: total - 9 + index, // Rank from bottom
+        rank: total - index, // Worst = highest rank number (e.g. 1273, 1272, 1271...)
         image: resolveImageUrl(c.image || ""),
         userVote: userVotesMap[c.id] || null,
         lastSyncedAt: c.lastSyncedAt?.toISOString() || null,

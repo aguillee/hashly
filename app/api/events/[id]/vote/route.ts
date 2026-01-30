@@ -275,15 +275,45 @@ export async function POST(
     }
 
     // Update event vote counts
+    // totalVoteChange encodes a "swing": e.g. +2 means going from DOWN(-1) to UP(+1)
+    // For a direction change, we must move votes between counters (decrement old, increment new)
+    // For a new vote, we just increment the appropriate counter
     const totalVoteChange = regularVoteWeight + nftVoteWeight;
     if (totalVoteChange !== 0) {
-      await prisma.event.update({
-        where: { id: eventId },
-        data: {
-          votesUp: { increment: totalVoteChange > 0 ? Math.abs(totalVoteChange) : 0 },
-          votesDown: { increment: totalVoteChange < 0 ? Math.abs(totalVoteChange) : 0 },
-        },
-      });
+      const isDirectionChange = existingVote && Math.abs(totalVoteChange) >= 2;
+
+      if (isDirectionChange) {
+        // Direction change: half the swing removes from old counter, half adds to new
+        const perCounter = Math.abs(totalVoteChange) / 2;
+        if (totalVoteChange > 0) {
+          // DOWN -> UP: move votes from votesDown to votesUp
+          await prisma.event.update({
+            where: { id: eventId },
+            data: {
+              votesUp: { increment: perCounter },
+              votesDown: { decrement: perCounter },
+            },
+          });
+        } else {
+          // UP -> DOWN: move votes from votesUp to votesDown
+          await prisma.event.update({
+            where: { id: eventId },
+            data: {
+              votesUp: { decrement: perCounter },
+              votesDown: { increment: perCounter },
+            },
+          });
+        }
+      } else {
+        // New vote: just add to the appropriate counter
+        await prisma.event.update({
+          where: { id: eventId },
+          data: {
+            votesUp: { increment: totalVoteChange > 0 ? Math.abs(totalVoteChange) : 0 },
+            votesDown: { increment: totalVoteChange < 0 ? Math.abs(totalVoteChange) : 0 },
+          },
+        });
+      }
     }
 
     // Get updated event

@@ -17,6 +17,9 @@ import {
   Check,
   Shield,
   ExternalLink,
+  Pencil,
+  X,
+  Save,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -68,6 +71,10 @@ export default function ProfilePage() {
   const [loading, setLoading] = React.useState(true);
   const [loadingNFTs, setLoadingNFTs] = React.useState(true);
   const [copied, setCopied] = React.useState(false);
+  const [editingAlias, setEditingAlias] = React.useState(false);
+  const [aliasInput, setAliasInput] = React.useState("");
+  const [savingAlias, setSavingAlias] = React.useState(false);
+  const { setUser } = useWalletStore();
 
   React.useEffect(() => {
     if (!isConnected) {
@@ -119,6 +126,37 @@ export default function ProfilePage() {
       navigator.clipboard.writeText(user.walletAddress);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const startEditAlias = () => {
+    setAliasInput(user?.alias || "");
+    setEditingAlias(true);
+  };
+
+  const saveAlias = async () => {
+    setSavingAlias(true);
+    try {
+      const response = await fetch("/api/users/alias", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ alias: aliasInput }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (user) {
+          setUser({ ...user, alias: data.alias });
+        }
+        setEditingAlias(false);
+      } else {
+        const err = await response.json();
+        alert(err.error || "Failed to update alias");
+      }
+    } catch {
+      alert("Failed to update alias");
+    } finally {
+      setSavingAlias(false);
     }
   };
 
@@ -180,6 +218,54 @@ export default function ProfilePage() {
               <Copy className="h-4 w-4 text-text-secondary" />
             )}
           </button>
+
+          {/* Alias */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {editingAlias ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={aliasInput}
+                  onChange={(e) => setAliasInput(e.target.value)}
+                  placeholder="Enter alias..."
+                  maxLength={20}
+                  className="px-3 py-1.5 rounded-lg bg-bg-card border border-accent-primary/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50 w-40 text-center"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveAlias();
+                    if (e.key === "Escape") setEditingAlias(false);
+                  }}
+                />
+                <button
+                  onClick={saveAlias}
+                  disabled={savingAlias}
+                  className="p-1.5 rounded-lg bg-success/20 text-success hover:bg-success/30 transition-colors"
+                >
+                  {savingAlias ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                </button>
+                <button
+                  onClick={() => setEditingAlias(false)}
+                  className="p-1.5 rounded-lg bg-error/20 text-error hover:bg-error/30 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={startEditAlias}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-bg-card/60 border border-border hover:border-accent-primary/50 transition-all text-sm"
+              >
+                <span className="text-text-secondary">
+                  {user.alias ? (
+                    <>Alias: <span className="text-text-primary font-medium">{user.alias}</span></>
+                  ) : (
+                    "Set alias for leaderboard"
+                  )}
+                </span>
+                <Pencil className="h-3 w-3 text-text-secondary" />
+              </button>
+            )}
+          </div>
         </div>
       </section>
 

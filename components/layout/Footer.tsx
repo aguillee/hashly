@@ -40,6 +40,13 @@ export function Footer() {
             {new Date().getFullYear()} Hashly
           </div>
         </div>
+
+        {/* Beta Notice */}
+        <div className="mt-4 pt-4 border-t border-border/50 text-center">
+          <p className="text-xs text-text-secondary/60">
+            This platform is in beta and may contain errors.
+          </p>
+        </div>
       </div>
     </footer>
   );

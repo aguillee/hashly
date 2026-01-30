@@ -52,7 +52,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
     return (
       <Link href={`/events/${event.id}`} className="block group">
         <div
-          className="relative h-80 sm:h-96 rounded-3xl overflow-hidden"
+          className="relative h-64 sm:h-80 lg:h-96 rounded-2xl sm:rounded-3xl overflow-hidden"
           style={{
             backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : undefined,
             backgroundSize: "cover",
@@ -123,10 +123,10 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
   if (variant === "foreverMint") {
     return (
       <Link href={`/events/${event.id}`} className="block group">
-        <div className="flex gap-4 p-4 rounded-2xl bg-bg-card border border-purple-500/30 hover:border-purple-500/50 transition-all">
+        <div className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl bg-bg-card border border-purple-500/30 hover:border-purple-500/50 transition-all">
           {/* Image */}
           <div
-            className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"
+            className="w-20 h-20 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"
             style={{
               backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : undefined,
               backgroundSize: "cover",
@@ -162,7 +162,10 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
                 )}
                 {priceInfo.value}
               </span>
-              <span className="text-purple-400">+{score} votes</span>
+              <span className={`font-bold px-2 py-0.5 rounded-md ${score > 0 ? "bg-green-500/20 text-green-400" : score < 0 ? "bg-red-500/20 text-red-400" : "bg-gray-500/20 text-gray-400"}`}>
+                <TrendingUp className="inline h-3.5 w-3.5 mr-1" />
+                {score > 0 ? `+${score}` : score} votes
+              </span>
             </div>
           </div>
         </div>
@@ -173,10 +176,10 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
   // Next Up - Smaller card
   return (
     <Link href={`/events/${event.id}`} className="block group">
-      <div className="flex gap-4 p-4 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/50 transition-all">
+      <div className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/50 transition-all">
         {/* Image */}
         <div
-          className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-bg-secondary"
+          className="w-20 h-20 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-bg-secondary"
           style={{
             backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : undefined,
             backgroundSize: "cover",

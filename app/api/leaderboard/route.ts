@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       leaderboard: leaderboard.map((u, index) => ({
         rank: index + 1,
         walletAddress: u.walletAddress,
+        alias: u.alias || null,
         points: u.points,
       })),
       userRank,

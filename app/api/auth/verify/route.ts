@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
       user: {
         id: user.id,
         walletAddress: user.walletAddress,
+        alias: user.alias,
         points: checkin.newTotal, // Use newTotal which has the latest points
         loginStreak: checkin.streak,
         isAdmin: user.isAdmin,

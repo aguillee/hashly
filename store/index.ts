@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 interface User {
   id: string;
   walletAddress: string;
+  alias: string | null;
   points: number;
   loginStreak: number;
   isAdmin: boolean;

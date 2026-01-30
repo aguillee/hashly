@@ -76,6 +76,8 @@ export function useCollections(search?: string) {
 
   return useSWR(url, fetcher, {
     dedupingInterval: 10000,
+    revalidateOnFocus: true,
+    refreshInterval: 30000,
   });
 }
 

@@ -16,6 +16,7 @@ export async function GET() {
       user: {
         id: user.id,
         walletAddress: user.walletAddress,
+        alias: user.alias,
         points: user.points,
         loginStreak: user.loginStreak,
         isAdmin: user.isAdmin,

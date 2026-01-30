@@ -170,6 +170,7 @@ export async function getLeaderboard(limit: number = 10) {
     select: {
       id: true,
       walletAddress: true,
+      alias: true,
       points: true,
     },
     orderBy: { points: "desc" },

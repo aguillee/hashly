@@ -27,6 +27,7 @@ interface Collection {
   id: string;
   tokenAddress: string;
   name: string;
+  image: string | null;
   owners: number;
   supply: number;
   totalVotes: number;
@@ -294,7 +295,7 @@ export default function CollectionsPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-accent-primary/5 via-accent-secondary/5 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">
             <span className="gradient-text">Discover NFTs on Hedera</span>
           </h1>
           <p className="text-text-secondary max-w-xl mx-auto mb-4">
@@ -318,7 +319,7 @@ export default function CollectionsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Search and Add Collection */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex gap-2 sm:gap-3 mb-6">
           <div className="relative flex-1">
             {searchLoading ? (
               <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent-primary animate-spin" />
@@ -347,7 +348,8 @@ export default function CollectionsPage() {
               className="gap-2 whitespace-nowrap"
             >
               <Plus className="h-4 w-4" />
-              Add Collection
+              <span className="hidden sm:inline">Add Collection</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           )}
         </div>
@@ -455,7 +457,7 @@ export default function CollectionsPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Top 30 Best Voted - Left Column */}
             <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
               <div className="p-4 border-b border-border flex items-center gap-2">
@@ -527,9 +529,10 @@ export default function CollectionsPage() {
         )}
 
         {/* Voting Info */}
-        <p className="mt-4 text-xs text-text-secondary text-center">
-          1 vote per wallet + 1 per dragon + 20 for El Santuario holders
-        </p>
+        <div className="mt-4 text-xs text-text-secondary text-center space-y-1">
+          <p>1 vote per wallet + 1 per dragon + 20 for El Santuario holders</p>
+          <p>Your vote is permanent. You can change it anytime (no 24h cooldown).</p>
+        </div>
       </div>
     </div>
   );
@@ -556,12 +559,27 @@ function CollectionRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3 rounded-xl border transition-all duration-200",
+        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-200",
         getRankStyle(collection.rank)
       )}
     >
       {/* Rank */}
       {getRankIcon(collection.rank)}
+
+      {/* Collection Image */}
+      <div className="w-9 h-9 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
+        {collection.image ? (
+          <img
+            src={collection.image}
+            alt={collection.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Layers className="h-4 w-4 text-text-secondary" />
+          </div>
+        )}
+      </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
@@ -571,11 +589,11 @@ function CollectionRow({
           rel="noopener noreferrer"
           className="font-medium text-text-primary text-sm truncate hover:text-accent-primary flex items-center gap-1"
         >
-          {collection.name}
+          <span className="truncate">{collection.name}</span>
           <ExternalLink className="h-3 w-3 flex-shrink-0" />
         </a>
-        <div className="flex items-center gap-3 text-xs text-text-secondary">
-          <span className="font-mono">{collection.tokenAddress}</span>
+        <div className="flex items-center gap-2 sm:gap-3 text-xs text-text-secondary">
+          <span className="font-mono hidden sm:inline">{collection.tokenAddress}</span>
           <span className="flex items-center gap-1">
             <Users className="h-3 w-3" />
             {collection.owners.toLocaleString()}
@@ -588,10 +606,10 @@ function CollectionRow({
       </div>
 
       {/* Votes */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent-primary/10">
+      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-accent-primary/10">
           <Trophy className="h-3 w-3 text-accent-primary" />
-          <span className="font-bold text-accent-primary text-sm">
+          <span className="font-bold text-accent-primary text-xs sm:text-sm">
             {collection.totalVotes}
           </span>
         </div>
@@ -602,7 +620,7 @@ function CollectionRow({
           onClick={() => onVote(collection.id, "UP")}
           disabled={isVoting}
           className={cn(
-            "h-8 w-8 p-0",
+            "h-7 w-7 sm:h-8 sm:w-8 p-0",
             hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600"
           )}
         >
@@ -618,7 +636,7 @@ function CollectionRow({
           onClick={() => onVote(collection.id, "DOWN")}
           disabled={isVoting}
           className={cn(
-            "h-8 w-8 p-0",
+            "h-7 w-7 sm:h-8 sm:w-8 p-0",
             hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600"
           )}
         >

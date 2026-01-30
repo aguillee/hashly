@@ -51,14 +51,14 @@ export function ForeverMintsSection() {
   return (
     <section className="py-12">
       {/* Section Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-            <Infinity className="h-6 w-6 text-purple-400" />
+      <div className="flex items-center justify-between mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+            <Infinity className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-text-primary">Forever Mints</h2>
-            <p className="text-text-secondary text-sm">Always available to mint</p>
+            <h2 className="text-lg sm:text-2xl font-bold text-text-primary">Forever Mints</h2>
+            <p className="text-text-secondary text-xs sm:text-sm">Always available to mint</p>
           </div>
         </div>
         <Link href="/calendar?foreverMints=only">
@@ -70,7 +70,7 @@ export function ForeverMintsSection() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {mints.map((mint) => (
           <ForeverMintCard key={mint.id} mint={mint} />
         ))}
@@ -91,7 +91,7 @@ function ForeverMintCard({ mint }: { mint: ForeverMint }) {
       <Card className="relative overflow-hidden rounded-3xl border-border/50 bg-bg-card/80 backdrop-blur-sm">
         {/* Image */}
         <Link href={`/events/${mint.id}`}>
-          <div className="relative h-44 bg-gradient-to-br from-bg-secondary to-bg-card overflow-hidden">
+          <div className="relative h-36 sm:h-44 bg-gradient-to-br from-bg-secondary to-bg-card overflow-hidden">
             {mint.imageUrl ? (
               <img
                 src={mint.imageUrl}
@@ -118,19 +118,20 @@ function ForeverMintCard({ mint }: { mint: ForeverMint }) {
             </div>
 
             {/* Score */}
-            {score !== 0 && (
-              <div className="absolute top-3 right-3">
-                <div
-                  className={`px-2 py-1 rounded-lg text-xs font-bold ${
-                    score > 0
-                      ? "bg-success/90 text-white"
-                      : "bg-error/90 text-white"
-                  }`}
-                >
-                  {score > 0 ? `+${score}` : score}
-                </div>
+            <div className="absolute top-3 right-3">
+              <div
+                className={`px-3 py-1.5 rounded-xl text-sm font-bold shadow-lg flex items-center gap-1.5 ${
+                  score > 0
+                    ? "bg-green-500 text-white shadow-green-500/40"
+                    : score < 0
+                    ? "bg-red-500 text-white shadow-red-500/40"
+                    : "bg-gray-500/80 text-white"
+                }`}
+              >
+                <span className="text-base">{score > 0 ? "▲" : score < 0 ? "▼" : "•"}</span>
+                {score > 0 ? `+${score}` : score}
               </div>
-            )}
+            </div>
           </div>
         </Link>
 

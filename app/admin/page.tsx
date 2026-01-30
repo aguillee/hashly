@@ -77,12 +77,12 @@ export default function AdminPage() {
   const [syncingLaunchpads, setSyncingLaunchpads] = React.useState(false);
   const [syncingKabila, setSyncingKabila] = React.useState(false);
   const [syncingCollections, setSyncingCollections] = React.useState(false);
-  const [deletingCollections, setDeletingCollections] = React.useState(false);
-  const [cleaningUp, setCleaningUp] = React.useState(false);
   const [addingCollection, setAddingCollection] = React.useState(false);
   const [newCollectionTokenId, setNewCollectionTokenId] = React.useState("");
+  const [deleteCollectionId, setDeleteCollectionId] = React.useState("");
+  const [deletingCollection, setDeletingCollection] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "collections" | "cleanup" | "delete-collections" | "add-collection";
+    type: "launchpads" | "kabila" | "collections" | "delete-collection" | "add-collection";
     message: string;
   } | null>(null);
 
@@ -370,15 +370,18 @@ export default function AdminPage() {
     }
   }
 
-  async function handleDeleteCollections() {
-    if (!confirm("This will DELETE ALL collections and their votes. Are you sure?")) {
+  async function handleDeleteSpecificCollection(e: React.FormEvent) {
+    e.preventDefault();
+    if (!deleteCollectionId.trim()) return;
+
+    if (!confirm(`Are you sure you want to delete collection ${deleteCollectionId}? This will also delete all its votes.`)) {
       return;
     }
 
-    setDeletingCollections(true);
+    setDeletingCollection(true);
     setSyncResult(null);
     try {
-      const response = await fetch("/api/collections", {
+      const response = await fetch(`/api/admin/collections/${encodeURIComponent(deleteCollectionId.trim())}`, {
         method: "DELETE",
       });
 
@@ -386,61 +389,24 @@ export default function AdminPage() {
 
       if (response.ok) {
         setSyncResult({
-          type: "delete-collections",
-          message: data.message || `Deleted ${data.deleted || 0} collections`,
+          type: "delete-collection",
+          message: data.message || `Deleted collection ${deleteCollectionId}`,
         });
+        setDeleteCollectionId("");
       } else {
         setSyncResult({
-          type: "delete-collections",
+          type: "delete-collection",
           message: data.error || "Delete failed",
         });
       }
     } catch (error) {
-      console.error("Failed to delete collections:", error);
+      console.error("Failed to delete collection:", error);
       setSyncResult({
-        type: "delete-collections",
-        message: "Failed to delete collections",
+        type: "delete-collection",
+        message: "Failed to delete collection",
       });
     } finally {
-      setDeletingCollections(false);
-    }
-  }
-
-  async function handleCleanup() {
-    if (!confirm("This will DELETE all events except Forever Mints. Are you sure?")) {
-      return;
-    }
-
-    setCleaningUp(true);
-    setSyncResult(null);
-    try {
-      const response = await fetch("/api/admin/cleanup", {
-        method: "POST",
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSyncResult({
-          type: "cleanup",
-          message: data.message || `Deleted ${data.deleted} events`,
-        });
-        // Refresh pending events
-        fetchPendingEvents();
-      } else {
-        setSyncResult({
-          type: "cleanup",
-          message: data.error || "Cleanup failed",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to cleanup:", error);
-      setSyncResult({
-        type: "cleanup",
-        message: "Failed to cleanup events",
-      });
-    } finally {
-      setCleaningUp(false);
+      setDeletingCollection(false);
     }
   }
 
@@ -628,59 +594,33 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        {/* Delete Collections */}
+        {/* Delete Specific Collection */}
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-orange-500/10">
-                  <Trash2 className="h-6 w-6 text-orange-500" />
-                </div>
-                <div>
-                  <p className="font-medium">Delete Collections</p>
-                  <p className="text-xs text-text-secondary">Remove all collections</p>
-                </div>
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-lg bg-orange-500/10">
+                <Trash2 className="h-6 w-6 text-orange-500" />
               </div>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteCollections}
-                loading={deletingCollections}
-                className="gap-2"
-              >
-                <Trash2 className={deletingCollections ? "animate-spin" : ""} />
-                Delete
-              </Button>
-            </div>
-            {syncResult?.type === "delete-collections" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Cleanup */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-red-500/10">
-                  <Trash2 className="h-6 w-6 text-red-500" />
-                </div>
-                <div>
-                  <p className="font-medium">Cleanup Events</p>
-                  <p className="text-xs text-text-secondary">Delete all except Forever</p>
-                </div>
+              <div>
+                <p className="font-medium">Delete Collection</p>
+                <p className="text-xs text-text-secondary">Remove a specific collection by Token ID</p>
               </div>
-              <Button
-                variant="destructive"
-                onClick={handleCleanup}
-                loading={cleaningUp}
-                className="gap-2"
-              >
-                <Trash2 className={cleaningUp ? "animate-spin" : ""} />
-                Clean
-              </Button>
             </div>
-            {syncResult?.type === "cleanup" && (
+            <form
+              onSubmit={handleDeleteSpecificCollection}
+              className="flex gap-2"
+            >
+              <Input
+                placeholder="Token ID (0.0.XXXXX)"
+                value={deleteCollectionId}
+                onChange={(e) => setDeleteCollectionId(e.target.value)}
+                disabled={deletingCollection}
+              />
+              <Button type="submit" variant="destructive" size="sm" loading={deletingCollection}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </form>
+            {syncResult?.type === "delete-collection" && (
               <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
             )}
           </CardContent>
