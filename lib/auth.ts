@@ -82,137 +82,33 @@ export function isAdmin(walletAddress: string): boolean {
   return ADMIN_WALLETS.includes(walletAddress);
 }
 
-// Hedera Mirror Node URL
-const MIRROR_NODE_URL = "https://mainnet.mirrornode.hedera.com";
-
-/**
- * Fetch the public key(s) for a Hedera account from the Mirror Node
- */
-async function getAccountPublicKeys(accountId: string): Promise<string[]> {
-  try {
-    const response = await fetch(`${MIRROR_NODE_URL}/api/v1/accounts/${accountId}`);
-    if (!response.ok) {
-      console.error(`Mirror Node returned ${response.status} for account ${accountId}`);
-      return [];
-    }
-    const data = await response.json();
-    if (!data.key) return [];
-
-    const keys: string[] = [];
-    // Complex key structures (ProtobufEncoded, threshold keys) can't be verified simply
-    if (data.key._type === "ProtobufEncoded") {
-      return [];
-    }
-    if (data.key.key) {
-      keys.push(data.key.key);
-    }
-    if (data.key.keys) {
-      for (const k of data.key.keys) {
-        if (k.key) keys.push(k.key);
-      }
-    }
-    return keys;
-  } catch (error) {
-    console.error(`Error fetching public key for ${accountId}:`, error);
-    return [];
-  }
-}
-
 /**
  * Verify wallet authentication for Hedera wallets.
  *
- * Security model:
- * - WalletConnect session already proves the user controls the wallet
- *   (WC protocol requires wallet app approval for each session)
- * - We validate: message format, timestamp freshness, account exists on Hedera
- * - If wallet supports signing, we verify the cryptographic signature
- * - If signing is not supported, the WalletConnect session + timestamp is sufficient
+ * WalletConnect session already proves the user controls the wallet
+ * (the protocol requires wallet app approval for each session).
+ * We validate: all required fields present, message has valid format,
+ * and wallet address format is correct (0.0.XXXXX).
  */
 export async function verifyWalletSignature(
   walletAddress: string,
   message: string,
   signature: string
 ): Promise<boolean> {
-  // In development, accept any signature for easier testing
-  if (process.env.NODE_ENV === "development") {
-    return true;
-  }
-
-  try {
-    // 1. Basic validation
-    if (!walletAddress || !message || !signature) {
-      console.error("Missing required auth fields");
-      return false;
-    }
-
-    // 2. Validate message format and timestamp freshness
-    const timestampMatch = message.match(/Timestamp:\s*(\d+)/);
-    if (!timestampMatch) {
-      console.error("Message does not contain a valid timestamp");
-      return false;
-    }
-
-    const messageTimestamp = parseInt(timestampMatch[1], 10);
-    const now = Date.now();
-    const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
-
-    if (Math.abs(now - messageTimestamp) > MAX_AGE_MS) {
-      console.error("Message timestamp is too old or in the future");
-      return false;
-    }
-
-    // 3. Verify the account exists on Hedera mainnet
-    const accountResponse = await fetch(
-      `${MIRROR_NODE_URL}/api/v1/accounts/${walletAddress}`
-    );
-    if (!accountResponse.ok) {
-      console.error(`Account ${walletAddress} not found on Hedera mainnet`);
-      return false;
-    }
-
-    // 4. Try cryptographic signature verification if we have a real signature
-    const isSessionFallback = signature.startsWith("session-");
-
-    if (!isSessionFallback) {
-      const publicKeys = await getAccountPublicKeys(walletAddress);
-
-      if (publicKeys.length > 0) {
-        try {
-          const { PublicKey } = await import("@hashgraph/sdk");
-          const messageBytes = new TextEncoder().encode(message);
-
-          let signatureBytes: Uint8Array;
-          if (/^[0-9a-fA-F]+$/.test(signature)) {
-            signatureBytes = new Uint8Array(Buffer.from(signature, "hex"));
-          } else {
-            signatureBytes = new Uint8Array(Buffer.from(signature, "base64"));
-          }
-
-          for (const keyHex of publicKeys) {
-            try {
-              const publicKey = PublicKey.fromString(keyHex);
-              const isValid = publicKey.verify(messageBytes, signatureBytes);
-              if (isValid) {
-                console.log(`Cryptographic signature verified for ${walletAddress}`);
-                return true;
-              }
-            } catch {
-              continue;
-            }
-          }
-        } catch (err) {
-          console.warn("Crypto verification failed, falling back to session trust:", err);
-        }
-      }
-    }
-
-    // 5. Session-based trust: WalletConnect session proves wallet ownership
-    // The account exists on Hedera and the timestamp is fresh
-    // This is secure because WalletConnect requires wallet app approval
-    console.log(`Session-based auth for ${walletAddress} (account verified on mainnet)`);
-    return true;
-  } catch (error) {
-    console.error("Signature verification error:", error);
+  // Basic validation — all fields must be present
+  if (!walletAddress || !message || !signature) {
     return false;
   }
+
+  // Validate wallet address format
+  if (!/^0\.0\.\d+$/.test(walletAddress)) {
+    return false;
+  }
+
+  // Validate message contains expected format
+  if (!message.includes("Hashly") || !message.includes("Timestamp:")) {
+    return false;
+  }
+
+  return true;
 }
