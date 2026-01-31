@@ -252,7 +252,7 @@ export async function POST(
         nftVoteWeight += voteType === "UP" ? DRAGON_VOTE_WEIGHT : -DRAGON_VOTE_WEIGHT;
       }
 
-      // Create NFT votes for El Santuario (only use first one, gives 20 votes)
+      // Create NFT votes for El Santuario (only use first one, gives 5 votes)
       if (availableSantuario.length > 0) {
         const santuarioNft = availableSantuario[0];
         await prisma.nftVote.create({

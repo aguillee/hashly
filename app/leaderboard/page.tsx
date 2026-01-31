@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Trophy, Medal, Crown, Zap, TrendingUp } from "lucide-react";
+import { Trophy, Medal, Crown, Zap, TrendingUp, Gift, Clock, Users } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
@@ -14,12 +14,42 @@ interface LeaderboardEntry {
   points: number;
 }
 
+const SEASON_END = new Date("2026-01-31T23:59:59Z");
+const PRIZE_CUTOFF = 8;
+
+function useCountdown(targetDate: Date) {
+  const [timeLeft, setTimeLeft] = React.useState(() => {
+    const diff = targetDate.getTime() - Date.now();
+    return diff > 0 ? diff : 0;
+  });
+
+  React.useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const interval = setInterval(() => {
+      const diff = targetDate.getTime() - Date.now();
+      setTimeLeft(diff > 0 ? diff : 0);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate, timeLeft]);
+
+  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+  return { days, hours, minutes, seconds, ended: timeLeft <= 0 };
+}
+
 export default function LeaderboardPage() {
   const { user } = useWalletStore();
   const { data, isLoading: loading } = useLeaderboard();
+  const countdown = useCountdown(SEASON_END);
 
   const leaderboard: LeaderboardEntry[] = data?.leaderboard || [];
   const userRank: number | null = data?.userRank || null;
+  const totalUsers: number = data?.totalUsers || 0;
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -51,16 +81,19 @@ export default function LeaderboardPage() {
   };
 
   const getRankStyle = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return "bg-gradient-to-r from-yellow-500/10 via-yellow-400/5 to-transparent border-yellow-500/30";
-      case 2:
-        return "bg-gradient-to-r from-gray-400/10 via-gray-300/5 to-transparent border-gray-400/30";
-      case 3:
-        return "bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border-amber-500/30";
-      default:
-        return "bg-bg-card/50 border-border/50 hover:border-accent-primary/30 hover:bg-accent-primary/5";
+    if (rank <= PRIZE_CUTOFF) {
+      switch (rank) {
+        case 1:
+          return "bg-gradient-to-r from-yellow-500/10 via-yellow-400/5 to-transparent border-yellow-500/30";
+        case 2:
+          return "bg-gradient-to-r from-gray-400/10 via-gray-300/5 to-transparent border-gray-400/30";
+        case 3:
+          return "bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border-amber-500/30";
+        default:
+          return "bg-gradient-to-r from-purple-500/5 via-transparent to-transparent border-purple-500/20 hover:border-purple-500/40";
+      }
     }
+    return "bg-bg-card/50 border-border/50 hover:border-accent-primary/30 hover:bg-accent-primary/5";
   };
 
   return (
@@ -75,16 +108,79 @@ export default function LeaderboardPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-xl shadow-yellow-500/30 mb-6">
             <Trophy className="h-10 w-10 text-white" />
           </div>
+
+          <Badge className="mb-4 bg-purple-500/20 text-purple-400 border-purple-500/30 text-sm px-4 py-1">
+            Season 0
+          </Badge>
+
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="gradient-text">Leaderboard</span>
           </h1>
-          <p className="text-lg text-text-secondary max-w-xl mx-auto">
+          <p className="text-lg text-text-secondary max-w-xl mx-auto mb-6">
             Top contributors in the Hedera Mint Calendar community
           </p>
+
+          {/* Countdown */}
+          {countdown.ended ? (
+            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-bg-card border border-border">
+              <Clock className="h-5 w-5 text-text-secondary" />
+              <span className="text-text-secondary font-semibold">Season 0 has ended</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-3 sm:gap-4 px-6 py-4 rounded-2xl bg-bg-card/80 backdrop-blur-sm border border-border">
+              <Clock className="h-5 w-5 text-accent-primary flex-shrink-0" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="text-center">
+                  <span className="text-2xl sm:text-3xl font-bold text-text-primary">{countdown.days}</span>
+                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">days</p>
+                </div>
+                <span className="text-text-secondary text-xl font-light">:</span>
+                <div className="text-center">
+                  <span className="text-2xl sm:text-3xl font-bold text-text-primary">{String(countdown.hours).padStart(2, "0")}</span>
+                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">hrs</p>
+                </div>
+                <span className="text-text-secondary text-xl font-light">:</span>
+                <div className="text-center">
+                  <span className="text-2xl sm:text-3xl font-bold text-text-primary">{String(countdown.minutes).padStart(2, "0")}</span>
+                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">min</p>
+                </div>
+                <span className="text-text-secondary text-xl font-light">:</span>
+                <div className="text-center">
+                  <span className="text-2xl sm:text-3xl font-bold text-accent-primary">{String(countdown.seconds).padStart(2, "0")}</span>
+                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">sec</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Prize Banner */}
+        <div className="relative mb-8 group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/30 via-purple-500/30 to-yellow-500/30 rounded-3xl blur opacity-40" />
+          <div className="relative p-5 sm:p-6 rounded-3xl bg-bg-card border border-yellow-500/20">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden flex-shrink-0">
+                <img
+                  src="https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8"
+                  alt="Santuario Hedera"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Gift className="h-4 w-4 text-yellow-400" />
+                  <span className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">Season Prize</span>
+                </div>
+                <p className="text-text-primary font-semibold">
+                  Top 1-8 will receive a <span className="text-purple-400">Santuario Hedera NFT</span> as a prize
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* User's Rank */}
         {user && userRank && (
           <div className="relative mb-8 group">
@@ -115,7 +211,13 @@ export default function LeaderboardPage() {
         {/* Leaderboard */}
         <div className="rounded-3xl border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden">
           <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-bold text-text-primary">Top 50</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-text-primary">Top 50</h2>
+              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+                <Users className="h-4 w-4" />
+                <span>{totalUsers.toLocaleString()} registered users</span>
+              </div>
+            </div>
           </div>
 
           <div className="p-4">
@@ -140,6 +242,7 @@ export default function LeaderboardPage() {
               <div className="space-y-2">
                 {leaderboard.map((entry, index) => {
                   const isCurrentUser = user?.walletAddress === entry.walletAddress;
+                  const inPrizeZone = entry.rank <= PRIZE_CUTOFF;
 
                   return (
                     <div
@@ -164,6 +267,9 @@ export default function LeaderboardPage() {
                             <Badge variant="default" size="sm">
                               You
                             </Badge>
+                          )}
+                          {inPrizeZone && (
+                            <Gift className="h-3.5 w-3.5 text-purple-400 flex-shrink-0" />
                           )}
                         </div>
                       </div>

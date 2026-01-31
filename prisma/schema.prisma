@@ -168,7 +168,7 @@ model NftVote {
   serialNumber  Int      @map("serial_number")
   walletAddress String   @map("wallet_address") // Wallet that cast the vote
   voteType      VoteType @map("vote_type")
-  voteWeight    Int      @default(1) @map("vote_weight") // 1 for dragons, 20 for El Santuario
+  voteWeight    Int      @default(1) @map("vote_weight") // 1 for dragons, 5 for El Santuario
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations

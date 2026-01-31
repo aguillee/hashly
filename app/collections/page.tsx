@@ -531,7 +531,7 @@ export default function CollectionsPage() {
 
         {/* Voting Info */}
         <div className="mt-4 text-xs text-text-secondary text-center space-y-1">
-          <p>1 vote per wallet + 1 per dragon + 20 for El Santuario holders</p>
+          <p>1 vote per wallet + 1 per dragon + 5 for El Santuario holders</p>
           <p>Your vote is permanent. You can change it anytime (no 24h cooldown).</p>
         </div>
       </div>

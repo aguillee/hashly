@@ -74,7 +74,7 @@ export async function POST(
       // Dragons: each dragon = 1 vote
       const dragonVotes = walletNFTs.totalDragons * DRAGON_VOTE_WEIGHT;
 
-      // El Santuario: 20 votes if owned
+      // El Santuario: 5 votes if owned
       const santuarioVotes = walletNFTs.hasSantuario ? SANTUARIO_VOTE_WEIGHT : 0;
 
       // Total NFT-based vote weight

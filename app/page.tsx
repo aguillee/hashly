@@ -121,8 +121,12 @@ export default function HomePage() {
 
             {/* Santuario Hedera */}
             <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-primary/30 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-4">
-                <Gift className="h-6 w-6 text-purple-400" />
+              <div className="w-12 h-12 rounded-xl overflow-hidden mb-4">
+                <img
+                  src="https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8"
+                  alt="Santuario Hedera"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h3 className="text-lg font-semibold text-text-primary mb-2">
                 Santuario Hedera
@@ -145,15 +149,19 @@ export default function HomePage() {
 
             {/* El Santuario */}
             <div className="p-4 sm:p-6 rounded-2xl bg-bg-card border border-border hover:border-accent-secondary/30 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-xl overflow-hidden mb-4">
+                <img
+                  src="https://launchpad-assets.kabila.app/logo/0.0.9954622/JPLTxQfsoC/logo.png"
+                  alt="El Santuario"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h3 className="text-lg font-semibold text-text-primary mb-2">
                 El Santuario
               </h3>
               <p className="text-text-secondary text-sm mb-3">
-                Premium membership with{" "}
-                <span className="text-accent-secondary font-semibold">+20 votes per project</span>{" "}
+                Hold an El Santuario NFT to get{" "}
+                <span className="text-accent-secondary font-semibold">+5 votes per project</span>{" "}
                 plus auto-approval for your submitted events.
               </p>
               <a

@@ -80,11 +80,11 @@ export async function GET() {
       createdById: topForeverMintResults[0].created_by_id,
     } : null;
 
-    // Calculate score and find most voted (excluding forever mints)
+    // Calculate score and find most voted (UPCOMING only, excluding forever mints and LIVE events)
     let mostVoted = null;
     let highestScore = -Infinity;
 
-    for (const event of events) {
+    for (const event of events.filter(e => e.status === "UPCOMING")) {
       const score = event.votesUp - event.votesDown;
       if (score > highestScore) {
         highestScore = score;

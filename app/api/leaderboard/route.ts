@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLeaderboard, getUserRank } from "@/lib/points";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,9 @@ export async function GET(request: NextRequest) {
       userRank = await getUserRank(user.id);
     }
 
+    // Total registered users
+    const totalUsers = await prisma.user.count();
+
     return NextResponse.json({
       leaderboard: leaderboard.map((u, index) => ({
         rank: index + 1,
@@ -27,6 +31,7 @@ export async function GET(request: NextRequest) {
         points: u.points,
       })),
       userRank,
+      totalUsers,
     });
   } catch (error) {
     console.error("Leaderboard error:", error);

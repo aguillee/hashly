@@ -6,7 +6,7 @@ export const SANTUARIO_TOKEN_ID = "0.0.9954622"; // El Santuario
 
 // Vote weights
 export const DRAGON_VOTE_WEIGHT = 1; // +1 vote per dragon NFT
-export const SANTUARIO_VOTE_WEIGHT = 20; // +20 votes for El Santuario holder
+export const SANTUARIO_VOTE_WEIGHT = 5; // +5 votes for El Santuario holder
 
 // Mirror Node URL
 const MIRROR_NODE_URL = "https://mainnet.mirrornode.hedera.com";
