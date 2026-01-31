@@ -14,7 +14,7 @@ interface LeaderboardEntry {
   points: number;
 }
 
-const SEASON_END = new Date("2026-01-31T23:59:59Z");
+const SEASON_END = new Date("2026-02-28T23:59:59Z");
 const PRIZE_CUTOFF = 8;
 
 function useCountdown(targetDate: Date) {
