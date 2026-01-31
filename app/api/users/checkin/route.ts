@@ -1,9 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/auth";
 import { handleDailyCheckin } from "@/lib/points";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "auth");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user) {

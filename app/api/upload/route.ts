@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Maximum file size: 3MB
 const MAX_FILE_SIZE = 3 * 1024 * 1024;
@@ -15,6 +16,10 @@ const supabase = createClient(
 );
 
 export async function POST(request: NextRequest) {
+  // Rate limiting - strict for uploads
+  const rateLimitResponse = await checkRateLimit(request, "write");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Check authentication
     const user = await getCurrentUser();

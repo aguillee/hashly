@@ -158,15 +158,41 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     try {
       const message = `Sign in to Hashly\nTimestamp: ${Date.now()}`;
 
-      // For now, use a simple auth without signature verification
-      // In production, you'd want to sign and verify
+      // Try to sign the message cryptographically with the connected wallet
+      let signature = "";
+      try {
+        if (dAppConnector) {
+          const signers = dAppConnector.signers;
+          const signer = signers.find(
+            (s) => s.getAccountId().toString() === accountId
+          );
+          if (signer) {
+            const messageBytes = new TextEncoder().encode(message);
+            const signResult = await signer.sign([messageBytes]);
+            if (signResult && signResult.length > 0 && signResult[0].signature) {
+              const sigArray = new Uint8Array(signResult[0].signature);
+              signature = Array.from(sigArray)
+                .map((b) => b.toString(16).padStart(2, "0"))
+                .join("");
+            }
+          }
+        }
+      } catch (signError) {
+        console.warn("Message signing not supported by wallet, using session fallback:", signError);
+      }
+
+      // Fallback for wallets that don't support signMessage
+      if (!signature) {
+        signature = `session-${Date.now()}-${accountId}`;
+      }
+
       const response = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           walletAddress: accountId,
           message,
-          signature: "wallet-connect-session",
+          signature,
         }),
       });
 

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { z } from "zod";
+
+const adminEventUpdateSchema = z.object({
+  isApproved: z.boolean(),
+});
 
 // PATCH /api/admin/events/[id] - Update event (approve/unapprove)
 export async function PATCH(
@@ -20,10 +25,18 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    const validation = adminEventUpdateSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Invalid input: isApproved must be a boolean" },
+        { status: 400 }
+      );
+    }
+
     const event = await prisma.event.update({
       where: { id },
       data: {
-        isApproved: body.isApproved,
+        isApproved: validation.data.isApproved,
       },
     });
 

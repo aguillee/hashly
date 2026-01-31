@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -13,6 +14,9 @@ import {
  */
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {
@@ -36,8 +40,10 @@ export async function POST(request: NextRequest) {
 /**
  * GET /api/admin/sync/collections - Get current collections stats
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {
@@ -91,6 +97,8 @@ export async function GET() {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {

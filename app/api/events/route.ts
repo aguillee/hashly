@@ -11,7 +11,7 @@ import { createEventSchema, validateRequest } from "@/lib/validations";
 // GET /api/events - List events
 export async function GET(request: NextRequest) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "public");
+  const rateLimitResponse = await checkRateLimit(request, "public");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
 // POST /api/events - Create event (user submission)
 export async function POST(request: NextRequest) {
   // Rate limiting - stricter for write operations
-  const rateLimitResponse = checkRateLimit(request, "write");
+  const rateLimitResponse = await checkRateLimit(request, "write");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

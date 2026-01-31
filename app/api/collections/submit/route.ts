@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchTokenFromMirrorNode } from "@/lib/sentx";
@@ -10,6 +11,9 @@ import { hasElSantuario } from "@/lib/hedera";
  */
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "write");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user) {

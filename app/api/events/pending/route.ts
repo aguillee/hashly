@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { addPoints } from "@/lib/points";
 
 // GET /api/events/pending - List pending events (admin only)
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "public");
+    if (rateLimitResponse) return rateLimitResponse;
     const user = await getCurrentUser();
 
     if (!user?.isAdmin) {
@@ -40,6 +43,8 @@ export async function GET() {
 // POST /api/events/pending - Approve or reject event (admin only)
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "public");
+    if (rateLimitResponse) return rateLimitResponse;
     const user = await getCurrentUser();
 
     if (!user?.isAdmin) {

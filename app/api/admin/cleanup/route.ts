@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
 // POST /api/admin/cleanup - Delete all non-forever-mint events
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {
@@ -37,6 +41,9 @@ export async function POST(request: NextRequest) {
 // DELETE /api/admin/cleanup - Delete ALL events (including forever mints)
 export async function DELETE(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {
@@ -67,8 +74,10 @@ export async function DELETE(request: NextRequest) {
 }
 
 // GET /api/admin/cleanup - Preview what will be deleted
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {

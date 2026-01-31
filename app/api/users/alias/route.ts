@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -7,6 +8,9 @@ export const dynamic = "force-dynamic";
 // PUT /api/users/alias - Update user alias
 export async function PUT(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "write");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

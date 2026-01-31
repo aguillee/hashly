@@ -16,6 +16,7 @@ export async function GET() {
 
     const events = await prisma.event.findMany({
       orderBy: { createdAt: "desc" },
+      take: 200, // Limit results to prevent DoS
       include: {
         createdBy: {
           select: { walletAddress: true },

@@ -23,7 +23,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "vote");
+  const rateLimitResponse = await checkRateLimit(request, "vote");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
@@ -203,7 +203,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "vote");
+  const rateLimitResponse = await checkRateLimit(request, "vote");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

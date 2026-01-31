@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchMintEvents, resolveImageUrl } from "@/lib/sentx";
@@ -23,6 +24,9 @@ function stripHtml(html: string): string {
 // POST /api/admin/sync - Import launchpads from SentX
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {
@@ -44,8 +48,10 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/admin/sync - Get sync status/preview
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {

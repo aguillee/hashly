@@ -19,7 +19,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   // Rate limiting - stricter for vote manipulation prevention
-  const rateLimitResponse = checkRateLimit(request, "vote");
+  const rateLimitResponse = await checkRateLimit(request, "vote");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
@@ -58,7 +58,7 @@ export async function POST(
       );
     }
 
-    // Check for existing regular vote
+    // Check for existing regular vote (use findFirst inside try to handle race conditions)
     const existingVote = await prisma.vote.findUnique({
       where: {
         userId_eventId: {
@@ -168,31 +168,42 @@ export async function POST(
         }
       }
     } else {
-      // Create new regular vote
+      // Create new regular vote — use try/catch to handle race condition (duplicate key)
       regularVoteWeight = voteType === "UP" ? 1 : -1;
 
-      await prisma.$transaction([
-        prisma.vote.create({
-          data: {
-            userId: user.id,
-            eventId,
-            voteType: voteType as VoteType,
-          },
-        }),
-        // Add points automatically
-        prisma.user.update({
-          where: { id: user.id },
-          data: { points: { increment: POINTS_PER_VOTE } },
-        }),
-        prisma.pointHistory.create({
-          data: {
-            userId: user.id,
-            points: POINTS_PER_VOTE,
-            actionType: "VOTE",
-            description: `Voted on event: ${event.title}`,
-          },
-        }),
-      ]);
+      try {
+        await prisma.$transaction([
+          prisma.vote.create({
+            data: {
+              userId: user.id,
+              eventId,
+              voteType: voteType as VoteType,
+            },
+          }),
+          // Add points automatically
+          prisma.user.update({
+            where: { id: user.id },
+            data: { points: { increment: POINTS_PER_VOTE } },
+          }),
+          prisma.pointHistory.create({
+            data: {
+              userId: user.id,
+              points: POINTS_PER_VOTE,
+              actionType: "VOTE",
+              description: `Voted on event: ${event.title}`,
+            },
+          }),
+        ]);
+      } catch (txError: any) {
+        // P2002 = Unique constraint violation (race condition — vote already created)
+        if (txError?.code === "P2002") {
+          return NextResponse.json(
+            { error: "Vote already recorded" },
+            { status: 409 }
+          );
+        }
+        throw txError;
+      }
     }
 
     // Handle NFT votes if requested

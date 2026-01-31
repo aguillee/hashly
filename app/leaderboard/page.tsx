@@ -109,13 +109,14 @@ export default function LeaderboardPage() {
             <Trophy className="h-10 w-10 text-white" />
           </div>
 
-          <Badge className="mb-4 bg-purple-500/20 text-purple-400 border-purple-500/30 text-sm px-4 py-1">
-            Season 0
-          </Badge>
-
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-3">
             <span className="gradient-text">Leaderboard</span>
           </h1>
+          <div className="mb-4">
+            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-sm px-4 py-1">
+              Season 0
+            </Badge>
+          </div>
           <p className="text-lg text-text-secondary max-w-xl mx-auto mb-6">
             Top contributors in the Hedera Mint Calendar community
           </p>

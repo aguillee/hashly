@@ -14,7 +14,7 @@ const verifySchema = z.object({
 
 export async function POST(request: NextRequest) {
   // Rate limiting - strict for auth to prevent brute force
-  const rateLimitResponse = checkRateLimit(request, "auth");
+  const rateLimitResponse = await checkRateLimit(request, "auth");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

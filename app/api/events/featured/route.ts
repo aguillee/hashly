@@ -1,11 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/events/featured - Get featured events (most voted + next up + top forever mint)
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "public");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const now = new Date();
 
     // Get all approved upcoming/live events (excluding forever mints for main featured)

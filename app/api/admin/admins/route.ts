@@ -7,7 +7,7 @@ import { addAdminSchema, validateRequest } from "@/lib/validations";
 // GET /api/admin/admins - Get all admin users
 export async function GET(request: NextRequest) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "admin");
+  const rateLimitResponse = await checkRateLimit(request, "admin");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/admins - Add new admin
 export async function POST(request: NextRequest) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "admin");
+  const rateLimitResponse = await checkRateLimit(request, "admin");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

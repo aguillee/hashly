@@ -17,7 +17,7 @@ const MIN_VOLUME_HBAR = 20000;
 // Returns top 30 best voted + top 10 worst voted (or search results)
 export async function GET(request: NextRequest) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "public");
+  const rateLimitResponse = await checkRateLimit(request, "public");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
@@ -202,7 +202,7 @@ async function getUserVotesMap(
 // POST /api/collections - Sync collections from SentX
 export async function POST(request: NextRequest) {
   // Rate limiting - stricter for sync operations
-  const rateLimitResponse = checkRateLimit(request, "write");
+  const rateLimitResponse = await checkRateLimit(request, "write");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
@@ -112,8 +113,11 @@ const MISSION_DEFINITIONS = [
   },
 ];
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "public");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const cookieStore = await cookies();
     const token = cookieStore.get("auth-token")?.value;
 

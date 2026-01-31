@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -10,6 +11,8 @@ export async function DELETE(
   { params }: { params: { tokenId: string } }
 ) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
     const user = await getCurrentUser();
     if (!user?.isAdmin) {
       return NextResponse.json(
