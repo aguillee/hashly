@@ -1,5 +1,14 @@
 import { prisma } from "./db";
 
+// UTC date helpers
+function utcDateString(date: Date): string {
+  return date.toISOString().slice(0, 10); // "YYYY-MM-DD"
+}
+
+function utcStartOfDay(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
 // Point values for different actions (for missions claim)
 export const POINTS = {
   DAILY_LOGIN: 5,
@@ -79,11 +88,11 @@ export async function handleDailyCheckin(userId: string): Promise<{
   const now = new Date();
   const lastLogin = user.lastLogin;
 
-  // Check if already logged in today
+  // Check if already logged in today (UTC)
   if (lastLogin) {
-    const lastLoginDate = new Date(lastLogin).toDateString();
-    const todayDate = now.toDateString();
-    if (lastLoginDate === todayDate) {
+    const lastLoginUTC = utcDateString(new Date(lastLogin));
+    const todayUTC = utcDateString(now);
+    if (lastLoginUTC === todayUTC) {
       return {
         success: true,
         streak: user.loginStreak,
@@ -94,15 +103,15 @@ export async function handleDailyCheckin(userId: string): Promise<{
     }
   }
 
-  // Calculate streak
+  // Calculate streak (UTC)
   let newStreak = 1;
   if (lastLogin) {
     const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const lastLoginDate = new Date(lastLogin).toDateString();
-    const yesterdayDate = yesterday.toDateString();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const lastLoginUTC = utcDateString(new Date(lastLogin));
+    const yesterdayUTC = utcDateString(yesterday);
 
-    if (lastLoginDate === yesterdayDate) {
+    if (lastLoginUTC === yesterdayUTC) {
       newStreak = user.loginStreak + 1;
     }
   }
@@ -191,5 +200,76 @@ export async function getUserRank(userId: string): Promise<number> {
   });
 
   return rank + 1;
+}
+
+// Award mission bonus points with double-claim prevention
+export async function awardMissionPoints(
+  userId: string,
+  points: number,
+  missionId: string,
+  missionType: "DAILY" | "WEEKLY" | "ACHIEVEMENT",
+  description: string
+): Promise<{ pointsEarned: number; newTotal: number }> {
+  return prisma.$transaction(async (tx) => {
+    const now = new Date();
+
+    // Check for existing claim INSIDE transaction (prevents race condition)
+    const existing = await tx.userMission.findUnique({
+      where: { userId_missionId: { userId, missionId } },
+    });
+
+    if (existing?.claimedAt) {
+      if (missionType === "DAILY") {
+        const startOfDay = utcStartOfDay(now);
+        if (existing.claimedAt >= startOfDay) {
+          throw new Error("ALREADY_CLAIMED");
+        }
+      } else if (missionType === "WEEKLY") {
+        const startOfWeek = utcStartOfDay(now);
+        startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
+        if (existing.claimedAt >= startOfWeek) {
+          throw new Error("ALREADY_CLAIMED");
+        }
+      } else {
+        // ACHIEVEMENT - once only
+        throw new Error("ALREADY_CLAIMED");
+      }
+    }
+
+    // Award points
+    const updatedUser = await tx.user.update({
+      where: { id: userId },
+      data: { points: { increment: points } },
+    });
+
+    await tx.pointHistory.create({
+      data: {
+        userId,
+        points,
+        actionType: "MISSION_CLAIM",
+        description,
+      },
+    });
+
+    await tx.userMission.upsert({
+      where: { userId_missionId: { userId, missionId } },
+      create: {
+        userId,
+        missionId,
+        progress: 0,
+        completedAt: now,
+        claimedAt: now,
+      },
+      update: {
+        claimedAt: now,
+        completedAt: now,
+      },
+    });
+
+    return {
+      pointsEarned: points,
+      newTotal: updatedUser.points,
+    };
+  });
 }
 

@@ -29,6 +29,7 @@ interface Mission {
   icon: string;
   progress: number;
   completed: boolean;
+  claimed: boolean;
 }
 
 interface UserStats {
@@ -45,6 +46,7 @@ export default function MissionsPage() {
   const [missions, setMissions] = React.useState<Mission[]>([]);
   const [stats, setStats] = React.useState<UserStats | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [claimingId, setClaimingId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!isConnected) {
@@ -71,6 +73,31 @@ export default function MissionsPage() {
       console.error("Failed to load missions:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function claimMission(missionId: string) {
+    try {
+      setClaimingId(missionId);
+      const response = await fetch("/api/missions/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ missionId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update local state
+        setMissions(prev =>
+          prev.map(m => m.id === missionId ? { ...m, claimed: true } : m)
+        );
+        // Refresh to get updated points
+        await loadMissionsAndStats();
+      }
+    } catch (error) {
+      console.error("Failed to claim mission:", error);
+    } finally {
+      setClaimingId(null);
     }
   }
 
@@ -147,23 +174,42 @@ export default function MissionsPage() {
           )}
         </div>
 
-        {/* Reward */}
+        {/* Reward / Claim */}
         <div className="text-right flex-shrink-0">
-          <div className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-xl",
-            mission.completed
-              ? "bg-success/10 text-success"
-              : "bg-accent-primary/10 border border-accent-primary/20"
-          )}>
-            <Zap className={cn("h-4 w-4", mission.completed ? "text-success" : "text-accent-primary")} />
-            <span className={cn("font-bold", mission.completed ? "text-success" : "text-accent-primary")}>
-              +{mission.pointsReward}
-            </span>
-          </div>
-          {mission.completed && (
+          {mission.completed && !mission.claimed ? (
+            <button
+              onClick={() => claimMission(mission.id)}
+              disabled={claimingId === mission.id}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-white transition-all",
+                "bg-gradient-to-r from-accent-primary to-accent-secondary hover:shadow-lg hover:shadow-accent-primary/30",
+                "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              {claimingId === mission.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Zap className="h-4 w-4" />
+              )}
+              <span>+{mission.pointsReward}</span>
+            </button>
+          ) : (
+            <div className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl",
+              mission.claimed
+                ? "bg-success/10 text-success"
+                : "bg-accent-primary/10 border border-accent-primary/20"
+            )}>
+              <Zap className={cn("h-4 w-4", mission.claimed ? "text-success" : "text-accent-primary")} />
+              <span className={cn("font-bold", mission.claimed ? "text-success" : "text-accent-primary")}>
+                +{mission.pointsReward}
+              </span>
+            </div>
+          )}
+          {mission.claimed && (
             <span className="text-xs font-medium text-success flex items-center gap-1 justify-end mt-2">
               <CheckCircle className="h-3 w-3" />
-              Earned
+              Claimed
             </span>
           )}
         </div>

@@ -3,115 +3,9 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
+import { MISSION_DEFINITIONS } from "@/lib/missions";
 
 export const dynamic = "force-dynamic";
-
-// Mission definitions - points are earned automatically when conditions are met
-const MISSION_DEFINITIONS = [
-  // Daily
-  {
-    id: "daily_login",
-    name: "Daily Check-in",
-    description: "Log in to the platform (+5 pts automatic)",
-    pointsReward: 5,
-    type: "DAILY" as const,
-    requirement: 1,
-    icon: "calendar",
-  },
-  {
-    id: "daily_vote",
-    name: "Cast a Vote",
-    description: "Vote on at least 1 event (+10 pts per vote)",
-    pointsReward: 10,
-    type: "DAILY" as const,
-    requirement: 1,
-    icon: "vote",
-  },
-  {
-    id: "vote_5_events",
-    name: "Active Voter",
-    description: "Vote on 5 different events today",
-    pointsReward: 50,
-    type: "DAILY" as const,
-    requirement: 5,
-    icon: "vote",
-  },
-  // Weekly
-  {
-    id: "weekly_streak",
-    name: "Dedicated User",
-    description: "Log in 7 days in a row (+50 pts bonus)",
-    pointsReward: 50,
-    type: "WEEKLY" as const,
-    requirement: 7,
-    icon: "flame",
-  },
-  {
-    id: "weekly_votes",
-    name: "Super Voter",
-    description: "Vote on 20 events this week",
-    pointsReward: 200,
-    type: "WEEKLY" as const,
-    requirement: 20,
-    icon: "trophy",
-  },
-  // Achievements
-  {
-    id: "first_vote",
-    name: "First Vote",
-    description: "Cast your first vote",
-    pointsReward: 10,
-    type: "ACHIEVEMENT" as const,
-    requirement: 1,
-    icon: "target",
-  },
-  {
-    id: "first_event",
-    name: "Event Creator",
-    description: "Submit your first approved event",
-    pointsReward: 100,
-    type: "ACHIEVEMENT" as const,
-    requirement: 1,
-    icon: "gift",
-  },
-  {
-    id: "votes_100",
-    name: "Voting Enthusiast",
-    description: "Cast 100 votes total",
-    pointsReward: 1000,
-    type: "ACHIEVEMENT" as const,
-    requirement: 100,
-    icon: "trophy",
-  },
-  {
-    id: "votes_500",
-    name: "Voting Legend",
-    description: "Cast 500 votes total",
-    pointsReward: 5000,
-    type: "ACHIEVEMENT" as const,
-    requirement: 500,
-    icon: "trophy",
-  },
-  // Collection voting achievements
-  {
-    id: "collection_votes_50",
-    name: "Collection Explorer",
-    description: "Vote on 50 different collections (+1 pt per vote)",
-    pointsReward: 100,
-    type: "ACHIEVEMENT" as const,
-    requirement: 50,
-    icon: "vote",
-  },
-  {
-    id: "collection_votes_100",
-    name: "Collection Master",
-    description: "Vote on 100 different collections (+1 pt per vote)",
-    pointsReward: 500,
-    type: "ACHIEVEMENT" as const,
-    requirement: 100,
-    icon: "trophy",
-  },
-];
 
 export async function GET(request: NextRequest) {
   try {
@@ -142,21 +36,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Calculate stats
+    // Calculate stats (UTC)
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const startOfWeek = new Date(startOfDay);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
 
     const todayVotes = user.votes.filter(v => new Date(v.createdAt) >= startOfDay).length;
     const weekVotes = user.votes.filter(v => new Date(v.createdAt) >= startOfWeek).length;
     const totalVotes = user.votes.length;
     const approvedEvents = user.events.filter(e => e.isApproved).length;
 
-    // Get collection votes count
-    const collectionVotesCount = await prisma.collectionVote.count({
-      where: { walletAddress: payload.walletAddress as string },
-    });
+    // Get collection votes count and user missions in parallel
+    const [collectionVotesCount, userMissions] = await Promise.all([
+      prisma.collectionVote.count({
+        where: { walletAddress: payload.walletAddress as string },
+      }),
+      prisma.userMission.findMany({
+        where: { userId: user.id },
+      }),
+    ]);
 
     const stats = {
       totalVotes,
@@ -170,7 +69,7 @@ export async function GET(request: NextRequest) {
     // Check if user has logged in today
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
-    // Build missions with progress
+    // Build missions with progress and claim status
     const missions = MISSION_DEFINITIONS.map(def => {
       let progress = 0;
       let completed = false;
@@ -222,10 +121,24 @@ export async function GET(request: NextRequest) {
           break;
       }
 
+      // Check if already claimed in current period
+      const userMission = userMissions.find(um => um.missionId === def.id);
+      let claimed = false;
+      if (userMission?.claimedAt) {
+        if (def.type === "DAILY") {
+          claimed = userMission.claimedAt >= startOfDay;
+        } else if (def.type === "WEEKLY") {
+          claimed = userMission.claimedAt >= startOfWeek;
+        } else {
+          claimed = true; // Achievements are claimed once
+        }
+      }
+
       return {
         ...def,
         progress,
         completed,
+        claimed,
       };
     });
 
