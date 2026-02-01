@@ -41,11 +41,17 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0");
     const source = searchParams.get("source"); // SENTX or KABILA
     const foreverMints = searchParams.get("foreverMints"); // "only", "exclude", or "include"
+    const eventType = searchParams.get("eventType"); // "MINT_EVENT", "ECOSYSTEM_MEETUP"
 
     // Build where clause
     const where: Prisma.EventWhereInput = {
       isApproved: true,
     };
+
+    // Event type filter
+    if (eventType === "MINT_EVENT" || eventType === "ECOSYSTEM_MEETUP") {
+      where.event_type = eventType;
+    }
 
     // Handle forever mints filter
     if (foreverMints === "only") {
@@ -110,6 +116,12 @@ export async function GET(request: NextRequest) {
           createdAt: true,
           isForeverMint: true,
           source: true,
+          event_type: true,
+          host: true,
+          language: true,
+          location: true,
+          location_type: true,
+          custom_links: true,
         },
       }),
       prisma.event.count({ where }),
@@ -196,53 +208,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const {
-      title,
-      description,
-      mintDate,
-      mintPrice,
-      supply,
-      imageUrl,
-      websiteUrl,
-      twitterUrl,
-      discordUrl,
-      phases,
-    } = validation.data;
+    const data = validation.data;
 
     // Check if user has El Santuario NFT for auto-approval
     const hasSantuarioNFT = await hasElSantuario(user.walletAddress);
     const shouldAutoApprove = user.isAdmin || hasSantuarioNFT;
 
-    // Create event with phases (pending approval unless admin or has El Santuario)
+    // Determine event type from body (not from Zod - we handle it separately)
+    const reqEventType = body.eventType === "ECOSYSTEM_MEETUP" ? "ECOSYSTEM_MEETUP" : "MINT_EVENT";
+
+    // Build event data
+    const eventData: any = {
+      title: data.title,
+      description: data.description,
+      mintDate: new Date(data.mintDate),
+      mintPrice: data.mintPrice,
+      supply: typeof data.supply === "number" ? data.supply : (data.supply ? parseInt(data.supply) : null),
+      imageUrl: data.imageUrl,
+      websiteUrl: data.websiteUrl,
+      twitterUrl: data.twitterUrl,
+      discordUrl: data.discordUrl,
+      isApproved: shouldAutoApprove,
+      createdById: user.id,
+      event_type: reqEventType,
+    };
+
+    // Add meetup-specific fields
+    if (reqEventType === "ECOSYSTEM_MEETUP") {
+      eventData.host = body.host || null;
+      eventData.language = body.language || null;
+      eventData.location_type = body.locationType === "IN_PERSON" ? "IN_PERSON" : "ONLINE";
+      eventData.location = body.location || null;
+      eventData.custom_links = body.customLinks || null;
+      if (body.endDate) {
+        // We don't have an endDate column directly, but we do now from db pull
+        // Actually the schema has no endDate on Event... but the DB does have it
+        // Let's not set it for now since the pulled schema doesn't show it
+      }
+    }
+
+    // Add phases for mint events
+    if (reqEventType === "MINT_EVENT" && data.phases && data.phases.length > 0) {
+      eventData.phases = {
+        create: data.phases.map((phase: any) => ({
+          name: phase.name,
+          startDate: new Date(phase.startDate),
+          endDate: phase.endDate ? new Date(phase.endDate) : null,
+          price: phase.price,
+          supply: phase.supply ?? null,
+          maxPerWallet: phase.maxPerWallet ?? null,
+          isWhitelist: phase.isWhitelist,
+          order: phase.order,
+        })),
+      };
+    }
+
     const event = await prisma.event.create({
-      data: {
-        title,
-        description,
-        mintDate: new Date(mintDate),
-        mintPrice,
-        supply: typeof supply === "number" ? supply : (supply ? parseInt(supply) : null),
-        imageUrl,
-        websiteUrl,
-        twitterUrl,
-        discordUrl,
-        isApproved: shouldAutoApprove, // Auto-approve if admin or has El Santuario NFT
-        createdById: user.id,
-        // Create phases if provided
-        ...(phases && phases.length > 0 && {
-          phases: {
-            create: phases.map((phase) => ({
-              name: phase.name,
-              startDate: new Date(phase.startDate),
-              endDate: phase.endDate ? new Date(phase.endDate) : null,
-              price: phase.price,
-              supply: phase.supply ?? null,
-              maxPerWallet: phase.maxPerWallet ?? null,
-              isWhitelist: phase.isWhitelist,
-              order: phase.order,
-            })),
-          },
-        }),
-      },
+      data: eventData,
       include: {
         phases: true,
       },

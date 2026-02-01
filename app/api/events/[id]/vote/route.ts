@@ -58,6 +58,14 @@ export async function POST(
       );
     }
 
+    // Meetups can only receive positive votes (stars), no downvotes
+    if (event.event_type === "ECOSYSTEM_MEETUP" && voteType === "DOWN") {
+      return NextResponse.json(
+        { error: "Ecosystem meetups can only receive positive votes" },
+        { status: 400 }
+      );
+    }
+
     // Check for existing regular vote (use findFirst inside try to handle race conditions)
     const existingVote = await prisma.vote.findUnique({
       where: {

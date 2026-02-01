@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   CalendarDays,
   Infinity,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -49,6 +50,7 @@ const statusFilters = [
   { value: "live", label: "Live Now", icon: TrendingUp },
   { value: "upcoming", label: "Upcoming", icon: Clock },
   { value: "forever", label: "Forever Mints", icon: Infinity },
+  { value: "meetups", label: "Meetups", icon: Users },
 ];
 
 const sourceFilters = [
@@ -87,6 +89,8 @@ export default function CalendarPage() {
     if (params.get("foreverMints") === "only") {
       setForeverMintsOnly(true);
       setStatus("forever");
+    } else if (params.get("eventType") === "ECOSYSTEM_MEETUP") {
+      setStatus("meetups");
     }
   }, [setStatus]);
 
@@ -96,12 +100,14 @@ export default function CalendarPage() {
       setLoading(true);
       const params = new URLSearchParams();
 
-      // Handle forever mints filter
+      // Handle special filters
       if (status === "forever") {
         params.append("foreverMints", "only");
+      } else if (status === "meetups") {
+        params.append("eventType", "ECOSYSTEM_MEETUP");
       } else {
         if (status !== "all") params.append("status", status);
-        params.append("foreverMints", "exclude"); // Exclude forever mints from regular listing
+        params.append("foreverMints", "exclude");
       }
 
       if (searchQuery) params.append("search", searchQuery);
@@ -181,7 +187,7 @@ export default function CalendarPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-text-primary">Event Calendar</h1>
-            <p className="text-text-secondary mt-1">Browse all upcoming NFT mints on Hedera</p>
+            <p className="text-text-secondary mt-1">Browse all upcoming events on Hedera</p>
           </div>
           {isConnected && (
             <Link href="/events/new">
@@ -244,7 +250,7 @@ export default function CalendarPage() {
                 return (
                   <button
                     key={filter.value}
-                    onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "ended" | "forever")}
+                    onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "ended" | "forever" | "meetups")}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                       status === filter.value

@@ -12,12 +12,13 @@ export async function GET(request: NextRequest) {
 
     const now = new Date();
 
-    // Get all approved upcoming/live events (excluding forever mints for main featured)
+    // Get all approved upcoming/live MINT events (excluding forever mints for main featured)
     const events = await prisma.event.findMany({
       where: {
         isApproved: true,
         status: { in: ["UPCOMING", "LIVE"] },
-        isForeverMint: false, // Exclude forever mints from main featured
+        isForeverMint: false,
+        event_type: "MINT_EVENT",
       },
       include: {
         createdBy: {
@@ -28,6 +29,28 @@ export async function GET(request: NextRequest) {
         },
       },
     });
+
+    // Get featured meetups: top starred (not ended) + 2 closest upcoming (not live)
+    const [topMeetupResults, upcomingMeetups] = await Promise.all([
+      prisma.event.findFirst({
+        where: {
+          isApproved: true,
+          event_type: "ECOSYSTEM_MEETUP",
+          status: { in: ["UPCOMING", "LIVE"] },
+        },
+        orderBy: { votesUp: "desc" },
+      }),
+      prisma.event.findMany({
+        where: {
+          isApproved: true,
+          event_type: "ECOSYSTEM_MEETUP",
+          status: "UPCOMING",
+          mintDate: { gt: now },
+        },
+        orderBy: { mintDate: "asc" },
+        take: 3, // We take 3 so we can exclude the top one and still have 2
+      }),
+    ]);
 
     // Get top forever mint separately - order by score (votesUp - votesDown)
     const topForeverMintResults = await prisma.$queryRaw<Array<{
@@ -108,6 +131,13 @@ export async function GET(request: NextRequest) {
       nextUp = upcomingEvents[1];
     }
 
+    // Build meetup featured data:
+    // topMeetup = highest starred (not ended), nextMeetups = 2 closest upcoming (different from topMeetup)
+    const topMeetup = topMeetupResults;
+    const nextMeetups = upcomingMeetups
+      .filter(m => !topMeetup || m.id !== topMeetup.id)
+      .slice(0, 2);
+
     return NextResponse.json({
       mostVoted: mostVoted
         ? {
@@ -127,6 +157,14 @@ export async function GET(request: NextRequest) {
             score: topForeverMint.votesUp - topForeverMint.votesDown,
           }
         : null,
+      // Ecosystem Meetups
+      topMeetup: topMeetup
+        ? { ...topMeetup, score: topMeetup.votesUp }
+        : null,
+      nextMeetups: nextMeetups.map(m => ({
+        ...m,
+        score: m.votesUp,
+      })),
     });
   } catch (error) {
     console.error("Failed to fetch featured events:", error);

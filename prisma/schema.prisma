@@ -9,79 +9,192 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  walletAddress String   @unique @map("wallet_address")
-  alias         String?  @map("alias")
-  points        Int      @default(0)
-  loginStreak   Int      @default(0) @map("login_streak")
-  lastLogin     DateTime? @map("last_login")
-  isAdmin       Boolean  @default(false) @map("is_admin")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  // Relations
+  id            String         @id @default(cuid())
+  walletAddress String         @unique @map("wallet_address")
+  points        Int            @default(0)
+  loginStreak   Int            @default(0) @map("login_streak")
+  lastLogin     DateTime?      @map("last_login")
+  isAdmin       Boolean        @default(false) @map("is_admin")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  alias         String?        @map("alias")
   events        Event[]
-  votes         Vote[]
-  userMissions  UserMission[]
   pointHistory  PointHistory[]
   shares        Share[]
+  userMissions  UserMission[]
+  votes         Vote[]
 
   @@map("users")
 }
 
 model Event {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
   title         String
-  description   String      @db.Text
-  mintDate      DateTime?   @map("mint_date")
-  mintPrice     String      @map("mint_price")
+  description   String
+  mintDate      DateTime?     @map("mint_date")
+  mintPrice     String        @map("mint_price")
   supply        Int?
-  imageUrl      String?     @map("image_url")
-  websiteUrl    String?     @map("website_url")
-  twitterUrl    String?     @map("twitter_url")
-  discordUrl    String?     @map("discord_url")
+  imageUrl      String?       @map("image_url")
+  websiteUrl    String?       @map("website_url")
+  twitterUrl    String?       @map("twitter_url")
+  discordUrl    String?       @map("discord_url")
   category      String?
-  status        EventStatus @default(UPCOMING)
-  isApproved    Boolean     @default(false) @map("is_approved")
-  votesUp       Int         @default(0) @map("votes_up")
-  votesDown     Int         @default(0) @map("votes_down")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-
-  // Multi-source support
-  source        DataSource  @default(SENTX)
-  externalId    String?     @map("external_id")
-  isForeverMint Boolean     @default(false) @map("is_forever_mint")
-
-  // Relations
-  createdBy   User     @relation(fields: [createdById], references: [id])
-  createdById String   @map("created_by_id")
-  votes       Vote[]
-  shares      Share[]
-  phases      MintPhase[]
-  nftVotes    NftVote[]
+  status        EventStatus   @default(UPCOMING)
+  isApproved    Boolean       @default(false) @map("is_approved")
+  votesUp       Int           @default(0) @map("votes_up")
+  votesDown     Int           @default(0) @map("votes_down")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  createdById   String        @map("created_by_id")
+  externalId    String?       @map("external_id")
+  isForeverMint Boolean       @default(false) @map("is_forever_mint")
+  source        DataSource    @default(SENTX)
+  custom_links  Json?
+  event_type    EventType     @default(MINT_EVENT)
+  host          String?
+  language      String?
+  location      String?
+  location_type LocationType?
+  createdBy     User          @relation(fields: [createdById], references: [id])
+  phases        MintPhase[]
+  nftVotes      NftVote[]
+  shares        Share[]
+  votes         Vote[]
 
   @@unique([source, externalId])
+  @@index([isApproved, isForeverMint])
+  @@index([isApproved, status, event_type])
+  @@index([isApproved, status, isForeverMint, event_type])
   @@map("events")
 }
 
 model MintPhase {
-  id          String   @id @default(cuid())
-  name        String
-  startDate   DateTime @map("start_date")
-  endDate     DateTime? @map("end_date")
-  price       String
-  maxPerWallet Int?    @map("max_per_wallet")
-  supply      Int?
-  isWhitelist Boolean  @default(false) @map("is_whitelist")
-  order       Int      @default(0)
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  // Relations
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId     String   @map("event_id")
+  id           String    @id @default(cuid())
+  name         String
+  startDate    DateTime  @map("start_date")
+  endDate      DateTime? @map("end_date")
+  price        String
+  maxPerWallet Int?      @map("max_per_wallet")
+  supply       Int?
+  isWhitelist  Boolean   @default(false) @map("is_whitelist")
+  order        Int       @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  eventId      String    @map("event_id")
+  event        Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("mint_phases")
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  voteType  VoteType @map("vote_type")
+  createdAt DateTime @default(now()) @map("created_at")
+  userId    String   @map("user_id")
+  eventId   String   @map("event_id")
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, eventId])
+  @@map("votes")
+}
+
+model UserMission {
+  id          String    @id @default(cuid())
+  progress    Int       @default(0)
+  completedAt DateTime? @map("completed_at")
+  claimedAt   DateTime? @map("claimed_at")
+  resetAt     DateTime? @map("reset_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  userId      String    @map("user_id")
+  missionId   String    @map("mission_id")
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, missionId])
+  @@map("user_missions")
+}
+
+model PointHistory {
+  id          String   @id @default(cuid())
+  points      Int
+  actionType  String   @map("action_type")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("point_history")
+}
+
+model Share {
+  id        String   @id @default(cuid())
+  platform  String   @default("twitter")
+  createdAt DateTime @default(now()) @map("created_at")
+  userId    String   @map("user_id")
+  eventId   String   @map("event_id")
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, eventId, platform])
+  @@map("shares")
+}
+
+model NftVote {
+  id            String   @id @default(cuid())
+  tokenId       String   @map("token_id")
+  serialNumber  Int      @map("serial_number")
+  walletAddress String   @map("wallet_address")
+  voteType      VoteType @map("vote_type")
+  voteWeight    Int      @default(1) @map("vote_weight")
+  createdAt     DateTime @default(now()) @map("created_at")
+  eventId       String   @map("event_id")
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenId, serialNumber, eventId])
+  @@map("nft_votes")
+}
+
+model Collection {
+  id           String           @id @default(cuid())
+  tokenAddress String           @unique @map("token_address")
+  name         String
+  description  String?
+  image        String?
+  slug         String?
+  floor        Int              @default(0)
+  volume       Int              @default(0)
+  owners       Int              @default(0)
+  supply       Int              @default(0)
+  totalVotes   Int              @default(0) @map("total_votes")
+  sentxStars   Int              @default(0) @map("sentx_stars")
+  lastSyncedAt DateTime?        @map("last_synced_at")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+  externalId   String?          @map("external_id")
+  source       DataSource       @default(SENTX)
+  isApproved   Boolean          @default(false) @map("is_approved")
+  submittedBy  String?          @map("submitted_by")
+  votes        CollectionVote[]
+
+  @@unique([source, externalId])
+  @@index([isApproved, totalVotes])
+  @@map("collections")
+}
+
+model CollectionVote {
+  id            String     @id @default(cuid())
+  walletAddress String     @map("wallet_address")
+  voteWeight    Int        @default(1) @map("vote_weight")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  collectionId  String     @map("collection_id")
+  nftTokenId    String?    @map("nft_token_id")
+  nftSerials    String?    @map("nft_serials")
+  collection    Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([walletAddress, collectionId])
+  @@index([collectionId])
+  @@index([walletAddress])
+  @@map("collection_votes")
 }
 
 enum EventStatus {
@@ -95,139 +208,17 @@ enum DataSource {
   KABILA
 }
 
-model Vote {
-  id        String   @id @default(cuid())
-  voteType  VoteType @map("vote_type")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  // Relations
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @map("user_id")
-  event     Event    @relation(fields: [eventId], references: [id])
-  eventId   String   @map("event_id")
-
-  @@unique([userId, eventId])
-  @@map("votes")
-}
-
 enum VoteType {
   UP
   DOWN
 }
 
-model UserMission {
-  id          String    @id @default(cuid())
-  progress    Int       @default(0)
-  completedAt DateTime? @map("completed_at")
-  claimedAt   DateTime? @map("claimed_at")
-  resetAt     DateTime? @map("reset_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-
-  // Relations
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String    @map("user_id")
-  missionId   String    @map("mission_id")  // String ID, not a foreign key
-
-  @@unique([userId, missionId])
-  @@map("user_missions")
+enum EventType {
+  MINT_EVENT
+  ECOSYSTEM_MEETUP
 }
 
-model PointHistory {
-  id          String   @id @default(cuid())
-  points      Int
-  actionType  String   @map("action_type")
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  // Relations
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String   @map("user_id")
-
-  @@map("point_history")
-}
-
-model Share {
-  id        String   @id @default(cuid())
-  platform  String   @default("twitter")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  // Relations
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @map("user_id")
-  event     Event    @relation(fields: [eventId], references: [id])
-  eventId   String   @map("event_id")
-
-  @@unique([userId, eventId, platform])
-  @@map("shares")
-}
-
-// NFT-based votes for special collections
-model NftVote {
-  id            String   @id @default(cuid())
-  tokenId       String   @map("token_id")       // 0.0.7235629 (Dragons) or 0.0.9954622 (El Santuario)
-  serialNumber  Int      @map("serial_number")
-  walletAddress String   @map("wallet_address") // Wallet that cast the vote
-  voteType      VoteType @map("vote_type")
-  voteWeight    Int      @default(1) @map("vote_weight") // 1 for dragons, 5 for El Santuario
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  // Relations
-  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId       String   @map("event_id")
-
-  @@unique([tokenId, serialNumber, eventId]) // Each serial can only vote once per event
-  @@map("nft_votes")
-}
-
-// NFT Collections from SentX/Kabila or user-submitted
-model Collection {
-  id            String     @id @default(cuid())
-  tokenAddress  String     @unique @map("token_address") // Hedera token ID (0.0.xxx)
-  name          String
-  description   String?    @db.Text
-  image         String?
-  slug          String?
-  floor         Int        @default(0)           // Floor price in HBAR (tinybars)
-  volume        Int        @default(0)           // Total volume
-  owners        Int        @default(0)
-  supply        Int        @default(0)
-  totalVotes    Int        @default(0) @map("total_votes")
-  sentxStars    Int        @default(0) @map("sentx_stars") // Stars from SentX
-  lastSyncedAt  DateTime?  @map("last_synced_at")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-
-  // Multi-source support
-  source        DataSource @default(SENTX)
-  externalId    String?    @map("external_id")
-
-  // Approval system (for user-submitted collections)
-  isApproved    Boolean    @default(false) @map("is_approved")
-  submittedBy   String?    @map("submitted_by")  // Wallet address of the user who submitted
-
-  // Relations
-  votes         CollectionVote[]
-
-  @@unique([source, externalId])
-  @@map("collections")
-}
-
-// Permanent votes for collections (no reset)
-model CollectionVote {
-  id            String   @id @default(cuid())
-  walletAddress String   @map("wallet_address")
-  voteWeight    Int      @default(1) @map("vote_weight") // 1 = normal, 1 per dragon, 20 for santuario
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  collection    Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  collectionId  String   @map("collection_id")
-
-  // NFT-based vote tracking (optional)
-  nftTokenId    String?  @map("nft_token_id")    // Which NFT collection was used
-  nftSerials    String?  @map("nft_serials")     // Comma-separated serial numbers used
-
-  @@unique([walletAddress, collectionId]) // Each wallet can only vote once per collection
-  @@map("collection_votes")
+enum LocationType {
+  ONLINE
+  IN_PERSON
 }

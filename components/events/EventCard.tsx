@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Calendar, ThumbsUp, ThumbsDown, Clock, Box, ArrowUpRight, Zap } from "lucide-react";
+import { Calendar, ThumbsUp, ThumbsDown, Clock, Box, ArrowUpRight, Zap, Star, MapPin, Globe, Users } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -28,6 +28,10 @@ interface EventCardProps {
     votesDown: number;
     canVote?: boolean;
     voteLockedUntil?: string | null;
+    event_type?: "MINT_EVENT" | "ECOSYSTEM_MEETUP";
+    host?: string | null;
+    location?: string | null;
+    location_type?: string | null;
   };
   userVote?: "UP" | "DOWN" | null;
   onVote?: (eventId: string, voteType: "UP" | "DOWN") => void;
@@ -37,7 +41,8 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
   const { isConnected } = useWalletStore();
   const [isVoting, setIsVoting] = React.useState(false);
 
-  const score = getVoteScore(event.votesUp, event.votesDown);
+  const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
+  const score = isMeetup ? event.votesUp : getVoteScore(event.votesUp, event.votesDown);
   const timeRemaining = formatTimeRemaining(event.mintDate);
   const priceInfo = parseMintPrice(event.mintPrice);
 
@@ -168,68 +173,114 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
             {event.description}
           </p>
 
-          {/* Price & Supply */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
-              {priceInfo.isHbar ? (
-                <HbarIcon className="h-5 w-5" />
-              ) : (
-                <UsdcIcon className="h-5 w-5" />
+          {/* Price & Supply (mint) or Host & Location (meetup) */}
+          {isMeetup ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              {event.host && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
+                  <Users className="h-4 w-4 text-accent-primary" />
+                  <span className="font-medium text-sm text-accent-primary">{event.host}</span>
+                </div>
               )}
-              <span className="font-semibold text-sm text-accent-primary">
-                {priceInfo.value}
-              </span>
+              {event.location_type === "IN_PERSON" && event.location ? (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border">
+                  <MapPin className="h-4 w-4 text-text-secondary" />
+                  <span className="font-medium text-sm text-text-primary">{event.location}</span>
+                </div>
+              ) : event.location_type === "ONLINE" ? (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border">
+                  <Globe className="h-4 w-4 text-text-secondary" />
+                  <span className="font-medium text-sm text-text-primary">Online</span>
+                </div>
+              ) : null}
             </div>
-            {event.supply && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border">
-                <Box className="h-4 w-4 text-text-secondary" />
-                <span className="font-medium text-sm text-text-primary">{event.supply.toLocaleString()}</span>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
+                {priceInfo.isHbar ? (
+                  <HbarIcon className="h-5 w-5" />
+                ) : (
+                  <UsdcIcon className="h-5 w-5" />
+                )}
+                <span className="font-semibold text-sm text-accent-primary">
+                  {priceInfo.value}
+                </span>
               </div>
-            )}
-          </div>
+              {event.supply && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border">
+                  <Box className="h-4 w-4 text-text-secondary" />
+                  <span className="font-medium text-sm text-text-primary">{event.supply.toLocaleString()}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Voting & Details */}
           <div className="flex items-center justify-between pt-4 border-t border-border">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => handleVote("UP")}
-                disabled={!isConnected || isVoting || !canVoteNow}
-                className={cn(
-                  "p-2.5 rounded-xl transition-all duration-300",
-                  userVote === "UP"
-                    ? "bg-success/20 text-success"
-                    : "bg-bg-secondary text-text-secondary hover:text-success hover:bg-success/10",
-                  (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
-                )}
-                title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
-              >
-                <ThumbsUp className="h-4 w-4" />
-              </button>
-
-              <div className={cn(
-                "min-w-[48px] text-center py-2 px-3 rounded-xl font-bold text-sm",
-                score > 0 ? "bg-success/10 text-success" :
-                score < 0 ? "bg-error/10 text-error" :
-                "bg-bg-secondary text-text-secondary"
-              )}>
-                {score > 0 ? `+${score}` : score}
+            {isMeetup ? (
+              /* Star voting for meetups - only positive */
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleVote("UP")}
+                  disabled={!isConnected || isVoting || !canVoteNow}
+                  className={cn(
+                    "p-2.5 rounded-xl transition-all duration-300",
+                    userVote === "UP"
+                      ? "bg-yellow-500/20 text-yellow-400"
+                      : "bg-bg-secondary text-text-secondary hover:text-yellow-400 hover:bg-yellow-500/10",
+                    (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
+                  )}
+                  title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
+                >
+                  <Star className={cn("h-4 w-4", userVote === "UP" && "fill-yellow-400")} />
+                </button>
+                <div className="min-w-[48px] text-center py-2 px-3 rounded-xl font-bold text-sm bg-yellow-500/10 text-yellow-400">
+                  {score}
+                </div>
               </div>
+            ) : (
+              /* Standard thumbs voting for mint events */
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleVote("UP")}
+                  disabled={!isConnected || isVoting || !canVoteNow}
+                  className={cn(
+                    "p-2.5 rounded-xl transition-all duration-300",
+                    userVote === "UP"
+                      ? "bg-success/20 text-success"
+                      : "bg-bg-secondary text-text-secondary hover:text-success hover:bg-success/10",
+                    (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
+                  )}
+                  title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                </button>
 
-              <button
-                onClick={() => handleVote("DOWN")}
-                disabled={!isConnected || isVoting || !canVoteNow}
-                className={cn(
-                  "p-2.5 rounded-xl transition-all duration-300",
-                  userVote === "DOWN"
-                    ? "bg-error/20 text-error"
-                    : "bg-bg-secondary text-text-secondary hover:text-error hover:bg-error/10",
-                  (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
-                )}
-                title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
-              >
-                <ThumbsDown className="h-4 w-4" />
-              </button>
-            </div>
+                <div className={cn(
+                  "min-w-[48px] text-center py-2 px-3 rounded-xl font-bold text-sm",
+                  score > 0 ? "bg-success/10 text-success" :
+                  score < 0 ? "bg-error/10 text-error" :
+                  "bg-bg-secondary text-text-secondary"
+                )}>
+                  {score > 0 ? `+${score}` : score}
+                </div>
+
+                <button
+                  onClick={() => handleVote("DOWN")}
+                  disabled={!isConnected || isVoting || !canVoteNow}
+                  className={cn(
+                    "p-2.5 rounded-xl transition-all duration-300",
+                    userVote === "DOWN"
+                      ? "bg-error/20 text-error"
+                      : "bg-bg-secondary text-text-secondary hover:text-error hover:bg-error/10",
+                    (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
+                  )}
+                  title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                </button>
+              </div>
+            )}
 
             <div className="flex items-center gap-1.5">
               <ShareToXButton
