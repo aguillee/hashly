@@ -63,7 +63,6 @@
   "events": {
     "upcoming": "Próximo",
     "live": "En Vivo",
-    "ended": "Finalizado",
     "mint": "Mint",
     "price": "Precio",
     "supply": "Supply",
@@ -85,8 +84,7 @@
     "filter": {
       "all": "Todos",
       "upcoming": "Próximos",
-      "live": "En Vivo",
-      "ended": "Finalizados"
+      "live": "En Vivo"
     },
     "sort": {
       "date": "Por Fecha",

@@ -28,7 +28,7 @@ interface Event {
   mintDate: string;
   mintPrice: string;
   category: string;
-  status: "UPCOMING" | "LIVE" | "ENDED";
+  status: "UPCOMING" | "LIVE";
   isApproved: boolean;
   votesUp: number;
   votesDown: number;

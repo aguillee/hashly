@@ -152,15 +152,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
     }
   });
 
-  // 3. Delete any ENDED events that might exist (cleanup legacy)
-  const deletedEnded = await prisma.event.deleteMany({
-    where: {
-      status: "ENDED",
-      isForeverMint: false
-    }
-  });
-
-  console.log(`Kabila Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${deletedEnded.count} ENDED deleted`);
+  console.log(`Kabila Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted`);
 
   // === FETCH AND SYNC ===
 
@@ -173,7 +165,6 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
       cleanup: {
         updatedToLive: updatedToLive.count,
         deletedOld: deletedOld.count,
-        deletedEnded: deletedEnded.count,
       },
       message: "No launchpads found from Kabila API",
     };
@@ -182,7 +173,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
   // Filter to only LIVE and UPCOMING (not FINISHED)
   const activeLaunchpads = launchpads.filter((lp) => {
     const status = mapKabilaState(lp.state);
-    return status !== "ENDED";
+    return status !== "FINISHED";
   });
 
   let created = 0;
@@ -266,9 +257,8 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
     cleanup: {
       updatedToLive: updatedToLive.count,
       deletedOld: deletedOld.count,
-      deletedEnded: deletedEnded.count,
     },
     errors: errors.length > 0 ? errors : undefined,
-    message: `Imported ${created} new UPCOMING events, updated ${updated} existing from Kabila. Skipped ${skipped} without date or already live. Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
+    message: `Imported ${created} new UPCOMING events, updated ${updated} existing from Kabila. Skipped ${skipped} without date or already live. Cleanup: ${deletedOld.count} old events removed.`,
   };
 }

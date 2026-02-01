@@ -149,15 +149,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     }
   });
 
-  // 3. Delete any ENDED events that might exist (cleanup legacy)
-  const deletedEnded = await prisma.event.deleteMany({
-    where: {
-      status: "ENDED",
-      isForeverMint: false
-    }
-  });
-
-  // 4. Ensure ALL Forever Mints are LIVE (fix any that got wrong status)
+  // 3. Ensure ALL Forever Mints are LIVE (fix any that got wrong status)
   const fixedForeverMints = await prisma.event.updateMany({
     where: {
       isForeverMint: true,
@@ -166,7 +158,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     data: { status: "LIVE" }
   });
 
-  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${deletedEnded.count} ENDED deleted, ${fixedForeverMints.count} Forever Mints fixed to LIVE`);
+  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${fixedForeverMints.count} Forever Mints fixed to LIVE`);
 
   // === FETCH AND SYNC ===
 
@@ -358,9 +350,8 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     cleanup: {
       updatedToLive: updatedToLive.count,
       deletedOld: deletedOld.count,
-      deletedEnded: deletedEnded.count,
     },
     errors: errors.length > 0 ? errors : undefined,
-    message: `Imported ${created} new UPCOMING events, updated ${updated} existing (${foreverMints.length} forever mints). Skipped ${skipped} without date or already live. Cleanup: ${deletedOld.count + deletedEnded.count} old events removed.`,
+    message: `Imported ${created} new UPCOMING events, updated ${updated} existing (${foreverMints.length} forever mints). Skipped ${skipped} without date or already live. Cleanup: ${deletedOld.count} old events removed.`,
   };
 }

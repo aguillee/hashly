@@ -32,6 +32,21 @@ export async function GET(request: NextRequest) {
       data: { status: "LIVE" },
     });
 
+    // Delete LIVE events older than 7 days (except Forever Mints)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    await prisma.event.deleteMany({
+      where: {
+        status: "LIVE",
+        isForeverMint: false,
+        mintDate: {
+          not: null,
+          lt: sevenDaysAgo,
+        },
+      },
+    });
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const categoriesParam = searchParams.get("categories"); // comma-separated

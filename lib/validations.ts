@@ -101,7 +101,7 @@ export const addAdminSchema = z.object({
 
 export const updateEventStatusSchema = z.object({
   isApproved: z.boolean().optional(),
-  status: z.enum(["UPCOMING", "LIVE", "ENDED"]).optional(),
+  status: z.enum(["UPCOMING", "LIVE"]).optional(),
 });
 
 // ============================================
@@ -114,7 +114,7 @@ export const paginationSchema = z.object({
 });
 
 export const eventFiltersSchema = z.object({
-  status: z.enum(["UPCOMING", "LIVE", "ENDED", "all"]).optional(),
+  status: z.enum(["UPCOMING", "LIVE", "all"]).optional(),
   category: z.string().optional(),
   search: z.string().max(100).optional(),
   sortBy: z.enum(["date", "votes", "newest"]).optional(),

@@ -17,7 +17,7 @@ interface FeaturedEvent {
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
-  status: "UPCOMING" | "LIVE" | "ENDED";
+  status: "UPCOMING" | "LIVE";
   votesUp: number;
   votesDown: number;
   score?: number;

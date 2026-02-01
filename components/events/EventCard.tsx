@@ -22,7 +22,7 @@ interface EventCardProps {
     mintPrice: string;
     supply: number | null;
     imageUrl: string | null;
-    status: "UPCOMING" | "LIVE" | "ENDED";
+    status: "UPCOMING" | "LIVE";
     isForeverMint?: boolean;
     votesUp: number;
     votesDown: number;
@@ -51,7 +51,6 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
   const now = new Date();
   const mintDate = new Date(event.mintDate);
 
-  let isEnded = false;
   let isLive = false;
   let isUpcoming = false;
 
@@ -59,12 +58,11 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
     // Forever Mints are always LIVE
     isLive = true;
   } else {
-    isEnded = mintDate < now && (now.getTime() - mintDate.getTime()) > 24 * 60 * 60 * 1000;
-    isLive = !isEnded && mintDate <= now;
-    isUpcoming = !isEnded && !isLive;
+    isLive = mintDate <= now;
+    isUpcoming = !isLive;
   }
 
-  const actualStatus = isEnded ? "ENDED" : isLive ? "LIVE" : "UPCOMING";
+  const actualStatus = isLive ? "LIVE" : "UPCOMING";
 
   const canVoteNow = event.canVote !== false; // Default to true if not specified
 
@@ -122,10 +120,6 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                 <Badge variant="live" size="lg" className="shadow-lg">
                   <span className="mr-1.5 h-2 w-2 rounded-full bg-white animate-pulse" />
                   Live Now
-                </Badge>
-              ) : isEnded ? (
-                <Badge variant="ghost" size="lg">
-                  Ended
                 </Badge>
               ) : (
                 <Badge variant="default" size="lg" className="shadow-lg">

@@ -63,7 +63,6 @@
   "events": {
     "upcoming": "Upcoming",
     "live": "Live Now",
-    "ended": "Ended",
     "mint": "Mint",
     "price": "Price",
     "supply": "Supply",
@@ -85,8 +84,7 @@
     "filter": {
       "all": "All",
       "upcoming": "Upcoming",
-      "live": "Live",
-      "ended": "Ended"
+      "live": "Live"
     },
     "sort": {
       "date": "By Date",

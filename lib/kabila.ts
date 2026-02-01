@@ -82,8 +82,8 @@ export async function fetchKabilaLaunchpads(): Promise<KabilaLaunchpad[]> {
 /**
  * Map Kabila state to our EventStatus
  */
-export function mapKabilaState(state: string): "UPCOMING" | "LIVE" | "ENDED" {
-  if (state === "FINISHED") return "ENDED";
+export function mapKabilaState(state: string): "UPCOMING" | "LIVE" | "FINISHED" {
+  if (state === "FINISHED") return "FINISHED";
   if (state === "LIVE") return "LIVE";
   return "UPCOMING";
 }

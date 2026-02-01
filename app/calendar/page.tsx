@@ -31,7 +31,7 @@ interface Event {
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
-  status: "UPCOMING" | "LIVE" | "ENDED";
+  status: "UPCOMING" | "LIVE";
   votesUp: number;
   votesDown: number;
   canVote?: boolean;
@@ -250,7 +250,7 @@ export default function CalendarPage() {
                 return (
                   <button
                     key={filter.value}
-                    onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "ended" | "forever" | "meetups")}
+                    onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "forever" | "meetups")}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                       status === filter.value

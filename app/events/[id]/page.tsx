@@ -52,7 +52,7 @@ interface EventDetail {
   websiteUrl: string | null;
   twitterUrl: string | null;
   discordUrl: string | null;
-  status: "UPCOMING" | "LIVE" | "ENDED";
+  status: "UPCOMING" | "LIVE";
   votesUp: number;
   votesDown: number;
   createdBy: {
@@ -223,8 +223,6 @@ export default function EventDetailPage() {
     switch (status) {
       case "LIVE":
         return <Badge variant="success" className="animate-pulse">Live Now</Badge>;
-      case "ENDED":
-        return <Badge variant="secondary">Ended</Badge>;
       default:
         return <Badge variant="default">Upcoming</Badge>;
     }
