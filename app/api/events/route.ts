@@ -6,7 +6,7 @@ import { hasElSantuario } from "@/lib/hedera";
 
 export const dynamic = "force-dynamic";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { createEventSchema, validateRequest } from "@/lib/validations";
+import { createEventSchema, meetupFieldsSchema, validateRequest } from "@/lib/validations";
 
 // GET /api/events - List events
 export async function GET(request: NextRequest) {
@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
     const categoriesParam = searchParams.get("categories"); // comma-separated
     const sortBy = searchParams.get("sortBy") || "date";
     const search = searchParams.get("search");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
+    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
     const source = searchParams.get("source"); // SENTX or KABILA
     const foreverMints = searchParams.get("foreverMints"); // "only", "exclude", or "include"
     const eventType = searchParams.get("eventType"); // "MINT_EVENT", "ECOSYSTEM_MEETUP"
@@ -248,18 +248,21 @@ export async function POST(request: NextRequest) {
       event_type: reqEventType,
     };
 
-    // Add meetup-specific fields
+    // Add meetup-specific fields (validated with Zod)
     if (reqEventType === "ECOSYSTEM_MEETUP") {
-      eventData.host = body.host || null;
-      eventData.language = body.language || null;
-      eventData.location_type = body.locationType === "IN_PERSON" ? "IN_PERSON" : "ONLINE";
-      eventData.location = body.location || null;
-      eventData.custom_links = body.customLinks || null;
-      if (body.endDate) {
-        // We don't have an endDate column directly, but we do now from db pull
-        // Actually the schema has no endDate on Event... but the DB does have it
-        // Let's not set it for now since the pulled schema doesn't show it
+      const meetupValidation = meetupFieldsSchema.safeParse(body);
+      if (!meetupValidation.success) {
+        return NextResponse.json(
+          { error: meetupValidation.error.issues.map(e => e.message).join(", ") },
+          { status: 400 }
+        );
       }
+      const meetupData = meetupValidation.data;
+      eventData.host = meetupData.host || null;
+      eventData.language = meetupData.language || null;
+      eventData.location_type = meetupData.locationType || "ONLINE";
+      eventData.location = meetupData.location || null;
+      eventData.custom_links = meetupData.customLinks || null;
     }
 
     // Add phases for mint events

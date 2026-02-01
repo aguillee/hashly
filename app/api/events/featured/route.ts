@@ -104,7 +104,6 @@ export async function GET(request: NextRequest) {
       source: topForeverMintResults[0].source,
       externalId: topForeverMintResults[0].external_id,
       isForeverMint: topForeverMintResults[0].is_forever_mint,
-      createdById: topForeverMintResults[0].created_by_id,
     } : null;
 
     // Calculate score and find most voted (UPCOMING only, excluding forever mints and LIVE events)

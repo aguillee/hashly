@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
+    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
 
     // Use raw query to order by score (votesUp - votesDown)
     const foreverMints = await prisma.$queryRaw<Array<{
@@ -75,7 +75,6 @@ export async function GET(request: NextRequest) {
       source: mint.source,
       externalId: mint.external_id,
       isForeverMint: mint.is_forever_mint,
-      createdById: mint.created_by_id,
     }));
 
     return NextResponse.json({

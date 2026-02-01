@@ -3,6 +3,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { addPoints } from "@/lib/points";
+import { eventPendingActionSchema } from "@/lib/validations";
 
 // GET /api/events/pending - List pending events (admin only)
 export async function GET(request: NextRequest) {
@@ -54,14 +55,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { eventId, action } = await request.json();
-
-    if (!eventId || !["approve", "reject"].includes(action)) {
+    const body = await request.json();
+    const validation = eventPendingActionSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Invalid request" },
+        { error: validation.error.issues.map(e => e.message).join(", ") },
         { status: 400 }
       );
     }
+
+    const { eventId, action } = validation.data;
 
     const event = await prisma.event.findUnique({
       where: { id: eventId },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // DELETE /api/admin/admins/[id] - Remove admin privileges
 export async function DELETE(
@@ -8,6 +9,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {

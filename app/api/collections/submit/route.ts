@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchTokenFromMirrorNode } from "@/lib/sentx";
 import { hasElSantuario } from "@/lib/hedera";
+import { submitCollectionSchema } from "@/lib/validations";
 
 /**
  * POST /api/collections/submit - Submit a collection for approval
@@ -24,22 +25,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tokenId } = body;
-
-    if (!tokenId) {
+    const validation = submitCollectionSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Token ID is required" },
+        { error: validation.error.issues.map(e => e.message).join(", ") },
         { status: 400 }
       );
     }
 
-    // Validate tokenId format (0.0.xxxxx)
-    if (!/^0\.0\.\d+$/.test(tokenId)) {
-      return NextResponse.json(
-        { error: "Invalid Token ID format. Expected: 0.0.xxxxx" },
-        { status: 400 }
-      );
-    }
+    const { tokenId } = validation.data;
 
     // Check if collection already exists
     const existing = await prisma.collection.findUnique({

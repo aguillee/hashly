@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { adminPendingActionSchema } from "@/lib/validations";
 
 /**
  * GET /api/admin/collections/pending - Get pending collections
@@ -64,21 +65,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { collectionId, action } = body;
-
-    if (!collectionId || !action) {
+    const validation = adminPendingActionSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "collectionId and action are required" },
+        { error: validation.error.issues.map(e => e.message).join(", ") },
         { status: 400 }
       );
     }
 
-    if (!["approve", "reject"].includes(action)) {
-      return NextResponse.json(
-        { error: "action must be 'approve' or 'reject'" },
-        { status: 400 }
-      );
-    }
+    const { collectionId, action } = validation.data;
 
     // Find the collection
     const collection = await prisma.collection.findUnique({

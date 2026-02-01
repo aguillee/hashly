@@ -33,6 +33,7 @@ export const createEventSchema = z.object({
   imageUrl: z
     .string()
     .url("Invalid image URL")
+    .refine((url) => url.startsWith("https://"), { message: "Image URL must use HTTPS" })
     .optional()
     .nullable()
     .or(z.literal("")),
@@ -102,6 +103,46 @@ export const addAdminSchema = z.object({
 export const updateEventStatusSchema = z.object({
   isApproved: z.boolean().optional(),
   status: z.enum(["UPCOMING", "LIVE"]).optional(),
+});
+
+// Token ID format: 0.0.XXXXX
+export const tokenIdSchema = z
+  .string()
+  .regex(/^0\.0\.\d+$/, "Invalid token ID format. Expected: 0.0.xxxxx");
+
+export const adminAddCollectionSchema = z.object({
+  tokenId: tokenIdSchema,
+  name: z.string().max(200).optional(),
+  description: z.string().max(2000).optional(),
+});
+
+export const adminPendingActionSchema = z.object({
+  collectionId: z.string().uuid("Invalid collection ID"),
+  action: z.enum(["approve", "reject"]),
+});
+
+export const eventPendingActionSchema = z.object({
+  eventId: z.string().uuid("Invalid event ID"),
+  action: z.enum(["approve", "reject"]),
+});
+
+export const submitCollectionSchema = z.object({
+  tokenId: tokenIdSchema,
+});
+
+// Meetup-specific fields validated separately
+export const meetupFieldsSchema = z.object({
+  host: z.string().max(100).optional().nullable(),
+  language: z.string().max(20).optional().nullable(),
+  locationType: z.enum(["IN_PERSON", "ONLINE"]).optional(),
+  location: z.string().max(300).optional().nullable(),
+  customLinks: z.array(
+    z.object({
+      name: z.string().max(50),
+      url: z.string().url().max(500),
+    })
+  ).max(10).optional().nullable(),
+  endDate: z.string().datetime().optional().nullable(),
 });
 
 // ============================================

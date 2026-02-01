@@ -228,6 +228,9 @@ export async function POST(request: NextRequest) {
 // DELETE /api/collections - Delete all collections (admin only)
 export async function DELETE(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
     if (!user?.isAdmin) {
       return NextResponse.json(

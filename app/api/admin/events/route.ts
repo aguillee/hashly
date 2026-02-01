@@ -1,10 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // GET /api/admin/events - Get all events for admin
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {

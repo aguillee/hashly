@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const { walletAddress, message, signature } = validation.data;
 
-    // Verify the signature
+    // Verify the signature cryptographically
     const isValid = await verifyWalletSignature(walletAddress, message, signature);
 
     if (!isValid) {
@@ -75,14 +75,10 @@ export async function POST(request: NextRequest) {
       },
       checkin: checkin.success ? checkin : null,
     });
-  } catch (error: any) {
-    console.error("Auth error:", error?.message || error);
-    // Return more details to help debug
+  } catch (error: unknown) {
+    console.error("Auth error:", error);
     return NextResponse.json(
-      {
-        error: "Authentication failed",
-        details: process.env.NODE_ENV === "development" ? error?.message : undefined
-      },
+      { error: "Authentication failed" },
       { status: 500 }
     );
   }

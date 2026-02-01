@@ -82,33 +82,122 @@ export function isAdmin(walletAddress: string): boolean {
   return ADMIN_WALLETS.includes(walletAddress);
 }
 
+const MIRROR_NODE_URL = "https://mainnet.mirrornode.hedera.com";
+
+// Maximum age of a signed message (5 minutes) to prevent replay attacks
+const MAX_MESSAGE_AGE_MS = 5 * 60 * 1000;
+
+/**
+ * Apply the Hedera Signed Message prefix (EIP-191 style).
+ * WalletConnect wallets prefix messages before signing:
+ *   '\x19Hedera Signed Message:\n' + message.length + message
+ * We must apply the same prefix when verifying on the backend.
+ */
+function prefixMessageToSign(message: string): Uint8Array {
+  const prefixed = "\x19Hedera Signed Message:\n" + message.length + message;
+  return new TextEncoder().encode(prefixed);
+}
+
 /**
  * Verify wallet authentication for Hedera wallets.
  *
- * WalletConnect session already proves the user controls the wallet
- * (the protocol requires wallet app approval for each session).
- * We validate: all required fields present, message has valid format,
- * and wallet address format is correct (0.0.XXXXX).
+ * 1. Validates format of all fields
+ * 2. Checks timestamp freshness (anti-replay)
+ * 3. Fetches the account's public key from Hedera Mirror Node
+ * 4. Verifies the Ed25519/ECDSA signature with the Hedera message prefix
  */
 export async function verifyWalletSignature(
   walletAddress: string,
   message: string,
   signature: string
 ): Promise<boolean> {
-  // Basic validation — all fields must be present
   if (!walletAddress || !message || !signature) {
+    console.error("[auth] Missing fields");
     return false;
   }
 
-  // Validate wallet address format
   if (!/^0\.0\.\d+$/.test(walletAddress)) {
+    console.error("[auth] Invalid wallet format:", walletAddress);
     return false;
   }
 
-  // Validate message contains expected format
   if (!message.includes("Hashly") || !message.includes("Timestamp:")) {
+    console.error("[auth] Message format invalid");
     return false;
   }
 
-  return true;
+  // Extract and validate timestamp (anti-replay)
+  const timestampMatch = message.match(/Timestamp:\s*(\d+)/);
+  if (!timestampMatch) {
+    return false;
+  }
+  const messageTimestamp = parseInt(timestampMatch[1]);
+  const now = Date.now();
+  if (Math.abs(now - messageTimestamp) > MAX_MESSAGE_AGE_MS) {
+    console.error("[auth] Message timestamp too old");
+    return false;
+  }
+
+  // Reject session-based signatures — not cryptographically secure
+  if (signature.startsWith("session-")) {
+    console.error("[auth] Session-based signatures are no longer accepted");
+    return false;
+  }
+
+  // Cryptographic verification: fetch public key from Mirror Node
+  try {
+    const response = await fetch(
+      `${MIRROR_NODE_URL}/api/v1/accounts/${walletAddress}`,
+      { next: { revalidate: 300 } }
+    );
+
+    if (!response.ok) {
+      console.error("[auth] Mirror Node lookup failed:", response.status);
+      return false;
+    }
+
+    const accountData = await response.json();
+    const publicKeyHex = accountData?.key?.key;
+    const keyType = accountData?.key?._type;
+
+    if (!publicKeyHex) {
+      console.error("[auth] No public key found for account");
+      return false;
+    }
+
+    if (keyType !== "ED25519" && keyType !== "ECDSA_SECP256K1") {
+      console.error("[auth] Unsupported key type:", keyType);
+      return false;
+    }
+
+    // Parse hex signature to bytes
+    const hexPairs = signature.match(/.{1,2}/g);
+    if (!hexPairs) {
+      console.error("[auth] Invalid signature hex format");
+      return false;
+    }
+    const signatureBytes = Uint8Array.from(
+      hexPairs.map((byte: string) => parseInt(byte, 16))
+    );
+
+    // Apply the Hedera Signed Message prefix (same as WalletConnect wallets)
+    const prefixedMessageBytes = prefixMessageToSign(message);
+
+    const { PublicKey } = await import("@hashgraph/sdk");
+    const pubKey = keyType === "ED25519"
+      ? PublicKey.fromStringED25519(publicKeyHex)
+      : PublicKey.fromStringECDSA(publicKeyHex);
+
+    const verified = pubKey.verify(prefixedMessageBytes, signatureBytes);
+    if (verified) {
+      console.log("[auth] Signature verified for:", walletAddress);
+      return true;
+    }
+
+    console.error("[auth] Signature verification failed for:", walletAddress);
+    return false;
+  } catch (error) {
+    console.error("[auth] Verification error:", error);
+    return false;
+  }
 }

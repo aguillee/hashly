@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 
 const adminEventUpdateSchema = z.object({
@@ -13,6 +14,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {
@@ -56,6 +60,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const user = await getCurrentUser();
 
     if (!user || !user.isAdmin) {

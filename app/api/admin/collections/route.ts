@@ -3,6 +3,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchTokenFromMirrorNode, fetchCollectionStats } from "@/lib/sentx";
+import { adminAddCollectionSchema } from "@/lib/validations";
 
 /**
  * POST /api/admin/collections - Add a collection manually by tokenId
@@ -23,22 +24,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tokenId, name: customName, description: customDescription } = body;
-
-    if (!tokenId) {
+    const validation = adminAddCollectionSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "tokenId is required" },
+        { error: validation.error.issues.map(e => e.message).join(", ") },
         { status: 400 }
       );
     }
 
-    // Validate tokenId format (0.0.xxxxx)
-    if (!/^0\.0\.\d+$/.test(tokenId)) {
-      return NextResponse.json(
-        { error: "Invalid tokenId format. Expected: 0.0.xxxxx" },
-        { status: 400 }
-      );
-    }
+    const { tokenId, name: customName, description: customDescription } = validation.data;
 
     // Check if collection already exists
     const existing = await prisma.collection.findUnique({
@@ -126,7 +120,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "50");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
     const search = searchParams.get("search");
 
     const skip = (page - 1) * limit;

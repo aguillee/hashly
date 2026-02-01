@@ -158,33 +158,29 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     try {
       const message = `Sign in to Hashly\nTimestamp: ${Date.now()}`;
 
-      // Try to sign the message cryptographically with the connected wallet
-      let signature = "";
-      try {
-        if (dAppConnector) {
-          const signers = dAppConnector.signers;
-          const signer = signers.find(
-            (s) => s.getAccountId().toString() === accountId
-          );
-          if (signer) {
-            const messageBytes = new TextEncoder().encode(message);
-            const signResult = await signer.sign([messageBytes]);
-            if (signResult && signResult.length > 0 && signResult[0].signature) {
-              const sigArray = new Uint8Array(signResult[0].signature);
-              signature = Array.from(sigArray)
-                .map((b) => b.toString(16).padStart(2, "0"))
-                .join("");
-            }
-          }
-        }
-      } catch (signError) {
-        console.warn("Message signing not supported by wallet, using session fallback:", signError);
+      // Sign the message cryptographically with the connected wallet
+      if (!dAppConnector) {
+        throw new Error("Wallet connector not available");
       }
 
-      // Fallback for wallets that don't support signMessage
-      if (!signature) {
-        signature = `session-${Date.now()}-${accountId}`;
+      const signers = dAppConnector.signers;
+      const signer = signers.find(
+        (s) => s.getAccountId().toString() === accountId
+      );
+      if (!signer) {
+        throw new Error("No signer found for account");
       }
+
+      const messageBytes = new TextEncoder().encode(message);
+      const signResult = await signer.sign([messageBytes]);
+      if (!signResult || signResult.length === 0 || !signResult[0].signature) {
+        throw new Error("Wallet did not return a signature");
+      }
+
+      const sigArray = new Uint8Array(signResult[0].signature);
+      const signature = Array.from(sigArray)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
       const response = await fetch("/api/auth/verify", {
         method: "POST",
@@ -198,7 +194,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Authentication failed");
+        throw new Error(error.error || "Authentication failed");
       }
 
       const data = await response.json();
