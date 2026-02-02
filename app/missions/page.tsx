@@ -191,7 +191,7 @@ export default function MissionsPage() {
               ) : (
                 <Zap className="h-4 w-4" />
               )}
-              <span>+{mission.pointsReward}</span>
+              <span>Claim +{mission.pointsReward}</span>
             </button>
           ) : (
             <div className={cn(

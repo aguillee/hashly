@@ -117,12 +117,12 @@ export const adminAddCollectionSchema = z.object({
 });
 
 export const adminPendingActionSchema = z.object({
-  collectionId: z.string().uuid("Invalid collection ID"),
+  collectionId: z.string().min(1, "Collection ID is required"),
   action: z.enum(["approve", "reject"]),
 });
 
 export const eventPendingActionSchema = z.object({
-  eventId: z.string().uuid("Invalid event ID"),
+  eventId: z.string().min(1, "Event ID is required"),
   action: z.enum(["approve", "reject"]),
 });
 
