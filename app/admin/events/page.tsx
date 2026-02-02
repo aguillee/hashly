@@ -239,6 +239,11 @@ export default function AdminEventsPage() {
                         <CheckCircle className="h-4 w-4 text-success" />
                       )}
                     </Button>
+                    <Link href={`/admin/events/${event.id}/edit`}>
+                      <Button variant="ghost" size="sm" title="Edit">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Link>
                     <Link href={`/events/${event.id}`}>
                       <Button variant="ghost" size="sm" title="View">
                         <Eye className="h-4 w-4" />

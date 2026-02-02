@@ -22,8 +22,9 @@ import { Button } from "@/components/ui/Button";
 import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
 import { TopCollectionsPodium } from "@/components/collections/TopCollectionsPodium";
 import { useWalletStore } from "@/store";
-import { useFeatured } from "@/lib/swr";
+import { useFeatured, useHomeAds } from "@/lib/swr";
 import { formatDate } from "@/lib/utils";
+import { HomeAdCarousel } from "@/components/ads/HomeAdCarousel";
 
 // Reusable event card for meetup/hackathon 3-column sections
 function EventColumnCard({ event, icon: Icon, accentColor = "accent-primary" }: { event: any; icon: any; accentColor?: string }) {
@@ -97,6 +98,9 @@ function EventColumnCard({ event, icon: Icon, accentColor = "accent-primary" }: 
 export default function HomePage() {
   const { isConnected } = useWalletStore();
   const { data: featured, isLoading: loading } = useFeatured();
+  const { data: homeAdsData } = useHomeAds();
+  const homeAds = homeAdsData?.ads || [];
+  const hasAds = homeAds.length > 0;
 
   const hasFeaturedEvents = featured?.mostVoted || featured?.nextUp || featured?.topForeverMint;
   const hasMeetups = featured?.topMeetup || featured?.nextMeetup;
@@ -111,8 +115,8 @@ export default function HomePage() {
         <div className="absolute top-20 right-1/4 w-80 h-80 bg-accent-secondary/10 rounded-full blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          {/* Hero: 2 columns on desktop */}
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Hero: 2 or 3 columns on desktop */}
+          <div className={`grid ${hasAds ? "lg:grid-cols-[4fr_3fr_3fr]" : "lg:grid-cols-2"} gap-8 lg:gap-8 items-center`}>
             {/* Left: Title + CTA */}
             <div className="text-center lg:text-left">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
@@ -196,6 +200,13 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+
+            {/* Right: Ad Carousel - only visible when ads exist */}
+            {hasAds && (
+              <div className="hidden lg:block h-full min-h-[280px]">
+                <HomeAdCarousel ads={homeAds} />
+              </div>
+            )}
           </div>
         </div>
       </section>

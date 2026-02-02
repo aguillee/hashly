@@ -61,6 +61,7 @@ model Event {
   nftVotes      NftVote[]
   shares        Share[]
   votes         Vote[]
+  homeAds       HomeAd[]
 
   @@unique([source, externalId])
   @@index([isApproved, isForeverMint])
@@ -222,4 +223,29 @@ enum EventType {
 enum LocationType {
   ONLINE
   IN_PERSON
+}
+
+enum HomeAdType {
+  EVENT
+  CUSTOM
+}
+
+model HomeAd {
+  id        String     @id @default(cuid())
+  type      HomeAdType
+  eventId   String?    @map("event_id")
+  imageUrl  String?    @map("image_url")
+  linkUrl   String?    @map("link_url")
+  title     String?
+  duration  Int        @default(5)
+  order     Int        @default(0)
+  isActive  Boolean    @default(true) @map("is_active")
+  views     Int        @default(0)
+  clicks    Int        @default(0)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  event     Event?     @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  @@index([isActive, order])
+  @@map("home_ads")
 }

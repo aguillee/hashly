@@ -113,5 +113,13 @@ export function useMissions() {
   return useSWR("/api/missions", fetcher);
 }
 
+// Home ads (carousel)
+export function useHomeAds() {
+  return useSWR("/api/home-ads", fetcher, {
+    revalidateOnFocus: true,
+    refreshInterval: 60000,
+  });
+}
+
 // Export mutate for manual revalidation
 export { mutate } from "swr";

@@ -15,6 +15,7 @@ import {
   Loader2,
   RefreshCw,
   Layers,
+  Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -428,7 +429,7 @@ export default function AdminPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
@@ -469,6 +470,22 @@ export default function AdminPage() {
                 <div>
                   <p className="text-sm font-medium">Create Event</p>
                   <p className="text-xs text-text-secondary">Add new event directly</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/ads">
+          <Card hover>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-pink-500/10">
+                  <Megaphone className="h-6 w-6 text-pink-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Home Ads</p>
+                  <p className="text-xs text-text-secondary">Manage homepage carousel</p>
                 </div>
               </div>
             </CardContent>

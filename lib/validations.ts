@@ -146,6 +146,51 @@ export const meetupFieldsSchema = z.object({
 });
 
 // ============================================
+// HOME AD VALIDATIONS
+// ============================================
+
+export const createHomeAdSchema = z.object({
+  type: z.enum(["EVENT", "CUSTOM"]),
+  eventId: z.string().min(1).optional().nullable(),
+  imageUrl: z.string().url().max(500).optional().nullable(),
+  linkUrl: z.string().url().max(500).optional().nullable(),
+  title: z.string().max(200).optional().nullable(),
+  duration: z.number().int().min(1).max(60).default(5),
+  isActive: z.boolean().default(true),
+}).refine(
+  (data) => {
+    if (data.type === "EVENT") return !!data.eventId;
+    return true;
+  },
+  { message: "Event ID is required for EVENT type ads", path: ["eventId"] }
+).refine(
+  (data) => {
+    if (data.type === "CUSTOM") return !!data.imageUrl;
+    return true;
+  },
+  { message: "Image URL is required for CUSTOM type ads", path: ["imageUrl"] }
+);
+
+export const updateHomeAdSchema = z.object({
+  type: z.enum(["EVENT", "CUSTOM"]).optional(),
+  eventId: z.string().min(1).optional().nullable(),
+  imageUrl: z.string().url().max(500).optional().nullable(),
+  linkUrl: z.string().url().max(500).optional().nullable(),
+  title: z.string().max(200).optional().nullable(),
+  duration: z.number().int().min(1).max(60).optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const reorderHomeAdsSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string().min(1),
+      order: z.number().int().min(0),
+    })
+  ),
+});
+
+// ============================================
 // QUERY VALIDATIONS
 // ============================================
 
