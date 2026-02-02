@@ -174,9 +174,9 @@ export default function NewEventPage() {
           }
         }
 
-        const mintDateTime = new Date(`${formData.mintDate}T${formData.mintTime || "00:00"}`);
+        const mintDateTime = new Date(`${formData.mintDate}T${formData.mintTime || "00:00"}Z`);
         const endDateTime = formData.endDate
-          ? new Date(`${formData.endDate}T${formData.endTime || "23:59"}`)
+          ? new Date(`${formData.endDate}T${formData.endTime || "23:59"}Z`)
           : null;
 
         const response = await fetch("/api/events", {
@@ -230,15 +230,15 @@ export default function NewEventPage() {
             }
           }
           const sortedPhases = [...phases].sort(
-            (a, b) => new Date(`${a.startDate}T${a.startTime || "00:00"}`).getTime() -
-                      new Date(`${b.startDate}T${b.startTime || "00:00"}`).getTime()
+            (a, b) => new Date(`${a.startDate}T${a.startTime || "00:00"}Z`).getTime() -
+                      new Date(`${b.startDate}T${b.startTime || "00:00"}Z`).getTime()
           );
-          mintDateTime = new Date(`${sortedPhases[0].startDate}T${sortedPhases[0].startTime || "00:00"}`);
+          mintDateTime = new Date(`${sortedPhases[0].startDate}T${sortedPhases[0].startTime || "00:00"}Z`);
           phasesData = sortedPhases.map((phase, index) => ({
             name: phase.name,
-            startDate: new Date(`${phase.startDate}T${phase.startTime || "00:00"}`).toISOString(),
+            startDate: new Date(`${phase.startDate}T${phase.startTime || "00:00"}Z`).toISOString(),
             endDate: phase.endDate
-              ? new Date(`${phase.endDate}T${phase.endTime || "23:59"}`).toISOString()
+              ? new Date(`${phase.endDate}T${phase.endTime || "23:59"}Z`).toISOString()
               : null,
             price: phase.currency === "USDC" ? `$${phase.price}` : `${phase.price} HBAR`,
             supply: phase.supply ? parseInt(phase.supply) : null,
@@ -249,7 +249,7 @@ export default function NewEventPage() {
         } else {
           if (!formData.mintDate) throw new Error("Start date is required");
           if (!formData.mintPrice) throw new Error("Mint price is required");
-          mintDateTime = new Date(`${formData.mintDate}T${formData.mintTime || "00:00"}`);
+          mintDateTime = new Date(`${formData.mintDate}T${formData.mintTime || "00:00"}Z`);
         }
 
         const formattedPrice = usePhases && phases.length > 0
