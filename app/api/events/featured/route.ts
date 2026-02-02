@@ -30,8 +30,15 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Get featured meetups: top starred (not ended) + 2 closest upcoming (not live)
-    const [topMeetupResults, upcomingMeetups, topHackathonResults, upcomingHackathons] = await Promise.all([
+    // Get featured meetups & hackathons
+    const [
+      topMeetupResults,
+      upcomingMeetups,
+      topHackathonResults,
+      upcomingHackathons,
+      biggestPrizeHackathon,
+    ] = await Promise.all([
+      // Most voted meetup
       prisma.event.findFirst({
         where: {
           isApproved: true,
@@ -40,6 +47,7 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { votesUp: "desc" },
       }),
+      // Upcoming meetups (closest date)
       prisma.event.findMany({
         where: {
           isApproved: true,
@@ -50,6 +58,7 @@ export async function GET(request: NextRequest) {
         orderBy: { mintDate: "asc" },
         take: 3,
       }),
+      // Most voted hackathon
       prisma.event.findFirst({
         where: {
           isApproved: true,
@@ -58,6 +67,7 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { votesUp: "desc" },
       }),
+      // Upcoming hackathons (closest date)
       prisma.event.findMany({
         where: {
           isApproved: true,
@@ -67,6 +77,16 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { mintDate: "asc" },
         take: 3,
+      }),
+      // Biggest prize hackathon (has prizes field, non-empty)
+      prisma.event.findFirst({
+        where: {
+          isApproved: true,
+          event_type: "HACKATHON",
+          status: { in: ["UPCOMING", "LIVE"] },
+          prizes: { not: null },
+        },
+        orderBy: { votesUp: "desc" },
       }),
     ]);
 
@@ -149,17 +169,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Build meetup featured data:
-    // topMeetup = highest starred (not ended), nextMeetups = 2 closest upcoming (different from topMeetup)
+    // topMeetup = highest starred, nextMeetup = closest upcoming (different from topMeetup)
     const topMeetup = topMeetupResults;
-    const nextMeetups = upcomingMeetups
-      .filter(m => !topMeetup || m.id !== topMeetup.id)
-      .slice(0, 2);
+    const nextMeetup = upcomingMeetups.find(m => !topMeetup || m.id !== topMeetup.id) || null;
 
-    // Build hackathon featured data (same logic as meetups)
+    // Build hackathon featured data:
+    // topHackathon = most voted, nextHackathon = closest upcoming (deduplicated), bigPrize = biggest prize (deduplicated)
     const topHackathon = topHackathonResults;
-    const nextHackathons = upcomingHackathons
-      .filter(h => !topHackathon || h.id !== topHackathon.id)
-      .slice(0, 2);
+    const usedHackathonIds = new Set<string>();
+    if (topHackathon) usedHackathonIds.add(topHackathon.id);
+
+    const nextHackathon = upcomingHackathons.find(h => !usedHackathonIds.has(h.id)) || null;
+    if (nextHackathon) usedHackathonIds.add(nextHackathon.id);
+
+    // Biggest prize: must not duplicate the other two columns
+    const bigPrizeHackathon = biggestPrizeHackathon && !usedHackathonIds.has(biggestPrizeHackathon.id)
+      ? biggestPrizeHackathon
+      : null;
 
     return NextResponse.json({
       mostVoted: mostVoted
@@ -180,22 +206,23 @@ export async function GET(request: NextRequest) {
             score: topForeverMint.votesUp - topForeverMint.votesDown,
           }
         : null,
-      // Ecosystem Meetups
+      // Ecosystem Meetups (3 columns: most voted, next upcoming, deduplicated)
       topMeetup: topMeetup
         ? { ...topMeetup, score: topMeetup.votesUp }
         : null,
-      nextMeetups: nextMeetups.map(m => ({
-        ...m,
-        score: m.votesUp,
-      })),
-      // Hackathons
+      nextMeetup: nextMeetup
+        ? { ...nextMeetup, score: nextMeetup.votesUp }
+        : null,
+      // Hackathons (3 columns: most voted, next upcoming, biggest prize, deduplicated)
       topHackathon: topHackathon
         ? { ...topHackathon, score: topHackathon.votesUp }
         : null,
-      nextHackathons: nextHackathons.map(h => ({
-        ...h,
-        score: h.votesUp,
-      })),
+      nextHackathon: nextHackathon
+        ? { ...nextHackathon, score: nextHackathon.votesUp }
+        : null,
+      bigPrizeHackathon: bigPrizeHackathon
+        ? { ...bigPrizeHackathon, score: bigPrizeHackathon.votesUp }
+        : null,
     });
   } catch (error) {
     console.error("Failed to fetch featured events:", error);

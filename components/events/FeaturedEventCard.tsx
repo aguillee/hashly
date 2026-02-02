@@ -143,7 +143,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 gap-1">
+              <Badge className="bg-purple-500 text-white border-purple-600 gap-1 font-semibold shadow-sm">
                 <Infinity className="h-3 w-3" />
                 Always Live
               </Badge>
@@ -196,7 +196,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 gap-1">
+            <Badge className="bg-orange-500 text-white border-orange-600 gap-1 font-semibold shadow-sm">
               <Clock className="h-3 w-3" />
               Minting Soon
             </Badge>
