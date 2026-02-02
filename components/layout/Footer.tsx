@@ -11,7 +11,7 @@ export function Footer() {
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold gradient-text">Hashly</span>
             <span className="text-text-secondary text-sm">
-              NFT Mint Calendar on Hedera
+              Discover Events on Hedera
             </span>
           </div>
 

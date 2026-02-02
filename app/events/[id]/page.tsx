@@ -174,7 +174,7 @@ export default function EventDetailPage() {
 
   async function handleShare() {
     const url = window.location.href;
-    const text = `Check out ${event?.title} on Hedera Mint Calendar!`;
+    const text = `Check out ${event?.title} on Hashly!`;
 
     if (navigator.share) {
       try {
@@ -447,7 +447,7 @@ export default function EventDetailPage() {
                   <Calendar className="h-5 w-5 text-accent-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-text-secondary">{isMeetup || isHackathon ? "Event Date" : "Mint Date"}</p>
+                  <p className="text-sm text-text-secondary">Event Date</p>
                   <p className="font-medium">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
@@ -633,7 +633,7 @@ export default function EventDetailPage() {
             <Button
               variant="secondary"
               onClick={() => {
-                const text = `Check out ${event.title} on @hashly_h 🗓️\n\nThe mint calendar for Hedera!`;
+                const text = `Check out ${event.title} on @hashly_h 🗓️\n\nDiscover events on Hedera!`;
                 const url = `https://hash-ly.com/events/${event.id}`;
                 window.open(
                   `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,

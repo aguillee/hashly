@@ -69,7 +69,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
       const metadata = {
         name: "Hashly",
-        description: "Discover and vote on upcoming NFT mints on Hedera",
+        description: "Discover and vote on events happening on Hedera",
         url:
           typeof window !== "undefined"
             ? window.location.origin

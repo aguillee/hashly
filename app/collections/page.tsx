@@ -297,7 +297,7 @@ export default function CollectionsPage() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">
-            <span className="gradient-text">Discover NFTs on Hedera</span>
+            <span className="gradient-text">Discover Collections on Hedera</span>
           </h1>
           <p className="text-text-secondary max-w-xl mx-auto mb-4">
             Explore new and existing collections, vote on your favorites, and see what the community ranks at the top

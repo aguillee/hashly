@@ -22,10 +22,10 @@ const Toaster = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Hashly - Discover NFT Mints on Hedera",
+  title: "Hashly - Discover Events on Hedera",
   description:
-    "The ultimate calendar for upcoming NFT mints on Hedera. Vote, discover, and never miss a mint.",
-  keywords: ["hedera", "nft", "mint", "calendar", "crypto", "hashgraph", "hashly"],
+    "Discover NFT mints, meetups, hackathons, and everything happening on Hedera. Vote, explore, and never miss an event.",
+  keywords: ["hedera", "nft", "mint", "calendar", "crypto", "hashgraph", "hashly", "meetups", "hackathons", "events"],
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",

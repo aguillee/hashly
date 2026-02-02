@@ -304,7 +304,7 @@ export default function CalendarPage() {
             <span className="text-xs text-text-secondary uppercase tracking-wide">Sort:</span>
             <div className="flex gap-1">
               {[
-                { value: "date", label: "Mint Date" },
+                { value: "date", label: "Date" },
                 { value: "votes", label: "Most Voted" },
                 { value: "newest", label: "Recent" },
               ].map((sort) => (

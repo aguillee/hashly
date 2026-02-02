@@ -156,6 +156,18 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Find most voted LIVE event
+    let mostVotedLive = null;
+    let highestLiveScore = -Infinity;
+
+    for (const event of events.filter(e => e.status === "LIVE")) {
+      const score = event.votesUp - event.votesDown;
+      if (score > highestLiveScore) {
+        highestLiveScore = score;
+        mostVotedLive = event;
+      }
+    }
+
     // Find next up (closest mint date in the future)
     // Only consider events with a mint date (not TBA) and exclude forever mints
     const upcomingEvents = events
@@ -198,6 +210,12 @@ export async function GET(request: NextRequest) {
         ? {
             ...nextUp,
             score: nextUp.votesUp - nextUp.votesDown,
+          }
+        : null,
+      mostVotedLive: mostVotedLive
+        ? {
+            ...mostVotedLive,
+            score: mostVotedLive.votesUp - mostVotedLive.votesDown,
           }
         : null,
       topForeverMint: topForeverMint

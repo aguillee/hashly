@@ -118,7 +118,7 @@ export default function LeaderboardPage() {
             </Badge>
           </div>
           <p className="text-lg text-text-secondary max-w-xl mx-auto mb-6">
-            Top contributors in the Hedera Mint Calendar community
+            Top contributors in the Hashly community
           </p>
 
           {/* Countdown */}

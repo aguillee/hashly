@@ -280,7 +280,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
 
             <div className="flex items-center gap-1.5">
               <ShareToXButton
-                shareText={`Check out ${event.title} on @hashly_h 🗓️\n\nThe mint calendar for Hedera!`}
+                shareText={`Check out ${event.title} on @hashly_h 🗓️\n\nDiscover events on Hedera!`}
                 shareUrl={`https://hash-ly.com/events/${event.id}`}
                 className="p-2.5 rounded-xl"
               />

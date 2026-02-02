@@ -17,6 +17,7 @@ import {
   Users,
   Clock,
   Code2,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
@@ -102,7 +103,7 @@ export default function HomePage() {
   const homeAds = homeAdsData?.ads || [];
   const hasAds = homeAds.length > 0;
 
-  const hasFeaturedEvents = featured?.mostVoted || featured?.nextUp || featured?.topForeverMint;
+  const hasFeaturedEvents = featured?.mostVoted || featured?.mostVotedLive || featured?.nextUp || featured?.topForeverMint;
   const hasMeetups = featured?.topMeetup || featured?.nextMeetup;
   const hasHackathons = featured?.topHackathon || featured?.nextHackathon || featured?.bigPrizeHackathon;
 
@@ -229,7 +230,24 @@ export default function HomePage() {
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className={`grid grid-cols-1 gap-4 ${
+              [featured?.mostVotedLive, featured?.mostVoted, featured?.nextUp, featured?.topForeverMint].filter(Boolean).length >= 4
+                ? "md:grid-cols-2 lg:grid-cols-4"
+                : [featured?.mostVotedLive, featured?.mostVoted, featured?.nextUp, featured?.topForeverMint].filter(Boolean).length === 3
+                  ? "md:grid-cols-3"
+                  : "md:grid-cols-2"
+            }`}>
+              {/* Live Now - Most Voted */}
+              {featured?.mostVotedLive && (
+                <div>
+                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-green-400" />
+                    Live Now
+                  </h3>
+                  <FeaturedEventCard event={featured.mostVotedLive} variant="nextUp" />
+                </div>
+              )}
+
               {/* Most Voted */}
               {featured?.mostVoted && (
                 <div>
