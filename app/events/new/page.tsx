@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, ArrowLeft, Link as LinkIcon, Send, Plus, Trash2, Layers, Clock, MapPin, Globe, Users } from "lucide-react";
+import { Calendar, ArrowLeft, Link as LinkIcon, Send, Plus, Trash2, Layers, Clock, MapPin, Globe, Users, Code2, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
@@ -13,7 +13,7 @@ import { useWalletStore } from "@/store";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type EventType = "MINT_EVENT" | "ECOSYSTEM_MEETUP";
+type EventType = "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
 
 interface MintPhase {
   id: string;
@@ -92,11 +92,12 @@ export default function NewEventPage() {
     websiteUrl: "",
     twitterUrl: "",
     discordUrl: "",
-    // Meetup fields
+    // Meetup / Hackathon fields
     host: "",
     language: "en",
     locationType: "online" as "online" | "in_person",
     location: "",
+    prizes: "",
   });
 
   React.useEffect(() => {
@@ -155,9 +156,9 @@ export default function NewEventPage() {
         throw new Error("Description must be at least 10 characters");
       }
 
-      if (eventType === "ECOSYSTEM_MEETUP") {
-        // Meetup validation
-        if (!formData.host.trim()) throw new Error("Host is required");
+      if (eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") {
+        // Meetup / Hackathon validation
+        if (!formData.host.trim()) throw new Error(eventType === "HACKATHON" ? "Organizer is required" : "Host is required");
         if (!formData.mintDate) throw new Error("Event date is required");
 
         if (formData.locationType === "in_person" && !formData.location.trim()) {
@@ -191,13 +192,14 @@ export default function NewEventPage() {
             websiteUrl: formData.websiteUrl || null,
             twitterUrl: formData.twitterUrl || null,
             discordUrl: formData.discordUrl || null,
-            eventType: "ECOSYSTEM_MEETUP",
+            eventType,
             host: formData.host,
             language: formData.language,
             locationType: formData.locationType === "in_person" ? "IN_PERSON" : "ONLINE",
             location: formData.location || null,
             endDate: endDateTime?.toISOString() || null,
             customLinks: validLinks.map(l => ({ name: l.name.trim(), url: l.url.trim() })),
+            ...(eventType === "HACKATHON" && formData.prizes ? { prizes: formData.prizes } : {}),
           }),
         });
 
@@ -333,7 +335,7 @@ export default function NewEventPage() {
                   type="button"
                   onClick={() => setEventType("MINT_EVENT")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+                    "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
                     eventType === "MINT_EVENT"
                       ? "bg-accent-primary text-white"
                       : "bg-bg-card text-text-secondary hover:text-text-primary"
@@ -346,14 +348,27 @@ export default function NewEventPage() {
                   type="button"
                   onClick={() => setEventType("ECOSYSTEM_MEETUP")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+                    "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
                     eventType === "ECOSYSTEM_MEETUP"
                       ? "bg-accent-primary text-white"
                       : "bg-bg-card text-text-secondary hover:text-text-primary"
                   )}
                 >
                   <Users className="h-4 w-4" />
-                  Ecosystem Meetup
+                  Meetup
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEventType("HACKATHON")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
+                    eventType === "HACKATHON"
+                      ? "bg-accent-primary text-white"
+                      : "bg-bg-card text-text-secondary hover:text-text-primary"
+                  )}
+                >
+                  <Code2 className="h-4 w-4" />
+                  Hackathon
                 </button>
               </div>
             </div>
@@ -361,13 +376,13 @@ export default function NewEventPage() {
             {/* Title */}
             <div>
               <label className="block text-sm font-medium mb-2">
-                {eventType === "ECOSYSTEM_MEETUP" ? "Event Title" : "Project Name"} <span className="text-error">*</span>
+                {eventType === "MINT_EVENT" ? "Project Name" : eventType === "HACKATHON" ? "Hackathon Name" : "Event Title"} <span className="text-error">*</span>
               </label>
               <Input
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder={eventType === "ECOSYSTEM_MEETUP" ? "e.g., Hedera Community Call" : "e.g., Hedera Punks"}
+                placeholder={eventType === "MINT_EVENT" ? "e.g., Hedera Punks" : eventType === "HACKATHON" ? "e.g., Hedera DeFi Hackathon" : "e.g., Hedera Community Call"}
                 required
               />
             </div>
@@ -381,29 +396,45 @@ export default function NewEventPage() {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder={eventType === "ECOSYSTEM_MEETUP" ? "Describe this meetup or event..." : "Tell us about this project..."}
+                placeholder={eventType === "MINT_EVENT" ? "Tell us about this project..." : eventType === "HACKATHON" ? "Describe this hackathon..." : "Describe this meetup or event..."}
                 required
                 rows={4}
                 className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
               />
             </div>
 
-            {/* ============ MEETUP-SPECIFIC FIELDS ============ */}
-            {eventType === "ECOSYSTEM_MEETUP" && (
+            {/* ============ MEETUP / HACKATHON FIELDS ============ */}
+            {(eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") && (
               <>
-                {/* Host */}
+                {/* Host / Organizer */}
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Host <span className="text-error">*</span>
+                    {eventType === "HACKATHON" ? "Organizer" : "Host"} <span className="text-error">*</span>
                   </label>
                   <Input
                     name="host"
                     value={formData.host}
                     onChange={handleChange}
-                    placeholder="e.g., HBAR Foundation, Community DAO"
+                    placeholder={eventType === "HACKATHON" ? "e.g., HBAR Foundation, Hashgraph" : "e.g., HBAR Foundation, Community DAO"}
                     required
                   />
                 </div>
+
+                {/* Prizes (Hackathon only) */}
+                {eventType === "HACKATHON" && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-yellow-500" />
+                      Prizes
+                    </label>
+                    <Input
+                      name="prizes"
+                      value={formData.prizes}
+                      onChange={handleChange}
+                      placeholder="e.g., $50,000 in HBAR + ecosystem grants"
+                    />
+                  </div>
+                )}
 
                 {/* Language */}
                 <div>

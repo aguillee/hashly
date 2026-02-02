@@ -55,6 +55,7 @@ model Event {
   language      String?
   location      String?
   location_type LocationType?
+  prizes        String?
   createdBy     User          @relation(fields: [createdById], references: [id])
   phases        MintPhase[]
   nftVotes      NftVote[]
@@ -215,6 +216,7 @@ enum VoteType {
 enum EventType {
   MINT_EVENT
   ECOSYSTEM_MEETUP
+  HACKATHON
 }
 
 enum LocationType {

@@ -20,6 +20,8 @@ import {
   Layers,
   AlertCircle,
   DollarSign,
+  Trophy,
+  Code2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -57,7 +59,8 @@ interface EventDetail {
   status: "UPCOMING" | "LIVE";
   votesUp: number;
   votesDown: number;
-  event_type: "MINT_EVENT" | "ECOSYSTEM_MEETUP";
+  event_type: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
+  prizes?: string | null;
   createdBy: {
     walletAddress: string;
   };
@@ -266,6 +269,8 @@ export default function EventDetailPage() {
 
   const score = event.votesUp - event.votesDown;
   const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
+  const isHackathon = event.event_type === "HACKATHON";
+  const isStarsOnly = isMeetup || isHackathon; // Stars-only voting for meetups and hackathons
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -351,7 +356,7 @@ export default function EventDetailPage() {
           </Card>
 
           {/* Mint Phases - only for mint events */}
-          {!isMeetup && event.phases.length > 0 && (
+          {!isMeetup && !isHackathon && event.phases.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -442,7 +447,7 @@ export default function EventDetailPage() {
                   <Calendar className="h-5 w-5 text-accent-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-text-secondary">{isMeetup ? "Event Date" : "Mint Date"}</p>
+                  <p className="text-sm text-text-secondary">{isMeetup || isHackathon ? "Event Date" : "Mint Date"}</p>
                   <p className="font-medium">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
@@ -452,12 +457,24 @@ export default function EventDetailPage() {
                   <Clock className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-text-secondary">{isMeetup ? "Time Until Event" : "Time Until Mint"}</p>
+                  <p className="text-sm text-text-secondary">{isStarsOnly ? "Time Until Event" : "Time Until Mint"}</p>
                   <p className="font-medium text-lg">{getTimeUntil(event.mintDate)}</p>
                 </div>
               </div>
 
-              {isMeetup ? (
+              {isHackathon ? (
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-lg bg-yellow-500/10">
+                    <Trophy className="h-5 w-5 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-text-secondary">Prizes</p>
+                    <p className="font-medium text-lg">
+                      {event.prizes || "To be announced"}
+                    </p>
+                  </div>
+                </div>
+              ) : isMeetup ? (
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-lg bg-yellow-500/10">
                     <DollarSign className="h-5 w-5 text-yellow-500" />
@@ -513,9 +530,9 @@ export default function EventDetailPage() {
           {/* Voting */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">{isMeetup ? "Community Rating" : "Community Score"}</h3>
+              <h3 className="font-semibold mb-4">{isStarsOnly ? "Community Rating" : "Community Score"}</h3>
               <div className="text-center mb-4">
-                {isMeetup ? (
+                {isStarsOnly ? (
                   <div className="flex items-center justify-center gap-1.5">
                     <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
                     <span className="text-4xl font-bold text-yellow-400">{event.votesUp}</span>
@@ -534,7 +551,7 @@ export default function EventDetailPage() {
               {!isConnected && (
                 <div className="mb-4 p-3 rounded-lg bg-accent-primary/10 border border-accent-primary/30 text-center">
                   <p className="text-sm text-accent-primary font-medium">
-                    Connect wallet to {isMeetup ? "rate" : "vote"}
+                    Connect wallet to {isStarsOnly ? "rate" : "vote"}
                   </p>
                 </div>
               )}
@@ -543,12 +560,12 @@ export default function EventDetailPage() {
               {isConnected && event.userVote && !event.canVote && voteCountdown && (
                 <div className="mb-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 text-center">
                   <p className="text-sm text-orange-500 font-medium">
-                    {isMeetup ? "Rate" : "Vote"} again in {voteCountdown}
+                    {isStarsOnly ? "Rate" : "Vote"} again in {voteCountdown}
                   </p>
                 </div>
               )}
 
-              {isMeetup ? (
+              {isStarsOnly ? (
                 <Button
                   variant={event.userVote === "UP" ? "default" : "secondary"}
                   onClick={() => handleVote("UP")}
@@ -595,7 +612,7 @@ export default function EventDetailPage() {
 
               {isConnected && event.userVote && (
                 <p className="text-xs text-text-secondary text-center mt-3">
-                  {isMeetup
+                  {isStarsOnly
                     ? "You starred this event ⭐"
                     : `You voted ${event.userVote === "UP" ? "👍" : "👎"}`}
                 </p>

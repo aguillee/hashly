@@ -13,6 +13,7 @@ import {
   CalendarDays,
   Infinity,
   Users,
+  Code2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -51,6 +52,7 @@ const statusFilters = [
   { value: "upcoming", label: "Upcoming", icon: Clock },
   { value: "forever", label: "Forever Mints", icon: Infinity },
   { value: "meetups", label: "Meetups", icon: Users },
+  { value: "hackathons", label: "Hackathons", icon: Code2 },
 ];
 
 const sourceFilters = [
@@ -91,6 +93,8 @@ export default function CalendarPage() {
       setStatus("forever");
     } else if (params.get("eventType") === "ECOSYSTEM_MEETUP") {
       setStatus("meetups");
+    } else if (params.get("eventType") === "HACKATHON") {
+      setStatus("hackathons");
     }
   }, [setStatus]);
 
@@ -105,6 +109,8 @@ export default function CalendarPage() {
         params.append("foreverMints", "only");
       } else if (status === "meetups") {
         params.append("eventType", "ECOSYSTEM_MEETUP");
+      } else if (status === "hackathons") {
+        params.append("eventType", "HACKATHON");
       } else {
         if (status !== "all") params.append("status", status);
         params.append("foreverMints", "exclude");

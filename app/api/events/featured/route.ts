@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get featured meetups: top starred (not ended) + 2 closest upcoming (not live)
-    const [topMeetupResults, upcomingMeetups] = await Promise.all([
+    const [topMeetupResults, upcomingMeetups, topHackathonResults, upcomingHackathons] = await Promise.all([
       prisma.event.findFirst({
         where: {
           isApproved: true,
@@ -48,7 +48,25 @@ export async function GET(request: NextRequest) {
           mintDate: { gt: now },
         },
         orderBy: { mintDate: "asc" },
-        take: 3, // We take 3 so we can exclude the top one and still have 2
+        take: 3,
+      }),
+      prisma.event.findFirst({
+        where: {
+          isApproved: true,
+          event_type: "HACKATHON",
+          status: { in: ["UPCOMING", "LIVE"] },
+        },
+        orderBy: { votesUp: "desc" },
+      }),
+      prisma.event.findMany({
+        where: {
+          isApproved: true,
+          event_type: "HACKATHON",
+          status: "UPCOMING",
+          mintDate: { gt: now },
+        },
+        orderBy: { mintDate: "asc" },
+        take: 3,
       }),
     ]);
 
@@ -137,6 +155,12 @@ export async function GET(request: NextRequest) {
       .filter(m => !topMeetup || m.id !== topMeetup.id)
       .slice(0, 2);
 
+    // Build hackathon featured data (same logic as meetups)
+    const topHackathon = topHackathonResults;
+    const nextHackathons = upcomingHackathons
+      .filter(h => !topHackathon || h.id !== topHackathon.id)
+      .slice(0, 2);
+
     return NextResponse.json({
       mostVoted: mostVoted
         ? {
@@ -163,6 +187,14 @@ export async function GET(request: NextRequest) {
       nextMeetups: nextMeetups.map(m => ({
         ...m,
         score: m.votesUp,
+      })),
+      // Hackathons
+      topHackathon: topHackathon
+        ? { ...topHackathon, score: topHackathon.votesUp }
+        : null,
+      nextHackathons: nextHackathons.map(h => ({
+        ...h,
+        score: h.votesUp,
       })),
     });
   } catch (error) {

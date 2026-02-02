@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Event type filter
-    if (eventType === "MINT_EVENT" || eventType === "ECOSYSTEM_MEETUP") {
+    if (eventType === "MINT_EVENT" || eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") {
       where.event_type = eventType;
     }
 
@@ -137,6 +137,7 @@ export async function GET(request: NextRequest) {
           location: true,
           location_type: true,
           custom_links: true,
+          prizes: true,
         },
       }),
       prisma.event.count({ where }),
@@ -230,7 +231,9 @@ export async function POST(request: NextRequest) {
     const shouldAutoApprove = user.isAdmin || hasSantuarioNFT;
 
     // Determine event type from body (not from Zod - we handle it separately)
-    const reqEventType = body.eventType === "ECOSYSTEM_MEETUP" ? "ECOSYSTEM_MEETUP" : "MINT_EVENT";
+    const reqEventType = body.eventType === "ECOSYSTEM_MEETUP" ? "ECOSYSTEM_MEETUP"
+      : body.eventType === "HACKATHON" ? "HACKATHON"
+      : "MINT_EVENT";
 
     // Build event data
     const eventData: any = {
@@ -248,8 +251,8 @@ export async function POST(request: NextRequest) {
       event_type: reqEventType,
     };
 
-    // Add meetup-specific fields (validated with Zod)
-    if (reqEventType === "ECOSYSTEM_MEETUP") {
+    // Add meetup/hackathon-specific fields (validated with Zod)
+    if (reqEventType === "ECOSYSTEM_MEETUP" || reqEventType === "HACKATHON") {
       const meetupValidation = meetupFieldsSchema.safeParse(body);
       if (!meetupValidation.success) {
         return NextResponse.json(
@@ -263,6 +266,11 @@ export async function POST(request: NextRequest) {
       eventData.location_type = meetupData.locationType || "ONLINE";
       eventData.location = meetupData.location || null;
       eventData.custom_links = meetupData.customLinks || null;
+
+      // Hackathon-specific: prizes
+      if (reqEventType === "HACKATHON" && body.prizes) {
+        eventData.prizes = String(body.prizes).slice(0, 500);
+      }
     }
 
     // Add phases for mint events

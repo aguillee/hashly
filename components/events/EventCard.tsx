@@ -28,7 +28,7 @@ interface EventCardProps {
     votesDown: number;
     canVote?: boolean;
     voteLockedUntil?: string | null;
-    event_type?: "MINT_EVENT" | "ECOSYSTEM_MEETUP";
+    event_type?: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
     host?: string | null;
     location?: string | null;
     location_type?: string | null;
@@ -42,7 +42,9 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
   const [isVoting, setIsVoting] = React.useState(false);
 
   const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
-  const score = isMeetup ? event.votesUp : getVoteScore(event.votesUp, event.votesDown);
+  const isHackathon = event.event_type === "HACKATHON";
+  const isStarsOnly = isMeetup || isHackathon;
+  const score = isStarsOnly ? event.votesUp : getVoteScore(event.votesUp, event.votesDown);
   const timeRemaining = formatTimeRemaining(event.mintDate);
   const priceInfo = parseMintPrice(event.mintPrice);
 
@@ -167,8 +169,8 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
             {event.description}
           </p>
 
-          {/* Price & Supply (mint) or Host & Location (meetup) */}
-          {isMeetup ? (
+          {/* Price & Supply (mint) or Host & Location (meetup/hackathon) */}
+          {isStarsOnly ? (
             <div className="flex items-center gap-3 flex-wrap">
               {event.host && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
@@ -211,8 +213,8 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
 
           {/* Voting & Details */}
           <div className="flex items-center justify-between pt-4 border-t border-border">
-            {isMeetup ? (
-              /* Star voting for meetups - only positive */
+            {isStarsOnly ? (
+              /* Star voting for meetups/hackathons - only positive */
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleVote("UP")}
