@@ -13,11 +13,13 @@ import {
   Users,
   ThumbsUp,
   ThumbsDown,
+  Star,
   Share2,
   ArrowLeft,
   Loader2,
   Layers,
   AlertCircle,
+  DollarSign,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -55,6 +57,7 @@ interface EventDetail {
   status: "UPCOMING" | "LIVE";
   votesUp: number;
   votesDown: number;
+  event_type: "MINT_EVENT" | "ECOSYSTEM_MEETUP";
   createdBy: {
     walletAddress: string;
   };
@@ -260,6 +263,7 @@ export default function EventDetailPage() {
   }
 
   const score = event.votesUp - event.votesDown;
+  const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -344,8 +348,8 @@ export default function EventDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Mint Phases */}
-          {event.phases.length > 0 && (
+          {/* Mint Phases - only for mint events */}
+          {!isMeetup && event.phases.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -428,7 +432,7 @@ export default function EventDetailPage() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Mint Info */}
+          {/* Event Info */}
           <Card>
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center gap-3">
@@ -436,7 +440,7 @@ export default function EventDetailPage() {
                   <Calendar className="h-5 w-5 text-accent-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-text-secondary">Mint Date</p>
+                  <p className="text-sm text-text-secondary">{isMeetup ? "Event Date" : "Mint Date"}</p>
                   <p className="font-medium">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
@@ -446,42 +450,60 @@ export default function EventDetailPage() {
                   <Clock className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-text-secondary">Time Until Mint</p>
+                  <p className="text-sm text-text-secondary">{isMeetup ? "Time Until Event" : "Time Until Mint"}</p>
                   <p className="font-medium text-lg">{getTimeUntil(event.mintDate)}</p>
                 </div>
               </div>
 
-              {(() => {
-                const priceInfo = parseMintPrice(event.mintPrice);
-                return (
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-lg bg-yellow-500/10">
-                      {priceInfo.isHbar ? (
-                        <HbarIcon className="h-5 w-5" />
-                      ) : (
-                        <UsdcIcon className="h-5 w-5" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm text-text-secondary">Mint Price</p>
-                      <p className="font-medium text-lg">
-                        {priceInfo.isHbar ? `${priceInfo.value} HBAR` : `$${priceInfo.value}`}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {event.supply && (
+              {isMeetup ? (
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-lg bg-purple-500/10">
-                    <Layers className="h-5 w-5 text-purple-500" />
+                  <div className="p-3 rounded-lg bg-yellow-500/10">
+                    <DollarSign className="h-5 w-5 text-yellow-500" />
                   </div>
                   <div>
-                    <p className="text-sm text-text-secondary">Total Supply</p>
-                    <p className="font-medium text-lg">{event.supply.toLocaleString()}</p>
+                    <p className="text-sm text-text-secondary">Entry Price</p>
+                    <p className="font-medium text-lg">
+                      {!event.mintPrice || event.mintPrice === "0" || event.mintPrice.toLowerCase().includes("free")
+                        ? "Free"
+                        : `$${event.mintPrice}`}
+                    </p>
                   </div>
                 </div>
+              ) : (
+                <>
+                  {(() => {
+                    const priceInfo = parseMintPrice(event.mintPrice);
+                    return (
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-lg bg-yellow-500/10">
+                          {priceInfo.isHbar ? (
+                            <HbarIcon className="h-5 w-5" />
+                          ) : (
+                            <UsdcIcon className="h-5 w-5" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm text-text-secondary">Mint Price</p>
+                          <p className="font-medium text-lg">
+                            {priceInfo.isHbar ? `${priceInfo.value} HBAR` : `$${priceInfo.value}`}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {event.supply && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-lg bg-purple-500/10">
+                        <Layers className="h-5 w-5 text-purple-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-text-secondary">Total Supply</p>
+                        <p className="font-medium text-lg">{event.supply.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -489,21 +511,28 @@ export default function EventDetailPage() {
           {/* Voting */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">Community Score</h3>
+              <h3 className="font-semibold mb-4">{isMeetup ? "Community Rating" : "Community Score"}</h3>
               <div className="text-center mb-4">
-                <span className={cn(
-                  "text-4xl font-bold",
-                  score > 0 ? "text-success" : score < 0 ? "text-error" : "text-text-secondary"
-                )}>
-                  {score > 0 ? "+" : ""}{score}
-                </span>
+                {isMeetup ? (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+                    <span className="text-4xl font-bold text-yellow-400">{event.votesUp}</span>
+                  </div>
+                ) : (
+                  <span className={cn(
+                    "text-4xl font-bold",
+                    score > 0 ? "text-success" : score < 0 ? "text-error" : "text-text-secondary"
+                  )}>
+                    {score > 0 ? "+" : ""}{score}
+                  </span>
+                )}
               </div>
 
               {/* Connect wallet message */}
               {!isConnected && (
                 <div className="mb-4 p-3 rounded-lg bg-accent-primary/10 border border-accent-primary/30 text-center">
                   <p className="text-sm text-accent-primary font-medium">
-                    Connect wallet to vote
+                    Connect wallet to {isMeetup ? "rate" : "vote"}
                   </p>
                 </div>
               )}
@@ -512,41 +541,61 @@ export default function EventDetailPage() {
               {isConnected && event.userVote && !event.canVote && voteCountdown && (
                 <div className="mb-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 text-center">
                   <p className="text-sm text-orange-500 font-medium">
-                    Vote again in {voteCountdown}
+                    {isMeetup ? "Rate" : "Vote"} again in {voteCountdown}
                   </p>
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              {isMeetup ? (
                 <Button
                   variant={event.userVote === "UP" ? "default" : "secondary"}
                   onClick={() => handleVote("UP")}
                   disabled={voting || !isConnected || !event.canVote}
                   className={cn(
-                    "flex items-center gap-2",
+                    "w-full flex items-center justify-center gap-2",
+                    event.userVote === "UP"
+                      ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                      : "hover:border-yellow-500/50",
                     (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  <ThumbsUp className="h-4 w-4" />
-                  {event.votesUp}
+                  <Star className={cn("h-4 w-4", event.userVote === "UP" && "fill-white")} />
+                  {event.userVote === "UP" ? "Starred" : "Give a Star"}
                 </Button>
-                <Button
-                  variant={event.userVote === "DOWN" ? "default" : "secondary"}
-                  onClick={() => handleVote("DOWN")}
-                  disabled={voting || !isConnected || !event.canVote}
-                  className={cn(
-                    "flex items-center gap-2",
-                    (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  <ThumbsDown className="h-4 w-4" />
-                  {event.votesDown}
-                </Button>
-              </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant={event.userVote === "UP" ? "default" : "secondary"}
+                    onClick={() => handleVote("UP")}
+                    disabled={voting || !isConnected || !event.canVote}
+                    className={cn(
+                      "flex items-center gap-2",
+                      (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <ThumbsUp className="h-4 w-4" />
+                    {event.votesUp}
+                  </Button>
+                  <Button
+                    variant={event.userVote === "DOWN" ? "default" : "secondary"}
+                    onClick={() => handleVote("DOWN")}
+                    disabled={voting || !isConnected || !event.canVote}
+                    className={cn(
+                      "flex items-center gap-2",
+                      (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <ThumbsDown className="h-4 w-4" />
+                    {event.votesDown}
+                  </Button>
+                </div>
+              )}
 
               {isConnected && event.userVote && (
                 <p className="text-xs text-text-secondary text-center mt-3">
-                  You voted {event.userVote === "UP" ? "👍" : "👎"}
+                  {isMeetup
+                    ? "You starred this event ⭐"
+                    : `You voted ${event.userVote === "UP" ? "👍" : "👎"}`}
                 </p>
               )}
             </CardContent>
