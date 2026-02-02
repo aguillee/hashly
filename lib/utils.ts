@@ -8,6 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatDate(date: Date | string): string {
   const d = new Date(date);
   return d.toLocaleDateString("en-US", {
+    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -17,12 +18,13 @@ export function formatDate(date: Date | string): string {
 export function formatDateTime(date: Date | string): string {
   const d = new Date(date);
   return d.toLocaleDateString("en-US", {
+    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  });
+  }) + " UTC";
 }
 
 export function formatTimeRemaining(targetDate: Date | string): string {

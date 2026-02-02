@@ -188,22 +188,24 @@ export default function EventDetailPage() {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
+      timeZone: "UTC",
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
+    }) + " UTC";
   };
 
   const formatShortDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
+      timeZone: "UTC",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
+    }) + " UTC";
   };
 
   const getTimeUntil = (dateString: string) => {
