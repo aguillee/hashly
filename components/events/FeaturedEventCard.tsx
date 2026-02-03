@@ -102,9 +102,9 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
                   )}
                   <span>{priceInfo.value} {priceInfo.isHbar ? "HBAR" : "USDC"}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-green-400 font-semibold">
+                <div className={`flex items-center gap-1.5 font-semibold ${score >= 0 ? "text-green-400" : "text-red-400"}`}>
                   <TrendingUp className="h-4 w-4" />
-                  <span>+{score} votes</span>
+                  <span>{score >= 0 ? `+${score}` : score} votes</span>
                 </div>
               </div>
 
@@ -225,7 +225,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
               )}
               {priceInfo.value}
             </span>
-            <span className="text-success">+{score}</span>
+            <span className={score >= 0 ? "text-success" : "text-red-400"}>{score >= 0 ? `+${score}` : score}</span>
           </div>
         </div>
       </div>
