@@ -196,10 +196,17 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-orange-500 text-white border-orange-600 gap-1 font-semibold shadow-sm">
-              <Clock className="h-3 w-3" />
-              Minting Soon
-            </Badge>
+            {event.status === "LIVE" ? (
+              <Badge className="bg-green-500 text-white border-green-600 gap-1 font-semibold shadow-sm animate-pulse">
+                <Clock className="h-3 w-3" />
+                Live Now
+              </Badge>
+            ) : (
+              <Badge className="bg-orange-500 text-white border-orange-600 gap-1 font-semibold shadow-sm">
+                <Clock className="h-3 w-3" />
+                Minting Soon
+              </Badge>
+            )}
           </div>
 
           <h3 className="font-semibold text-text-primary group-hover:text-accent-primary transition-colors truncate mb-1">
