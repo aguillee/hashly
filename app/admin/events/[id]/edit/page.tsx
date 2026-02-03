@@ -53,6 +53,8 @@ export default function AdminEditEventPage() {
     description: "",
     mintDate: "",
     mintTime: "",
+    endDate: "",
+    endTime: "",
     mintPrice: "",
     supply: "",
     imageUrl: "",
@@ -99,11 +101,22 @@ export default function AdminEditEventPage() {
         mintTime = d.toISOString().split("T")[1]?.substring(0, 5) || "";
       }
 
+      // Parse endDate
+      let endDate = "";
+      let endTime = "";
+      if (e.endDate) {
+        const d = new Date(e.endDate);
+        endDate = d.toISOString().split("T")[0];
+        endTime = d.toISOString().split("T")[1]?.substring(0, 5) || "";
+      }
+
       setFormData({
         title: e.title || "",
         description: e.description || "",
         mintDate,
         mintTime,
+        endDate,
+        endTime,
         mintPrice: e.mintPrice || "",
         supply: e.supply?.toString() || "",
         imageUrl: e.imageUrl || "",
@@ -148,10 +161,15 @@ export default function AdminEditEventPage() {
         ? new Date(`${formData.mintDate}T${formData.mintTime || "00:00"}Z`).toISOString()
         : null;
 
+      const endDateTime = formData.endDate
+        ? new Date(`${formData.endDate}T${formData.endTime || "23:59"}Z`).toISOString()
+        : null;
+
       const body: Record<string, any> = {
         title: formData.title,
         description: formData.description,
         mintDate: mintDateTime,
+        endDate: endDateTime,
         mintPrice: formData.mintPrice,
         supply: formData.supply ? parseInt(formData.supply) : null,
         imageUrl: formData.imageUrl || null,
@@ -397,12 +415,24 @@ export default function AdminEditEventPage() {
             {/* Date & Time */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Date</label>
+                <label className="block text-sm font-medium mb-2">Start Date</label>
                 <Input type="date" name="mintDate" value={formData.mintDate} onChange={handleChange} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Time (UTC)</label>
+                <label className="block text-sm font-medium mb-2">Start Time (UTC)</label>
                 <Input type="time" name="mintTime" value={formData.mintTime} onChange={handleChange} />
+              </div>
+            </div>
+
+            {/* End Date & Time */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">End Date</label>
+                <Input type="date" name="endDate" value={formData.endDate} onChange={handleChange} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">End Time (UTC)</label>
+                <Input type="time" name="endTime" value={formData.endTime} onChange={handleChange} />
               </div>
             </div>
 

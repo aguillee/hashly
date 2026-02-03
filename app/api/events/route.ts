@@ -32,7 +32,18 @@ export async function GET(request: NextRequest) {
       data: { status: "LIVE" },
     });
 
-    // Delete LIVE events older than 7 days (except Forever Mints)
+    // Delete events whose endDate has passed (immediate cleanup)
+    await prisma.event.deleteMany({
+      where: {
+        isForeverMint: false,
+        endDate: {
+          not: null,
+          lt: now,
+        },
+      },
+    });
+
+    // Delete LIVE events older than 7 days (except Forever Mints, and those without endDate)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -40,6 +51,7 @@ export async function GET(request: NextRequest) {
       where: {
         status: "LIVE",
         isForeverMint: false,
+        endDate: null,
         mintDate: {
           not: null,
           lt: sevenDaysAgo,
@@ -250,6 +262,11 @@ export async function POST(request: NextRequest) {
       createdById: user.id,
       event_type: reqEventType,
     };
+
+    // Add endDate if provided
+    if (body.endDate) {
+      eventData.endDate = new Date(body.endDate);
+    }
 
     // Add meetup/hackathon-specific fields (validated with Zod)
     if (reqEventType === "ECOSYSTEM_MEETUP" || reqEventType === "HACKATHON") {

@@ -32,6 +32,7 @@ model Event {
   title         String
   description   String
   mintDate      DateTime?     @map("mint_date")
+  endDate       DateTime?     @map("end_date")
   mintPrice     String        @map("mint_price")
   supply        Int?
   imageUrl      String?       @map("image_url")

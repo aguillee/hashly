@@ -9,6 +9,7 @@ const adminEventUpdateSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().min(10).max(5000).optional(),
   mintDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
   mintPrice: z.string().max(100).optional(),
   supply: z.number().int().positive().optional().nullable(),
   imageUrl: z.string().url().max(500).optional().nullable(),
@@ -99,6 +100,7 @@ export async function PATCH(
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.mintDate !== undefined) updateData.mintDate = data.mintDate ? new Date(data.mintDate) : null;
+    if (data.endDate !== undefined) updateData.endDate = data.endDate ? new Date(data.endDate) : null;
     if (data.mintPrice !== undefined) updateData.mintPrice = data.mintPrice;
     if (data.supply !== undefined) updateData.supply = data.supply;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;

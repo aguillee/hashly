@@ -133,8 +133,18 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     data: { status: "LIVE" }
   });
 
-  // 2. Delete LIVE events older than 7 days directly (except Forever Mints)
-  // No ENDED status - just delete them
+  // 2. Delete events whose endDate has passed (immediate cleanup)
+  const deletedEnded = await prisma.event.deleteMany({
+    where: {
+      isForeverMint: false,
+      endDate: {
+        not: null,
+        lt: now
+      }
+    }
+  });
+
+  // 3. Delete LIVE events older than 7 days (except Forever Mints, and those without endDate)
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -142,6 +152,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     where: {
       status: "LIVE",
       isForeverMint: false,
+      endDate: null,
       mintDate: {
         not: null,
         lt: sevenDaysAgo
@@ -149,7 +160,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     }
   });
 
-  // 3. Ensure ALL Forever Mints are LIVE (fix any that got wrong status)
+  // 4. Ensure ALL Forever Mints are LIVE (fix any that got wrong status)
   const fixedForeverMints = await prisma.event.updateMany({
     where: {
       isForeverMint: true,
@@ -158,7 +169,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     data: { status: "LIVE" }
   });
 
-  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedOld.count} old LIVE deleted, ${fixedForeverMints.count} Forever Mints fixed to LIVE`);
+  console.log(`Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedEnded.count} ended deleted, ${deletedOld.count} old LIVE deleted, ${fixedForeverMints.count} Forever Mints fixed to LIVE`);
 
   // === FETCH AND SYNC ===
 
@@ -205,6 +216,9 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
         mintDate = new Date(event.startDate);
       }
 
+      // Determine end date
+      const endDate = event.endDateUnix ? new Date(event.endDateUnix * 1000) : null;
+
       // SKIP events without a mint date (TBA) - we only want events with dates
       if (!mintDate) {
         console.log(`[SYNC] Skipping ${event.mintEventName}: no mint date (TBA)`);
@@ -242,6 +256,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
           title,
           description,
           mintDate,
+          endDate,
           mintPrice,
           supply: event.totalCount || null,
           imageUrl: resolveImageUrl(event.image),
@@ -256,6 +271,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
         update: {
           title,
           description,
+          endDate,
           mintPrice,
           supply: event.totalCount || null,
           imageUrl: resolveImageUrl(event.image),

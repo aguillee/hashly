@@ -50,6 +50,7 @@ interface EventDetail {
   title: string;
   description: string;
   mintDate: string;
+  endDate: string | null;
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
@@ -447,10 +448,22 @@ export default function EventDetailPage() {
                   <Calendar className="h-5 w-5 text-accent-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-text-secondary">Event Date</p>
+                  <p className="text-sm text-text-secondary">{event.endDate ? "Start Date" : "Event Date"}</p>
                   <p className="font-medium">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
+
+              {event.endDate && (
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-lg bg-red-500/10">
+                    <Calendar className="h-5 w-5 text-red-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-text-secondary">End Date</p>
+                    <p className="font-medium">{formatDate(event.endDate)}</p>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-lg bg-green-500/10">
