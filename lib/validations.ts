@@ -142,7 +142,7 @@ export const meetupFieldsSchema = z.object({
       url: z.string().url().max(500),
     })
   ).max(10).optional().nullable(),
-  endDate: z.string().datetime().optional().nullable(),
+  endDate: z.string().datetime({ message: "End date is required for meetups and hackathons" }),
 });
 
 // ============================================

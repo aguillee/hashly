@@ -159,7 +159,8 @@ export default function NewEventPage() {
       if (eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") {
         // Meetup / Hackathon validation
         if (!formData.host.trim()) throw new Error(eventType === "HACKATHON" ? "Organizer is required" : "Host is required");
-        if (!formData.mintDate) throw new Error("Event date is required");
+        if (!formData.mintDate) throw new Error("Start date is required");
+        if (!formData.endDate) throw new Error("End date is required");
 
         if (formData.locationType === "in_person" && !formData.location.trim()) {
           throw new Error("Location is required for in-person events");
@@ -530,12 +531,15 @@ export default function NewEventPage() {
                 {/* End Date & Time */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">End Date</label>
+                    <label className="block text-sm font-medium mb-2">
+                      End Date <span className="text-error">*</span>
+                    </label>
                     <Input
                       type="date"
                       name="endDate"
                       value={formData.endDate}
                       onChange={handleChange}
+                      required
                     />
                   </div>
                   <div>

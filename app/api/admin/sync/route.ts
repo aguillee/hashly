@@ -144,9 +144,9 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
     }
   });
 
-  // 3. Delete LIVE events older than 24h (except Forever Mints; only those without endDate)
-  const oneDayAgo = new Date();
-  oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+  // 3. Delete LIVE events older than 7 days (except Forever Mints; only those without endDate)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
   const deletedOld = await prisma.event.deleteMany({
     where: {
@@ -155,7 +155,7 @@ async function syncLaunchpadsFromSentX(adminUserId: string) {
       endDate: null,
       mintDate: {
         not: null,
-        lt: oneDayAgo
+        lt: sevenDaysAgo
       }
     }
   });
