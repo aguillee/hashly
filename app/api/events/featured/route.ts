@@ -174,11 +174,13 @@ export async function GET(request: NextRequest) {
       .filter((e) => e.mintDate && new Date(e.mintDate) > now)
       .sort((a, b) => new Date(a.mintDate!).getTime() - new Date(b.mintDate!).getTime());
 
-    // Make sure nextUp is different from mostVoted if possible
-    let nextUp = upcomingEvents[0] || null;
-    if (nextUp && mostVoted && nextUp.id === mostVoted.id && upcomingEvents.length > 1) {
-      nextUp = upcomingEvents[1];
-    }
+    // Collect IDs already used (mostVoted, mostVotedLive) for deduplication
+    const usedEventIds = new Set<string>();
+    if (mostVoted) usedEventIds.add(mostVoted.id);
+    if (mostVotedLive) usedEventIds.add(mostVotedLive.id);
+
+    // Make sure nextUp is different from mostVoted and mostVotedLive
+    let nextUp = upcomingEvents.find(e => !usedEventIds.has(e.id)) || null;
 
     // Build meetup featured data:
     // topMeetup = highest starred, nextMeetup = closest upcoming (different from topMeetup)

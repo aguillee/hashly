@@ -155,7 +155,7 @@ export async function POST(
             );
           }
         } else {
-          // Update existing regular vote
+          // Update existing regular vote - 24h cooldown passed, can vote again
           const oldVoteType = existingVote.voteType;
 
           await prisma.vote.update({
@@ -166,13 +166,16 @@ export async function POST(
             },
           });
 
-          // Calculate vote change
+          // Calculate vote change - every 24h the user can add +1 (UP) or -1 (DOWN)
+          // If changing direction, we also need to undo the previous vote
           if (voteType === "UP" && oldVoteType === "DOWN") {
-            regularVoteWeight = 2; // -1 becomes +1
+            regularVoteWeight = 2; // Remove old -1, add new +1
           } else if (voteType === "DOWN" && oldVoteType === "UP") {
-            regularVoteWeight = -2; // +1 becomes -1
+            regularVoteWeight = -2; // Remove old +1, add new -1
+          } else {
+            // Same vote type - just add another vote in that direction
+            regularVoteWeight = voteType === "UP" ? 1 : -1;
           }
-          // If same vote type, no change
         }
       }
     } else {
