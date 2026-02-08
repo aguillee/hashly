@@ -581,19 +581,19 @@ export default function EventDetailPage() {
               {isStarsOnly ? (
                 <>
                   <Button
-                    variant={event.userVote === "UP" ? "default" : "secondary"}
+                    variant={event.userVote === "UP" && !event.canVote ? "default" : "secondary"}
                     onClick={() => handleVote("UP")}
                     disabled={voting || !isConnected || !event.canVote}
                     className={cn(
                       "w-full flex items-center justify-center gap-2",
-                      event.userVote === "UP"
+                      event.userVote === "UP" && !event.canVote
                         ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                         : "hover:border-yellow-500/50",
                       (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
                     )}
                   >
-                    <Star className={cn("h-4 w-4", event.userVote === "UP" && "fill-white")} />
-                    {event.userVote === "UP" ? "Starred" : "Give a Star"}
+                    <Star className={cn("h-4 w-4", event.userVote === "UP" && !event.canVote && "fill-white")} />
+                    {event.userVote === "UP" && !event.canVote ? "Starred" : "Give a Star"}
                   </Button>
                   {event.userVote === "UP" && !event.canVote && (
                     <p className="text-center text-sm text-text-secondary mt-2">
