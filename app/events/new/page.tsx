@@ -213,9 +213,13 @@ export default function NewEventPage() {
         }
       } else {
         // Mint Event - always requires at least one phase
+        if (!formData.supply) {
+          throw new Error("Total supply is required");
+        }
+
         for (const phase of phases) {
-          if (!phase.name || !phase.startDate || !phase.startTime || !phase.endDate || !phase.endTime || !phase.price || !phase.supply) {
-            throw new Error("Each phase requires: name, start date, start time, end date, end time, price, and supply");
+          if (!phase.name || !phase.startDate || !phase.startTime || !phase.endDate || !phase.endTime || !phase.price) {
+            throw new Error("Each phase requires: name, start date, start time, end date, end time, and price");
           }
         }
 
@@ -230,7 +234,7 @@ export default function NewEventPage() {
           startDate: new Date(`${phase.startDate}T${phase.startTime}Z`).toISOString(),
           endDate: new Date(`${phase.endDate}T${phase.endTime}Z`).toISOString(),
           price: phase.currency === "USDC" ? `$${phase.price}` : `${phase.price} HBAR`,
-          supply: parseInt(phase.supply),
+          supply: phase.supply ? parseInt(phase.supply) : null,
           maxPerWallet: phase.maxPerWallet ? parseInt(phase.maxPerWallet) : null,
           isWhitelist: phase.isWhitelist,
           order: index,
@@ -246,7 +250,7 @@ export default function NewEventPage() {
             description: formData.description,
             mintDate: mintDateTime.toISOString(),
             mintPrice: formattedPrice,
-            supply: phases[0].supply ? parseInt(phases[0].supply) : null,
+            supply: parseInt(formData.supply),
             imageUrl: formData.imageUrl || null,
             websiteUrl: formData.websiteUrl || null,
             twitterUrl: formData.twitterUrl || null,
@@ -576,6 +580,21 @@ export default function NewEventPage() {
             {/* ============ MINT EVENT FIELDS ============ */}
             {eventType === "MINT_EVENT" && (
               <>
+                {/* Total Supply */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Total Supply <span className="text-error">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    name="supply"
+                    value={formData.supply}
+                    onChange={handleChange}
+                    placeholder="e.g., 10000"
+                    required
+                  />
+                </div>
+
                 {/* Mint Phases */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -638,15 +657,9 @@ export default function NewEventPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs text-text-secondary mb-1">Supply <span className="text-error">*</span></label>
-                            <Input type="number" value={phase.supply} onChange={(e) => handlePhaseChange(phase.id, "supply", e.target.value)} placeholder="1000" required />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-text-secondary mb-1">Max/Wallet</label>
-                            <Input type="number" value={phase.maxPerWallet} onChange={(e) => handlePhaseChange(phase.id, "maxPerWallet", e.target.value)} placeholder="5" />
-                          </div>
+                        <div>
+                          <label className="block text-xs text-text-secondary mb-1">Max/Wallet</label>
+                          <Input type="number" value={phase.maxPerWallet} onChange={(e) => handlePhaseChange(phase.id, "maxPerWallet", e.target.value)} placeholder="5" />
                         </div>
                         <div className="flex items-center gap-3">
                           <button type="button" onClick={() => handlePhaseChange(phase.id, "isWhitelist", !phase.isWhitelist)} className={cn("relative w-11 h-6 rounded-full transition-colors", phase.isWhitelist ? "bg-accent-primary" : "bg-gray-600")}>
