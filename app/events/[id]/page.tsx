@@ -630,11 +630,9 @@ export default function EventDetailPage() {
                 </div>
               )}
 
-              {isConnected && event.userVote && (
+              {isConnected && event.userVote && !isStarsOnly && (
                 <p className="text-xs text-text-secondary text-center mt-3">
-                  {isStarsOnly
-                    ? "You starred this event ⭐"
-                    : `You voted ${event.userVote === "UP" ? "👍" : "👎"}`}
+                  You voted {event.userVote === "UP" ? "👍" : "👎"}
                 </p>
               )}
             </CardContent>

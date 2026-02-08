@@ -220,79 +220,108 @@ export async function POST(
     // Handle NFT votes if requested
     if (useNftVotes) {
       const walletNFTs = await getWalletNFTs(user.walletAddress);
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-      // Get already used NFT serials for this event
-      const usedNftVotes = await prisma.nftVote.findMany({
+      // Get existing NFT votes for this wallet on this event
+      const existingNftVotes = await prisma.nftVote.findMany({
         where: {
           eventId,
+          walletAddress: user.walletAddress,
           tokenId: { in: [DRAGON_TOKEN_ID, SANTUARIO_TOKEN_ID] },
-        },
-        select: {
-          tokenId: true,
-          serialNumber: true,
         },
       });
 
-      const usedDragonSerials = new Set(
-        usedNftVotes
-          .filter(v => v.tokenId === DRAGON_TOKEN_ID)
-          .map(v => v.serialNumber)
-      );
-      const usedSantuarioSerials = new Set(
-        usedNftVotes
-          .filter(v => v.tokenId === SANTUARIO_TOKEN_ID)
-          .map(v => v.serialNumber)
+      // Map existing votes by tokenId+serialNumber for quick lookup
+      const existingVoteMap = new Map(
+        existingNftVotes.map(v => [`${v.tokenId}-${v.serialNumber}`, v])
       );
 
-      // Find available dragon NFTs (not used in this event by any wallet)
-      const availableDragons = walletNFTs.dragons.filter(
-        d => !usedDragonSerials.has(d.serialNumber)
-      );
+      // Process dragon NFTs - can vote again after 24h
+      for (const dragon of walletNFTs.dragons) {
+        const key = `${DRAGON_TOKEN_ID}-${dragon.serialNumber}`;
+        const existingNftVote = existingVoteMap.get(key);
 
-      // Find available santuario NFTs
-      const availableSantuario = walletNFTs.santuario.filter(
-        s => !usedSantuarioSerials.has(s.serialNumber)
-      );
-
-      // Create NFT votes for dragons
-      for (const dragon of availableDragons) {
-        await prisma.nftVote.create({
-          data: {
+        if (existingNftVote) {
+          // Check if 24h passed since last NFT vote
+          if (existingNftVote.createdAt < twentyFourHoursAgo) {
+            // Update existing NFT vote (reset timestamp, add weight)
+            await prisma.nftVote.update({
+              where: { id: existingNftVote.id },
+              data: {
+                voteType: voteType as VoteType,
+                createdAt: new Date(),
+              },
+            });
+            nftVotesUsed.push({
+              tokenId: DRAGON_TOKEN_ID,
+              serialNumber: dragon.serialNumber,
+              weight: DRAGON_VOTE_WEIGHT,
+            });
+            nftVoteWeight += voteType === "UP" ? DRAGON_VOTE_WEIGHT : -DRAGON_VOTE_WEIGHT;
+          }
+          // If within 24h, skip this NFT
+        } else {
+          // Create new NFT vote
+          await prisma.nftVote.create({
+            data: {
+              tokenId: DRAGON_TOKEN_ID,
+              serialNumber: dragon.serialNumber,
+              walletAddress: user.walletAddress,
+              eventId,
+              voteType: voteType as VoteType,
+              voteWeight: DRAGON_VOTE_WEIGHT,
+            },
+          });
+          nftVotesUsed.push({
             tokenId: DRAGON_TOKEN_ID,
             serialNumber: dragon.serialNumber,
-            walletAddress: user.walletAddress,
-            eventId,
-            voteType: voteType as VoteType,
-            voteWeight: DRAGON_VOTE_WEIGHT,
-          },
-        });
-        nftVotesUsed.push({
-          tokenId: DRAGON_TOKEN_ID,
-          serialNumber: dragon.serialNumber,
-          weight: DRAGON_VOTE_WEIGHT,
-        });
-        nftVoteWeight += voteType === "UP" ? DRAGON_VOTE_WEIGHT : -DRAGON_VOTE_WEIGHT;
+            weight: DRAGON_VOTE_WEIGHT,
+          });
+          nftVoteWeight += voteType === "UP" ? DRAGON_VOTE_WEIGHT : -DRAGON_VOTE_WEIGHT;
+        }
       }
 
-      // Create NFT votes for El Santuario (only use first one, gives 5 votes)
-      if (availableSantuario.length > 0) {
-        const santuarioNft = availableSantuario[0];
-        await prisma.nftVote.create({
-          data: {
+      // Process El Santuario NFTs - only use first one, gives 5 votes, can vote again after 24h
+      if (walletNFTs.santuario.length > 0) {
+        const santuarioNft = walletNFTs.santuario[0];
+        const key = `${SANTUARIO_TOKEN_ID}-${santuarioNft.serialNumber}`;
+        const existingNftVote = existingVoteMap.get(key);
+
+        if (existingNftVote) {
+          // Check if 24h passed since last NFT vote
+          if (existingNftVote.createdAt < twentyFourHoursAgo) {
+            await prisma.nftVote.update({
+              where: { id: existingNftVote.id },
+              data: {
+                voteType: voteType as VoteType,
+                createdAt: new Date(),
+              },
+            });
+            nftVotesUsed.push({
+              tokenId: SANTUARIO_TOKEN_ID,
+              serialNumber: santuarioNft.serialNumber,
+              weight: SANTUARIO_VOTE_WEIGHT,
+            });
+            nftVoteWeight += voteType === "UP" ? SANTUARIO_VOTE_WEIGHT : -SANTUARIO_VOTE_WEIGHT;
+          }
+        } else {
+          await prisma.nftVote.create({
+            data: {
+              tokenId: SANTUARIO_TOKEN_ID,
+              serialNumber: santuarioNft.serialNumber,
+              walletAddress: user.walletAddress,
+              eventId,
+              voteType: voteType as VoteType,
+              voteWeight: SANTUARIO_VOTE_WEIGHT,
+            },
+          });
+          nftVotesUsed.push({
             tokenId: SANTUARIO_TOKEN_ID,
             serialNumber: santuarioNft.serialNumber,
-            walletAddress: user.walletAddress,
-            eventId,
-            voteType: voteType as VoteType,
-            voteWeight: SANTUARIO_VOTE_WEIGHT,
-          },
-        });
-        nftVotesUsed.push({
-          tokenId: SANTUARIO_TOKEN_ID,
-          serialNumber: santuarioNft.serialNumber,
-          weight: SANTUARIO_VOTE_WEIGHT,
-        });
-        nftVoteWeight += voteType === "UP" ? SANTUARIO_VOTE_WEIGHT : -SANTUARIO_VOTE_WEIGHT;
+            weight: SANTUARIO_VOTE_WEIGHT,
+          });
+          nftVoteWeight += voteType === "UP" ? SANTUARIO_VOTE_WEIGHT : -SANTUARIO_VOTE_WEIGHT;
+        }
       }
     }
 
