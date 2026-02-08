@@ -595,7 +595,7 @@ export default function EventDetailPage() {
                     <Star className={cn("h-4 w-4", event.userVote === "UP" && "fill-white")} />
                     {event.userVote === "UP" ? "Starred" : "Give a Star"}
                   </Button>
-                  {event.userVote === "UP" && (
+                  {event.userVote === "UP" && !event.canVote && (
                     <p className="text-center text-sm text-text-secondary mt-2">
                       You starred this event ⭐
                     </p>
