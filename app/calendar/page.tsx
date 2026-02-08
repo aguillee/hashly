@@ -187,17 +187,17 @@ export default function CalendarPage() {
   }, [localSearch, setSearchQuery]);
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary">Event Calendar</h1>
-            <p className="text-text-secondary mt-1">Browse all upcoming events on Hedera</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Event Calendar</h1>
+            <p className="text-sm text-text-secondary mt-0.5 sm:mt-1">Browse all upcoming events on Hedera</p>
           </div>
           {isConnected && (
             <Link href="/events/new">
-              <Button className="gap-2">
+              <Button className="gap-2 text-sm">
                 <Plus className="h-4 w-4" />
                 Submit Event
               </Button>
@@ -206,7 +206,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-3 sm:mb-4">
           <div className="flex-1">
             <Input
               placeholder="Search events..."
@@ -217,11 +217,11 @@ export default function CalendarPage() {
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex rounded-xl border border-border overflow-hidden">
+          <div className="flex rounded-xl border border-border overflow-hidden w-full sm:w-auto">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
+                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                 viewMode === "grid"
                   ? "bg-accent-primary text-white"
                   : "bg-bg-card text-text-secondary hover:text-text-primary"
@@ -233,7 +233,7 @@ export default function CalendarPage() {
             <button
               onClick={() => setViewMode("calendar")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
+                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                 viewMode === "calendar"
                   ? "bg-accent-primary text-white"
                   : "bg-bg-card text-text-secondary hover:text-text-primary"
@@ -245,12 +245,12 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Compact Filters - Always Visible */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-6">
-          {/* Status Filters */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-text-secondary uppercase tracking-wide">Status:</span>
-            <div className="flex gap-1">
+        {/* Filters */}
+        <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
+          {/* Status Filters - Scrollable on mobile */}
+          <div className="overflow-x-auto pb-1 -mb-1 scrollbar-hide">
+            <div className="flex items-center gap-1.5 min-w-max">
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide flex-shrink-0 mr-1">Type:</span>
               {statusFilters.map((filter) => {
                 const Icon = filter.icon;
                 return (
@@ -258,69 +258,66 @@ export default function CalendarPage() {
                     key={filter.value}
                     onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "forever" | "meetups")}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                      "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
                       status === filter.value
                         ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/80"
+                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
                     )}
                   >
-                    <Icon className="h-3.5 w-3.5" />
-                    {filter.label}
+                    <Icon className="h-3 w-3" />
+                    {filter.label.split(' ')[0]}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="hidden sm:block h-6 w-px bg-border" />
-
-          {/* Source Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-text-secondary uppercase tracking-wide">Source:</span>
-            <div className="flex gap-1">
-              {sourceFilters.map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                    sourceFilter === filter.value
-                      ? "bg-accent-primary text-white"
-                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                  )}
-                >
-                  {filter.label}
-                </button>
-              ))}
+          {/* Source & Sort - Compact row */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            {/* Source Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide">Source:</span>
+              <div className="flex gap-0.5 sm:gap-1">
+                {sourceFilters.map((filter) => (
+                  <button
+                    key={filter.value}
+                    onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
+                    className={cn(
+                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all",
+                      sourceFilter === filter.value
+                        ? "bg-accent-primary text-white"
+                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    {filter.label === "All Sources" ? "All" : filter.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Divider */}
-          <div className="hidden sm:block h-6 w-px bg-border" />
-
-          {/* Sort By */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-text-secondary uppercase tracking-wide">Sort:</span>
-            <div className="flex gap-1">
-              {[
-                { value: "date", label: "Date" },
-                { value: "votes", label: "Most Voted" },
-                { value: "newest", label: "Recent" },
-              ].map((sort) => (
-                <button
-                  key={sort.value}
-                  onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                    sortBy === sort.value
-                      ? "bg-accent-primary text-white"
-                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                  )}
-                >
-                  {sort.label}
-                </button>
-              ))}
+            {/* Sort By */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide">Sort:</span>
+              <div className="flex gap-0.5 sm:gap-1">
+                {[
+                  { value: "date", label: "Date" },
+                  { value: "votes", label: "Votes" },
+                  { value: "newest", label: "New" },
+                ].map((sort) => (
+                  <button
+                    key={sort.value}
+                    onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
+                    className={cn(
+                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all",
+                      sortBy === sort.value
+                        ? "bg-accent-primary text-white"
+                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    {sort.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -355,7 +352,7 @@ export default function CalendarPage() {
         ) : viewMode === "calendar" ? (
           <CalendarView events={events} />
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {events.map((event) => (
               <EventCard
                 key={event.id}

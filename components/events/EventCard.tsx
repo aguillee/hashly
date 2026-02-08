@@ -87,10 +87,10 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         isLive ? "bg-gradient-to-r from-success/30 to-emerald-400/30" : "bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20"
       )} />
 
-      <Card className="relative overflow-hidden rounded-3xl border-border/50 bg-bg-card/80 backdrop-blur-sm">
+      <Card className="relative overflow-hidden rounded-2xl sm:rounded-3xl border-border/50 bg-bg-card/80 backdrop-blur-sm">
         {/* Image */}
         <Link href={`/events/${event.id}`}>
-          <div className="relative h-52 bg-gradient-to-br from-bg-secondary to-bg-card overflow-hidden">
+          <div className="relative h-44 sm:h-52 bg-gradient-to-br from-bg-secondary to-bg-card overflow-hidden">
             {event.imageUrl ? (
               <img
                 src={event.imageUrl}
@@ -117,14 +117,14 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-bg-card via-transparent to-transparent opacity-60" />
 
             {/* Status badge */}
-            <div className="absolute top-4 left-4">
+            <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
               {isLive ? (
-                <Badge variant="live" size="lg" className="shadow-lg">
-                  <span className="mr-1.5 h-2 w-2 rounded-full bg-white animate-pulse" />
+                <Badge variant="live" size="default" className="shadow-lg text-xs sm:text-sm">
+                  <span className="mr-1 sm:mr-1.5 h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-white animate-pulse" />
                   Live Now
                 </Badge>
               ) : (
-                <Badge variant="default" size="lg" className="shadow-lg">
+                <Badge variant="default" size="default" className="shadow-lg text-xs sm:text-sm">
                   Upcoming
                 </Badge>
               )}
@@ -132,18 +132,18 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
 
             {/* Countdown */}
             {isUpcoming && (
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="bg-black/60 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center justify-between">
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4">
+                <div className="bg-black/60 backdrop-blur-md rounded-xl sm:rounded-2xl px-3 py-2 sm:px-4 sm:py-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-accent-primary/20 flex items-center justify-center">
-                      <Clock className="h-4 w-4 text-accent-primary" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-accent-primary/20 flex items-center justify-center">
+                      <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-primary" />
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase text-text-secondary font-medium">Starts in</div>
-                      <div className="text-sm font-bold text-white">{timeRemaining}</div>
+                      <div className="text-[9px] sm:text-[10px] uppercase text-text-secondary font-medium">Starts in</div>
+                      <div className="text-xs sm:text-sm font-bold text-white">{timeRemaining}</div>
                     </div>
                   </div>
-                  <Zap className="h-5 w-5 text-accent-primary animate-pulse" />
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-accent-primary animate-pulse" />
                 </div>
               </div>
             )}
@@ -151,68 +151,68 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         </Link>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
           {/* Title & Date */}
           <div>
             <Link href={`/events/${event.id}`}>
-              <h3 className="font-bold text-lg line-clamp-1 text-text-primary group-hover:text-accent-primary transition-colors duration-300">
+              <h3 className="font-bold text-base sm:text-lg line-clamp-1 text-text-primary group-hover:text-accent-primary transition-colors duration-300">
                 {event.title}
               </h3>
             </Link>
-            <p className="text-sm text-text-secondary mt-1">
+            <p className="text-xs sm:text-sm text-text-secondary mt-0.5 sm:mt-1">
               {formatDate(event.mintDate)}
             </p>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-text-secondary line-clamp-2 leading-relaxed">
             {event.description}
           </p>
 
           {/* Price & Supply (mint) or Host & Location (meetup/hackathon) */}
           {isStarsOnly ? (
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {event.host && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
-                  <Users className="h-4 w-4 text-accent-primary" />
-                  <span className="font-medium text-sm text-accent-primary">{event.host}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-accent-primary/10 border border-accent-primary/20">
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-primary" />
+                  <span className="font-medium text-xs sm:text-sm text-accent-primary truncate max-w-[100px] sm:max-w-none">{event.host}</span>
                 </div>
               )}
               {event.location_type === "IN_PERSON" && event.location ? (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border">
-                  <MapPin className="h-4 w-4 text-text-secondary" />
-                  <span className="font-medium text-sm text-text-primary">{event.location}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-bg-secondary border border-border">
+                  <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-secondary flex-shrink-0" />
+                  <span className="font-medium text-xs sm:text-sm text-text-primary truncate max-w-[100px] sm:max-w-none">{event.location}</span>
                 </div>
               ) : event.location_type === "ONLINE" ? (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border">
-                  <Globe className="h-4 w-4 text-text-secondary" />
-                  <span className="font-medium text-sm text-text-primary">Online</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-bg-secondary border border-border">
+                  <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-secondary" />
+                  <span className="font-medium text-xs sm:text-sm text-text-primary">Online</span>
                 </div>
               ) : null}
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-accent-primary/10 border border-accent-primary/20">
                 {priceInfo.isHbar ? (
-                  <HbarIcon className="h-5 w-5" />
+                  <HbarIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 ) : (
-                  <UsdcIcon className="h-5 w-5" />
+                  <UsdcIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 )}
-                <span className="font-semibold text-sm text-accent-primary">
+                <span className="font-semibold text-xs sm:text-sm text-accent-primary">
                   {priceInfo.value}
                 </span>
               </div>
               {event.supply && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border">
-                  <Box className="h-4 w-4 text-text-secondary" />
-                  <span className="font-medium text-sm text-text-primary">{event.supply.toLocaleString()}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-bg-secondary border border-border">
+                  <Box className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-secondary" />
+                  <span className="font-medium text-xs sm:text-sm text-text-primary">{event.supply.toLocaleString()}</span>
                 </div>
               )}
             </div>
           )}
 
           {/* Voting & Details */}
-          <div className="flex items-center justify-between pt-4 border-t border-border">
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-border gap-2">
             {isStarsOnly ? (
               /* Star voting for meetups/hackathons - only positive */
               <div className="flex items-center gap-1">
@@ -220,7 +220,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   onClick={() => handleVote("UP")}
                   disabled={!isConnected || isVoting || !canVoteNow}
                   className={cn(
-                    "p-2.5 rounded-xl transition-all duration-300",
+                    "p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-300",
                     userVote === "UP"
                       ? "bg-yellow-500/20 text-yellow-400"
                       : "bg-bg-secondary text-text-secondary hover:text-yellow-400 hover:bg-yellow-500/10",
@@ -228,9 +228,9 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   )}
                   title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
                 >
-                  <Star className={cn("h-4 w-4", userVote === "UP" && "fill-yellow-400")} />
+                  <Star className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", userVote === "UP" && "fill-yellow-400")} />
                 </button>
-                <div className="min-w-[48px] text-center py-2 px-3 rounded-xl font-bold text-sm bg-yellow-500/10 text-yellow-400">
+                <div className="min-w-[40px] sm:min-w-[48px] text-center py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm bg-yellow-500/10 text-yellow-400">
                   {score}
                 </div>
               </div>
@@ -241,7 +241,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   onClick={() => handleVote("UP")}
                   disabled={!isConnected || isVoting || !canVoteNow}
                   className={cn(
-                    "p-2.5 rounded-xl transition-all duration-300",
+                    "p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-300",
                     userVote === "UP"
                       ? "bg-success/20 text-success"
                       : "bg-bg-secondary text-text-secondary hover:text-success hover:bg-success/10",
@@ -249,11 +249,11 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   )}
                   title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
                 >
-                  <ThumbsUp className="h-4 w-4" />
+                  <ThumbsUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
 
                 <div className={cn(
-                  "min-w-[48px] text-center py-2 px-3 rounded-xl font-bold text-sm",
+                  "min-w-[40px] sm:min-w-[48px] text-center py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm",
                   score > 0 ? "bg-success/10 text-success" :
                   score < 0 ? "bg-error/10 text-error" :
                   "bg-bg-secondary text-text-secondary"
@@ -265,7 +265,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   onClick={() => handleVote("DOWN")}
                   disabled={!isConnected || isVoting || !canVoteNow}
                   className={cn(
-                    "p-2.5 rounded-xl transition-all duration-300",
+                    "p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-300",
                     userVote === "DOWN"
                       ? "bg-error/20 text-error"
                       : "bg-bg-secondary text-text-secondary hover:text-error hover:bg-error/10",
@@ -273,21 +273,22 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   )}
                   title={!canVoteNow ? "Vote locked - wait 24h" : undefined}
                 >
-                  <ThumbsDown className="h-4 w-4" />
+                  <ThumbsDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               </div>
             )}
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <ShareToXButton
                 shareText={`Check out ${event.title} on @hashly_h 🗓️\n\nDiscover events on Hedera!`}
                 shareUrl={`https://hash-ly.com/events/${event.id}`}
-                className="p-2.5 rounded-xl"
+                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl"
               />
               <Link href={`/events/${event.id}`}>
-                <Button variant="ghost" size="sm" className="gap-1.5 group/btn">
-                  View Details
-                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 group/btn text-xs sm:text-sm px-2 sm:px-3">
+                  <span className="hidden sm:inline">View Details</span>
+                  <span className="sm:hidden">View</span>
+                  <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                 </Button>
               </Link>
             </div>

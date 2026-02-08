@@ -329,65 +329,66 @@ export default function AdminAdsPage() {
   if (!isConnected || !user?.isAdmin) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
         <Link
           href="/admin"
-          className="p-2 rounded-lg hover:bg-bg-secondary transition-colors"
+          className="p-1.5 sm:p-2 rounded-lg hover:bg-bg-secondary transition-colors"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Link>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">Home Ads</h1>
-          <p className="text-text-secondary">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold">Home Ads</h1>
+          <p className="text-xs sm:text-sm text-text-secondary truncate">
             Manage the homepage ad carousel
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Ad
+        <Button onClick={() => setShowForm(!showForm)} className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4">
+          <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden xs:inline">New Ad</span>
+          <span className="xs:hidden">Add</span>
         </Button>
       </div>
 
       {/* Stats Panel */}
       {!loading && ads.length > 0 && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <Eye className="h-5 w-5 text-blue-500" />
+            <CardContent className="p-2.5 sm:p-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10">
+                  <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{totalViews.toLocaleString()}</p>
-                  <p className="text-xs text-text-secondary">Total Views</p>
+                  <p className="text-lg sm:text-2xl font-bold">{totalViews.toLocaleString()}</p>
+                  <p className="text-[10px] sm:text-xs text-text-secondary">Views</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <MousePointerClick className="h-5 w-5 text-green-500" />
+            <CardContent className="p-2.5 sm:p-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10">
+                  <MousePointerClick className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{totalClicks.toLocaleString()}</p>
-                  <p className="text-xs text-text-secondary">Total Clicks</p>
+                  <p className="text-lg sm:text-2xl font-bold">{totalClicks.toLocaleString()}</p>
+                  <p className="text-[10px] sm:text-xs text-text-secondary">Clicks</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10">
-                  <BarChart3 className="h-5 w-5 text-amber-500" />
+            <CardContent className="p-2.5 sm:p-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-amber-500/10">
+                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{avgCTR}%</p>
-                  <p className="text-xs text-text-secondary">Avg CTR</p>
+                  <p className="text-lg sm:text-2xl font-bold">{avgCTR}%</p>
+                  <p className="text-[10px] sm:text-xs text-text-secondary">CTR</p>
                 </div>
               </div>
             </CardContent>
@@ -397,12 +398,12 @@ export default function AdminAdsPage() {
 
       {/* Create Form */}
       {showForm && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg">Create Ad</CardTitle>
+        <Card className="mb-4 sm:mb-6">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Create Ad</CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCreate} className="space-y-4">
+          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+            <form onSubmit={handleCreate} className="space-y-3 sm:space-y-4">
               {/* Type selector */}
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -528,23 +529,26 @@ export default function AdminAdsPage() {
 
       {/* Ads List */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Megaphone className="h-5 w-5" />
-            Active Carousel ({ads.filter((a) => a.isActive).length} active /{" "}
-            {ads.length} total)
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Megaphone className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">Active Carousel</span>
+            <span className="sm:hidden">Carousel</span>
+            <span className="text-text-secondary font-normal text-xs sm:text-sm">
+              ({ads.filter((a) => a.isActive).length}/{ads.length})
+            </span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+            <div className="flex items-center justify-center py-8 sm:py-12">
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-accent-primary" />
             </div>
           ) : ads.length === 0 ? (
-            <div className="text-center py-12">
-              <Megaphone className="h-12 w-12 mx-auto text-text-secondary mb-4" />
-              <p className="text-text-secondary">
-                No ads yet. Create your first ad to start the carousel.
+            <div className="text-center py-8 sm:py-12">
+              <Megaphone className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-text-secondary mb-3 sm:mb-4" />
+              <p className="text-sm text-text-secondary">
+                No ads yet. Create your first ad.
               </p>
             </div>
           ) : (
@@ -564,152 +568,240 @@ export default function AdminAdsPage() {
                   <React.Fragment key={ad.id}>
                   <div
                     className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border transition-colors",
+                      "p-2.5 sm:p-3 rounded-lg border transition-colors",
                       ad.isActive
                         ? "bg-bg-secondary border-border"
                         : "bg-bg-secondary/50 border-border/50 opacity-60"
                     )}
                   >
-                    {/* Order number */}
-                    <span className="text-xs font-mono text-text-secondary w-5 text-center flex-shrink-0">
-                      {index + 1}
-                    </span>
-
-                    {/* Thumbnail */}
-                    <div className="w-14 h-10 relative rounded-md overflow-hidden bg-bg-card flex-shrink-0">
-                      {displayImage ? (
-                        <img
-                          src={displayImage}
-                          alt={displayTitle}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ImageIcon className="h-4 w-4 text-text-secondary" />
+                    {/* Mobile Layout - Stacked */}
+                    <div className="flex items-start gap-2 sm:hidden">
+                      {/* Order + Thumbnail */}
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[10px] font-mono text-text-secondary">
+                          #{index + 1}
+                        </span>
+                        <div className="w-12 h-9 rounded overflow-hidden bg-bg-card flex-shrink-0">
+                          {displayImage ? (
+                            <img
+                              src={displayImage}
+                              alt={displayTitle}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="h-3 w-3 text-text-secondary" />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium truncate">
-                          {displayTitle}
-                        </span>
-                        <Badge
-                          variant={
-                            ad.type === "EVENT" ? "default" : "secondary"
-                          }
-                          className="text-[10px] flex-shrink-0"
-                        >
-                          {ad.type}
-                        </Badge>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-text-secondary">
-                        <span>{ad.duration}s</span>
-                        <span className="flex items-center gap-0.5">
-                          <Eye className="h-3 w-3" />
-                          {(ad.views || 0).toLocaleString()}
-                        </span>
-                        <span className="flex items-center gap-0.5">
-                          <MousePointerClick className="h-3 w-3" />
-                          {(ad.clicks || 0).toLocaleString()}
-                        </span>
-                        <span className="text-accent-primary font-medium">{ctr}% CTR</span>
-                        {ad.type === "CUSTOM" && ad.linkUrl && (
-                          <a
-                            href={ad.linkUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-0.5 hover:text-accent-primary"
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-xs font-medium truncate">
+                            {displayTitle}
+                          </span>
+                          <Badge
+                            variant={ad.type === "EVENT" ? "default" : "secondary"}
+                            className="text-[8px] px-1.5 py-0 flex-shrink-0"
                           >
-                            <ExternalLink className="h-3 w-3" />
-                            Link
-                          </a>
-                        )}
+                            {ad.type}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-text-secondary flex-wrap">
+                          <span>{ad.duration}s</span>
+                          <span className="flex items-center gap-0.5">
+                            <Eye className="h-2.5 w-2.5" />
+                            {(ad.views || 0).toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-0.5">
+                            <MousePointerClick className="h-2.5 w-2.5" />
+                            {(ad.clicks || 0).toLocaleString()}
+                          </span>
+                          <span className="text-accent-primary font-medium">{ctr}%</span>
+                        </div>
+                      </div>
+
+                      {/* Actions - Compact for mobile */}
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        <button
+                          onClick={() => editingId === ad.id ? cancelEdit() : startEdit(ad)}
+                          className="p-1.5 rounded hover:bg-bg-card transition-colors"
+                        >
+                          {editingId === ad.id ? (
+                            <X className="h-3.5 w-3.5" />
+                          ) : (
+                            <Pencil className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleToggleActive(ad)}
+                          className="p-1.5 rounded hover:bg-bg-card transition-colors"
+                        >
+                          {ad.isActive ? (
+                            <Eye className="h-3.5 w-3.5 text-success" />
+                          ) : (
+                            <EyeOff className="h-3.5 w-3.5 text-text-secondary" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(ad.id)}
+                          disabled={deleting === ad.id}
+                          className="p-1.5 rounded hover:bg-bg-card transition-colors text-error"
+                        >
+                          {deleting === ad.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                        </button>
                       </div>
                     </div>
 
-                    {/* Duration edit */}
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <input
-                        type="number"
-                        min="1"
-                        max="60"
-                        value={ad.duration}
-                        onChange={(e) =>
-                          handleDurationChange(ad.id, parseInt(e.target.value) || 5)
-                        }
-                        className="w-12 text-center rounded border border-border bg-bg-card px-1 py-0.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary"
-                      />
-                      <span className="text-xs text-text-secondary">s</span>
-                    </div>
+                    {/* Desktop Layout - Horizontal */}
+                    <div className="hidden sm:flex items-center gap-3">
+                      {/* Order number */}
+                      <span className="text-xs font-mono text-text-secondary w-5 text-center flex-shrink-0">
+                        {index + 1}
+                      </span>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => editingId === ad.id ? cancelEdit() : startEdit(ad)}
-                        title="Edit"
-                      >
-                        {editingId === ad.id ? (
-                          <X className="h-4 w-4" />
+                      {/* Thumbnail */}
+                      <div className="w-14 h-10 relative rounded-md overflow-hidden bg-bg-card flex-shrink-0">
+                        {displayImage ? (
+                          <img
+                            src={displayImage}
+                            alt={displayTitle}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <Pencil className="h-4 w-4" />
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="h-4 w-4 text-text-secondary" />
+                          </div>
                         )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleMove(ad.id, "up")}
-                        disabled={index === 0}
-                        title="Move up"
-                      >
-                        <ChevronUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleMove(ad.id, "down")}
-                        disabled={index === ads.length - 1}
-                        title="Move down"
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleActive(ad)}
-                        title={ad.isActive ? "Deactivate" : "Activate"}
-                      >
-                        {ad.isActive ? (
-                          <Eye className="h-4 w-4 text-success" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-text-secondary" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(ad.id)}
-                        disabled={deleting === ad.id}
-                        title="Delete"
-                        className="text-error hover:text-error"
-                      >
-                        {deleting === ad.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium truncate">
+                            {displayTitle}
+                          </span>
+                          <Badge
+                            variant={
+                              ad.type === "EVENT" ? "default" : "secondary"
+                            }
+                            className="text-[10px] flex-shrink-0"
+                          >
+                            {ad.type}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-text-secondary">
+                          <span>{ad.duration}s</span>
+                          <span className="flex items-center gap-0.5">
+                            <Eye className="h-3 w-3" />
+                            {(ad.views || 0).toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-0.5">
+                            <MousePointerClick className="h-3 w-3" />
+                            {(ad.clicks || 0).toLocaleString()}
+                          </span>
+                          <span className="text-accent-primary font-medium">{ctr}% CTR</span>
+                          {ad.type === "CUSTOM" && ad.linkUrl && (
+                            <a
+                              href={ad.linkUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-0.5 hover:text-accent-primary"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Link
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Duration edit */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <input
+                          type="number"
+                          min="1"
+                          max="60"
+                          value={ad.duration}
+                          onChange={(e) =>
+                            handleDurationChange(ad.id, parseInt(e.target.value) || 5)
+                          }
+                          className="w-12 text-center rounded border border-border bg-bg-card px-1 py-0.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                        />
+                        <span className="text-xs text-text-secondary">s</span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => editingId === ad.id ? cancelEdit() : startEdit(ad)}
+                          title="Edit"
+                        >
+                          {editingId === ad.id ? (
+                            <X className="h-4 w-4" />
+                          ) : (
+                            <Pencil className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMove(ad.id, "up")}
+                          disabled={index === 0}
+                          title="Move up"
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMove(ad.id, "down")}
+                          disabled={index === ads.length - 1}
+                          title="Move down"
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleActive(ad)}
+                          title={ad.isActive ? "Deactivate" : "Activate"}
+                        >
+                          {ad.isActive ? (
+                            <Eye className="h-4 w-4 text-success" />
+                          ) : (
+                            <EyeOff className="h-4 w-4 text-text-secondary" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(ad.id)}
+                          disabled={deleting === ad.id}
+                          title="Delete"
+                          className="text-error hover:text-error"
+                        >
+                          {deleting === ad.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
                   {editingId === ad.id && (
                     <form
                       onSubmit={handleSaveEdit}
-                      className="ml-8 p-4 rounded-lg border border-accent-primary/30 bg-bg-card space-y-3"
+                      className="mt-2 sm:ml-8 p-3 sm:p-4 rounded-lg border border-accent-primary/30 bg-bg-card space-y-3"
                     >
                       {/* Type selector */}
                       <div className="flex rounded-lg border border-border overflow-hidden w-fit">

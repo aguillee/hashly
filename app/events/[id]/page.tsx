@@ -274,19 +274,19 @@ export default function EventDetailPage() {
   const isStarsOnly = isMeetup || isHackathon; // Stars-only voting for meetups and hackathons
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Back Button */}
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-4 sm:mb-6 transition-colors text-sm"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Calendar
       </Link>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Content */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-4 sm:space-y-6">
           {/* Header Card */}
           <Card>
             {event.imageUrl && (
@@ -296,36 +296,36 @@ export default function EventDetailPage() {
                   alt={event.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                   {getStatusBadge(event.status)}
                 </div>
               </div>
             )}
-            <CardContent className={event.imageUrl ? "pt-6" : "pt-6"}>
-              <div className="flex items-start justify-between gap-4 mb-4">
+            <CardContent className={event.imageUrl ? "pt-4 sm:pt-6" : "pt-4 sm:pt-6"}>
+              <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div>
-                  <h1 className="text-2xl font-bold">{event.title}</h1>
+                  <h1 className="text-xl sm:text-2xl font-bold">{event.title}</h1>
                 </div>
                 {!event.imageUrl && getStatusBadge(event.status)}
               </div>
 
               <div
-                className="text-text-secondary prose prose-sm prose-invert max-w-none [&>p]:mb-3 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4 [&_strong]:text-text-primary [&_a]:text-accent-primary [&_a]:underline"
+                className="text-text-secondary prose prose-sm prose-invert max-w-none [&>p]:mb-2 sm:[&>p]:mb-3 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4 [&_strong]:text-text-primary [&_a]:text-accent-primary [&_a]:underline text-sm sm:text-base"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description, { ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'span', 'div'], ALLOWED_ATTR: ['href', 'target', 'rel', 'class'] }) }}
               />
 
               {/* Links */}
-              <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t border-border">
+              <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
                 {event.websiteUrl && (
                   <a
                     href={event.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-sm"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm"
                   >
-                    <Globe className="h-4 w-4" />
+                    <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Website
-                    <ExternalLink className="h-3 w-3" />
+                    <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   </a>
                 )}
                 {event.twitterUrl && (
@@ -333,11 +333,11 @@ export default function EventDetailPage() {
                     href={event.twitterUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-sm"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm"
                   >
-                    <Twitter className="h-4 w-4" />
+                    <Twitter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Twitter
-                    <ExternalLink className="h-3 w-3" />
+                    <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   </a>
                 )}
                 {event.discordUrl && (
@@ -345,11 +345,11 @@ export default function EventDetailPage() {
                     href={event.discordUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-sm"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm"
                   >
-                    <Users className="h-4 w-4" />
+                    <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Discord
-                    <ExternalLink className="h-3 w-3" />
+                    <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   </a>
                 )}
               </div>
@@ -439,62 +439,62 @@ export default function EventDetailPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Event Info */}
           <Card>
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-accent-primary/10">
-                  <Calendar className="h-5 w-5 text-accent-primary" />
+            <CardContent className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="p-2.5 sm:p-3 rounded-lg bg-accent-primary/10">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-accent-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-text-secondary">{event.endDate ? "Start Date" : "Event Date"}</p>
-                  <p className="font-medium">{formatDate(event.mintDate)}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-text-secondary">{event.endDate ? "Start Date" : "Event Date"}</p>
+                  <p className="font-medium text-sm sm:text-base truncate">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
 
               {event.endDate && (
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-lg bg-red-500/10">
-                    <Calendar className="h-5 w-5 text-red-500" />
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-red-500/10">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-text-secondary">End Date</p>
-                    <p className="font-medium">{formatDate(event.endDate)}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-text-secondary">End Date</p>
+                    <p className="font-medium text-sm sm:text-base truncate">{formatDate(event.endDate)}</p>
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-green-500/10">
-                  <Clock className="h-5 w-5 text-green-500" />
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="p-2.5 sm:p-3 rounded-lg bg-green-500/10">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-text-secondary">{isStarsOnly ? "Time Until Event" : "Time Until Mint"}</p>
-                  <p className="font-medium text-lg">{getTimeUntil(event.mintDate)}</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">{isStarsOnly ? "Time Until Event" : "Time Until Mint"}</p>
+                  <p className="font-medium text-base sm:text-lg">{getTimeUntil(event.mintDate)}</p>
                 </div>
               </div>
 
               {isHackathon ? (
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-lg bg-yellow-500/10">
-                    <Trophy className="h-5 w-5 text-yellow-500" />
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-yellow-500/10">
+                    <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-text-secondary">Prizes</p>
-                    <p className="font-medium text-lg">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-text-secondary">Prizes</p>
+                    <p className="font-medium text-base sm:text-lg truncate">
                       {event.prizes || "To be announced"}
                     </p>
                   </div>
                 </div>
               ) : isMeetup ? (
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-lg bg-yellow-500/10">
-                    <DollarSign className="h-5 w-5 text-yellow-500" />
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-yellow-500/10">
+                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                   </div>
                   <div>
-                    <p className="text-sm text-text-secondary">Entry Price</p>
-                    <p className="font-medium text-lg">
+                    <p className="text-xs sm:text-sm text-text-secondary">Entry Price</p>
+                    <p className="font-medium text-base sm:text-lg">
                       {!event.mintPrice || event.mintPrice === "0" || event.mintPrice.toLowerCase().includes("free")
                         ? "Free"
                         : `$${event.mintPrice}`}
@@ -506,17 +506,17 @@ export default function EventDetailPage() {
                   {(() => {
                     const priceInfo = parseMintPrice(event.mintPrice);
                     return (
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-lg bg-yellow-500/10">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        <div className="p-2.5 sm:p-3 rounded-lg bg-yellow-500/10">
                           {priceInfo.isHbar ? (
-                            <HbarIcon className="h-5 w-5" />
+                            <HbarIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           ) : (
-                            <UsdcIcon className="h-5 w-5" />
+                            <UsdcIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           )}
                         </div>
                         <div>
-                          <p className="text-sm text-text-secondary">Mint Price</p>
-                          <p className="font-medium text-lg">
+                          <p className="text-xs sm:text-sm text-text-secondary">Mint Price</p>
+                          <p className="font-medium text-base sm:text-lg">
                             {priceInfo.isHbar ? `${priceInfo.value} HBAR` : `$${priceInfo.value}`}
                           </p>
                         </div>
@@ -525,13 +525,13 @@ export default function EventDetailPage() {
                   })()}
 
                   {event.supply && (
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-lg bg-purple-500/10">
-                        <Layers className="h-5 w-5 text-purple-500" />
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="p-2.5 sm:p-3 rounded-lg bg-purple-500/10">
+                        <Layers className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                       </div>
                       <div>
-                        <p className="text-sm text-text-secondary">Total Supply</p>
-                        <p className="font-medium text-lg">{event.supply.toLocaleString()}</p>
+                        <p className="text-xs sm:text-sm text-text-secondary">Total Supply</p>
+                        <p className="font-medium text-base sm:text-lg">{event.supply.toLocaleString()}</p>
                       </div>
                     </div>
                   )}
@@ -542,17 +542,17 @@ export default function EventDetailPage() {
 
           {/* Voting */}
           <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">{isStarsOnly ? "Community Rating" : "Community Score"}</h3>
-              <div className="text-center mb-4">
+            <CardContent className="p-4 sm:p-6">
+              <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">{isStarsOnly ? "Community Rating" : "Community Score"}</h3>
+              <div className="text-center mb-3 sm:mb-4">
                 {isStarsOnly ? (
                   <div className="flex items-center justify-center gap-1.5">
-                    <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
-                    <span className="text-4xl font-bold text-yellow-400">{event.votesUp}</span>
+                    <Star className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 fill-yellow-400" />
+                    <span className="text-3xl sm:text-4xl font-bold text-yellow-400">{event.votesUp}</span>
                   </div>
                 ) : (
                   <span className={cn(
-                    "text-4xl font-bold",
+                    "text-3xl sm:text-4xl font-bold",
                     score > 0 ? "text-success" : score < 0 ? "text-error" : "text-text-secondary"
                   )}>
                     {score > 0 ? "+" : ""}{score}
@@ -562,8 +562,8 @@ export default function EventDetailPage() {
 
               {/* Connect wallet message */}
               {!isConnected && (
-                <div className="mb-4 p-3 rounded-lg bg-accent-primary/10 border border-accent-primary/30 text-center">
-                  <p className="text-sm text-accent-primary font-medium">
+                <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-lg bg-accent-primary/10 border border-accent-primary/30 text-center">
+                  <p className="text-xs sm:text-sm text-accent-primary font-medium">
                     Connect wallet to {isStarsOnly ? "rate" : "vote"}
                   </p>
                 </div>
@@ -571,8 +571,8 @@ export default function EventDetailPage() {
 
               {/* Vote locked message - only show if connected */}
               {isConnected && event.userVote && !event.canVote && voteCountdown && (
-                <div className="mb-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 text-center">
-                  <p className="text-sm text-orange-500 font-medium">
+                <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 text-center">
+                  <p className="text-xs sm:text-sm text-orange-500 font-medium">
                     {isStarsOnly ? "Rate" : "Vote"} again in {voteCountdown}
                   </p>
                 </div>
@@ -642,14 +642,15 @@ export default function EventDetailPage() {
           <div className="flex gap-2">
             <Button
               variant="secondary"
-              className="flex-1"
+              className="flex-1 text-sm"
               onClick={handleShare}
             >
-              <Share2 className="h-4 w-4 mr-2" />
-              Share Event
+              <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+              Share
             </Button>
             <Button
               variant="secondary"
+              className="px-3 sm:px-4"
               onClick={() => {
                 const text = `Check out ${event.title} on @hashly_h 🗓️\n\nDiscover events on Hedera!`;
                 const url = `https://hash-ly.com/events/${event.id}`;
@@ -660,12 +661,12 @@ export default function EventDetailPage() {
                 );
               }}
             >
-              <XIcon className="h-4 w-4" />
+              <XIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
 
           {/* Submitted By */}
-          <p className="text-xs text-text-secondary text-center">
+          <p className="text-[10px] sm:text-xs text-text-secondary text-center truncate px-2">
             Submitted by {event.createdBy.walletAddress}
           </p>
         </div>

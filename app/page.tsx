@@ -115,29 +115,29 @@ export default function HomePage() {
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent-primary/10 rounded-full blur-3xl" />
         <div className="absolute top-20 right-1/4 w-80 h-80 bg-accent-secondary/10 rounded-full blur-3xl" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {/* Hero: 2 or 3 columns on desktop */}
-          <div className={`grid ${hasAds ? "lg:grid-cols-[4fr_3fr_3fr]" : "lg:grid-cols-2"} gap-8 lg:gap-8 items-center`}>
+          <div className={`grid ${hasAds ? "lg:grid-cols-[4fr_3fr_3fr]" : "lg:grid-cols-2"} gap-6 lg:gap-8 items-center`}>
             {/* Left: Title + CTA */}
             <div className="text-center lg:text-left">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
+              <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-2 sm:mb-4">
                 <span className="gradient-text">Discover Hedera</span>
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 mb-5">
+              <p className="text-sm sm:text-base lg:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 mb-4 sm:mb-5 px-2 sm:px-0">
                 Explore events, collections, and meetups. Vote on your favorites and see what the community ranks at the top.
               </p>
               <div className="flex items-center justify-center lg:justify-start">
                 {isConnected ? (
                   <Link href="/events/new">
-                    <Button size="xl" className="gap-2 group px-8 shadow-xl shadow-accent-primary/30 hover:shadow-2xl hover:shadow-accent-primary/40 hover:scale-[1.03] transition-all duration-300">
-                      <Plus className="h-5 w-5" />
+                    <Button size="lg" className="gap-2 group px-6 sm:px-8 shadow-xl shadow-accent-primary/30 hover:shadow-2xl hover:shadow-accent-primary/40 hover:scale-[1.03] transition-all duration-300 text-sm sm:text-base">
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                       Submit an Event
-                      <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </Link>
                 ) : (
-                  <Button size="xl" className="gap-2 px-8" disabled>
-                    <Plus className="h-5 w-5" />
+                  <Button size="lg" className="gap-2 px-6 sm:px-8 text-sm sm:text-base" disabled>
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                     Connect Wallet to Submit
                   </Button>
                 )}
@@ -148,54 +148,54 @@ export default function HomePage() {
                 href="https://x.com/hashly_h"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-5 px-4 py-2 rounded-full bg-gradient-to-r from-accent-primary/15 to-accent-secondary/15 border border-accent-primary/30 hover:border-accent-primary/60 transition-all group"
+                className="inline-flex items-center gap-1.5 sm:gap-2 mt-4 sm:mt-5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-accent-primary/15 to-accent-secondary/15 border border-accent-primary/30 hover:border-accent-primary/60 transition-all group"
               >
-                <span className="text-sm text-text-secondary">Want to collaborate?</span>
-                <span className="text-sm font-semibold text-accent-primary group-hover:underline flex items-center gap-1">
+                <span className="text-xs sm:text-sm text-text-secondary">Want to collaborate?</span>
+                <span className="text-xs sm:text-sm font-semibold text-accent-primary group-hover:underline flex items-center gap-1">
                   Contact us on X <ExternalLink className="h-3 w-3" />
                 </span>
               </a>
             </div>
 
             {/* Right: How It Works - compact cards */}
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">How It Works</h2>
+            <div className="space-y-2 sm:space-y-3">
+              <h2 className="text-xs sm:text-sm font-semibold text-text-secondary uppercase tracking-wider mb-1 sm:mb-2">How It Works</h2>
 
-              <div className="flex gap-3 p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-primary/30 transition-colors">
-                <div className="w-9 h-9 rounded-lg bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Vote className="h-4 w-4 text-accent-primary" />
+              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-primary/30 transition-colors">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Vote className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-primary" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold text-text-primary">Community Voting</h3>
-                  <p className="text-text-secondary text-xs">Connect your wallet to vote and help discover quality projects.</p>
+                  <h3 className="text-xs sm:text-sm font-semibold text-text-primary">Community Voting</h3>
+                  <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">Connect your wallet to vote and help discover quality projects.</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-primary/30 transition-colors">
-                <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-primary/30 transition-colors">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden flex-shrink-0">
                   <img src="https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8" alt="Santuario Hedera" className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-text-primary">Santuario Hedera</h3>
-                    <a href="https://sentx.io/nft-marketplace/0.0.7235629" target="_blank" rel="noopener noreferrer" className="text-xs text-accent-primary hover:underline flex-shrink-0">SentX ↗</a>
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-text-primary">Santuario Hedera</h3>
+                    <a href="https://sentx.io/nft-marketplace/0.0.7235629" target="_blank" rel="noopener noreferrer" className="text-[10px] sm:text-xs text-accent-primary hover:underline flex-shrink-0">SentX ↗</a>
                   </div>
-                  <p className="text-text-secondary text-xs">
+                  <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">
                     <span className="text-accent-primary font-semibold">+1 vote per dragon</span> per project you vote on.
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-3 p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-secondary/30 transition-colors">
-                <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-secondary/30 transition-colors">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden flex-shrink-0">
                   <img src="https://launchpad-assets.kabila.app/logo/0.0.9954622/JPLTxQfsoC/logo.png" alt="El Santuario" className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-text-primary">El Santuario</h3>
-                    <a href="https://sentx.io/nft-marketplace/0.0.9954622" target="_blank" rel="noopener noreferrer" className="text-xs text-accent-secondary hover:underline flex-shrink-0">SentX ↗</a>
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-text-primary">El Santuario</h3>
+                    <a href="https://sentx.io/nft-marketplace/0.0.9954622" target="_blank" rel="noopener noreferrer" className="text-[10px] sm:text-xs text-accent-secondary hover:underline flex-shrink-0">SentX ↗</a>
                   </div>
-                  <p className="text-text-secondary text-xs">
+                  <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">
                     <span className="text-accent-secondary font-semibold">+5 votes per project</span> plus auto-approval.
                   </p>
                 </div>
@@ -220,17 +220,17 @@ export default function HomePage() {
           </div>
         </section>
       ) : hasFeaturedEvents ? (
-        <section className="py-6 sm:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-text-primary">
+        <section className="py-4 sm:py-6 lg:py-8">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">
                 NFT Events
               </h2>
-              <Link href="/calendar" className="text-sm text-accent-primary hover:underline">
+              <Link href="/calendar" className="text-xs sm:text-sm text-accent-primary hover:underline">
                 View all →
               </Link>
             </div>
-            <div className={`grid grid-cols-1 gap-4 ${
+            <div className={`grid grid-cols-1 gap-3 sm:gap-4 ${
               [featured?.mostVotedLive, featured?.mostVoted, featured?.nextUp, featured?.topForeverMint].filter(Boolean).length >= 4
                 ? "md:grid-cols-2 lg:grid-cols-4"
                 : [featured?.mostVotedLive, featured?.mostVoted, featured?.nextUp, featured?.topForeverMint].filter(Boolean).length === 3
@@ -240,8 +240,8 @@ export default function HomePage() {
               {/* Live Now - Most Voted */}
               {featured?.mostVotedLive && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-green-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400" />
                     Live Now
                   </h3>
                   <FeaturedEventCard event={featured.mostVotedLive} variant="nextUp" />
@@ -251,8 +251,8 @@ export default function HomePage() {
               {/* Most Voted */}
               {featured?.mostVoted && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-yellow-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400" />
                     Most Voted
                   </h3>
                   <FeaturedEventCard event={featured.mostVoted} variant="nextUp" />
@@ -262,8 +262,8 @@ export default function HomePage() {
               {/* Minting Soon */}
               {featured?.nextUp && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-orange-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-400" />
                     Minting Soon
                   </h3>
                   <FeaturedEventCard event={featured.nextUp} variant="nextUp" />
@@ -273,8 +273,8 @@ export default function HomePage() {
               {/* Top Forever Mint */}
               {featured?.topForeverMint && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Infinity className="h-4 w-4 text-purple-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Infinity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
                     Top Forever Mint
                   </h3>
                   <FeaturedEventCard event={featured.topForeverMint} variant="foreverMint" />
@@ -286,30 +286,30 @@ export default function HomePage() {
       ) : null}
 
       {/* Top Collections */}
-      <section className="py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <TopCollectionsPodium />
         </div>
       </section>
 
       {/* Ecosystem Meetups - 2 columns: Most Voted | Next Upcoming */}
       {hasMeetups && (
-        <section className="py-6 sm:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
-                <Users className="h-6 w-6 text-accent-primary" />
+        <section className="py-4 sm:py-6 lg:py-8">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
                 Ecosystem Meetups
               </h2>
-              <Link href="/calendar?eventType=ECOSYSTEM_MEETUP" className="text-sm text-accent-primary hover:underline">
+              <Link href="/calendar?eventType=ECOSYSTEM_MEETUP" className="text-xs sm:text-sm text-accent-primary hover:underline">
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {featured?.topMeetup && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400 fill-yellow-400" />
                     Most Voted
                   </h3>
                   <EventColumnCard event={featured.topMeetup} icon={Users} />
@@ -317,8 +317,8 @@ export default function HomePage() {
               )}
               {featured?.nextMeetup && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-orange-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-400" />
                     Next Upcoming
                   </h3>
                   <EventColumnCard event={featured.nextMeetup} icon={Users} />
@@ -331,22 +331,22 @@ export default function HomePage() {
 
       {/* Hackathons - 3 columns: Most Voted | Next Upcoming | Biggest Prize */}
       {hasHackathons && (
-        <section className="py-6 sm:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
-                <Code2 className="h-6 w-6 text-violet-500" />
+        <section className="py-4 sm:py-6 lg:py-8">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
+                <Code2 className="h-5 w-5 sm:h-6 sm:w-6 text-violet-500" />
                 Hackathons
               </h2>
-              <Link href="/calendar?eventType=HACKATHON" className="text-sm text-accent-primary hover:underline">
+              <Link href="/calendar?eventType=HACKATHON" className="text-xs sm:text-sm text-accent-primary hover:underline">
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {featured?.topHackathon && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400 fill-yellow-400" />
                     Most Voted
                   </h3>
                   <EventColumnCard event={featured.topHackathon} icon={Code2} accentColor="violet-500" />
@@ -354,8 +354,8 @@ export default function HomePage() {
               )}
               {featured?.nextHackathon && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-orange-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-400" />
                     Next Upcoming
                   </h3>
                   <EventColumnCard event={featured.nextHackathon} icon={Code2} accentColor="violet-500" />
@@ -363,8 +363,8 @@ export default function HomePage() {
               )}
               {featured?.bigPrizeHackathon && (
                 <div>
-                  <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-amber-400" />
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
                     Biggest Prize
                   </h3>
                   <EventColumnCard event={featured.bigPrizeHackathon} icon={Code2} accentColor="violet-500" />
