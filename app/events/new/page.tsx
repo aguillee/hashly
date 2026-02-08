@@ -74,7 +74,6 @@ export default function NewEventPage() {
   const [eventType, setEventType] = React.useState<EventType>("MINT_EVENT");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
-  const [usePhases, setUsePhases] = React.useState(false);
   const [phases, setPhases] = React.useState<MintPhase[]>([createEmptyPhase()]);
   const [customLinks, setCustomLinks] = React.useState<CustomLink[]>([createEmptyLink()]);
 
@@ -213,51 +212,31 @@ export default function NewEventPage() {
           router.push("/?submitted=true");
         }
       } else {
-        // Mint Event (existing logic)
-        let mintDateTime: Date;
-        let phasesData: Array<{
-          name: string;
-          startDate: string;
-          endDate: string | null;
-          price: string;
-          supply: number | null;
-          maxPerWallet: number | null;
-          isWhitelist: boolean;
-          order: number;
-        }> | null = null;
-
-        if (usePhases && phases.length > 0) {
-          for (const phase of phases) {
-            if (!phase.name || !phase.startDate || !phase.price) {
-              throw new Error("Each phase requires a name, start date, and price");
-            }
+        // Mint Event - always requires at least one phase
+        for (const phase of phases) {
+          if (!phase.name || !phase.startDate || !phase.startTime || !phase.endDate || !phase.endTime || !phase.price || !phase.supply) {
+            throw new Error("Each phase requires: name, start date, start time, end date, end time, price, and supply");
           }
-          const sortedPhases = [...phases].sort(
-            (a, b) => new Date(`${a.startDate}T${a.startTime || "00:00"}Z`).getTime() -
-                      new Date(`${b.startDate}T${b.startTime || "00:00"}Z`).getTime()
-          );
-          mintDateTime = new Date(`${sortedPhases[0].startDate}T${sortedPhases[0].startTime || "00:00"}Z`);
-          phasesData = sortedPhases.map((phase, index) => ({
-            name: phase.name,
-            startDate: new Date(`${phase.startDate}T${phase.startTime || "00:00"}Z`).toISOString(),
-            endDate: phase.endDate
-              ? new Date(`${phase.endDate}T${phase.endTime || "23:59"}Z`).toISOString()
-              : null,
-            price: phase.currency === "USDC" ? `$${phase.price}` : `${phase.price} HBAR`,
-            supply: phase.supply ? parseInt(phase.supply) : null,
-            maxPerWallet: phase.maxPerWallet ? parseInt(phase.maxPerWallet) : null,
-            isWhitelist: phase.isWhitelist,
-            order: index,
-          }));
-        } else {
-          if (!formData.mintDate) throw new Error("Start date is required");
-          if (!formData.mintPrice) throw new Error("Mint price is required");
-          mintDateTime = new Date(`${formData.mintDate}T${formData.mintTime || "00:00"}Z`);
         }
 
-        const formattedPrice = usePhases && phases.length > 0
-          ? (phases[0].currency === "USDC" ? `$${phases[0].price}` : `${phases[0].price} HBAR`)
-          : (formData.mintCurrency === "USDC" ? `$${formData.mintPrice}` : `${formData.mintPrice} HBAR`);
+        const sortedPhases = [...phases].sort(
+          (a, b) => new Date(`${a.startDate}T${a.startTime}Z`).getTime() -
+                    new Date(`${b.startDate}T${b.startTime}Z`).getTime()
+        );
+
+        const mintDateTime = new Date(`${sortedPhases[0].startDate}T${sortedPhases[0].startTime}Z`);
+        const phasesData = sortedPhases.map((phase, index) => ({
+          name: phase.name,
+          startDate: new Date(`${phase.startDate}T${phase.startTime}Z`).toISOString(),
+          endDate: new Date(`${phase.endDate}T${phase.endTime}Z`).toISOString(),
+          price: phase.currency === "USDC" ? `$${phase.price}` : `${phase.price} HBAR`,
+          supply: parseInt(phase.supply),
+          maxPerWallet: phase.maxPerWallet ? parseInt(phase.maxPerWallet) : null,
+          isWhitelist: phase.isWhitelist,
+          order: index,
+        }));
+
+        const formattedPrice = phases[0].currency === "USDC" ? `$${phases[0].price}` : `${phases[0].price} HBAR`;
 
         const response = await fetch("/api/events", {
           method: "POST",
@@ -267,9 +246,7 @@ export default function NewEventPage() {
             description: formData.description,
             mintDate: mintDateTime.toISOString(),
             mintPrice: formattedPrice,
-            supply: usePhases && phases.length > 0
-              ? (phases[0].supply ? parseInt(phases[0].supply) : null)
-              : (formData.supply ? parseInt(formData.supply) : null),
+            supply: phases[0].supply ? parseInt(phases[0].supply) : null,
             imageUrl: formData.imageUrl || null,
             websiteUrl: formData.websiteUrl || null,
             twitterUrl: formData.twitterUrl || null,
@@ -599,117 +576,18 @@ export default function NewEventPage() {
             {/* ============ MINT EVENT FIELDS ============ */}
             {eventType === "MINT_EVENT" && (
               <>
-                {/* Mint Phases Toggle */}
-                <div className="p-4 rounded-lg bg-bg-secondary border border-border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Layers className="h-5 w-5 text-accent-primary" />
-                      <div>
-                        <p className="font-medium">Multiple Mint Phases</p>
-                        <p className="text-xs text-text-secondary">
-                          Enable if your mint has multiple phases (WL, Public, etc.)
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setUsePhases(!usePhases)}
-                      className={cn(
-                        "relative w-12 h-6 rounded-full transition-colors",
-                        usePhases ? "bg-accent-primary" : "bg-gray-600"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
-                          usePhases ? "translate-x-7" : "translate-x-1"
-                        )}
-                      />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Simple Mint Info */}
-                {!usePhases && (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Start Date <span className="text-error">*</span>
-                        </label>
-                        <Input type="date" name="mintDate" value={formData.mintDate} onChange={handleChange} required />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Start Time (UTC)</label>
-                        <Input type="time" name="mintTime" value={formData.mintTime} onChange={handleChange} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">End Date</label>
-                        <Input type="date" name="endDate" value={formData.endDate} onChange={handleChange} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">End Time (UTC)</label>
-                        <Input type="time" name="endTime" value={formData.endTime} onChange={handleChange} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Mint Price <span className="text-error">*</span>
-                        </label>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
-                            <Input type="number" name="mintPrice" value={formData.mintPrice} onChange={handleChange} placeholder="100" required />
-                          </div>
-                          <div className="flex rounded-lg border border-border overflow-hidden">
-                            <button
-                              type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, mintCurrency: "HBAR" }))}
-                              className={cn(
-                                "flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors",
-                                formData.mintCurrency === "HBAR" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                              )}
-                            >
-                              <HbarIcon className="h-4 w-4" />
-                              HBAR
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, mintCurrency: "USDC" }))}
-                              className={cn(
-                                "flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors",
-                                formData.mintCurrency === "USDC" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                              )}
-                            >
-                              <UsdcIcon className="h-4 w-4" />
-                              USDC
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Supply</label>
-                        <Input type="number" name="supply" value={formData.supply} onChange={handleChange} placeholder="e.g., 10000" />
-                      </div>
-                    </div>
-                  </>
-                )}
-
                 {/* Mint Phases */}
-                {usePhases && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-accent-primary" />
-                        Mint Phases
-                      </label>
-                      <Button type="button" variant="outline" size="sm" onClick={addPhase} className="gap-1">
-                        <Plus className="h-3 w-3" />
-                        Add Phase
-                      </Button>
-                    </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-accent-primary" />
+                      Mint Phases
+                    </label>
+                    <Button type="button" variant="outline" size="sm" onClick={addPhase} className="gap-1">
+                      <Plus className="h-3 w-3" />
+                      Add Phase
+                    </Button>
+                  </div>
                     {phases.map((phase, index) => (
                       <div key={phase.id} className="p-4 rounded-lg border border-border bg-bg-card space-y-4">
                         <div className="flex items-center justify-between">
@@ -722,33 +600,33 @@ export default function NewEventPage() {
                         </div>
                         <div>
                           <label className="block text-xs text-text-secondary mb-1">Phase Name <span className="text-error">*</span></label>
-                          <Input value={phase.name} onChange={(e) => handlePhaseChange(phase.id, "name", e.target.value)} placeholder="e.g., Whitelist, Public Sale" required={usePhases} />
+                          <Input value={phase.name} onChange={(e) => handlePhaseChange(phase.id, "name", e.target.value)} placeholder="e.g., Whitelist, Public Sale" required />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="block text-xs text-text-secondary mb-1">Start Date <span className="text-error">*</span></label>
-                            <Input type="date" value={phase.startDate} onChange={(e) => handlePhaseChange(phase.id, "startDate", e.target.value)} required={usePhases} />
+                            <Input type="date" value={phase.startDate} onChange={(e) => handlePhaseChange(phase.id, "startDate", e.target.value)} required />
                           </div>
                           <div>
-                            <label className="block text-xs text-text-secondary mb-1">Start Time (UTC)</label>
-                            <Input type="time" value={phase.startTime} onChange={(e) => handlePhaseChange(phase.id, "startTime", e.target.value)} />
+                            <label className="block text-xs text-text-secondary mb-1">Start Time (UTC) <span className="text-error">*</span></label>
+                            <Input type="time" value={phase.startTime} onChange={(e) => handlePhaseChange(phase.id, "startTime", e.target.value)} required />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs text-text-secondary mb-1">End Date</label>
-                            <Input type="date" value={phase.endDate} onChange={(e) => handlePhaseChange(phase.id, "endDate", e.target.value)} />
+                            <label className="block text-xs text-text-secondary mb-1">End Date <span className="text-error">*</span></label>
+                            <Input type="date" value={phase.endDate} onChange={(e) => handlePhaseChange(phase.id, "endDate", e.target.value)} required />
                           </div>
                           <div>
-                            <label className="block text-xs text-text-secondary mb-1">End Time (UTC)</label>
-                            <Input type="time" value={phase.endTime} onChange={(e) => handlePhaseChange(phase.id, "endTime", e.target.value)} />
+                            <label className="block text-xs text-text-secondary mb-1">End Time (UTC) <span className="text-error">*</span></label>
+                            <Input type="time" value={phase.endTime} onChange={(e) => handlePhaseChange(phase.id, "endTime", e.target.value)} required />
                           </div>
                         </div>
                         <div>
                           <label className="block text-xs text-text-secondary mb-1">Price <span className="text-error">*</span></label>
                           <div className="flex gap-2">
                             <div className="flex-1">
-                              <Input type="number" value={phase.price} onChange={(e) => handlePhaseChange(phase.id, "price", e.target.value)} placeholder="100" required={usePhases} />
+                              <Input type="number" value={phase.price} onChange={(e) => handlePhaseChange(phase.id, "price", e.target.value)} placeholder="100" required />
                             </div>
                             <div className="flex rounded-lg border border-border overflow-hidden">
                               <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "HBAR")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "HBAR" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
@@ -762,8 +640,8 @@ export default function NewEventPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs text-text-secondary mb-1">Supply</label>
-                            <Input type="number" value={phase.supply} onChange={(e) => handlePhaseChange(phase.id, "supply", e.target.value)} placeholder="1000" />
+                            <label className="block text-xs text-text-secondary mb-1">Supply <span className="text-error">*</span></label>
+                            <Input type="number" value={phase.supply} onChange={(e) => handlePhaseChange(phase.id, "supply", e.target.value)} placeholder="1000" required />
                           </div>
                           <div>
                             <label className="block text-xs text-text-secondary mb-1">Max/Wallet</label>
@@ -778,8 +656,7 @@ export default function NewEventPage() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
+                </div>
               </>
             )}
 
