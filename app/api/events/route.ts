@@ -200,10 +200,11 @@ export async function GET(request: NextRequest) {
       total,
       hasMore: offset + events.length < total,
     });
-  } catch (error) {
-    console.error("Get events error:", error);
+  } catch (error: any) {
+    console.error("Get events error:", error?.message || error);
+    console.error("Get events stack:", error?.stack);
     return NextResponse.json(
-      { error: "Failed to fetch events" },
+      { error: "Failed to fetch events", details: error?.message || "Unknown error" },
       { status: 500 }
     );
   }
