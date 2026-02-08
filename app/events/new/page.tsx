@@ -159,14 +159,19 @@ export default function NewEventPage() {
         // Meetup / Hackathon validation
         if (!formData.host.trim()) throw new Error(eventType === "HACKATHON" ? "Organizer is required" : "Host is required");
         if (!formData.mintDate) throw new Error("Start date is required");
+        if (!formData.mintTime) throw new Error("Start time is required");
         if (!formData.endDate) throw new Error("End date is required");
+        if (!formData.endTime) throw new Error("End time is required");
 
         if (formData.locationType === "in_person" && !formData.location.trim()) {
           throw new Error("Location is required for in-person events");
         }
 
-        // Validate custom links
+        // Validate custom links - at least one is required
         const validLinks = customLinks.filter(l => l.name.trim() && l.url.trim());
+        if (validLinks.length === 0) {
+          throw new Error("At least one link is required");
+        }
         for (const link of validLinks) {
           try {
             new URL(link.url);
@@ -175,10 +180,8 @@ export default function NewEventPage() {
           }
         }
 
-        const mintDateTime = new Date(`${formData.mintDate}T${formData.mintTime || "00:00"}Z`);
-        const endDateTime = formData.endDate
-          ? new Date(`${formData.endDate}T${formData.endTime || "23:59"}Z`)
-          : null;
+        const mintDateTime = new Date(`${formData.mintDate}T${formData.mintTime}Z`);
+        const endDateTime = new Date(`${formData.endDate}T${formData.endTime}Z`);
 
         const response = await fetch("/api/events", {
           method: "POST",
@@ -498,13 +501,14 @@ export default function NewEventPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">
-                      Start Time (UTC)
+                      Start Time (UTC) <span className="text-error">*</span>
                     </label>
                     <Input
                       type="time"
                       name="mintTime"
                       value={formData.mintTime}
                       onChange={handleChange}
+                      required
                     />
                   </div>
                 </div>
@@ -524,12 +528,13 @@ export default function NewEventPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">End Time (UTC)</label>
+                    <label className="block text-sm font-medium mb-2">End Time (UTC) <span className="text-error">*</span></label>
                     <Input
                       type="time"
                       name="endTime"
                       value={formData.endTime}
                       onChange={handleChange}
+                      required
                     />
                   </div>
                 </div>
@@ -539,7 +544,7 @@ export default function NewEventPage() {
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium flex items-center gap-2">
                       <LinkIcon className="h-4 w-4 text-accent-primary" />
-                      Links
+                      Links <span className="text-error">*</span>
                     </label>
                     <Button type="button" variant="outline" size="sm" onClick={addLink} className="gap-1">
                       <Plus className="h-3 w-3" />
