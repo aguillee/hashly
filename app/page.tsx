@@ -204,7 +204,7 @@ export default function HomePage() {
 
             {/* Right: Ad Carousel - only visible when ads exist */}
             {hasAds && (
-              <div className="hidden lg:block h-full min-h-[280px]">
+              <div className="h-48 sm:h-56 lg:h-full lg:min-h-[280px] order-first lg:order-none">
                 <HomeAdCarousel ads={homeAds} />
               </div>
             )}
