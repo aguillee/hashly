@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },
           { symbol: { contains: search, mode: "insensitive" as const } },
+          { tokenAddress: { contains: search, mode: "insensitive" as const } },
         ],
       };
 
@@ -80,13 +81,36 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Get worst 10 tokens (lowest votes, including negative)
+    const worstTokens = await prisma.token.findMany({
+      where: { isApproved: true, isHidden: false },
+      orderBy: { totalVotes: "asc" },
+      take: 10,
+      select: {
+        id: true,
+        tokenAddress: true,
+        symbol: true,
+        name: true,
+        icon: true,
+        totalVotes: true,
+        createdAt: true,
+      },
+    });
+
     // Get user votes for all tokens
-    const userVotesMap = await getUserVotesMap(user, topTokens.map(t => t.id));
+    const allTokenIds = [...topTokens.map(t => t.id), ...worstTokens.map(t => t.id)];
+    const userVotesMap = await getUserVotesMap(user, allTokenIds);
 
     return NextResponse.json({
-      tokens: topTokens.map((t, index) => ({
+      top: topTokens.map((t, index) => ({
         ...t,
         rank: index + 1,
+        userVote: userVotesMap[t.id] || null,
+        createdAt: t.createdAt.toISOString(),
+      })),
+      worst: worstTokens.map((t, index) => ({
+        ...t,
+        rank: total - index,
         userVote: userVotesMap[t.id] || null,
         createdAt: t.createdAt.toISOString(),
       })),

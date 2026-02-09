@@ -48,6 +48,8 @@ interface Token {
   userVote: { voteWeight: number } | null;
 }
 
+type ProjectType = "nft" | "token";
+
 // Custom hook for debounce
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
@@ -74,6 +76,8 @@ export default function ProjectsPage() {
 
   // Tokens state
   const [topTokens, setTopTokens] = React.useState<Token[]>([]);
+  const [worstTokens, setWorstTokens] = React.useState<Token[]>([]);
+  const [tokenSearchResults, setTokenSearchResults] = React.useState<Token[]>([]);
   const [totalTokens, setTotalTokens] = React.useState(0);
 
   // UI state
@@ -86,9 +90,10 @@ export default function ProjectsPage() {
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchLoading, setSearchLoading] = React.useState(false);
 
-  // Modal for adding collection
+  // Modal for adding project
   const [showAddModal, setShowAddModal] = React.useState(false);
   const [newTokenId, setNewTokenId] = React.useState("");
+  const [projectType, setProjectType] = React.useState<ProjectType>("nft");
   const [submitting, setSubmitting] = React.useState(false);
 
   const { isConnected, user } = useWalletStore();
@@ -103,12 +108,14 @@ export default function ProjectsPage() {
     fetchTokens();
   }, []);
 
-  // Real-time search with debounce
+  // Real-time search with debounce - search both collections and tokens
   React.useEffect(() => {
     if (debouncedSearch.length > 0) {
       fetchCollections(false, debouncedSearch);
+      fetchTokens(debouncedSearch);
     } else if (debouncedSearch === "" && !loading) {
       fetchCollections(false, "");
+      fetchTokens();
     }
   }, [debouncedSearch]);
 
@@ -159,13 +166,24 @@ export default function ProjectsPage() {
     }
   }
 
-  async function fetchTokens() {
+  async function fetchTokens(searchQuery?: string) {
     try {
       setLoadingTokens(true);
-      const response = await fetch("/api/tokens");
+      const params = new URLSearchParams();
+      if (searchQuery) params.set("search", searchQuery);
+
+      const response = await fetch(`/api/tokens?${params}`);
       if (response.ok) {
         const data = await response.json();
-        setTopTokens(data.tokens || []);
+        if (data.isSearch) {
+          setTokenSearchResults(data.tokens || []);
+          setTopTokens([]);
+          setWorstTokens([]);
+        } else {
+          setTopTokens(data.top || data.tokens || []);
+          setWorstTokens(data.worst || []);
+          setTokenSearchResults([]);
+        }
         setTotalTokens(data.total);
       }
     } catch (error) {
@@ -329,15 +347,21 @@ export default function ProjectsPage() {
   const clearSearch = () => {
     setSearch("");
     setIsSearching(false);
+    setSearchResults([]);
+    setTokenSearchResults([]);
   };
 
-  async function handleSubmitCollection(e: React.FormEvent) {
+  async function handleSubmitProject(e: React.FormEvent) {
     e.preventDefault();
     if (!newTokenId.trim()) return;
 
     setSubmitting(true);
     try {
-      const response = await fetch("/api/collections/submit", {
+      const endpoint = projectType === "nft"
+        ? "/api/collections/submit"
+        : "/api/tokens/submit";
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tokenId: newTokenId.trim() }),
@@ -346,29 +370,37 @@ export default function ProjectsPage() {
       const data = await response.json();
 
       if (response.ok) {
+        const itemName = projectType === "nft"
+          ? data.collection?.name
+          : data.token?.symbol || data.token?.name;
+
         toast({
-          title: data.autoApproved ? "Collection Added!" : "Collection Submitted!",
+          title: data.autoApproved ? "Project Added!" : "Project Submitted!",
           description: data.autoApproved
-            ? `${data.collection.name} has been added to the list`
-            : `${data.collection.name} is pending admin approval`,
+            ? `${itemName} has been added to the list`
+            : `${itemName} is pending admin approval`,
         });
         setNewTokenId("");
         setShowAddModal(false);
         if (data.autoApproved) {
-          fetchCollections();
+          if (projectType === "nft") {
+            fetchCollections();
+          } else {
+            fetchTokens();
+          }
         }
       } else {
         toast({
           title: "Error",
-          description: data.error || "Failed to submit collection",
+          description: data.error || "Failed to submit project",
           variant: "error",
         });
       }
     } catch (error) {
-      console.error("Failed to submit collection:", error);
+      console.error("Failed to submit project:", error);
       toast({
         title: "Error",
-        description: "Failed to submit collection",
+        description: "Failed to submit project",
         variant: "error",
       });
     } finally {
@@ -406,17 +438,17 @@ export default function ProjectsPage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Search and Add Collection */}
+        {/* Search and Add Project */}
         <div className="flex gap-2 sm:gap-3 mb-6">
           <div className="relative flex-1">
-            {searchLoading ? (
+            {searchLoading || loadingTokens ? (
               <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent-primary animate-spin" />
             ) : (
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
             )}
             <input
               type="text"
-              placeholder="Search NFT collections..."
+              placeholder="Search NFTs or tokens by name or token ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-10 py-2 rounded-xl bg-bg-card border border-border focus:outline-none focus:ring-2 focus:ring-accent-primary/50 text-text-primary placeholder:text-text-secondary text-sm"
@@ -436,7 +468,7 @@ export default function ProjectsPage() {
               className="gap-2 whitespace-nowrap"
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Collection</span>
+              <span className="hidden sm:inline">Add Project</span>
               <span className="sm:hidden">Add</span>
             </Button>
           )}
@@ -454,12 +486,12 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* Add Collection Modal */}
+        {/* Add Project Modal */}
         {showAddModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="bg-bg-card border border-border rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold">Add Collection</h2>
+                <h2 className="text-lg font-bold">Add Project</h2>
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="text-text-secondary hover:text-text-primary"
@@ -467,11 +499,43 @@ export default function ProjectsPage() {
                   <X className="h-5 w-5" />
                 </button>
               </div>
+
+              {/* Project Type Selector */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setProjectType("nft")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 transition-all",
+                    projectType === "nft"
+                      ? "border-accent-primary bg-accent-primary/10 text-accent-primary"
+                      : "border-border hover:border-accent-primary/50 text-text-secondary"
+                  )}
+                >
+                  <Layers className="h-4 w-4" />
+                  <span className="font-medium">NFT Collection</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProjectType("token")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 transition-all",
+                    projectType === "token"
+                      ? "border-accent-secondary bg-accent-secondary/10 text-accent-secondary"
+                      : "border-border hover:border-accent-secondary/50 text-text-secondary"
+                  )}
+                >
+                  <Coins className="h-4 w-4" />
+                  <span className="font-medium">Token</span>
+                </button>
+              </div>
+
               <p className="text-sm text-text-secondary mb-4">
-                Enter the Hedera Token ID of the NFT collection you want to add.
-                If you hold an El Santuario NFT, it will be auto-approved!
+                {projectType === "nft"
+                  ? "Enter the Hedera Token ID of the NFT collection you want to add. If you hold an El Santuario NFT, it will be auto-approved!"
+                  : "Enter the Hedera Token ID of the token you want to add. If you hold an El Santuario NFT, it will be auto-approved!"}
               </p>
-              <form onSubmit={handleSubmitCollection} className="space-y-4">
+              <form onSubmit={handleSubmitProject} className="space-y-4">
                 <Input
                   placeholder="0.0.XXXXX"
                   value={newTokenId}
@@ -506,47 +570,83 @@ export default function ProjectsPage() {
             <Loader2 className="h-6 w-6 animate-spin text-accent-primary" />
           </div>
         ) : isSearching ? (
-          /* Search Results */
-          <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
-            <div className="p-4 border-b border-border flex items-center justify-between">
+          /* Search Results - Both NFTs and Tokens */
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
               <span className="text-sm text-text-secondary">
-                {searchResults.length} results for "{search}"
+                {searchResults.length + tokenSearchResults.length} results for "{search}"
               </span>
               <Button variant="ghost" size="sm" onClick={clearSearch}>
                 Clear search
               </Button>
             </div>
-            <div className="p-3">
-              {searchResults.length === 0 ? (
-                <div className="text-center py-12">
-                  <Search className="h-8 w-8 mx-auto text-text-secondary mb-3" />
-                  <p className="text-text-secondary text-sm mb-3">No collections found</p>
-                  {isConnected && (
-                    <Button
-                      size="sm"
-                      onClick={() => setShowAddModal(true)}
-                      className="gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add this collection
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {searchResults.map((collection) => (
-                    <CollectionRow
-                      key={collection.id}
-                      collection={collection}
-                      votingId={votingId}
-                      onVote={handleVote}
-                      getRankIcon={getRankIcon}
-                      getRankStyle={getRankStyle}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+
+            {searchResults.length === 0 && tokenSearchResults.length === 0 ? (
+              <div className="rounded-2xl border border-border bg-bg-card/50 p-8 text-center">
+                <Search className="h-8 w-8 mx-auto text-text-secondary mb-3" />
+                <p className="text-text-secondary text-sm mb-3">No projects found</p>
+                {isConnected && (
+                  <Button
+                    size="sm"
+                    onClick={() => setShowAddModal(true)}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add this project
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* NFT Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
+                    <div className="p-4 border-b border-border flex items-center gap-2">
+                      <Layers className="h-5 w-5 text-accent-primary" />
+                      <span className="font-semibold text-text-primary">NFT Collections ({searchResults.length})</span>
+                    </div>
+                    <div className="p-3 max-h-[50vh] overflow-y-auto">
+                      <div className="space-y-2">
+                        {searchResults.map((collection) => (
+                          <CollectionRow
+                            key={collection.id}
+                            collection={collection}
+                            votingId={votingId}
+                            onVote={handleVote}
+                            getRankIcon={getRankIcon}
+                            getRankStyle={getRankStyle}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Token Search Results */}
+                {tokenSearchResults.length > 0 && (
+                  <div className="rounded-2xl border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
+                    <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
+                      <Coins className="h-5 w-5 text-accent-secondary" />
+                      <span className="font-semibold text-text-primary">Tokens ({tokenSearchResults.length})</span>
+                    </div>
+                    <div className="p-3 max-h-[50vh] overflow-y-auto">
+                      <div className="space-y-2">
+                        {tokenSearchResults.map((token) => (
+                          <TokenRow
+                            key={token.id}
+                            token={token}
+                            votingId={votingTokenId}
+                            onVote={handleTokenVote}
+                            getRankIcon={getRankIcon}
+                            getRankStyle={getRankStyle}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <>
@@ -621,30 +721,67 @@ export default function ProjectsPage() {
               </div>
             </div>
 
-            {/* Worst Voted NFTs - Below */}
-            {worstCollections.length > 0 && (
-              <div className="rounded-2xl border border-red-500/30 bg-bg-card/50 overflow-hidden">
-                <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-red-500" />
-                  <span className="font-semibold text-text-primary">Worst Voted NFTs</span>
+            {/* Worst Voted Section - Two columns: NFTs left, Tokens right */}
+            {(worstCollections.length > 0 || worstTokens.length > 0) && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                {/* Worst NFTs - Left */}
+                <div className="rounded-2xl border border-red-500/30 bg-bg-card/50 overflow-hidden">
+                  <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
+                    <TrendingDown className="h-5 w-5 text-red-500" />
+                    <span className="font-semibold text-text-primary">Worst Voted NFTs</span>
+                  </div>
+                  <div className="p-3 overflow-x-auto lg:overflow-visible">
+                    {worstCollections.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Layers className="h-6 w-6 mx-auto text-text-secondary mb-2" />
+                        <p className="text-text-secondary text-sm">No worst NFTs yet</p>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 min-w-max lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:min-w-0">
+                        {worstCollections.slice(0, 6).map((collection) => (
+                          <CollectionRow
+                            key={collection.id}
+                            collection={collection}
+                            votingId={votingId}
+                            onVote={handleVote}
+                            getRankIcon={() => (
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0">
+                                <span className="text-red-400 font-bold text-[10px] sm:text-xs">#{collection.rank}</span>
+                              </div>
+                            )}
+                            getRankStyle={() => "bg-red-500/5 border-red-500/20 hover:border-red-500/40"}
+                            compact
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="p-3 overflow-x-auto">
-                  <div className="flex gap-2 min-w-max lg:grid lg:grid-cols-5 lg:min-w-0">
-                    {worstCollections.map((collection) => (
-                      <CollectionRow
-                        key={collection.id}
-                        collection={collection}
-                        votingId={votingId}
-                        onVote={handleVote}
-                        getRankIcon={() => (
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0">
-                            <span className="text-red-400 font-bold text-[10px] sm:text-xs">#{collection.rank}</span>
-                          </div>
-                        )}
-                        getRankStyle={() => "bg-red-500/5 border-red-500/20 hover:border-red-500/40"}
-                        compact
-                      />
-                    ))}
+
+                {/* Worst Tokens - Right */}
+                <div className="rounded-2xl border border-orange-500/30 bg-bg-card/50 overflow-hidden">
+                  <div className="p-4 border-b border-orange-500/30 flex items-center gap-2">
+                    <TrendingDown className="h-5 w-5 text-orange-500" />
+                    <span className="font-semibold text-text-primary">Worst Voted Tokens</span>
+                  </div>
+                  <div className="p-3 overflow-x-auto lg:overflow-visible">
+                    {worstTokens.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Coins className="h-6 w-6 mx-auto text-text-secondary mb-2" />
+                        <p className="text-text-secondary text-sm">No worst tokens yet</p>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 min-w-max lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:min-w-0">
+                        {worstTokens.slice(0, 6).map((token) => (
+                          <TokenRowCompact
+                            key={token.id}
+                            token={token}
+                            votingId={votingTokenId}
+                            onVote={handleTokenVote}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -881,6 +1018,63 @@ function TokenRow({
           shareUrl="https://hash-ly.com/projects"
           className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
         />
+      </div>
+    </div>
+  );
+}
+
+// Token Row Compact Component (for worst tokens)
+function TokenRowCompact({
+  token,
+  votingId,
+  onVote,
+}: {
+  token: Token;
+  votingId: string | null;
+  onVote: (id: string, type: "UP" | "DOWN") => void;
+}) {
+  const isVoting = votingId === token.id;
+  const hasVoted = token.userVote !== null;
+  const voteIsUp = hasVoted && token.userVote!.voteWeight > 0;
+
+  return (
+    <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all duration-200 w-36 lg:w-auto bg-orange-500/5 border-orange-500/20 hover:border-orange-500/40">
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0">
+        <span className="text-orange-400 font-bold text-[10px] sm:text-xs">#{token.rank}</span>
+      </div>
+      <div className="w-10 h-10 rounded-full overflow-hidden bg-bg-secondary flex-shrink-0">
+        {token.icon ? (
+          <img src={token.icon} alt={token.symbol} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Coins className="h-4 w-4 text-text-secondary" />
+          </div>
+        )}
+      </div>
+      <p className="text-xs font-bold text-center truncate w-full">${token.symbol}</p>
+      <div className="flex items-center gap-1 text-orange-400 text-xs font-bold">
+        <Trophy className="h-3 w-3" />
+        {token.totalVotes}
+      </div>
+      <div className="flex gap-1">
+        <Button
+          variant={hasVoted && voteIsUp ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onVote(token.id, "UP")}
+          disabled={isVoting}
+          className={cn("h-6 w-6 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
+        >
+          <ThumbsUp className="h-3 w-3" />
+        </Button>
+        <Button
+          variant={hasVoted && !voteIsUp ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onVote(token.id, "DOWN")}
+          disabled={isVoting}
+          className={cn("h-6 w-6 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
+        >
+          <ThumbsDown className="h-3 w-3" />
+        </Button>
       </div>
     </div>
   );
