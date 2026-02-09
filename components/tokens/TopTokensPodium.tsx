@@ -59,7 +59,7 @@ const rankConfig: Record<number, {
 
 export function TopTokensPodium() {
   const { data, isLoading } = useTokens();
-  const top5: Token[] = (data?.tokens || []).slice(0, 5);
+  const top5: Token[] = (data?.top || data?.tokens || []).slice(0, 5);
 
   if (isLoading) {
     return (
