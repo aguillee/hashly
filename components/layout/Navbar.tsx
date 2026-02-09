@@ -55,7 +55,7 @@ export function Navbar() {
       )}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-18 py-2 sm:py-4">
+        <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 py-2 sm:py-3 lg:py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
             <Image

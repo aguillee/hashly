@@ -154,6 +154,8 @@ export async function GET(request: NextRequest) {
           supply: true,
           totalVotes: true,
           source: true,
+          isApproved: true,
+          isHidden: true,
           lastSyncedAt: true,
           createdAt: true,
         },

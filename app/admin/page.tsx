@@ -16,6 +16,8 @@ import {
   RefreshCw,
   Layers,
   Megaphone,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -83,9 +85,19 @@ export default function AdminPage() {
   const [deleteCollectionId, setDeleteCollectionId] = React.useState("");
   const [deletingCollection, setDeletingCollection] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "collections" | "delete-collection" | "add-collection";
+    type: "launchpads" | "kabila" | "collections" | "delete-collection" | "add-collection" | "hide-collection";
     message: string;
   } | null>(null);
+  const [hideCollectionId, setHideCollectionId] = React.useState("");
+  const [hidingCollection, setHidingCollection] = React.useState(false);
+  const [hiddenCollections, setHiddenCollections] = React.useState<Array<{
+    id: string;
+    tokenAddress: string;
+    name: string;
+    image: string | null;
+  }>>([]);
+  const [loadingHidden, setLoadingHidden] = React.useState(true);
+  const [togglingHidden, setTogglingHidden] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!isConnected || !user?.isAdmin) {
@@ -96,7 +108,81 @@ export default function AdminPage() {
     fetchPendingEvents();
     fetchPendingCollections();
     fetchAdmins();
+    fetchHiddenCollections();
   }, [isConnected, user, router]);
+
+  async function fetchHiddenCollections() {
+    try {
+      const response = await fetch("/api/admin/collections?limit=100");
+      if (response.ok) {
+        const data = await response.json();
+        const hidden = data.collections.filter((c: { isHidden: boolean }) => c.isHidden);
+        setHiddenCollections(hidden);
+      }
+    } catch (error) {
+      console.error("Failed to fetch hidden collections:", error);
+    } finally {
+      setLoadingHidden(false);
+    }
+  }
+
+  async function handleHideCollection(e: React.FormEvent) {
+    e.preventDefault();
+    if (!hideCollectionId.trim()) return;
+
+    setHidingCollection(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch(`/api/admin/collections/${encodeURIComponent(hideCollectionId.trim())}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isHidden: true }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "hide-collection",
+          message: data.message || `Collection hidden`,
+        });
+        setHideCollectionId("");
+        fetchHiddenCollections();
+      } else {
+        setSyncResult({
+          type: "hide-collection",
+          message: data.error || "Failed to hide collection",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to hide collection:", error);
+      setSyncResult({
+        type: "hide-collection",
+        message: "Failed to hide collection",
+      });
+    } finally {
+      setHidingCollection(false);
+    }
+  }
+
+  async function handleToggleHidden(tokenAddress: string, currentlyHidden: boolean) {
+    setTogglingHidden(tokenAddress);
+    try {
+      const response = await fetch(`/api/admin/collections/${encodeURIComponent(tokenAddress)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isHidden: !currentlyHidden }),
+      });
+
+      if (response.ok) {
+        fetchHiddenCollections();
+      }
+    } catch (error) {
+      console.error("Failed to toggle collection visibility:", error);
+    } finally {
+      setTogglingHidden(null);
+    }
+  }
 
   async function fetchPendingEvents() {
     try {
@@ -642,7 +728,91 @@ export default function AdminPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Hide Collection */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-lg bg-gray-500/10">
+                <EyeOff className="h-6 w-6 text-gray-500" />
+              </div>
+              <div>
+                <p className="font-medium">Hide Collection</p>
+                <p className="text-xs text-text-secondary">Exclude from ranking by Token ID</p>
+              </div>
+            </div>
+            <form onSubmit={handleHideCollection} className="flex gap-2">
+              <Input
+                placeholder="Token ID (0.0.XXXXX)"
+                value={hideCollectionId}
+                onChange={(e) => setHideCollectionId(e.target.value)}
+                disabled={hidingCollection}
+              />
+              <Button type="submit" variant="secondary" size="sm" loading={hidingCollection}>
+                <EyeOff className="h-4 w-4" />
+              </Button>
+            </form>
+            {syncResult?.type === "hide-collection" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Hidden Collections List */}
+      {hiddenCollections.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <EyeOff className="h-5 w-5" />
+              Hidden Collections ({hiddenCollections.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {hiddenCollections.map((collection) => (
+                <div
+                  key={collection.id}
+                  className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg"
+                >
+                  <div className="w-10 h-10 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                    {collection.image ? (
+                      <Image
+                        src={collection.image}
+                        alt={collection.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Layers className="h-4 w-4 text-text-secondary" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{collection.name}</p>
+                    <p className="text-xs text-text-secondary font-mono truncate">{collection.tokenAddress}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleToggleHidden(collection.tokenAddress, true)}
+                    disabled={togglingHidden === collection.tokenAddress}
+                    className="flex-shrink-0"
+                    title="Show collection"
+                  >
+                    {togglingHidden === collection.tokenAddress ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-success" />
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Pending Events - 2 columns */}

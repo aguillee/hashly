@@ -5,6 +5,65 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+// PATCH /api/admin/collections/[tokenId] - Toggle hide/show a collection
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { tokenId: string } }
+) {
+  try {
+    const rateLimitResponse = await checkRateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+    const user = await getCurrentUser();
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const { tokenId } = params;
+    const body = await request.json();
+    const { isHidden } = body;
+
+    if (typeof isHidden !== "boolean") {
+      return NextResponse.json(
+        { error: "isHidden must be a boolean" },
+        { status: 400 }
+      );
+    }
+
+    // Find the collection by token address
+    const collection = await prisma.collection.findUnique({
+      where: { tokenAddress: tokenId },
+    });
+
+    if (!collection) {
+      return NextResponse.json(
+        { error: `Collection with token ID ${tokenId} not found` },
+        { status: 404 }
+      );
+    }
+
+    // Update the collection
+    const updated = await prisma.collection.update({
+      where: { id: collection.id },
+      data: { isHidden },
+    });
+
+    return NextResponse.json({
+      success: true,
+      collection: updated,
+      message: `Collection "${collection.name}" is now ${isHidden ? "hidden" : "visible"}`,
+    });
+  } catch (error) {
+    console.error("Toggle collection visibility error:", error);
+    return NextResponse.json(
+      { error: "Failed to update collection visibility" },
+      { status: 500 }
+    );
+  }
+}
+
 // DELETE /api/admin/collections/[tokenId] - Delete a specific collection by token ID
 export async function DELETE(
   request: NextRequest,

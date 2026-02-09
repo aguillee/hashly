@@ -175,11 +175,12 @@ model Collection {
   externalId   String?          @map("external_id")
   source       DataSource       @default(SENTX)
   isApproved   Boolean          @default(false) @map("is_approved")
+  isHidden     Boolean          @default(false) @map("is_hidden")
   submittedBy  String?          @map("submitted_by")
   votes        CollectionVote[]
 
   @@unique([source, externalId])
-  @@index([isApproved, totalVotes])
+  @@index([isApproved, isHidden, totalVotes])
   @@map("collections")
 }
 
