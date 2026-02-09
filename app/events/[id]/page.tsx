@@ -22,6 +22,7 @@ import {
   DollarSign,
   Trophy,
   Code2,
+  Link2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -45,6 +46,11 @@ interface MintPhase {
   order: number;
 }
 
+interface CustomLink {
+  name: string;
+  url: string;
+}
+
 interface EventDetail {
   id: string;
   title: string;
@@ -62,6 +68,7 @@ interface EventDetail {
   votesDown: number;
   event_type: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
   prizes?: string | null;
+  custom_links?: CustomLink[] | null;
   createdBy: {
     walletAddress: string;
   };
@@ -352,6 +359,20 @@ export default function EventDetailPage() {
                     <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   </a>
                 )}
+                {/* Custom Links */}
+                {event.custom_links && Array.isArray(event.custom_links) && event.custom_links.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm"
+                  >
+                    <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    {link.name}
+                    <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                  </a>
+                ))}
               </div>
             </CardContent>
           </Card>

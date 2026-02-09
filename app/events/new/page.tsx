@@ -97,6 +97,7 @@ export default function NewEventPage() {
     locationType: "online" as "online" | "in_person",
     location: "",
     prizes: "",
+    entryFee: "",
   });
 
   React.useEffect(() => {
@@ -190,7 +191,7 @@ export default function NewEventPage() {
             title: formData.title,
             description: formData.description,
             mintDate: mintDateTime.toISOString(),
-            mintPrice: "Free",
+            mintPrice: formData.entryFee.trim() ? formData.entryFee.trim() : "Free",
             imageUrl: formData.imageUrl || null,
             websiteUrl: formData.websiteUrl || null,
             twitterUrl: formData.twitterUrl || null,
@@ -420,6 +421,20 @@ export default function NewEventPage() {
                     />
                   </div>
                 )}
+
+                {/* Entry Fee */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Entry Fee
+                  </label>
+                  <Input
+                    name="entryFee"
+                    value={formData.entryFee}
+                    onChange={handleChange}
+                    placeholder="e.g., $20, 100 HBAR, or leave empty for Free"
+                  />
+                  <p className="text-xs text-text-secondary mt-1">Leave empty if the event is free</p>
+                </div>
 
                 {/* Language */}
                 <div>
