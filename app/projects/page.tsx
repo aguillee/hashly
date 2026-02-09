@@ -16,6 +16,7 @@ import {
   TrendingDown,
   Plus,
   X,
+  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -31,6 +32,17 @@ interface Collection {
   image: string | null;
   owners: number;
   supply: number;
+  totalVotes: number;
+  rank: number;
+  userVote: { voteWeight: number } | null;
+}
+
+interface Token {
+  id: string;
+  tokenAddress: string;
+  symbol: string;
+  name: string;
+  icon: string | null;
   totalVotes: number;
   rank: number;
   userVote: { voteWeight: number } | null;
@@ -53,15 +65,24 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export default function CollectionsPage() {
+export default function ProjectsPage() {
+  // NFT Collections state
   const [topCollections, setTopCollections] = React.useState<Collection[]>([]);
   const [worstCollections, setWorstCollections] = React.useState<Collection[]>([]);
   const [searchResults, setSearchResults] = React.useState<Collection[]>([]);
+  const [totalCollections, setTotalCollections] = React.useState(0);
+
+  // Tokens state
+  const [topTokens, setTopTokens] = React.useState<Token[]>([]);
+  const [totalTokens, setTotalTokens] = React.useState(0);
+
+  // UI state
   const [loading, setLoading] = React.useState(true);
+  const [loadingTokens, setLoadingTokens] = React.useState(true);
   const [syncing, setSyncing] = React.useState(false);
   const [votingId, setVotingId] = React.useState<string | null>(null);
+  const [votingTokenId, setVotingTokenId] = React.useState<string | null>(null);
   const [search, setSearch] = React.useState("");
-  const [total, setTotal] = React.useState(0);
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchLoading, setSearchLoading] = React.useState(false);
 
@@ -79,6 +100,7 @@ export default function CollectionsPage() {
   // Initial load
   React.useEffect(() => {
     fetchCollections();
+    fetchTokens();
   }, []);
 
   // Real-time search with debounce
@@ -86,7 +108,6 @@ export default function CollectionsPage() {
     if (debouncedSearch.length > 0) {
       fetchCollections(false, debouncedSearch);
     } else if (debouncedSearch === "" && !loading) {
-      // Clear search - reload normal view
       fetchCollections(false, "");
     }
   }, [debouncedSearch]);
@@ -112,15 +133,13 @@ export default function CollectionsPage() {
       const response = await fetch(`/api/collections?${params}`);
       if (response.ok) {
         const data = await response.json();
-        setTotal(data.total);
+        setTotalCollections(data.total);
 
         if (data.isSearch) {
-          // Search results
           setSearchResults(data.collections);
           setTopCollections([]);
           setWorstCollections([]);
         } else {
-          // Normal view: top 30 + worst 10
           setTopCollections(data.top || []);
           setWorstCollections(data.worst || []);
           setSearchResults([]);
@@ -137,6 +156,22 @@ export default function CollectionsPage() {
       setLoading(false);
       setSyncing(false);
       setSearchLoading(false);
+    }
+  }
+
+  async function fetchTokens() {
+    try {
+      setLoadingTokens(true);
+      const response = await fetch("/api/tokens");
+      if (response.ok) {
+        const data = await response.json();
+        setTopTokens(data.tokens || []);
+        setTotalTokens(data.total);
+      }
+    } catch (error) {
+      console.error("Failed to fetch tokens:", error);
+    } finally {
+      setLoadingTokens(false);
     }
   }
 
@@ -161,7 +196,6 @@ export default function CollectionsPage() {
       if (response.ok) {
         const data = await response.json();
 
-        // Update the collection in whichever list it's in
         const updateCollection = (c: Collection) =>
           c.id === collectionId
             ? { ...c, totalVotes: data.totalVotes, userVote: { voteWeight: data.yourVoteWeight } }
@@ -193,6 +227,60 @@ export default function CollectionsPage() {
       });
     } finally {
       setVotingId(null);
+    }
+  }
+
+  async function handleTokenVote(tokenId: string, voteType: "UP" | "DOWN") {
+    if (!isConnected) {
+      toast({
+        title: "Connect Wallet",
+        description: "Please connect your wallet to vote",
+      });
+      return;
+    }
+
+    setVotingTokenId(tokenId);
+
+    try {
+      const response = await fetch(`/api/tokens/${tokenId}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voteType, useNftVotes: true }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        setTopTokens((prev) =>
+          prev.map((t) =>
+            t.id === tokenId
+              ? { ...t, totalVotes: data.totalVotes, userVote: { voteWeight: data.yourVoteWeight } }
+              : t
+          )
+        );
+
+        const nftBonus = data.nftBonus > 0 ? ` (+${data.nftBonus} NFT bonus)` : "";
+        toast({
+          title: "Vote recorded!",
+          description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted`,
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Vote failed",
+          description: error.error || "Something went wrong",
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Token vote error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit vote",
+        variant: "error",
+      });
+    } finally {
+      setVotingTokenId(null);
     }
   }
 
@@ -266,7 +354,6 @@ export default function CollectionsPage() {
         });
         setNewTokenId("");
         setShowAddModal(false);
-        // Refresh collections if auto-approved
         if (data.autoApproved) {
           fetchCollections();
         }
@@ -292,15 +379,15 @@ export default function CollectionsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-12 overflow-hidden">
+      <section className="relative py-8 sm:py-12 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-accent-primary/5 via-accent-secondary/5 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">
-            <span className="gradient-text">Discover Collections on Hedera</span>
+            <span className="gradient-text">Hedera Projects</span>
           </h1>
-          <p className="text-text-secondary max-w-xl mx-auto mb-4">
-            Explore new and existing collections, vote on your favorites, and see what the community ranks at the top
+          <p className="text-text-secondary max-w-xl mx-auto mb-4 text-sm sm:text-base">
+            Discover NFT collections and tokens on Hedera. Vote for your favorites!
           </p>
 
           {user?.isAdmin && (
@@ -329,7 +416,7 @@ export default function CollectionsPage() {
             )}
             <input
               type="text"
-              placeholder="Search collections... (results appear as you type)"
+              placeholder="Search NFT collections..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-10 py-2 rounded-xl bg-bg-card border border-border focus:outline-none focus:ring-2 focus:ring-accent-primary/50 text-text-primary placeholder:text-text-secondary text-sm"
@@ -355,12 +442,16 @@ export default function CollectionsPage() {
           )}
         </div>
 
-        {/* Total Collections Banner */}
-        <div className="mb-6 p-4 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
-          <p className="text-center text-sm">
-            <span className="font-bold text-accent-primary">{total}</span>
-            <span className="text-text-secondary"> collections tracked</span>
-          </p>
+        {/* Stats Banner */}
+        <div className="mb-6 p-3 sm:p-4 rounded-xl bg-accent-primary/10 border border-accent-primary/20 flex justify-center gap-6 sm:gap-12">
+          <div className="text-center">
+            <p className="font-bold text-accent-primary text-lg sm:text-xl">{totalCollections}</p>
+            <p className="text-text-secondary text-xs sm:text-sm">NFT Collections</p>
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-accent-secondary text-lg sm:text-xl">{totalTokens}</p>
+            <p className="text-text-secondary text-xs sm:text-sm">Tokens</p>
+          </div>
         </div>
 
         {/* Add Collection Modal */}
@@ -458,56 +549,87 @@ export default function CollectionsPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Top 30 Best Voted - Left Column */}
-            <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
-              <div className="p-4 border-b border-border flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-yellow-500" />
-                <span className="font-semibold text-text-primary">Top 30 Best Voted</span>
+          <>
+            {/* Main Grid: Top NFTs (left) + Top Tokens (right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+              {/* Top 30 NFTs - Left Column */}
+              <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
+                <div className="p-4 border-b border-border flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <span className="font-semibold text-text-primary">Top 30 NFTs</span>
+                </div>
+                <div className="p-3 max-h-[70vh] overflow-y-auto">
+                  {topCollections.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Layers className="h-8 w-8 mx-auto text-text-secondary mb-3" />
+                      <p className="text-text-secondary text-sm mb-3">No collections yet</p>
+                      {user?.isAdmin && (
+                        <Button size="sm" onClick={() => fetchCollections(true)} className="gap-2">
+                          <RefreshCw className="h-3 w-3" />
+                          Sync Now
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {topCollections.map((collection) => (
+                        <CollectionRow
+                          key={collection.id}
+                          collection={collection}
+                          votingId={votingId}
+                          onVote={handleVote}
+                          getRankIcon={getRankIcon}
+                          getRankStyle={getRankStyle}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="p-3 max-h-[70vh] overflow-y-auto">
-                {topCollections.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Layers className="h-8 w-8 mx-auto text-text-secondary mb-3" />
-                    <p className="text-text-secondary text-sm mb-3">No collections yet</p>
-                    {user?.isAdmin && (
-                      <Button size="sm" onClick={() => fetchCollections(true)} className="gap-2">
-                        <RefreshCw className="h-3 w-3" />
-                        Sync Now
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {topCollections.map((collection) => (
-                      <CollectionRow
-                        key={collection.id}
-                        collection={collection}
-                        votingId={votingId}
-                        onVote={handleVote}
-                        getRankIcon={getRankIcon}
-                        getRankStyle={getRankStyle}
-                      />
-                    ))}
-                  </div>
-                )}
+
+              {/* Top 30 Tokens - Right Column */}
+              <div className="rounded-2xl border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
+                <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
+                  <Coins className="h-5 w-5 text-accent-secondary" />
+                  <span className="font-semibold text-text-primary">Top 30 Tokens</span>
+                </div>
+                <div className="p-3 max-h-[70vh] overflow-y-auto">
+                  {loadingTokens ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-6 w-6 animate-spin text-accent-secondary" />
+                    </div>
+                  ) : topTokens.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Coins className="h-8 w-8 mx-auto text-text-secondary mb-3" />
+                      <p className="text-text-secondary text-sm">No tokens yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {topTokens.map((token) => (
+                        <TokenRow
+                          key={token.id}
+                          token={token}
+                          votingId={votingTokenId}
+                          onVote={handleTokenVote}
+                          getRankIcon={getRankIcon}
+                          getRankStyle={getRankStyle}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Top 10 Worst Voted - Right Column */}
-            <div className="rounded-2xl border border-red-500/30 bg-bg-card/50 overflow-hidden">
-              <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
-                <TrendingDown className="h-5 w-5 text-red-500" />
-                <span className="font-semibold text-text-primary">Top 10 Worst Voted</span>
-              </div>
-              <div className="p-3 max-h-[70vh] overflow-y-auto">
-                {worstCollections.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Layers className="h-8 w-8 mx-auto text-text-secondary mb-3" />
-                    <p className="text-text-secondary text-sm">No worst voted yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
+            {/* Worst Voted NFTs - Below */}
+            {worstCollections.length > 0 && (
+              <div className="rounded-2xl border border-red-500/30 bg-bg-card/50 overflow-hidden">
+                <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
+                  <TrendingDown className="h-5 w-5 text-red-500" />
+                  <span className="font-semibold text-text-primary">Worst Voted NFTs</span>
+                </div>
+                <div className="p-3 overflow-x-auto">
+                  <div className="flex gap-2 min-w-max lg:grid lg:grid-cols-5 lg:min-w-0">
                     {worstCollections.map((collection) => (
                       <CollectionRow
                         key={collection.id}
@@ -520,19 +642,20 @@ export default function CollectionsPage() {
                           </div>
                         )}
                         getRankStyle={() => "bg-red-500/5 border-red-500/20 hover:border-red-500/40"}
+                        compact
                       />
                     ))}
                   </div>
-                )}
+                </div>
               </div>
-            </div>
-          </div>
+            )}
+          </>
         )}
 
         {/* Voting Info */}
         <div className="mt-4 text-xs text-text-secondary text-center space-y-1">
           <p>1 vote per wallet + 1 per dragon + 5 for El Santuario holders</p>
-          <p>Your vote is permanent. You can change it anytime (no 24h cooldown).</p>
+          <p>Your vote is permanent. You can change it anytime.</p>
         </div>
       </div>
     </div>
@@ -546,16 +669,65 @@ function CollectionRow({
   onVote,
   getRankIcon,
   getRankStyle,
+  compact = false,
 }: {
   collection: Collection;
   votingId: string | null;
   onVote: (id: string, type: "UP" | "DOWN") => void;
   getRankIcon: (rank: number) => React.ReactNode;
   getRankStyle: (rank: number) => string;
+  compact?: boolean;
 }) {
   const isVoting = votingId === collection.id;
   const hasVoted = collection.userVote !== null;
   const voteIsUp = hasVoted && collection.userVote!.voteWeight > 0;
+
+  if (compact) {
+    return (
+      <div
+        className={cn(
+          "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all duration-200 w-36 lg:w-auto",
+          getRankStyle(collection.rank)
+        )}
+      >
+        {getRankIcon(collection.rank)}
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
+          {collection.image ? (
+            <img src={collection.image} alt={collection.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Layers className="h-4 w-4 text-text-secondary" />
+            </div>
+          )}
+        </div>
+        <p className="text-xs font-medium text-center truncate w-full">{collection.name}</p>
+        <div className="flex items-center gap-1 text-red-400 text-xs font-bold">
+          <Trophy className="h-3 w-3" />
+          {collection.totalVotes}
+        </div>
+        <div className="flex gap-1">
+          <Button
+            variant={hasVoted && voteIsUp ? "default" : "ghost"}
+            size="sm"
+            onClick={() => onVote(collection.id, "UP")}
+            disabled={isVoting}
+            className={cn("h-6 w-6 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
+          >
+            <ThumbsUp className="h-3 w-3" />
+          </Button>
+          <Button
+            variant={hasVoted && !voteIsUp ? "default" : "ghost"}
+            size="sm"
+            onClick={() => onVote(collection.id, "DOWN")}
+            disabled={isVoting}
+            className={cn("h-6 w-6 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
+          >
+            <ThumbsDown className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -564,17 +736,11 @@ function CollectionRow({
         getRankStyle(collection.rank)
       )}
     >
-      {/* Rank */}
       {getRankIcon(collection.rank)}
 
-      {/* Collection Image */}
       <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
         {collection.image ? (
-          <img
-            src={collection.image}
-            alt={collection.name}
-            className="w-full h-full object-cover"
-          />
+          <img src={collection.image} alt={collection.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Layers className="h-4 w-4 text-text-secondary" />
@@ -582,7 +748,6 @@ function CollectionRow({
         )}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <a
           href={`https://sentx.io/nft-marketplace/${collection.tokenAddress}`}
@@ -606,13 +771,10 @@ function CollectionRow({
         </div>
       </div>
 
-      {/* Votes */}
       <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
         <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-accent-primary/10">
           <Trophy className="h-3 w-3 text-accent-primary" />
-          <span className="font-bold text-accent-primary text-xs sm:text-sm">
-            {collection.totalVotes}
-          </span>
+          <span className="font-bold text-accent-primary text-xs sm:text-sm">{collection.totalVotes}</span>
         </div>
 
         <Button
@@ -620,32 +782,103 @@ function CollectionRow({
           size="sm"
           onClick={() => onVote(collection.id, "UP")}
           disabled={isVoting}
-          className={cn(
-            "h-7 w-7 sm:h-8 sm:w-8 p-0",
-            hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600"
-          )}
+          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
         >
-          {isVoting ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            <ThumbsUp className="h-3 w-3" />
-          )}
+          {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className="h-3 w-3" />}
         </Button>
         <Button
           variant={hasVoted && !voteIsUp ? "default" : "ghost"}
           size="sm"
           onClick={() => onVote(collection.id, "DOWN")}
           disabled={isVoting}
-          className={cn(
-            "h-7 w-7 sm:h-8 sm:w-8 p-0",
-            hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600"
-          )}
+          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
         >
           <ThumbsDown className="h-3 w-3" />
         </Button>
         <ShareToXButton
           shareText={`I just voted for ${collection.name} on @hashly_h 🔥\n\nJoin and vote for your favorite collections!`}
-          shareUrl="https://hash-ly.com/collections"
+          shareUrl="https://hash-ly.com/projects"
+          className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
+        />
+      </div>
+    </div>
+  );
+}
+
+// Token Row Component
+function TokenRow({
+  token,
+  votingId,
+  onVote,
+  getRankIcon,
+  getRankStyle,
+}: {
+  token: Token;
+  votingId: string | null;
+  onVote: (id: string, type: "UP" | "DOWN") => void;
+  getRankIcon: (rank: number) => React.ReactNode;
+  getRankStyle: (rank: number) => string;
+}) {
+  const isVoting = votingId === token.id;
+  const hasVoted = token.userVote !== null;
+  const voteIsUp = hasVoted && token.userVote!.voteWeight > 0;
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-200",
+        getRankStyle(token.rank)
+      )}
+    >
+      {getRankIcon(token.rank)}
+
+      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-bg-secondary flex-shrink-0">
+        {token.icon ? (
+          <img src={token.icon} alt={token.symbol} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Coins className="h-4 w-4 text-text-secondary" />
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-text-primary text-sm flex items-center gap-1.5">
+          <span className="font-bold">{token.symbol}</span>
+          <span className="text-text-secondary text-xs hidden sm:inline">({token.name})</span>
+        </div>
+        <div className="text-xs text-text-secondary font-mono">
+          {token.tokenAddress}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-accent-secondary/10">
+          <Trophy className="h-3 w-3 text-accent-secondary" />
+          <span className="font-bold text-accent-secondary text-xs sm:text-sm">{token.totalVotes}</span>
+        </div>
+
+        <Button
+          variant={hasVoted && voteIsUp ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onVote(token.id, "UP")}
+          disabled={isVoting}
+          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
+        >
+          {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className="h-3 w-3" />}
+        </Button>
+        <Button
+          variant={hasVoted && !voteIsUp ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onVote(token.id, "DOWN")}
+          disabled={isVoting}
+          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
+        >
+          <ThumbsDown className="h-3 w-3" />
+        </Button>
+        <ShareToXButton
+          shareText={`I just voted for $${token.symbol} on @hashly_h 🔥\n\nJoin and vote for your favorite tokens!`}
+          shareUrl="https://hash-ly.com/projects"
           className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
         />
       </div>

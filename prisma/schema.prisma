@@ -251,3 +251,38 @@ model HomeAd {
   @@index([isActive, order])
   @@map("home_ads")
 }
+
+model Token {
+  id           String       @id @default(cuid())
+  tokenAddress String       @unique @map("token_address")
+  symbol       String
+  name         String
+  icon         String?
+  decimals     Int          @default(8)
+  totalVotes   Int          @default(0) @map("total_votes")
+  isApproved   Boolean      @default(false) @map("is_approved")
+  isHidden     Boolean      @default(false) @map("is_hidden")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  votes        TokenVote[]
+
+  @@index([isApproved, isHidden, totalVotes])
+  @@map("tokens")
+}
+
+model TokenVote {
+  id            String   @id @default(cuid())
+  walletAddress String   @map("wallet_address")
+  voteWeight    Int      @default(1) @map("vote_weight")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  tokenId       String   @map("token_id")
+  nftTokenId    String?  @map("nft_token_id")
+  nftSerials    String?  @map("nft_serials")
+  token         Token    @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@unique([walletAddress, tokenId])
+  @@index([tokenId])
+  @@index([walletAddress])
+  @@map("token_votes")
+}

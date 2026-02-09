@@ -27,7 +27,7 @@ const ConnectButton = dynamic(
 
 const navLinks = [
   { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/collections", label: "Collections", icon: Layers },
+  { href: "/projects", label: "Projects", icon: Layers },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 

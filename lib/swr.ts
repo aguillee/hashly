@@ -81,6 +81,19 @@ export function useCollections(search?: string) {
   });
 }
 
+// Tokens
+export function useTokens(search?: string) {
+  const url = search
+    ? `/api/tokens?search=${encodeURIComponent(search)}`
+    : "/api/tokens";
+
+  return useSWR(url, fetcher, {
+    dedupingInterval: 10000,
+    revalidateOnFocus: true,
+    refreshInterval: 30000,
+  });
+}
+
 // Leaderboard
 export function useLeaderboard(limit = 50) {
   return useSWR(`/api/leaderboard?limit=${limit}`, fetcher, {

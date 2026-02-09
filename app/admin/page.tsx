@@ -18,6 +18,7 @@ import {
   Megaphone,
   EyeOff,
   Eye,
+  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -85,7 +86,7 @@ export default function AdminPage() {
   const [deleteCollectionId, setDeleteCollectionId] = React.useState("");
   const [deletingCollection, setDeletingCollection] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "collections" | "delete-collection" | "add-collection" | "hide-collection";
+    type: "launchpads" | "kabila" | "collections" | "delete-collection" | "add-collection" | "hide-collection" | "sync-tokens" | "hide-token" | "delete-token" | "add-token";
     message: string;
   } | null>(null);
   const [hideCollectionId, setHideCollectionId] = React.useState("");
@@ -99,6 +100,23 @@ export default function AdminPage() {
   const [loadingHidden, setLoadingHidden] = React.useState(true);
   const [togglingHidden, setTogglingHidden] = React.useState<string | null>(null);
 
+  // Token states
+  const [syncingTokens, setSyncingTokens] = React.useState(false);
+  const [hideTokenId, setHideTokenId] = React.useState("");
+  const [hidingToken, setHidingToken] = React.useState(false);
+  const [deleteTokenId, setDeleteTokenId] = React.useState("");
+  const [deletingToken, setDeletingToken] = React.useState(false);
+  const [addTokenId, setAddTokenId] = React.useState("");
+  const [addingToken, setAddingToken] = React.useState(false);
+  const [hiddenTokens, setHiddenTokens] = React.useState<Array<{
+    id: string;
+    tokenAddress: string;
+    symbol: string;
+    icon: string | null;
+  }>>([]);
+  const [loadingHiddenTokens, setLoadingHiddenTokens] = React.useState(true);
+  const [togglingHiddenToken, setTogglingHiddenToken] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     if (!isConnected || !user?.isAdmin) {
       router.push("/");
@@ -109,6 +127,7 @@ export default function AdminPage() {
     fetchPendingCollections();
     fetchAdmins();
     fetchHiddenCollections();
+    fetchHiddenTokens();
   }, [isConnected, user, router]);
 
   async function fetchHiddenCollections() {
@@ -181,6 +200,186 @@ export default function AdminPage() {
       console.error("Failed to toggle collection visibility:", error);
     } finally {
       setTogglingHidden(null);
+    }
+  }
+
+  // ========== TOKEN FUNCTIONS ==========
+
+  async function fetchHiddenTokens() {
+    try {
+      const response = await fetch("/api/admin/tokens?limit=100");
+      if (response.ok) {
+        const data = await response.json();
+        const hidden = data.tokens.filter((t: { isHidden: boolean }) => t.isHidden);
+        setHiddenTokens(hidden);
+      }
+    } catch (error) {
+      console.error("Failed to fetch hidden tokens:", error);
+    } finally {
+      setLoadingHiddenTokens(false);
+    }
+  }
+
+  async function handleSyncTokens() {
+    setSyncingTokens(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/admin/tokens/sync", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setSyncResult({
+          type: "sync-tokens",
+          message: data.message || `Synced ${data.stats?.created || 0} new tokens`,
+        });
+      } else {
+        setSyncResult({
+          type: "sync-tokens",
+          message: data.error || "Failed to sync tokens",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to sync tokens:", error);
+      setSyncResult({
+        type: "sync-tokens",
+        message: "Failed to sync tokens",
+      });
+    } finally {
+      setSyncingTokens(false);
+    }
+  }
+
+  async function handleAddToken(e: React.FormEvent) {
+    e.preventDefault();
+    if (!addTokenId.trim()) return;
+
+    setAddingToken(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch("/api/admin/tokens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tokenId: addTokenId.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "add-token",
+          message: data.message || `Token added`,
+        });
+        setAddTokenId("");
+      } else {
+        setSyncResult({
+          type: "add-token",
+          message: data.error || "Failed to add token",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to add token:", error);
+      setSyncResult({
+        type: "add-token",
+        message: "Failed to add token",
+      });
+    } finally {
+      setAddingToken(false);
+    }
+  }
+
+  async function handleHideToken(e: React.FormEvent) {
+    e.preventDefault();
+    if (!hideTokenId.trim()) return;
+
+    setHidingToken(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch(`/api/admin/tokens/${encodeURIComponent(hideTokenId.trim())}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isHidden: true }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "hide-token",
+          message: data.message || `Token hidden`,
+        });
+        setHideTokenId("");
+        fetchHiddenTokens();
+      } else {
+        setSyncResult({
+          type: "hide-token",
+          message: data.error || "Failed to hide token",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to hide token:", error);
+      setSyncResult({
+        type: "hide-token",
+        message: "Failed to hide token",
+      });
+    } finally {
+      setHidingToken(false);
+    }
+  }
+
+  async function handleDeleteToken(e: React.FormEvent) {
+    e.preventDefault();
+    if (!deleteTokenId.trim()) return;
+
+    setDeletingToken(true);
+    setSyncResult(null);
+    try {
+      const response = await fetch(`/api/admin/tokens/${encodeURIComponent(deleteTokenId.trim())}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSyncResult({
+          type: "delete-token",
+          message: data.message || `Token deleted`,
+        });
+        setDeleteTokenId("");
+        fetchHiddenTokens();
+      } else {
+        setSyncResult({
+          type: "delete-token",
+          message: data.error || "Failed to delete token",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete token:", error);
+      setSyncResult({
+        type: "delete-token",
+        message: "Failed to delete token",
+      });
+    } finally {
+      setDeletingToken(false);
+    }
+  }
+
+  async function handleToggleHiddenToken(tokenAddress: string, currentlyHidden: boolean) {
+    setTogglingHiddenToken(tokenAddress);
+    try {
+      const response = await fetch(`/api/admin/tokens/${encodeURIComponent(tokenAddress)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isHidden: !currentlyHidden }),
+      });
+
+      if (response.ok) {
+        fetchHiddenTokens();
+      }
+    } catch (error) {
+      console.error("Failed to toggle token visibility:", error);
+    } finally {
+      setTogglingHiddenToken(null);
     }
   }
 
@@ -802,6 +1001,180 @@ export default function AdminPage() {
                     title="Show collection"
                   >
                     {togglingHidden === collection.tokenAddress ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-success" />
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Token Management Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Sync Tokens */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-amber-500/10">
+                  <Coins className="h-6 w-6 text-amber-500" />
+                </div>
+                <div>
+                  <p className="font-medium">Sync Tokens</p>
+                  <p className="text-xs text-text-secondary">Import from Eta Finance</p>
+                </div>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={handleSyncTokens}
+                loading={syncingTokens}
+                className="gap-2"
+              >
+                <RefreshCw className={syncingTokens ? "animate-spin" : ""} />
+                Sync
+              </Button>
+            </div>
+            {syncResult?.type === "sync-tokens" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Add Token Manually */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-lg bg-teal-500/10">
+                <Plus className="h-6 w-6 text-teal-500" />
+              </div>
+              <div>
+                <p className="font-medium">Add Token</p>
+                <p className="text-xs text-text-secondary">Add by Token ID</p>
+              </div>
+            </div>
+            <form onSubmit={handleAddToken} className="flex gap-2">
+              <Input
+                placeholder="0.0.XXXXX"
+                value={addTokenId}
+                onChange={(e) => setAddTokenId(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" size="sm" loading={addingToken}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </form>
+            {syncResult?.type === "add-token" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Hide Token */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-lg bg-gray-500/10">
+                <EyeOff className="h-6 w-6 text-gray-500" />
+              </div>
+              <div>
+                <p className="font-medium">Hide Token</p>
+                <p className="text-xs text-text-secondary">Exclude from ranking</p>
+              </div>
+            </div>
+            <form onSubmit={handleHideToken} className="flex gap-2">
+              <Input
+                placeholder="0.0.XXXXX"
+                value={hideTokenId}
+                onChange={(e) => setHideTokenId(e.target.value)}
+                disabled={hidingToken}
+              />
+              <Button type="submit" variant="secondary" size="sm" loading={hidingToken}>
+                <EyeOff className="h-4 w-4" />
+              </Button>
+            </form>
+            {syncResult?.type === "hide-token" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Delete Token */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-lg bg-red-500/10">
+                <Trash2 className="h-6 w-6 text-red-500" />
+              </div>
+              <div>
+                <p className="font-medium">Delete Token</p>
+                <p className="text-xs text-text-secondary">Remove by Token ID</p>
+              </div>
+            </div>
+            <form onSubmit={handleDeleteToken} className="flex gap-2">
+              <Input
+                placeholder="0.0.XXXXX"
+                value={deleteTokenId}
+                onChange={(e) => setDeleteTokenId(e.target.value)}
+                disabled={deletingToken}
+              />
+              <Button type="submit" variant="destructive" size="sm" loading={deletingToken}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </form>
+            {syncResult?.type === "delete-token" && (
+              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Hidden Tokens List */}
+      {hiddenTokens.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Coins className="h-5 w-5" />
+              Hidden Tokens ({hiddenTokens.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {hiddenTokens.map((token) => (
+                <div
+                  key={token.id}
+                  className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg"
+                >
+                  <div className="w-10 h-10 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                    {token.icon ? (
+                      <Image
+                        src={token.icon}
+                        alt={token.symbol}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Coins className="h-4 w-4 text-text-secondary" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{token.symbol}</p>
+                    <p className="text-xs text-text-secondary font-mono truncate">{token.tokenAddress}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleToggleHiddenToken(token.tokenAddress, true)}
+                    disabled={togglingHiddenToken === token.tokenAddress}
+                    className="flex-shrink-0"
+                    title="Show token"
+                  >
+                    {togglingHiddenToken === token.tokenAddress ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Eye className="h-4 w-4 text-success" />

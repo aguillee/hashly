@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
 import { TopCollectionsPodium } from "@/components/collections/TopCollectionsPodium";
+import { TopTokensPodium } from "@/components/tokens/TopTokensPodium";
 import { useWalletStore } from "@/store";
 import { useFeatured, useHomeAds } from "@/lib/swr";
 import { formatDate } from "@/lib/utils";
@@ -289,6 +290,13 @@ export default function HomePage() {
       <section className="py-4 sm:py-6 lg:py-8">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <TopCollectionsPodium />
+        </div>
+      </section>
+
+      {/* Top Tokens */}
+      <section className="py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <TopTokensPodium />
         </div>
       </section>
 
