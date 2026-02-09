@@ -447,9 +447,9 @@ export default function EventDetailPage() {
                 <div className="p-2.5 sm:p-3 rounded-lg bg-accent-primary/10">
                   <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-accent-primary" />
                 </div>
-                <div className="min-w-0 flex-1">
+                <div>
                   <p className="text-xs sm:text-sm text-text-secondary">{event.endDate ? "Start Date" : "Event Date"}</p>
-                  <p className="font-medium text-sm sm:text-base truncate">{formatDate(event.mintDate)}</p>
+                  <p className="font-medium text-sm sm:text-base">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
 
@@ -458,9 +458,9 @@ export default function EventDetailPage() {
                   <div className="p-2.5 sm:p-3 rounded-lg bg-red-500/10">
                     <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div>
                     <p className="text-xs sm:text-sm text-text-secondary">End Date</p>
-                    <p className="font-medium text-sm sm:text-base truncate">{formatDate(event.endDate)}</p>
+                    <p className="font-medium text-sm sm:text-base">{formatDate(event.endDate)}</p>
                   </div>
                 </div>
               )}
