@@ -22,6 +22,15 @@ export async function PATCH(
     }
 
     const { tokenId } = params;
+
+    // Validate token ID format (0.0.xxxxx)
+    if (!tokenId || !/^0\.0\.\d+$/.test(tokenId)) {
+      return NextResponse.json(
+        { error: "Invalid token ID format" },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
     const { isHidden } = body;
 
@@ -39,7 +48,7 @@ export async function PATCH(
 
     if (!collection) {
       return NextResponse.json(
-        { error: `Collection with token ID ${tokenId} not found` },
+        { error: "Resource not found" },
         { status: 404 }
       );
     }
@@ -82,6 +91,14 @@ export async function DELETE(
 
     const { tokenId } = params;
 
+    // Validate token ID format (0.0.xxxxx)
+    if (!tokenId || !/^0\.0\.\d+$/.test(tokenId)) {
+      return NextResponse.json(
+        { error: "Invalid token ID format" },
+        { status: 400 }
+      );
+    }
+
     // Find the collection by token address
     const collection = await prisma.collection.findUnique({
       where: { tokenAddress: tokenId },
@@ -89,7 +106,7 @@ export async function DELETE(
 
     if (!collection) {
       return NextResponse.json(
-        { error: `Collection with token ID ${tokenId} not found` },
+        { error: "Resource not found" },
         { status: 404 }
       );
     }

@@ -37,6 +37,15 @@ export async function POST(
     }
 
     const { id: collectionId } = await params;
+
+    // Validate collection ID format (CUID)
+    if (!collectionId || !/^c[a-z0-9]{24}$/.test(collectionId)) {
+      return NextResponse.json(
+        { error: "Invalid collection ID format" },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate input
@@ -217,6 +226,14 @@ export async function DELETE(
     }
 
     const { id: collectionId } = await params;
+
+    // Validate collection ID format (CUID)
+    if (!collectionId || !/^c[a-z0-9]{24}$/.test(collectionId)) {
+      return NextResponse.json(
+        { error: "Invalid collection ID format" },
+        { status: 400 }
+      );
+    }
 
     // Check for existing vote
     const existingVote = await prisma.collectionVote.findUnique({

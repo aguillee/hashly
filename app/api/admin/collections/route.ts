@@ -119,8 +119,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
+    const limit = Math.max(1, Math.min(parseInt(searchParams.get("limit") || "50") || 50, 100));
     // Limit search to 100 chars to prevent ReDoS attacks
     const rawSearch = searchParams.get("search");
     const search = rawSearch ? rawSearch.slice(0, 100) : null;

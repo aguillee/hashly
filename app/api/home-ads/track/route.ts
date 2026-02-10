@@ -4,7 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 
 const trackSchema = z.object({
-  adId: z.string().min(1),
+  adId: z.string().min(1).regex(/^c[a-z0-9]{24}$/, "Invalid ad ID format"),
   type: z.enum(["view", "click"]),
 });
 

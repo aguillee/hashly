@@ -130,9 +130,19 @@ export async function POST(request: NextRequest) {
       .from("images")
       .getPublicUrl(filePath);
 
+    // Ensure URL uses HTTPS
+    const publicUrl = urlData.publicUrl;
+    if (!publicUrl.startsWith("https://")) {
+      console.error("Generated URL does not use HTTPS:", publicUrl);
+      return NextResponse.json(
+        { error: "Failed to generate secure URL" },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      imageUrl: urlData.publicUrl,
+      imageUrl: publicUrl,
       filename,
     });
   } catch (error) {

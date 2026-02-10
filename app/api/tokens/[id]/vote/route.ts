@@ -34,6 +34,15 @@ export async function POST(
     }
 
     const { id: tokenId } = await params;
+
+    // Validate token ID format (CUID)
+    if (!tokenId || !/^c[a-z0-9]{24}$/.test(tokenId)) {
+      return NextResponse.json(
+        { error: "Invalid token ID format" },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate input (reuse collection vote schema)
@@ -214,6 +223,14 @@ export async function DELETE(
     }
 
     const { id: tokenId } = await params;
+
+    // Validate token ID format (CUID)
+    if (!tokenId || !/^c[a-z0-9]{24}$/.test(tokenId)) {
+      return NextResponse.json(
+        { error: "Invalid token ID format" },
+        { status: 400 }
+      );
+    }
 
     // Check for existing vote
     const existingVote = await prisma.tokenVote.findUnique({
