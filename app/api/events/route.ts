@@ -63,11 +63,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const categoriesParam = searchParams.get("categories"); // comma-separated
     const sortBy = searchParams.get("sortBy") || "date";
-    // Limit search to 100 chars to prevent ReDoS attacks
+    // Limit search to 100 chars to prevent ReDoS attacks, trim and check for empty
     const rawSearch = searchParams.get("search");
-    const search = rawSearch ? rawSearch.slice(0, 100) : null;
-    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
-    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
+    const search = rawSearch && rawSearch.trim().length > 0 ? rawSearch.slice(0, 100).trim() : null;
+    const limit = Math.max(1, Math.min(parseInt(searchParams.get("limit") || "20") || 20, 100));
+    const offset = Math.max(0, parseInt(searchParams.get("offset") || "0") || 0);
     const source = searchParams.get("source"); // SENTX or KABILA
     const foreverMints = searchParams.get("foreverMints"); // "only", "exclude", or "include"
     const eventType = searchParams.get("eventType"); // "MINT_EVENT", "ECOSYSTEM_MEETUP"

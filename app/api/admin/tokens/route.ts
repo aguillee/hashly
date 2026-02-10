@@ -46,6 +46,14 @@ export async function POST(request: NextRequest) {
 
     const tokenAddress = tokenId.trim();
 
+    // Validate token ID format (0.0.xxxxx)
+    if (!/^0\.0\.\d+$/.test(tokenAddress)) {
+      return NextResponse.json(
+        { error: "Invalid token ID format" },
+        { status: 400 }
+      );
+    }
+
     // Check if token already exists
     const existing = await prisma.token.findUnique({
       where: { tokenAddress },
@@ -122,9 +130,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
     const limit = Math.max(1, Math.min(parseInt(searchParams.get("limit") || "50") || 50, 100));
-    // Limit search to 100 chars to prevent ReDoS attacks
+    // Limit search to 100 chars to prevent ReDoS attacks, trim and check for empty
     const rawSearch = searchParams.get("search");
-    const search = rawSearch ? rawSearch.slice(0, 100) : null;
+    const search = rawSearch && rawSearch.trim().length > 0 ? rawSearch.slice(0, 100).trim() : null;
 
     const skip = (page - 1) * limit;
 

@@ -29,6 +29,13 @@ export async function PUT(request: NextRequest) {
         );
       }
 
+      if (trimmed.length > 0 && trimmed.length < 2) {
+        return NextResponse.json(
+          { error: "Alias must be at least 2 characters" },
+          { status: 400 }
+        );
+      }
+
       if (trimmed.length > 0 && !/^[a-zA-Z0-9_.\- ]+$/.test(trimmed)) {
         return NextResponse.json(
           { error: "Alias can only contain letters, numbers, spaces, dots, hyphens and underscores" },

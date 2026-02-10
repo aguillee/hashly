@@ -33,6 +33,15 @@ export async function POST(
     }
 
     const { id: eventId } = await params;
+
+    // Validate event ID format (CUID)
+    if (!eventId || !/^c[a-z0-9]{24}$/.test(eventId)) {
+      return NextResponse.json(
+        { error: "Invalid event ID format" },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate input with Zod
