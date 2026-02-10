@@ -23,6 +23,14 @@ export async function DELETE(
 
     const { id } = await params;
 
+    // Validate ID format (CUID)
+    if (!id || !/^c[a-z0-9]{24}$/.test(id)) {
+      return NextResponse.json(
+        { error: "Invalid admin ID format" },
+        { status: 400 }
+      );
+    }
+
     // Prevent removing yourself
     if (id === user.id) {
       return NextResponse.json(
@@ -31,25 +39,37 @@ export async function DELETE(
       );
     }
 
-    // Check how many admins exist
-    const adminCount = await prisma.user.count({
-      where: { isAdmin: true },
-    });
+    // Use transaction to prevent race condition (TOCTOU vulnerability)
+    // Check count and update atomically
+    try {
+      await prisma.$transaction(async (tx) => {
+        // Check how many admins exist within transaction
+        const adminCount = await tx.user.count({
+          where: { isAdmin: true },
+        });
 
-    if (adminCount <= 1) {
-      return NextResponse.json(
-        { error: "Cannot remove the last admin" },
-        { status: 400 }
-      );
+        if (adminCount <= 1) {
+          throw new Error("Cannot remove the last admin");
+        }
+
+        // Remove admin privileges (don't delete the user)
+        await tx.user.update({
+          where: { id },
+          data: { isAdmin: false },
+        });
+      });
+
+      return NextResponse.json({ success: true });
+    } catch (txError) {
+      const errorMessage = txError instanceof Error ? txError.message : "Transaction failed";
+      if (errorMessage === "Cannot remove the last admin") {
+        return NextResponse.json(
+          { error: errorMessage },
+          { status: 400 }
+        );
+      }
+      throw txError;
     }
-
-    // Remove admin privileges (don't delete the user)
-    await prisma.user.update({
-      where: { id },
-      data: { isAdmin: false },
-    });
-
-    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to remove admin:", error);
     return NextResponse.json(

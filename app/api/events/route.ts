@@ -63,7 +63,9 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const categoriesParam = searchParams.get("categories"); // comma-separated
     const sortBy = searchParams.get("sortBy") || "date";
-    const search = searchParams.get("search");
+    // Limit search to 100 chars to prevent ReDoS attacks
+    const rawSearch = searchParams.get("search");
+    const search = rawSearch ? rawSearch.slice(0, 100) : null;
     const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
     const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
     const source = searchParams.get("source"); // SENTX or KABILA

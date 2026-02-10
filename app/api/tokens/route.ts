@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get("search");
+    // Limit search to 100 chars to prevent ReDoS attacks
+    const rawSearch = searchParams.get("search");
+    const search = rawSearch ? rawSearch.slice(0, 100) : null;
 
     // Get total count of approved and visible tokens only
     const total = await prisma.token.count({

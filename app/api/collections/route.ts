@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get("search");
+    // Limit search to 100 chars to prevent ReDoS attacks
+    const rawSearch = searchParams.get("search");
+    const search = rawSearch ? rawSearch.slice(0, 100) : null;
     const shouldSync = searchParams.get("sync") === "true";
 
     // Optionally sync from SentX (admin only, called less frequently)

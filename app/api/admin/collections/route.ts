@@ -121,7 +121,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
-    const search = searchParams.get("search");
+    // Limit search to 100 chars to prevent ReDoS attacks
+    const rawSearch = searchParams.get("search");
+    const search = rawSearch ? rawSearch.slice(0, 100) : null;
 
     const skip = (page - 1) * limit;
 

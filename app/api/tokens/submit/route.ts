@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { tokenIdSchema, validateRequest } from "@/lib/validations";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
+
+const submitTokenSchema = z.object({
+  tokenId: tokenIdSchema,
+});
 
 // POST /api/tokens/submit - Submit a new token
 export async function POST(request: NextRequest) {
@@ -21,17 +27,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tokenId } = body;
 
-    if (!tokenId || typeof tokenId !== "string") {
+    // Validate input with Zod schema
+    const validation = validateRequest(submitTokenSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Token ID is required" },
+        { error: validation.error },
         { status: 400 }
       );
     }
 
-    // Clean up the token ID
-    const cleanTokenId = tokenId.trim();
+    const cleanTokenId = validation.data.tokenId;
 
     // Check if token already exists
     const existingToken = await prisma.token.findUnique({
