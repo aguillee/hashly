@@ -7,6 +7,74 @@ import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
+// Helper function to extract image from token metadata
+async function getImageFromMetadata(metadata: string): Promise<string | null> {
+  if (!metadata) return null;
+
+  try {
+    // Decode base64 metadata
+    const decoded = Buffer.from(metadata, 'base64').toString('utf-8');
+
+    // Check if it's an IPFS URL
+    if (decoded.startsWith('ipfs://')) {
+      const ipfsHash = decoded.replace('ipfs://', '');
+      const ipfsGatewayUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
+
+      // Try to fetch the metadata JSON from IPFS
+      const ipfsResponse = await fetch(ipfsGatewayUrl, {
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+
+      if (ipfsResponse.ok) {
+        const contentType = ipfsResponse.headers.get('content-type');
+
+        // If it's an image directly, return the URL
+        if (contentType?.startsWith('image/')) {
+          return ipfsGatewayUrl;
+        }
+
+        // If it's JSON, try to extract image field
+        if (contentType?.includes('json')) {
+          const jsonData = await ipfsResponse.json();
+          // Common image fields in token metadata
+          const imageUrl = jsonData.image || jsonData.icon || jsonData.logo || jsonData.picture;
+          if (imageUrl) {
+            // Convert IPFS URL to gateway URL if needed
+            if (imageUrl.startsWith('ipfs://')) {
+              return `https://ipfs.io/ipfs/${imageUrl.replace('ipfs://', '')}`;
+            }
+            return imageUrl;
+          }
+        }
+      }
+    }
+
+    // Check if decoded metadata is a direct HTTP URL
+    if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+      return decoded;
+    }
+
+    // Try to parse as JSON directly (some tokens store JSON in metadata)
+    try {
+      const jsonData = JSON.parse(decoded);
+      const imageUrl = jsonData.image || jsonData.icon || jsonData.logo || jsonData.picture;
+      if (imageUrl) {
+        if (imageUrl.startsWith('ipfs://')) {
+          return `https://ipfs.io/ipfs/${imageUrl.replace('ipfs://', '')}`;
+        }
+        return imageUrl;
+      }
+    } catch {
+      // Not JSON, continue
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error extracting image from metadata:', error);
+    return null;
+  }
+}
+
 const submitTokenSchema = z.object({
   tokenId: tokenIdSchema,
 });
@@ -88,10 +156,16 @@ export async function POST(request: NextRequest) {
 
         const mirrorData = await mirrorResponse.json();
 
+        // Try to get image from metadata
+        let icon: string | null = null;
+        if (mirrorData.metadata) {
+          icon = await getImageFromMetadata(mirrorData.metadata);
+        }
+
         tokenInfo = {
           symbol: mirrorData.symbol || "UNKNOWN",
           name: mirrorData.name || mirrorData.symbol || "Unknown Token",
-          icon: null, // Mirror Node doesn't have icons
+          icon: icon,
           decimals: parseInt(mirrorData.decimals) || 8,
         };
       } catch (error) {
