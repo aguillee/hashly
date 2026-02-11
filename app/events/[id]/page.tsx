@@ -314,7 +314,12 @@ export default function EventDetailPage() {
                 {/* Date badge - top left */}
                 <div className="absolute top-3 left-3">
                   <span className="px-2 py-1 text-[10px] sm:text-xs font-mono bg-text-primary/90 text-bg-primary rounded">
-                    {formatDate(event.mintDate).split(",")[0]}
+                    {new Date(event.mintDate).toLocaleDateString("en-US", {
+                      timeZone: "UTC",
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
                   </span>
                 </div>
                 {/* Status badge - top right */}
@@ -331,7 +336,12 @@ export default function EventDetailPage() {
                 {!event.imageUrl && (
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-1 text-[10px] sm:text-xs font-mono bg-bg-secondary text-text-primary rounded">
-                      {formatDate(event.mintDate).split(",")[0]}
+                      {new Date(event.mintDate).toLocaleDateString("en-US", {
+                        timeZone: "UTC",
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                     {getStatusBadge(event.status)}
                   </div>
@@ -494,9 +504,9 @@ export default function EventDetailPage() {
                 <div className="w-10 h-10 rounded bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
                   <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-accent-primary" />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-text-secondary">{event.endDate ? "Start Date" : "Event Date"}</p>
-                  <p className="font-medium text-sm sm:text-base font-mono truncate">{formatDate(event.mintDate)}</p>
+                  <p className="font-medium text-sm sm:text-base font-mono whitespace-normal leading-tight">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
 
@@ -505,9 +515,9 @@ export default function EventDetailPage() {
                   <div className="w-10 h-10 rounded bg-red-500/10 flex items-center justify-center flex-shrink-0">
                     <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-text-secondary">End Date</p>
-                    <p className="font-medium text-sm sm:text-base font-mono truncate">{formatDate(event.endDate)}</p>
+                    <p className="font-medium text-sm sm:text-base font-mono whitespace-normal leading-tight">{formatDate(event.endDate)}</p>
                   </div>
                 </div>
               )}
