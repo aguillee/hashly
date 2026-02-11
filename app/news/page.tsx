@@ -223,17 +223,17 @@ export default function NewsPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
+              <div className="mt-8 flex items-center justify-center gap-1 sm:gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-1 px-3 py-2 text-sm rounded-md bg-bg-card border border-border hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-md bg-bg-card border border-border hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Prev
+                  <span className="hidden sm:inline">Prev</span>
                 </button>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
                     // Show first, last, current, and nearby pages
                     const showPage =
@@ -245,7 +245,7 @@ export default function NewsPage() {
                       // Show dots for gaps
                       if (page === 2 || page === totalPages - 1) {
                         return (
-                          <span key={page} className="px-2 text-text-secondary">
+                          <span key={page} className="px-1 sm:px-2 text-text-secondary text-xs sm:text-sm">
                             ...
                           </span>
                         );
@@ -258,7 +258,7 @@ export default function NewsPage() {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={cn(
-                          "w-9 h-9 text-sm rounded-md border transition-colors font-mono",
+                          "w-8 h-8 sm:w-9 sm:h-9 text-xs sm:text-sm rounded-md border transition-colors font-mono",
                           currentPage === page
                             ? "bg-purple-500 border-purple-500 text-white"
                             : "bg-bg-card border-border hover:border-purple-500/50"
@@ -273,9 +273,9 @@ export default function NewsPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="flex items-center gap-1 px-3 py-2 text-sm rounded-md bg-bg-card border border-border hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-md bg-bg-card border border-border hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Next
+                  <span className="hidden sm:inline">Next</span>
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
