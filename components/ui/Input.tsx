@@ -13,16 +13,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <div className="w-full">
         <div className="relative">
           {icon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary">
               {icon}
             </div>
           )}
           <input
             type={type}
             className={cn(
-              "flex h-12 w-full rounded-xl border-2 bg-bg-card px-4 py-3 text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-primary/10 focus-visible:border-accent-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
+              "flex h-10 w-full rounded-md border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary/20 focus-visible:border-accent-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
               error ? "border-error focus-visible:ring-error/10" : "border-border hover:border-text-tertiary",
-              icon && "pl-11",
+              icon && "pl-10",
               className
             )}
             ref={ref}

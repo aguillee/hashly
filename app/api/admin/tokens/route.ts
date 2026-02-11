@@ -66,23 +66,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch token info from Eta Finance API
-    const response = await fetch(ETA_TOKENS_API);
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch token data from API" },
-        { status: 500 }
-      );
+    // Try to fetch token info from Eta Finance API first
+    let tokenInfo: { symbol: string; name: string; icon: string | null; decimals: number } | null = null;
+
+    try {
+      const response = await fetch(ETA_TOKENS_API);
+      if (response.ok) {
+        const tokens: EtaToken[] = await response.json();
+        const found = tokens.find(t => t.address === tokenAddress);
+        if (found) {
+          tokenInfo = {
+            symbol: found.symbol,
+            name: found.name,
+            icon: found.icon || null,
+            decimals: found.decimals,
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Eta Finance API error:", error);
     }
 
-    const tokens: EtaToken[] = await response.json();
-    const tokenInfo = tokens.find(t => t.address === tokenAddress);
-
+    // Fallback: Fetch from Hedera Mirror Node if not found in Eta Finance
     if (!tokenInfo) {
-      return NextResponse.json(
-        { error: "Token not found in Eta Finance API. You can add it manually." },
-        { status: 404 }
-      );
+      try {
+        const mirrorResponse = await fetch(
+          `https://mainnet.mirrornode.hedera.com/api/v1/tokens/${tokenAddress}`
+        );
+
+        if (!mirrorResponse.ok) {
+          return NextResponse.json(
+            { error: "Token not found. Please verify the Token ID is correct." },
+            { status: 404 }
+          );
+        }
+
+        const mirrorData = await mirrorResponse.json();
+
+        tokenInfo = {
+          symbol: mirrorData.symbol || "UNKNOWN",
+          name: mirrorData.name || mirrorData.symbol || "Unknown Token",
+          icon: null, // Mirror Node doesn't have icons
+          decimals: parseInt(mirrorData.decimals) || 8,
+        };
+      } catch (error) {
+        console.error("Mirror Node API error:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch token info from Hedera Mirror Node" },
+          { status: 500 }
+        );
+      }
     }
 
     // Create token
@@ -91,7 +124,7 @@ export async function POST(request: NextRequest) {
         tokenAddress,
         symbol: tokenInfo.symbol,
         name: tokenInfo.name,
-        icon: tokenInfo.icon || null,
+        icon: tokenInfo.icon,
         decimals: tokenInfo.decimals,
         isApproved: true, // Auto-approve when admin adds
       },

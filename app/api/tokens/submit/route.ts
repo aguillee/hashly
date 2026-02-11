@@ -51,25 +51,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch token info from Eta Finance API
-    const etaResponse = await fetch("https://api.eta.finance/v1/tokens");
-    if (!etaResponse.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch token info from Eta Finance" },
-        { status: 500 }
-      );
+    // Try to fetch token info from Eta Finance API first
+    let tokenInfo: { symbol: string; name: string; icon: string | null; decimals: number } | null = null;
+
+    try {
+      const etaResponse = await fetch("https://api.eta.finance/v1/tokens");
+      if (etaResponse.ok) {
+        const etaData = await etaResponse.json();
+        const found = etaData.find((t: { id: string }) => t.id === cleanTokenId);
+        if (found) {
+          tokenInfo = {
+            symbol: found.symbol,
+            name: found.name || found.symbol,
+            icon: found.icon || null,
+            decimals: found.decimals || 8,
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Eta Finance API error:", error);
     }
 
-    const etaData = await etaResponse.json();
-    const tokenInfo = etaData.find(
-      (t: { id: string }) => t.id === cleanTokenId
-    );
-
+    // Fallback: Fetch from Hedera Mirror Node if not found in Eta Finance
     if (!tokenInfo) {
-      return NextResponse.json(
-        { error: "Token not found in Eta Finance registry" },
-        { status: 404 }
-      );
+      try {
+        const mirrorResponse = await fetch(
+          `https://mainnet.mirrornode.hedera.com/api/v1/tokens/${cleanTokenId}`
+        );
+
+        if (!mirrorResponse.ok) {
+          return NextResponse.json(
+            { error: "Token not found. Please verify the Token ID is correct." },
+            { status: 404 }
+          );
+        }
+
+        const mirrorData = await mirrorResponse.json();
+
+        tokenInfo = {
+          symbol: mirrorData.symbol || "UNKNOWN",
+          name: mirrorData.name || mirrorData.symbol || "Unknown Token",
+          icon: null, // Mirror Node doesn't have icons
+          decimals: parseInt(mirrorData.decimals) || 8,
+        };
+      } catch (error) {
+        console.error("Mirror Node API error:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch token info from Hedera Mirror Node" },
+          { status: 500 }
+        );
+      }
     }
 
     // Check if user has El Santuario NFT for auto-approval

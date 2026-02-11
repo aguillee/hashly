@@ -35,7 +35,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
     <div ref={dropdownRef} className={cn("relative", className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
+        className="flex items-center gap-2 px-3 py-2 rounded-md bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
         aria-label="Select language"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -55,7 +55,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-40 rounded-xl bg-bg-card border border-border shadow-lg overflow-hidden z-50 animate-fade-in">
+        <div className="absolute right-0 top-full mt-2 w-40 rounded-md bg-bg-card border border-border shadow-lg overflow-hidden z-50 animate-fade-in">
           {locales.map((loc) => (
             <button
               key={loc}

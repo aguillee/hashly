@@ -3,19 +3,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200",
+  "inline-flex items-center px-3 py-1 text-xs font-semibold transition-all duration-200",
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-accent-primary to-accent-secondary text-white shadow-sm",
-        secondary: "bg-bg-secondary text-text-secondary border border-border",
-        success: "bg-gradient-to-r from-success to-emerald-400 text-white shadow-sm",
-        error: "bg-gradient-to-r from-error to-red-400 text-white shadow-sm",
-        warning: "bg-gradient-to-r from-warning to-amber-400 text-white shadow-sm",
-        coral: "bg-gradient-to-r from-accent-coral to-red-400 text-white shadow-sm",
-        outline: "border-2 border-border text-text-secondary hover:border-accent-primary/50",
-        ghost: "bg-bg-card/50 text-text-secondary backdrop-blur-sm",
-        live: "bg-gradient-to-r from-success to-emerald-400 text-white shadow-sm animate-pulse",
+        default: "rounded-md bg-accent-primary text-white",
+        secondary: "rounded-md bg-bg-secondary text-text-secondary border border-border",
+        success: "rounded-md bg-green-600 text-white",
+        error: "rounded-md bg-red-600 text-white",
+        warning: "rounded-md bg-amber-500 text-white",
+        coral: "rounded-md bg-accent-coral text-white",
+        outline: "rounded-md border-2 border-border text-text-secondary hover:border-accent-primary/50",
+        ghost: "rounded-md bg-bg-card/50 text-text-secondary backdrop-blur-sm",
+        live: "rounded-md bg-green-600 text-white animate-pulse",
+        purple: "rounded-md bg-purple-600 text-white",
+        skew: "skew-tag bg-accent-primary text-white font-bold tracking-wide",
+        skewLive: "skew-tag bg-green-600 text-white font-bold tracking-wide",
+        skewPurple: "skew-tag bg-purple-600 text-white font-bold tracking-wide",
       },
       size: {
         default: "px-3 py-1 text-xs",

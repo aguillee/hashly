@@ -23,7 +23,7 @@ export function ShareToXButton({ shareText, shareUrl, className }: ShareToXButto
       onClick={handleShare}
       title="Compartir en X"
       className={cn(
-        "p-2 rounded-xl transition-all duration-300 bg-bg-secondary text-text-secondary hover:bg-[#1DA1F2]/10 hover:text-[#1DA1F2]",
+        "p-2 rounded-md transition-all duration-300 bg-bg-secondary text-text-secondary hover:bg-[#1DA1F2]/10 hover:text-[#1DA1F2]",
         className
       )}
     >

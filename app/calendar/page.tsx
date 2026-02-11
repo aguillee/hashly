@@ -189,11 +189,21 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen py-4 sm:py-8">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Event Calendar</h1>
-            <p className="text-sm text-text-secondary mt-0.5 sm:mt-1">Browse all upcoming events on Hedera</p>
+        {/* Compact Header - News style */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-bg-card dark:bg-[#1a1a2e] border-2 border-accent-primary/50 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-sm border-2 border-bg-primary animate-pulse" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Event Calendar</h1>
+              <p className="text-xs sm:text-sm text-text-secondary">
+                <span className="font-mono">{events.length}</span> events on Hedera
+              </p>
+            </div>
           </div>
           {isConnected && (
             <Link href="/events/new">
@@ -212,16 +222,17 @@ export default function CalendarPage() {
               placeholder="Search events..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              icon={<Search className="h-5 w-5" />}
+              icon={<Search className="h-4 w-4" />}
+              className="rounded-md"
             />
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex rounded-xl border border-border overflow-hidden w-full sm:w-auto">
+          {/* View Mode Toggle - More square */}
+          <div className="flex rounded-md border border-border overflow-hidden w-full sm:w-auto">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(
-                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
+                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
                 viewMode === "grid"
                   ? "bg-accent-primary text-white"
                   : "bg-bg-card text-text-secondary hover:text-text-primary"
@@ -233,7 +244,7 @@ export default function CalendarPage() {
             <button
               onClick={() => setViewMode("calendar")}
               className={cn(
-                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
+                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
                 viewMode === "calendar"
                   ? "bg-accent-primary text-white"
                   : "bg-bg-card text-text-secondary hover:text-text-primary"
@@ -245,12 +256,12 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
+        {/* Filters - News style with border-l-4 */}
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-bg-card/50 border-l-4 border-accent-primary rounded-r-md">
           {/* Status Filters - Scrollable on mobile */}
-          <div className="overflow-x-auto pb-1 -mb-1 scrollbar-hide">
+          <div className="overflow-x-auto pb-2 -mb-2 scrollbar-hide">
             <div className="flex items-center gap-1.5 min-w-max">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide flex-shrink-0 mr-1">Type:</span>
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide flex-shrink-0 mr-1 font-semibold">Type:</span>
               {statusFilters.map((filter) => {
                 const Icon = filter.icon;
                 return (
@@ -258,10 +269,10 @@ export default function CalendarPage() {
                     key={filter.value}
                     onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "forever" | "meetups")}
                     className={cn(
-                      "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
+                      "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
                       status === filter.value
                         ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                        : "bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/80"
                     )}
                   >
                     <Icon className="h-3 w-3" />
@@ -272,18 +283,21 @@ export default function CalendarPage() {
             </div>
           </div>
 
+          {/* Separator */}
+          <div className="border-t border-dashed border-border/50 my-2 sm:my-3" />
+
           {/* Source & Sort - Compact row */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {/* Source Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide">Source:</span>
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold">Source:</span>
               <div className="flex gap-0.5 sm:gap-1">
                 {sourceFilters.map((filter) => (
                   <button
                     key={filter.value}
                     onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
                     className={cn(
-                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all",
+                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-all",
                       sourceFilter === filter.value
                         ? "bg-accent-primary text-white"
                         : "bg-bg-secondary text-text-secondary hover:text-text-primary"
@@ -297,7 +311,7 @@ export default function CalendarPage() {
 
             {/* Sort By */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide">Sort:</span>
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold">Sort:</span>
               <div className="flex gap-0.5 sm:gap-1">
                 {[
                   { value: "date", label: "Date" },
@@ -308,7 +322,7 @@ export default function CalendarPage() {
                     key={sort.value}
                     onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
                     className={cn(
-                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all",
+                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-all",
                       sortBy === sort.value
                         ? "bg-accent-primary text-white"
                         : "bg-bg-secondary text-text-secondary hover:text-text-primary"
@@ -329,10 +343,10 @@ export default function CalendarPage() {
           </div>
         ) : events.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-2xl bg-bg-secondary flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 rounded-md bg-bg-secondary flex items-center justify-center mx-auto mb-4">
               <Calendar className="h-10 w-10 text-text-secondary" />
             </div>
-            <h3 className="text-xl font-semibold text-text-primary mb-2">
+            <h3 className="text-xl font-bold text-text-primary mb-2">
               No events found
             </h3>
             <p className="text-text-secondary mb-6">

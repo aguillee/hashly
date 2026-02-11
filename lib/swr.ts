@@ -134,5 +134,14 @@ export function useHomeAds() {
   });
 }
 
+// Homepage stats (events, collections, votes counts)
+export function useStats() {
+  return useSWR("/api/stats", fetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 86400000, // Cache for 24 hours
+    refreshInterval: 86400000, // Refresh every 24 hours
+  });
+}
+
 // Export mutate for manual revalidation
 export { mutate } from "swr";

@@ -704,7 +704,7 @@ export default function AdminPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 rounded-xl bg-accent-primary/10">
+        <div className="p-3 rounded-md bg-accent-primary/10">
           <Shield className="h-8 w-8 text-accent-primary" />
         </div>
         <div>

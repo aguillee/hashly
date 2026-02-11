@@ -55,25 +55,25 @@ export default function LeaderboardPage() {
     switch (rank) {
       case 1:
         return (
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/30">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/30">
             <Crown className="h-5 w-5 text-white" />
           </div>
         );
       case 2:
         return (
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg shadow-gray-400/30">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg shadow-gray-400/30">
             <Medal className="h-5 w-5 text-white" />
           </div>
         );
       case 3:
         return (
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/30">
             <Medal className="h-5 w-5 text-white" />
           </div>
         );
       default:
         return (
-          <div className="w-10 h-10 rounded-xl bg-bg-secondary border border-border flex items-center justify-center">
+          <div className="w-10 h-10 rounded-md bg-bg-secondary border border-border flex items-center justify-center">
             <span className="text-text-secondary font-bold text-sm">#{rank}</span>
           </div>
         );
@@ -98,71 +98,54 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-accent-primary/5 via-accent-secondary/5 to-transparent" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-primary/10 rounded-full blur-3xl" />
-
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-xl shadow-yellow-500/30 mb-6">
-            <Trophy className="h-10 w-10 text-white" />
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl font-bold mb-3">
-            <span className="gradient-text">Leaderboard</span>
-          </h1>
-          <div className="mb-4">
-            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-sm px-4 py-1">
-              Season 0
-            </Badge>
-          </div>
-          <p className="text-lg text-text-secondary max-w-xl mx-auto mb-6">
-            Top contributors in the Hashly community
-          </p>
-
-          {/* Countdown */}
-          {countdown.ended ? (
-            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-bg-card border border-border">
-              <Clock className="h-5 w-5 text-text-secondary" />
-              <span className="text-text-secondary font-semibold">Season 0 has ended</span>
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-3 sm:gap-4 px-6 py-4 rounded-2xl bg-bg-card/80 backdrop-blur-sm border border-border">
-              <Clock className="h-5 w-5 text-accent-primary flex-shrink-0" />
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="text-center">
-                  <span className="text-2xl sm:text-3xl font-bold text-text-primary">{countdown.days}</span>
-                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">days</p>
-                </div>
-                <span className="text-text-secondary text-xl font-light">:</span>
-                <div className="text-center">
-                  <span className="text-2xl sm:text-3xl font-bold text-text-primary">{String(countdown.hours).padStart(2, "0")}</span>
-                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">hrs</p>
-                </div>
-                <span className="text-text-secondary text-xl font-light">:</span>
-                <div className="text-center">
-                  <span className="text-2xl sm:text-3xl font-bold text-text-primary">{String(countdown.minutes).padStart(2, "0")}</span>
-                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">min</p>
-                </div>
-                <span className="text-text-secondary text-xl font-light">:</span>
-                <div className="text-center">
-                  <span className="text-2xl sm:text-3xl font-bold text-accent-primary">{String(countdown.seconds).padStart(2, "0")}</span>
-                  <p className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wider">sec</p>
+      {/* Compact Header - News style */}
+      <div className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Title row */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-bg-card dark:bg-[#1a1a2e] border-2 border-yellow-500/50 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform">
+                  <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" />
                 </div>
               </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Leaderboard</h1>
+                <p className="text-xs sm:text-sm text-text-secondary">
+                  {totalUsers} contributors · Season 0
+                </p>
+              </div>
             </div>
-          )}
+
+            {/* Countdown */}
+            {countdown.ended ? (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-sm">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <span className="text-red-500 font-medium">Season ended</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-card dark:bg-bg-secondary border border-border">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-xs text-text-secondary hidden sm:inline">ends in</span>
+                <span className="font-mono text-sm font-bold text-text-primary">
+                  {countdown.days}d {String(countdown.hours).padStart(2, "0")}h {String(countdown.minutes).padStart(2, "0")}m
+                </span>
+                <span className="font-mono text-sm font-bold text-yellow-500">
+                  {String(countdown.seconds).padStart(2, "0")}s
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-      </section>
+      </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Prize Banner */}
         <div className="relative mb-8 group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/30 via-purple-500/30 to-yellow-500/30 rounded-3xl blur opacity-40" />
-          <div className="relative p-5 sm:p-6 rounded-3xl bg-bg-card border border-yellow-500/20">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/30 via-purple-500/30 to-yellow-500/30 rounded-lg blur opacity-40" />
+          <div className="relative p-5 sm:p-6 rounded-lg bg-bg-card border border-yellow-500/20">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden flex-shrink-0">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0">
                 <img
                   src="https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8"
                   alt="Santuario Hedera"
@@ -184,24 +167,24 @@ export default function LeaderboardPage() {
 
         {/* User's Rank */}
         {user && userRank && (
-          <div className="relative mb-8 group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-3xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
-            <div className="relative p-6 rounded-3xl bg-bg-card border border-border">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
-                    <TrendingUp className="h-7 w-7 text-white" />
+          <div className="relative mb-6 sm:mb-8 group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg sm:rounded-lg blur opacity-30 group-hover:opacity-50 transition-opacity" />
+            <div className="relative p-4 sm:p-6 rounded-lg sm:rounded-lg bg-bg-card border border-border">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md sm:rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center flex-shrink-0">
+                    <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-text-secondary font-medium">Your Rank</p>
-                    <p className="text-3xl font-bold text-text-primary">#{userRank}</p>
+                    <p className="text-xs sm:text-sm text-text-secondary font-medium">Your Rank</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-text-primary tabular-nums">#{userRank}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-text-secondary font-medium">Your Points</p>
-                  <div className="flex items-center gap-2 text-3xl font-bold">
-                    <Zap className="h-6 w-6 text-accent-primary" />
-                    <span className="gradient-text">{(user.points ?? 0).toLocaleString()}</span>
+                  <p className="text-xs sm:text-sm text-text-secondary font-medium">Your Points</p>
+                  <div className="flex items-center justify-end gap-1.5 sm:gap-2 text-2xl sm:text-3xl font-bold">
+                    <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
+                    <span className="gradient-text tabular-nums">{(user.points ?? 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -210,7 +193,7 @@ export default function LeaderboardPage() {
         )}
 
         {/* Leaderboard */}
-        <div className="rounded-3xl border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden">
+        <div className="rounded-lg border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden">
           <div className="p-6 border-b border-border">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-text-primary">Top 50</h2>
@@ -227,13 +210,13 @@ export default function LeaderboardPage() {
                 {[...Array(10)].map((_, i) => (
                   <div
                     key={i}
-                    className="h-20 bg-gradient-to-r from-bg-secondary to-bg-card animate-pulse rounded-2xl"
+                    className="h-20 bg-gradient-to-r from-bg-secondary to-bg-card animate-pulse rounded-lg"
                   />
                 ))}
               </div>
             ) : leaderboard.length === 0 ? (
               <div className="text-center py-16">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 flex items-center justify-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 flex items-center justify-center">
                   <Trophy className="h-10 w-10 text-accent-primary" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">No rankings yet</h3>
@@ -249,20 +232,22 @@ export default function LeaderboardPage() {
                     <div
                       key={entry.walletAddress}
                       className={cn(
-                        "flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300",
+                        "flex items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-md sm:rounded-lg border transition-all duration-300 hover-lift",
                         getRankStyle(entry.rank),
                         isCurrentUser && "ring-2 ring-accent-primary ring-offset-2 ring-offset-bg-card"
                       )}
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       {/* Rank */}
-                      {getRankIcon(entry.rank)}
+                      <div className="flex-shrink-0">
+                        {getRankIcon(entry.rank)}
+                      </div>
 
                       {/* User Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-text-primary truncate">
-                            {entry.alias || entry.walletAddress}
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <span className="font-semibold text-text-primary truncate text-sm sm:text-base max-w-[120px] sm:max-w-none">
+                            {entry.alias || `${entry.walletAddress.slice(0, 8)}...${entry.walletAddress.slice(-4)}`}
                           </span>
                           {isCurrentUser && (
                             <Badge variant="default" size="sm">
@@ -270,15 +255,15 @@ export default function LeaderboardPage() {
                             </Badge>
                           )}
                           {inPrizeZone && (
-                            <Gift className="h-3.5 w-3.5 text-purple-400 flex-shrink-0" />
+                            <Gift className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-400 flex-shrink-0" />
                           )}
                         </div>
                       </div>
 
                       {/* Points */}
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-primary/10 border border-accent-primary/20">
-                        <Zap className="h-4 w-4 text-accent-primary" />
-                        <span className="font-bold text-accent-primary">{entry.points.toLocaleString()}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-md bg-accent-primary/10 border border-accent-primary/20 flex-shrink-0">
+                        <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-primary" />
+                        <span className="font-bold text-accent-primary text-sm sm:text-base tabular-nums">{entry.points.toLocaleString()}</span>
                       </div>
                     </div>
                   );

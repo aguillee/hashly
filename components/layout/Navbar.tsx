@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { Calendar, Trophy, Menu, X, Shield, Zap, Wallet, Layers } from "lucide-react";
+import { Calendar, Trophy, Menu, X, Shield, Zap, Wallet, Layers, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useWalletStore } from "@/store";
@@ -26,6 +26,7 @@ const ConnectButton = dynamic(
 );
 
 const navLinks = [
+  { href: "/news", label: "News", icon: Newspaper },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/projects", label: "Projects", icon: Layers },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
@@ -67,12 +68,12 @@ export function Navbar() {
               priority
             />
             <div className="hidden xs:block">
-              <span className="font-bold text-lg sm:text-xl gradient-text">Hashly</span>
+              <span className="font-bold text-lg sm:text-xl text-text-primary">Hashly</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2 bg-bg-card/50 backdrop-blur-sm rounded-2xl p-1.5 border border-border">
+          <div className="hidden md:flex items-center gap-1 bg-bg-card/50 backdrop-blur-sm rounded-lg p-1 border border-border">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -82,9 +83,9 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
                     isActive
-                      ? "bg-gradient-to-r from-accent-primary to-accent-secondary text-white shadow-md"
+                      ? "bg-accent-primary text-white"
                       : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                   )}
                 >
@@ -99,9 +100,9 @@ export function Navbar() {
               <Link
                 href="/admin"
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
                   pathname.startsWith("/admin")
-                    ? "bg-gradient-to-r from-accent-coral to-red-400 text-white shadow-md"
+                    ? "bg-accent-coral text-white"
                     : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                 )}
               >
@@ -112,15 +113,15 @@ export function Navbar() {
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-1 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Points Badge (if connected) - hidden on mobile */}
             {user && (
               <Link
                 href="/profile"
-                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
+                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
               >
                 <Zap className="h-4 w-4 text-accent-primary" />
-                <span className="font-semibold text-text-primary">
+                <span className="font-semibold text-text-primary text-sm">
                   {(user.points ?? 0).toLocaleString()}
                 </span>
               </Link>
@@ -150,8 +151,8 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border bg-bg-card/95 backdrop-blur-xl animate-fade-in">
-            <div className="flex flex-col gap-2">
+          <div className="md:hidden py-3 border-t border-border bg-bg-card/95 backdrop-blur-xl animate-fade-in">
+            <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
@@ -162,9 +163,9 @@ export function Navbar() {
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                      "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors duration-200",
                       isActive
-                        ? "bg-gradient-to-r from-accent-primary to-accent-secondary text-white"
+                        ? "bg-accent-primary text-white"
                         : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                     )}
                   >
@@ -179,9 +180,9 @@ export function Navbar() {
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors duration-200",
                     pathname.startsWith("/admin")
-                      ? "bg-gradient-to-r from-accent-coral to-red-400 text-white"
+                      ? "bg-accent-coral text-white"
                       : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                   )}
                 >
@@ -191,7 +192,7 @@ export function Navbar() {
               )}
 
               {/* Mobile-only: Points and Theme */}
-              <div className="flex items-center justify-between px-4 pt-3 mt-1 border-t border-border">
+              <div className="flex items-center justify-between px-4 pt-3 mt-2 border-t border-dashed border-border/50">
                 {user && (
                   <Link
                     href="/profile"

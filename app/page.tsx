@@ -28,55 +28,95 @@ import { useFeatured, useHomeAds } from "@/lib/swr";
 import { formatDate } from "@/lib/utils";
 import { HomeAdCarousel } from "@/components/ads/HomeAdCarousel";
 
-// Reusable event card for meetup/hackathon 3-column sections
+// Reusable event card for meetup/hackathon 3-column sections - News style
 function EventColumnCard({ event, icon: Icon, accentColor = "accent-primary" }: { event: any; icon: any; accentColor?: string }) {
+  const isLive = event.status === "LIVE";
+  const borderColor = accentColor === "violet-500"
+    ? "border-l-violet-500 hover:border-l-violet-400"
+    : isLive
+      ? "border-l-green-500 hover:border-l-green-400"
+      : "border-l-accent-primary/50 hover:border-l-accent-primary";
+
+  // Calculate time until event
+  const getTimeUntil = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diff = date.getTime() - now.getTime();
+
+    if (diff < 0) return null;
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h`;
+    return "Starting soon";
+  };
+
+  const timeUntil = !isLive ? getTimeUntil(event.mintDate) : null;
+
   return (
     <Link href={`/events/${event.id}`} className="block group">
-      <div className="relative h-full rounded-xl overflow-hidden border border-border bg-bg-card hover:border-accent-primary/30 transition-all">
+      <div className={`relative h-full bg-bg-card/80 overflow-hidden transition-all duration-200 border-l-4 rounded-r-md ${borderColor}`}>
         {/* Image area */}
-        <div className="relative h-32 sm:h-36 bg-gradient-to-br from-accent-primary/20 to-accent-secondary/10">
+        <div className="relative aspect-video bg-bg-secondary overflow-hidden">
           {event.imageUrl ? (
             <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Icon className={`h-10 w-10 text-${accentColor}/40`} />
+            <div className="w-full h-full flex items-center justify-center bg-bg-secondary">
+              <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-text-secondary/30" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-card via-transparent to-transparent" />
-          {/* Stars badge */}
-          <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-lg bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/30">
-            <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-            <span className="text-xs font-bold text-yellow-400">{event.votesUp}</span>
-          </div>
-          {/* Status badge */}
+
+          {/* Date badge - same style as countdown */}
           <div className="absolute top-2 left-2">
-            {event.status === "LIVE" ? (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/90 text-white text-[10px] font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                Live
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-black/70 rounded text-white text-xs">
+              <Calendar className="h-3 w-3" />
+              <span className="font-mono">{formatDate(new Date(event.mintDate).toISOString())}</span>
+            </div>
+          </div>
+
+          {/* Status Badge - skewed tag style */}
+          <div className="absolute top-2 right-2">
+            {isLive ? (
+              <span className="skew-tag inline-block px-2 py-0.5 bg-green-600 text-white text-[9px] sm:text-[10px] font-bold tracking-wide">
+                <span>LIVE NOW</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-accent-primary/90 text-white text-[10px] font-medium">
-                Upcoming
+              <span className="skew-tag inline-block px-2 py-0.5 bg-accent-primary text-white text-[9px] sm:text-[10px] font-bold tracking-wide">
+                <span>UPCOMING</span>
               </span>
             )}
           </div>
+
+          {/* Countdown for upcoming */}
+          {timeUntil && (
+            <div className="absolute bottom-2 left-2">
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-black/70 rounded text-white text-xs">
+                <Clock className="h-3 w-3" />
+                <span className="font-mono">{timeUntil}</span>
+              </div>
+            </div>
+          )}
         </div>
+
         {/* Content */}
-        <div className="p-3">
-          <h4 className="text-sm font-bold text-text-primary group-hover:text-accent-primary transition-colors line-clamp-1">
+        <div className="p-3 sm:p-4 flex flex-col border-t border-border/30">
+          {/* Host */}
+          {event.host && (
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-text-secondary/70 mb-1.5">
+              <span className="w-1 h-1 rounded-full bg-accent-primary" />
+              <span className="truncate">{event.host}</span>
+            </div>
+          )}
+
+          {/* Title */}
+          <h4 className="font-bold text-text-primary mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-accent-primary transition-colors text-sm sm:text-base leading-tight">
             {event.title}
           </h4>
-          {event.host && (
-            <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">{event.host}</p>
-          )}
-          <div className="flex items-center gap-2 mt-1.5 text-xs text-text-secondary">
-            {event.mintDate && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {formatDate(new Date(event.mintDate).toISOString())}
-              </span>
-            )}
+
+          {/* Location info */}
+          <div className="flex items-center gap-2 text-xs text-text-secondary">
             {event.location_type === "IN_PERSON" && event.location && (
               <span className="flex items-center gap-1 truncate">
                 <MapPin className="h-3 w-3 flex-shrink-0" />
@@ -84,13 +124,25 @@ function EventColumnCard({ event, icon: Icon, accentColor = "accent-primary" }: 
               </span>
             )}
           </div>
+
           {/* Show prizes if available */}
           {event.prizes && (
-            <div className="mt-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/15 to-yellow-500/10 border border-amber-500/30">
+            <div className="mt-2 flex items-center gap-1.5 px-2 py-1.5 bg-amber-500/10 border-l-2 border-amber-500">
               <Trophy className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />
-              <span className="text-sm font-bold text-amber-400 line-clamp-1">{event.prizes}</span>
+              <span className="text-xs font-bold text-amber-400 line-clamp-1">{event.prizes}</span>
             </div>
           )}
+
+          {/* Footer with stars and details */}
+          <div className="mt-3 pt-2 border-t border-dashed border-border/50 flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+              <span className="text-xs font-bold text-yellow-500 font-mono">{event.votesUp}</span>
+            </div>
+            <span className="text-xs text-text-secondary group-hover:text-accent-primary transition-colors flex items-center gap-1">
+              details <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </span>
+          </div>
         </div>
       </div>
     </Link>
@@ -112,92 +164,100 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero + How It Works - Combined compact section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-accent-primary/5 via-transparent to-transparent" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent-primary/10 rounded-full blur-3xl" />
-        <div className="absolute top-20 right-1/4 w-80 h-80 bg-accent-secondary/10 rounded-full blur-3xl" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           {/* Hero: 2 or 3 columns on desktop */}
           <div className={`grid ${hasAds ? "lg:grid-cols-[4fr_3fr_3fr]" : "lg:grid-cols-2"} gap-6 lg:gap-8 items-center`}>
             {/* Left: Title + CTA */}
-            <div className="text-center lg:text-left">
-              <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-2 sm:mb-4">
-                <span className="gradient-text">Discover Hedera</span>
-              </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 mb-4 sm:mb-5 px-2 sm:px-0">
-                Explore events, collections, and meetups. Vote on your favorites and see what the community ranks at the top.
-              </p>
-              <div className="flex items-center justify-center lg:justify-start">
-                {isConnected ? (
-                  <Link href="/events/new">
-                    <Button size="lg" className="gap-2 group px-6 sm:px-8 shadow-xl shadow-accent-primary/30 hover:shadow-2xl hover:shadow-accent-primary/40 hover:scale-[1.03] transition-all duration-300 text-sm sm:text-base">
-                      <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-                      Submit an Event
-                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button size="lg" className="gap-2 px-6 sm:px-8 text-sm sm:text-base" disabled>
-                    <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Connect Wallet to Submit
-                  </Button>
-                )}
-              </div>
-
-              {/* Collaborate CTA - llamativo */}
-              <a
-                href="https://x.com/hashly_h"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 sm:gap-2 mt-4 sm:mt-5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-accent-primary/15 to-accent-secondary/15 border border-accent-primary/30 hover:border-accent-primary/60 transition-all group"
-              >
-                <span className="text-xs sm:text-sm text-text-secondary">Want to collaborate?</span>
-                <span className="text-xs sm:text-sm font-semibold text-accent-primary group-hover:underline flex items-center gap-1">
-                  Contact us on X <ExternalLink className="h-3 w-3" />
-                </span>
-              </a>
-            </div>
-
-            {/* Right: How It Works - compact cards */}
-            <div className="space-y-2 sm:space-y-3">
-              <h2 className="text-xs sm:text-sm font-semibold text-text-secondary uppercase tracking-wider mb-1 sm:mb-2">How It Works</h2>
-
-              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-primary/30 transition-colors">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Vote className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-primary" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-semibold text-text-primary">Community Voting</h3>
-                  <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">Connect your wallet to vote and help discover quality projects.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-primary/30 transition-colors">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden flex-shrink-0">
-                  <img src="https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8" alt="Santuario Hedera" className="w-full h-full object-cover" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-text-primary">Santuario Hedera</h3>
-                    <a href="https://sentx.io/nft-marketplace/0.0.7235629" target="_blank" rel="noopener noreferrer" className="text-[10px] sm:text-xs text-accent-primary hover:underline flex-shrink-0">SentX ↗</a>
+            <div className="text-center lg:text-left space-y-4 sm:space-y-5">
+              <div className="flex items-center gap-3 justify-center lg:justify-start">
+                <div className="relative">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md bg-bg-card dark:bg-[#1a1a2e] border-2 border-accent-primary/50 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform">
+                    <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-accent-primary" />
                   </div>
-                  <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">
-                    <span className="text-accent-primary font-semibold">+1 vote per dragon</span> per project you vote on.
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-sm border-2 border-bg-primary animate-pulse" />
+                </div>
+                <div className="text-left">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary">
+                    Discover Hedera
+                  </h1>
+                  <p className="text-sm sm:text-base text-text-secondary">
+                    Events, NFTs & Community Rankings
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-bg-card/80 border border-border hover:border-accent-secondary/30 transition-colors">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden flex-shrink-0">
+              {/* CTA buttons */}
+              <div className="flex items-center justify-center lg:justify-start gap-3 pt-2">
+                {isConnected ? (
+                  <Link href="/events/new">
+                    <Button className="gap-2 group text-sm px-5 py-2.5">
+                      <Plus className="h-4 w-4" />
+                      Submit Event
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button className="gap-2 text-sm px-5 py-2.5" disabled>
+                    <Plus className="h-4 w-4" />
+                    Connect to Submit
+                  </Button>
+                )}
+
+                <a
+                  href="https://x.com/hashly_h"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-4 py-2.5 text-sm text-text-secondary hover:text-accent-primary transition-colors border border-border rounded-lg hover:border-accent-primary/50"
+                >
+                  Collaborate? <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Right: How It Works - compact cards */}
+            <div className="space-y-2 sm:space-y-3">
+              <h2 className="text-xs sm:text-sm font-semibold text-text-secondary uppercase tracking-wider mb-1 sm:mb-2 flex items-center gap-2">
+                <span className="w-6 h-px bg-text-secondary/30 hidden sm:block" />
+                how it works
+                <span className="w-6 h-px bg-text-secondary/30 hidden sm:block" />
+              </h2>
+
+              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gradient-to-r from-accent-primary/10 via-accent-primary/5 to-transparent border-l-4 border-l-accent-primary rounded-r-md hover:from-accent-primary/15 hover:via-accent-primary/10 transition-all group">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-accent-primary/10 flex items-center justify-center flex-shrink-0 border-2 border-accent-primary/50 group-hover:border-accent-primary transition-all">
+                  <Vote className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-primary" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-text-primary group-hover:text-accent-primary transition-colors">Community Voting</h3>
+                  <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">Connect your wallet to vote and help discover quality projects.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gradient-to-r from-yellow-500/10 via-yellow-400/5 to-transparent border-l-4 border-l-yellow-500 rounded-r-md hover:from-yellow-500/15 hover:via-yellow-400/10 transition-all group">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded overflow-hidden flex-shrink-0 border-2 border-yellow-500/50 group-hover:border-yellow-500 transition-all">
+                  <img src="https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8" alt="Santuario Hedera" className="w-full h-full object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-xs sm:text-sm font-bold text-text-primary group-hover:text-yellow-500 transition-colors">Santuario Hedera</h3>
+                    <a href="https://sentx.io/nft-marketplace/0.0.7235629" target="_blank" rel="noopener noreferrer" className="text-[10px] sm:text-xs text-yellow-500 hover:underline flex-shrink-0">SentX ↗</a>
+                  </div>
+                  <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">
+                    <span className="text-yellow-400 font-semibold">+1 vote per dragon</span> per project you vote on.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gradient-to-r from-purple-500/10 via-purple-400/5 to-transparent border-l-4 border-l-purple-500 rounded-r-md hover:from-purple-500/15 hover:via-purple-400/10 transition-all group">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded overflow-hidden flex-shrink-0 border-2 border-purple-500/50 group-hover:border-purple-500 transition-all">
                   <img src="https://launchpad-assets.kabila.app/logo/0.0.9954622/JPLTxQfsoC/logo.png" alt="El Santuario" className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-text-primary">El Santuario</h3>
-                    <a href="https://sentx.io/nft-marketplace/0.0.9954622" target="_blank" rel="noopener noreferrer" className="text-[10px] sm:text-xs text-accent-secondary hover:underline flex-shrink-0">SentX ↗</a>
+                    <h3 className="text-xs sm:text-sm font-bold text-text-primary group-hover:text-purple-400 transition-colors">El Santuario</h3>
+                    <a href="https://sentx.io/nft-marketplace/0.0.9954622" target="_blank" rel="noopener noreferrer" className="text-[10px] sm:text-xs text-purple-400 hover:underline flex-shrink-0">SentX ↗</a>
                   </div>
                   <p className="text-text-secondary text-[10px] sm:text-xs leading-relaxed">
-                    <span className="text-accent-secondary font-semibold">+5 votes per project</span> plus auto-approval.
+                    <span className="text-purple-400 font-semibold">+5 votes per project</span> plus auto-approval.
                   </p>
                 </div>
               </div>

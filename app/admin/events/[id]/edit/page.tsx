@@ -292,7 +292,7 @@ export default function AdminEditEventPage() {
             {/* Event Type */}
             <div>
               <label className="block text-sm font-medium mb-2">Event Type</label>
-              <div className="flex rounded-xl border border-border overflow-hidden">
+              <div className="flex rounded-md border border-border overflow-hidden">
                 {(["MINT_EVENT", "ECOSYSTEM_MEETUP", "HACKATHON"] as EventType[]).map((type) => (
                   <button
                     key={type}
@@ -375,7 +375,7 @@ export default function AdminEditEventPage() {
             {isMeetupOrHackathon && (
               <div>
                 <label className="block text-sm font-medium mb-2">Location Type</label>
-                <div className="flex rounded-xl border border-border overflow-hidden">
+                <div className="flex rounded-md border border-border overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, location_type: "ONLINE" }))}

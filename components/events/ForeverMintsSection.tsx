@@ -54,7 +54,7 @@ export function ForeverMintsSection() {
       {/* Section Header */}
       <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+          <div className="p-2.5 sm:p-3 rounded-md sm:rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
             <Infinity className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
           </div>
           <div>
@@ -87,9 +87,9 @@ function ForeverMintCard({ mint }: { mint: ForeverMint }) {
   return (
     <div className="group relative">
       {/* Glow Effect */}
-      <div className="absolute -inset-0.5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20" />
+      <div className="absolute -inset-0.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20" />
 
-      <Card className="relative overflow-hidden rounded-3xl border-border/50 bg-bg-card/80 backdrop-blur-sm">
+      <Card className="relative overflow-hidden rounded-lg border-border/50 bg-bg-card/80 backdrop-blur-sm">
         {/* Image */}
         <Link href={`/events/${mint.id}`}>
           <div className="relative h-36 sm:h-44 bg-gradient-to-br from-bg-secondary to-bg-card overflow-hidden">
@@ -101,7 +101,7 @@ function ForeverMintCard({ mint }: { mint: ForeverMint }) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500/20 via-pink-500/15 to-purple-500/20">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center backdrop-blur-sm border border-white/10">
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center backdrop-blur-sm border border-white/10">
                   <Infinity className="h-8 w-8 text-purple-400" />
                 </div>
               </div>
@@ -121,7 +121,7 @@ function ForeverMintCard({ mint }: { mint: ForeverMint }) {
             {/* Score */}
             <div className="absolute top-3 right-3">
               <div
-                className={`px-3 py-1.5 rounded-xl text-sm font-bold shadow-lg flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-md text-sm font-bold shadow-lg flex items-center gap-1.5 ${
                   score > 0
                     ? "bg-green-500 text-white shadow-green-500/40"
                     : score < 0

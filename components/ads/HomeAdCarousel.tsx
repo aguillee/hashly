@@ -144,7 +144,7 @@ export function HomeAdCarousel({ ads }: HomeAdCarouselProps) {
   if (!currentAd) return null;
 
   return (
-    <div className="relative h-full rounded-xl overflow-hidden border border-border bg-bg-card">
+    <div className="relative h-full rounded-md overflow-hidden border-l-4 border-l-orange-500 bg-bg-card/80">
       {/* All slides stacked - crossfade via opacity */}
       {ads.map((ad, i) => (
         <div

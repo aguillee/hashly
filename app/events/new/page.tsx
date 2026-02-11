@@ -316,7 +316,7 @@ export default function NewEventPage() {
             {/* Event Type Selector */}
             <div>
               <label className="block text-sm font-medium mb-2">Event Type</label>
-              <div className="flex rounded-xl border border-border overflow-hidden">
+              <div className="flex rounded-md border border-border overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setEventType("MINT_EVENT")}
@@ -385,7 +385,7 @@ export default function NewEventPage() {
                 placeholder={eventType === "MINT_EVENT" ? "Tell us about this project..." : eventType === "HACKATHON" ? "Describe this hackathon..." : "Describe this meetup or event..."}
                 required
                 rows={4}
-                className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
+                className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
               />
             </div>
 
@@ -443,7 +443,7 @@ export default function NewEventPage() {
                     name="language"
                     value={formData.language}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                    className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
                   >
                     {LANGUAGES.map(lang => (
                       <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -454,7 +454,7 @@ export default function NewEventPage() {
                 {/* Location Type */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Type</label>
-                  <div className="flex rounded-xl border border-border overflow-hidden">
+                  <div className="flex rounded-md border border-border overflow-hidden">
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, locationType: "online" }))}
@@ -628,7 +628,7 @@ export default function NewEventPage() {
                     </Button>
                   </div>
                     {phases.map((phase, index) => (
-                      <div key={phase.id} className="p-4 rounded-lg border border-border bg-bg-card space-y-4">
+                      <div key={phase.id} className="p-4 rounded-md border border-border bg-bg-card space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-accent-primary">Phase {index + 1}</span>
                           {phases.length > 1 && (
@@ -667,7 +667,7 @@ export default function NewEventPage() {
                             <div className="flex-1">
                               <Input type="number" value={phase.price} onChange={(e) => handlePhaseChange(phase.id, "price", e.target.value)} placeholder="100" required />
                             </div>
-                            <div className="flex rounded-lg border border-border overflow-hidden">
+                            <div className="flex rounded-md border border-border overflow-hidden">
                               <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "HBAR")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "HBAR" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
                                 <HbarIcon className="h-3 w-3" />HBAR
                               </button>

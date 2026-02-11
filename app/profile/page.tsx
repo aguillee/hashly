@@ -199,7 +199,7 @@ export default function ProfilePage() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-secondary/10 rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-accent-primary to-accent-secondary shadow-xl mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary shadow-xl mb-6">
             <User className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
@@ -207,7 +207,7 @@ export default function ProfilePage() {
           </h1>
           <button
             onClick={copyAddress}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-bg-card/80 backdrop-blur-sm border border-border hover:border-accent-primary/50 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-bg-card/80 backdrop-blur-sm border border-border hover:border-accent-primary/50 transition-all"
           >
             <span className="font-mono text-text-secondary text-sm">
               {user.walletAddress}
@@ -272,8 +272,8 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Points & Streak Card */}
         <div className="relative mb-8 group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-3xl blur opacity-20 group-hover:opacity-30 transition-opacity" />
-          <div className="relative p-6 rounded-3xl bg-bg-card border border-border">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity" />
+          <div className="relative p-6 rounded-lg bg-bg-card border border-border">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
               {/* Points */}
               <div className="text-center md:text-left">
@@ -287,8 +287,8 @@ export default function ProfilePage() {
               </div>
 
               {/* Streak */}
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                <div className="w-10 h-10 rounded-md bg-orange-500/20 flex items-center justify-center">
                   <Flame className="h-5 w-5 text-orange-500" />
                 </div>
                 <div>
@@ -309,14 +309,14 @@ export default function ProfilePage() {
           </div>
 
           {loadingNFTs ? (
-            <div className="p-8 rounded-2xl bg-bg-card/50 border border-border text-center">
+            <div className="p-8 rounded-lg bg-bg-card/50 border border-border text-center">
               <Loader2 className="h-8 w-8 animate-spin text-accent-primary mx-auto mb-2" />
               <p className="text-text-secondary">Loading NFTs...</p>
             </div>
           ) : nftData ? (
             <div className="grid md:grid-cols-2 gap-4">
               {/* Dragons */}
-              <div className="p-5 rounded-2xl bg-bg-card/50 border border-border">
+              <div className="p-5 rounded-lg bg-bg-card/50 border border-border">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">Santuario Hedera (Dragons)</h3>
                   <a
@@ -346,7 +346,7 @@ export default function ProfilePage() {
               </div>
 
               {/* El Santuario */}
-              <div className="p-5 rounded-2xl bg-bg-card/50 border border-border">
+              <div className="p-5 rounded-lg bg-bg-card/50 border border-border">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold">El Santuario</h3>
                   <a
@@ -376,14 +376,14 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <div className="p-8 rounded-2xl bg-bg-card/50 border border-border text-center">
+            <div className="p-8 rounded-lg bg-bg-card/50 border border-border text-center">
               <p className="text-text-secondary">Failed to load NFT data</p>
             </div>
           )}
 
           {/* Benefits Summary */}
           {nftData && nftData.benefits.extraVotesPerProject > 0 && (
-            <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-accent-primary/10 to-accent-secondary/10 border border-accent-primary/20">
+            <div className="mt-4 p-4 rounded-md bg-gradient-to-r from-accent-primary/10 to-accent-secondary/10 border border-accent-primary/20">
               <p className="text-sm">
                 <span className="font-semibold text-accent-primary">Your Benefits:</span>{" "}
                 <span className="text-text-secondary">
@@ -397,7 +397,7 @@ export default function ProfilePage() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 flex items-center justify-center mb-4">
               <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
             </div>
             <p className="text-text-secondary">Loading profile...</p>
@@ -406,32 +406,32 @@ export default function ProfilePage() {
           <>
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="p-5 rounded-2xl bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-accent-primary/30 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-accent-primary/20 flex items-center justify-center mx-auto mb-3">
+              <div className="p-5 rounded-lg bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-accent-primary/30 transition-all">
+                <div className="w-12 h-12 rounded-md bg-accent-primary/20 flex items-center justify-center mx-auto mb-3">
                   <Vote className="h-6 w-6 text-accent-primary" />
                 </div>
                 <p className="text-2xl font-bold text-text-primary">{stats.totalVotes}</p>
                 <p className="text-xs text-text-secondary font-medium">Total Votes</p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-success/30 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center mx-auto mb-3">
+              <div className="p-5 rounded-lg bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-success/30 transition-all">
+                <div className="w-12 h-12 rounded-md bg-success/20 flex items-center justify-center mx-auto mb-3">
                   <Calendar className="h-6 w-6 text-success" />
                 </div>
                 <p className="text-2xl font-bold text-text-primary">{stats.approvedEvents}</p>
                 <p className="text-xs text-text-secondary font-medium">Events Created</p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-purple-500/30 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
+              <div className="p-5 rounded-lg bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-purple-500/30 transition-all">
+                <div className="w-12 h-12 rounded-md bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
                   <TrendingUp className="h-6 w-6 text-purple-500" />
                 </div>
                 <p className="text-2xl font-bold text-text-primary">#{stats.rank}</p>
                 <p className="text-xs text-text-secondary font-medium">Leaderboard Rank</p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-yellow-500/30 transition-all">
-                <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center mx-auto mb-3">
+              <div className="p-5 rounded-lg bg-bg-card/50 backdrop-blur-sm border border-border text-center hover:border-yellow-500/30 transition-all">
+                <div className="w-12 h-12 rounded-md bg-yellow-500/20 flex items-center justify-center mx-auto mb-3">
                   <Trophy className="h-6 w-6 text-yellow-500" />
                 </div>
                 <p className="text-2xl font-bold text-text-primary">Top {Math.round((stats.rank / stats.totalUsers) * 100)}%</p>
@@ -440,9 +440,9 @@ export default function ProfilePage() {
             </div>
 
             {/* Point History */}
-            <div className="rounded-3xl border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden">
+            <div className="rounded-lg border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden">
               <div className="p-6 border-b border-border flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent-primary/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-md bg-accent-primary/20 flex items-center justify-center">
                   <Clock className="h-5 w-5 text-accent-primary" />
                 </div>
                 <h2 className="text-xl font-bold text-text-primary">Recent Activity</h2>
@@ -453,10 +453,10 @@ export default function ProfilePage() {
                     {stats.pointHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between p-4 rounded-2xl bg-bg-secondary/50 border border-border hover:border-accent-primary/30 transition-all"
+                        className="flex items-center justify-between p-4 rounded-lg bg-bg-secondary/50 border border-border hover:border-accent-primary/30 transition-all"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-bg-card flex items-center justify-center text-accent-primary">
+                          <div className="w-10 h-10 rounded-md bg-bg-card flex items-center justify-center text-accent-primary">
                             {getActionIcon(item.actionType)}
                           </div>
                           <div>
@@ -469,7 +469,7 @@ export default function ProfilePage() {
                           </div>
                         </div>
                         <div className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-sm",
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-md font-bold text-sm",
                           item.points > 0 ? "bg-success/10 text-success" : "bg-error/10 text-error"
                         )}>
                           <Zap className="h-4 w-4" />
@@ -480,7 +480,7 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 flex items-center justify-center">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 flex items-center justify-center">
                       <Clock className="h-8 w-8 text-accent-primary" />
                     </div>
                     <p className="text-text-secondary">

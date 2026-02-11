@@ -227,7 +227,10 @@ export async function POST(
     }
 
     // Handle NFT votes if requested
-    if (useNftVotes) {
+    // For Forever Mint: NFT votes work like collections - no cooldown, votes replace (don't accumulate)
+    // For Regular events: NFT votes have 24h cooldown and accumulate
+    if (useNftVotes && !isForeverMint) {
+      // Regular events: NFT votes with 24h cooldown that accumulate
       const walletNFTs = await getWalletNFTs(user.walletAddress);
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
@@ -333,6 +336,8 @@ export async function POST(
         }
       }
     }
+    // For Forever Mint: NFT votes are already handled above when changing direction (lines 117-146)
+    // They don't accumulate - they just change direction with the regular vote
 
     // Update event vote counts
     // totalVoteChange encodes a "swing": e.g. +2 means going from DOWN(-1) to UP(+1)

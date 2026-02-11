@@ -410,32 +410,37 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-8 sm:py-12 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-accent-primary/5 via-accent-secondary/5 to-transparent" />
+      {/* Compact Header - News style */}
+      <div className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-bg-card dark:bg-[#1a1a2e] border-2 border-accent-primary/50 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform">
+                  <Layers className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Hedera Projects</h1>
+                <p className="text-xs sm:text-sm text-text-secondary">
+                  {totalCollections} NFTs · {totalTokens} Tokens
+                </p>
+              </div>
+            </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">
-            <span className="gradient-text">Hedera Projects</span>
-          </h1>
-          <p className="text-text-secondary max-w-xl mx-auto mb-4 text-sm sm:text-base">
-            Discover NFT collections and tokens on Hedera. Vote for your favorites!
-          </p>
-
-          {user?.isAdmin && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => fetchCollections(true)}
-              disabled={syncing}
-              className="gap-2"
-            >
-              <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />
-              {syncing ? "Syncing..." : "Sync"}
-            </Button>
-          )}
+            {user?.isAdmin && (
+              <button
+                onClick={() => fetchCollections(true)}
+                disabled={syncing}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card dark:bg-bg-secondary border border-border hover:border-accent-primary/50 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={cn("h-3.5 w-3.5", syncing && "animate-spin")} />
+                {syncing ? "Syncing..." : "Sync"}
+              </button>
+            )}
+          </div>
         </div>
-      </section>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Search and Add Project */}
@@ -451,7 +456,7 @@ export default function ProjectsPage() {
               placeholder="Search NFTs or tokens by name or token ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-10 py-2 rounded-xl bg-bg-card border border-border focus:outline-none focus:ring-2 focus:ring-accent-primary/50 text-text-primary placeholder:text-text-secondary text-sm"
+              className="w-full pl-10 pr-10 py-2 rounded-md bg-bg-card border border-border focus:outline-none focus:ring-2 focus:ring-accent-primary/50 text-text-primary placeholder:text-text-secondary text-sm"
             />
             {search && (
               <button
@@ -474,22 +479,11 @@ export default function ProjectsPage() {
           )}
         </div>
 
-        {/* Stats Banner */}
-        <div className="mb-6 p-3 sm:p-4 rounded-xl bg-accent-primary/10 border border-accent-primary/20 flex justify-center gap-6 sm:gap-12">
-          <div className="text-center">
-            <p className="font-bold text-accent-primary text-lg sm:text-xl">{totalCollections}</p>
-            <p className="text-text-secondary text-xs sm:text-sm">NFT Collections</p>
-          </div>
-          <div className="text-center">
-            <p className="font-bold text-accent-secondary text-lg sm:text-xl">{totalTokens}</p>
-            <p className="text-text-secondary text-xs sm:text-sm">Tokens</p>
-          </div>
-        </div>
 
         {/* Add Project Modal */}
         {showAddModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-bg-card border border-border rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <div className="bg-bg-card border border-border rounded-lg p-6 w-full max-w-md mx-4 shadow-lg">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Add Project</h2>
                 <button
@@ -506,7 +500,7 @@ export default function ProjectsPage() {
                   type="button"
                   onClick={() => setProjectType("nft")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 transition-all",
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md border transition-all",
                     projectType === "nft"
                       ? "border-accent-primary bg-accent-primary/10 text-accent-primary"
                       : "border-border hover:border-accent-primary/50 text-text-secondary"
@@ -519,7 +513,7 @@ export default function ProjectsPage() {
                   type="button"
                   onClick={() => setProjectType("token")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 transition-all",
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md border transition-all",
                     projectType === "token"
                       ? "border-accent-secondary bg-accent-secondary/10 text-accent-secondary"
                       : "border-border hover:border-accent-secondary/50 text-text-secondary"
@@ -582,7 +576,7 @@ export default function ProjectsPage() {
             </div>
 
             {searchResults.length === 0 && tokenSearchResults.length === 0 ? (
-              <div className="rounded-2xl border border-border bg-bg-card/50 p-8 text-center">
+              <div className="rounded-lg border border-border bg-bg-card/50 p-8 text-center">
                 <Search className="h-8 w-8 mx-auto text-text-secondary mb-3" />
                 <p className="text-text-secondary text-sm mb-3">No projects found</p>
                 {isConnected && (
@@ -600,7 +594,7 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* NFT Search Results */}
                 {searchResults.length > 0 && (
-                  <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
+                  <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
                     <div className="p-4 border-b border-border flex items-center gap-2">
                       <Layers className="h-5 w-5 text-accent-primary" />
                       <span className="font-semibold text-text-primary">NFT Collections ({searchResults.length})</span>
@@ -624,7 +618,7 @@ export default function ProjectsPage() {
 
                 {/* Token Search Results */}
                 {tokenSearchResults.length > 0 && (
-                  <div className="rounded-2xl border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
+                  <div className="rounded-lg border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
                     <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
                       <Coins className="h-5 w-5 text-accent-secondary" />
                       <span className="font-semibold text-text-primary">Tokens ({tokenSearchResults.length})</span>
@@ -653,7 +647,7 @@ export default function ProjectsPage() {
             {/* Main Grid: Top NFTs (left) + Top Tokens (right) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
               {/* Top 30 NFTs - Left Column */}
-              <div className="rounded-2xl border border-border bg-bg-card/50 overflow-hidden">
+              <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
                 <div className="p-4 border-b border-border flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-yellow-500" />
                   <span className="font-semibold text-text-primary">Top 30 NFTs</span>
@@ -688,7 +682,7 @@ export default function ProjectsPage() {
               </div>
 
               {/* Top 30 Tokens - Right Column */}
-              <div className="rounded-2xl border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
+              <div className="rounded-lg border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
                 <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
                   <Coins className="h-5 w-5 text-accent-secondary" />
                   <span className="font-semibold text-text-primary">Top 30 Tokens</span>
@@ -725,7 +719,7 @@ export default function ProjectsPage() {
             {(worstCollections.length > 0 || worstTokens.length > 0) && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Worst NFTs - Left */}
-                <div className="rounded-2xl border border-red-500/30 bg-bg-card/50 overflow-hidden">
+                <div className="rounded-lg border border-red-500/30 bg-bg-card/50 overflow-hidden">
                   <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
                     <TrendingDown className="h-5 w-5 text-red-500" />
                     <span className="font-semibold text-text-primary">Worst Voted NFTs</span>
@@ -759,7 +753,7 @@ export default function ProjectsPage() {
                 </div>
 
                 {/* Worst Tokens - Right */}
-                <div className="rounded-2xl border border-orange-500/30 bg-bg-card/50 overflow-hidden">
+                <div className="rounded-lg border border-orange-500/30 bg-bg-card/50 overflow-hidden">
                   <div className="p-4 border-b border-orange-500/30 flex items-center gap-2">
                     <TrendingDown className="h-5 w-5 text-orange-500" />
                     <span className="font-semibold text-text-primary">Worst Voted Tokens</span>
@@ -823,7 +817,7 @@ function CollectionRow({
     return (
       <div
         className={cn(
-          "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all duration-200 w-36 lg:w-auto",
+          "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all duration-200 w-36 lg:w-auto",
           getRankStyle(collection.rank)
         )}
       >
@@ -869,7 +863,7 @@ function CollectionRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-200",
+        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border transition-all duration-200",
         getRankStyle(collection.rank)
       )}
     >
@@ -963,7 +957,7 @@ function TokenRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-200",
+        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border transition-all duration-200",
         getRankStyle(token.rank)
       )}
     >
@@ -1038,7 +1032,7 @@ function TokenRowCompact({
   const voteIsUp = hasVoted && token.userVote!.voteWeight > 0;
 
   return (
-    <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all duration-200 w-36 lg:w-auto bg-orange-500/5 border-orange-500/20 hover:border-orange-500/40">
+    <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all duration-200 w-36 lg:w-auto bg-orange-500/5 border-orange-500/20 hover:border-orange-500/40">
       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0">
         <span className="text-orange-400 font-bold text-[10px] sm:text-xs">#{token.rank}</span>
       </div>

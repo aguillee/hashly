@@ -50,7 +50,7 @@ export function CalendarView({ events }: CalendarViewProps) {
   const weekDaysShort = ["M", "T", "W", "T", "F", "S", "S"];
 
   return (
-    <div className="bg-bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-bg-card/80 rounded-lg border border-border overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-2.5 sm:p-4 border-b border-border">
         <h2 className="text-base sm:text-xl font-bold">
