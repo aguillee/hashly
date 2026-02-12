@@ -17,6 +17,7 @@ import {
   Plus,
   X,
   Coins,
+  ArrowLeftRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -46,6 +47,8 @@ interface Token {
   totalVotes: number;
   rank: number;
   userVote: { voteWeight: number } | null;
+  priceUsd?: number | null;
+  marketCap?: number | null;
 }
 
 type ProjectType = "nft" | "token";
@@ -977,9 +980,28 @@ function TokenRow({
         <div className="font-medium text-text-primary text-sm flex items-center gap-1.5">
           <span className="font-bold">{token.symbol}</span>
           <span className="text-text-secondary text-xs hidden sm:inline">({token.name})</span>
+          {token.marketCap && token.marketCap > 0 && (
+            <span className="text-xs text-accent-secondary font-mono ml-1">
+              MC: ${token.marketCap >= 1000000
+                ? `${(token.marketCap / 1000000).toFixed(1)}M`
+                : token.marketCap >= 1000
+                  ? `${(token.marketCap / 1000).toFixed(0)}K`
+                  : token.marketCap.toFixed(0)}
+            </span>
+          )}
         </div>
-        <div className="text-xs text-text-secondary font-mono">
-          {token.tokenAddress}
+        <div className="flex items-center gap-2 text-xs text-text-secondary">
+          <span className="font-mono">{token.tokenAddress}</span>
+          <a
+            href={`https://www.saucerswap.finance/swap/HBAR/${token.tokenAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ArrowLeftRight className="h-3 w-3" />
+            <span className="hidden sm:inline">Swap</span>
+          </a>
         </div>
       </div>
 
@@ -1046,10 +1068,28 @@ function TokenRowCompact({
         )}
       </div>
       <p className="text-xs font-bold text-center truncate w-full">${token.symbol}</p>
+      {token.marketCap && token.marketCap > 0 && (
+        <p className="text-[10px] text-accent-secondary font-mono">
+          MC: ${token.marketCap >= 1000000
+            ? `${(token.marketCap / 1000000).toFixed(1)}M`
+            : token.marketCap >= 1000
+              ? `${(token.marketCap / 1000).toFixed(0)}K`
+              : token.marketCap.toFixed(0)}
+        </p>
+      )}
       <div className="flex items-center gap-1 text-orange-400 text-xs font-bold">
         <Trophy className="h-3 w-3" />
         {token.totalVotes}
       </div>
+      <a
+        href={`https://www.saucerswap.finance/swap/HBAR/${token.tokenAddress}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors text-[10px]"
+      >
+        <ArrowLeftRight className="h-2.5 w-2.5" />
+        Swap
+      </a>
       <div className="flex gap-1">
         <Button
           variant={hasVoted && voteIsUp ? "default" : "ghost"}

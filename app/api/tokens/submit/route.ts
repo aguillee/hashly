@@ -119,25 +119,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try to fetch token info from Eta Finance API first
-    let tokenInfo: { symbol: string; name: string; icon: string | null; decimals: number } | null = null;
+    // Try to fetch token info from SaucerSwap API first
+    let tokenInfo: { symbol: string; name: string; icon: string | null; website: string | null; decimals: number; priceUsd: number | null } | null = null;
 
     try {
-      const etaResponse = await fetch("https://api.eta.finance/v1/tokens");
-      if (etaResponse.ok) {
-        const etaData = await etaResponse.json();
-        const found = etaData.find((t: { id: string }) => t.id === cleanTokenId);
-        if (found) {
-          tokenInfo = {
-            symbol: found.symbol,
-            name: found.name || found.symbol,
-            icon: found.icon || null,
-            decimals: found.decimals || 8,
-          };
+      const saucerSwapResponse = await fetch(
+        `https://api.saucerswap.finance/tokens/${cleanTokenId}`,
+        {
+          headers: {
+            "x-api-key": process.env.SAUCERSWAP_API_KEY || "",
+          },
         }
+      );
+      if (saucerSwapResponse.ok) {
+        const tokenData = await saucerSwapResponse.json();
+        tokenInfo = {
+          symbol: tokenData.symbol,
+          name: tokenData.name || tokenData.symbol,
+          icon: tokenData.icon || null,
+          website: tokenData.website || null,
+          decimals: tokenData.decimals || 8,
+          priceUsd: tokenData.priceUsd || null,
+        };
       }
     } catch (error) {
-      console.error("Eta Finance API error:", error);
+      console.error("SaucerSwap API error:", error);
     }
 
     // Fallback: Fetch from Hedera Mirror Node if not found in Eta Finance
@@ -166,7 +172,9 @@ export async function POST(request: NextRequest) {
           symbol: mirrorData.symbol || "UNKNOWN",
           name: mirrorData.name || mirrorData.symbol || "Unknown Token",
           icon: icon,
+          website: null,
           decimals: parseInt(mirrorData.decimals) || 8,
+          priceUsd: null,
         };
       } catch (error) {
         console.error("Mirror Node API error:", error);
@@ -200,7 +208,9 @@ export async function POST(request: NextRequest) {
         symbol: tokenInfo.symbol || "UNKNOWN",
         name: tokenInfo.name || tokenInfo.symbol || "Unknown Token",
         icon: tokenInfo.icon || null,
+        website: tokenInfo.website || null,
         decimals: tokenInfo.decimals || 8,
+        priceUsd: tokenInfo.priceUsd || null,
         isApproved: hasElSantuario || user.isAdmin,
         isHidden: false,
       },

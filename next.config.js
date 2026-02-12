@@ -13,6 +13,8 @@ const nextConfig = {
       { protocol: "https", hostname: "*.arweave.net" },
       { protocol: "https", hostname: "ipfs.io" },
       { protocol: "https", hostname: "cloudflare-ipfs.com" },
+      { protocol: "https", hostname: "dwk1opv266jxs.cloudfront.net" },
+      { protocol: "https", hostname: "*.cloudfront.net" },
     ],
   },
   experimental: {

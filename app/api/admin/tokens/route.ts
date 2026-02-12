@@ -5,15 +5,17 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-// Eta Finance API for token info
-const ETA_TOKENS_API = "https://api.eta.finance/v1/tokens";
+// SaucerSwap API for token info
+const SAUCERSWAP_API = "https://api.saucerswap.finance/tokens";
 
-interface EtaToken {
+interface SaucerSwapToken {
+  id: string;
   name: string;
   symbol: string;
   decimals: number;
-  address: string;
-  icon?: string;
+  icon?: string | null;
+  website?: string | null;
+  priceUsd?: number;
 }
 
 // Helper function to extract image from token metadata
@@ -134,25 +136,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try to fetch token info from Eta Finance API first
-    let tokenInfo: { symbol: string; name: string; icon: string | null; decimals: number } | null = null;
+    // Try to fetch token info from SaucerSwap API first
+    let tokenInfo: { symbol: string; name: string; icon: string | null; website: string | null; decimals: number; priceUsd: number | null } | null = null;
 
     try {
-      const response = await fetch(ETA_TOKENS_API);
+      const response = await fetch(`${SAUCERSWAP_API}/${tokenAddress}`, {
+        headers: {
+          "x-api-key": process.env.SAUCERSWAP_API_KEY || "",
+        },
+      });
       if (response.ok) {
-        const tokens: EtaToken[] = await response.json();
-        const found = tokens.find(t => t.address === tokenAddress);
-        if (found) {
-          tokenInfo = {
-            symbol: found.symbol,
-            name: found.name,
-            icon: found.icon || null,
-            decimals: found.decimals,
-          };
-        }
+        const tokenData: SaucerSwapToken = await response.json();
+        tokenInfo = {
+          symbol: tokenData.symbol,
+          name: tokenData.name,
+          icon: tokenData.icon || null,
+          website: tokenData.website || null,
+          decimals: tokenData.decimals,
+          priceUsd: tokenData.priceUsd || null,
+        };
       }
     } catch (error) {
-      console.error("Eta Finance API error:", error);
+      console.error("SaucerSwap API error:", error);
     }
 
     // Fallback: Fetch from Hedera Mirror Node if not found in Eta Finance
@@ -181,7 +186,9 @@ export async function POST(request: NextRequest) {
           symbol: mirrorData.symbol || "UNKNOWN",
           name: mirrorData.name || mirrorData.symbol || "Unknown Token",
           icon: icon,
+          website: null,
           decimals: parseInt(mirrorData.decimals) || 8,
+          priceUsd: null,
         };
       } catch (error) {
         console.error("Mirror Node API error:", error);
@@ -199,7 +206,9 @@ export async function POST(request: NextRequest) {
         symbol: tokenInfo.symbol,
         name: tokenInfo.name,
         icon: tokenInfo.icon,
+        website: tokenInfo.website,
         decimals: tokenInfo.decimals,
+        priceUsd: tokenInfo.priceUsd,
         isApproved: true, // Auto-approve when admin adds
       },
     });

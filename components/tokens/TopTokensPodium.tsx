@@ -21,6 +21,8 @@ interface Token {
   totalVotes: number;
   rank: number;
   icon?: string;
+  priceUsd?: number | null;
+  marketCap?: number | null;
 }
 
 const rankConfig: Record<number, {
@@ -94,12 +96,15 @@ export function TopTokensPodium() {
           const RankIcon = config?.icon;
 
           return (
-            <div
+            <a
               key={token.id}
+              href={`https://www.saucerswap.finance/swap/HBAR/${token.tokenAddress}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex-shrink-0 w-[140px] sm:w-auto sm:flex-1 snap-start group"
             >
               <div className={cn(
-                "relative p-3 transition-all h-full overflow-hidden border-l-4 rounded-r-lg",
+                "relative p-3 transition-all h-full overflow-hidden border-l-4 rounded-r-lg cursor-pointer",
                 isTop3
                   ? cn(config.borderLeft, config.cardBg, "hover:brightness-110")
                   : "bg-bg-card/80 border-l-border hover:border-l-accent-secondary/50"
@@ -155,6 +160,19 @@ export function TopTokensPodium() {
                   {token.name}
                 </p>
 
+                {/* Market Cap */}
+                {token.marketCap && token.marketCap > 0 && (
+                  <div className="mt-1.5 text-center">
+                    <p className="text-[10px] text-text-secondary font-mono">
+                      MC: ${token.marketCap >= 1000000
+                        ? `${(token.marketCap / 1000000).toFixed(1)}M`
+                        : token.marketCap >= 1000
+                          ? `${(token.marketCap / 1000).toFixed(0)}K`
+                          : token.marketCap.toFixed(0)}
+                    </p>
+                  </div>
+                )}
+
                 {/* Votes */}
                 <div className="mt-2 pt-2 border-t border-dashed border-border/50">
                   <p className="text-xs font-bold text-center flex items-center justify-center gap-0.5">
@@ -165,7 +183,7 @@ export function TopTokensPodium() {
                   </p>
                 </div>
               </div>
-            </div>
+            </a>
           );
         })}
       </div>

@@ -258,7 +258,10 @@ model Token {
   symbol       String
   name         String
   icon         String?
+  website      String?
   decimals     Int          @default(8)
+  priceUsd     Float?       @map("price_usd")
+  marketCap    Float?       @map("market_cap")
   totalVotes   Int          @default(0) @map("total_votes")
   isApproved   Boolean      @default(false) @map("is_approved")
   isHidden     Boolean      @default(false) @map("is_hidden")
