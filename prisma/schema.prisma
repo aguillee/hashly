@@ -18,11 +18,12 @@ model User {
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
   alias         String?        @map("alias")
-  events        Event[]
-  pointHistory  PointHistory[]
-  shares        Share[]
-  userMissions  UserMission[]
-  votes         Vote[]
+  events          Event[]
+  pointHistory    PointHistory[]
+  shares          Share[]
+  userMissions    UserMission[]
+  votes           Vote[]
+  sentimentVotes  SentimentVote[]
 
   @@map("users")
 }
@@ -288,4 +289,60 @@ model TokenVote {
   @@index([tokenId])
   @@index([walletAddress])
   @@map("token_votes")
+}
+
+enum SentimentCategory {
+  NFT
+  NETWORK
+  HBAR
+}
+
+enum SentimentVoteType {
+  BULLISH
+  BEARISH
+}
+
+// Individual votes - one per user per category per day
+model SentimentVote {
+  id                String            @id @default(cuid())
+  walletAddress     String            @map("wallet_address")
+  category          SentimentCategory
+  vote              SentimentVoteType
+  date              String            // "2024-02-13" (UTC date)
+  hcsTransactionId  String?           @map("hcs_transaction_id") // Hedera tx proof
+  hcsSequenceNumber BigInt?           @map("hcs_sequence_number")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  user              User              @relation(fields: [walletAddress], references: [walletAddress])
+
+  @@unique([walletAddress, category, date])
+  @@index([date, category])
+  @@index([walletAddress])
+  @@map("sentiment_votes")
+}
+
+// Daily aggregated data for fast queries and historical charts
+model SentimentDaily {
+  id              String   @id @default(cuid())
+  date            String   @unique // "2024-02-13"
+
+  // Raw vote counts
+  nftBullish      Int      @default(0) @map("nft_bullish")
+  nftBearish      Int      @default(0) @map("nft_bearish")
+  networkBullish  Int      @default(0) @map("network_bullish")
+  networkBearish  Int      @default(0) @map("network_bearish")
+  hbarBullish     Int      @default(0) @map("hbar_bullish")
+  hbarBearish     Int      @default(0) @map("hbar_bearish")
+
+  // Calculated scores (0-100)
+  nftScore        Float?   @map("nft_score")
+  networkScore    Float?   @map("network_score")
+  hbarScore       Float?   @map("hbar_score")
+  globalScore     Float?   @map("global_score") // Smoothed combined score
+
+  totalVoters     Int      @default(0) @map("total_voters")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([date])
+  @@map("sentiment_daily")
 }
