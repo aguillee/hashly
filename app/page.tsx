@@ -27,6 +27,8 @@ import { useWalletStore } from "@/store";
 import { useFeatured, useHomeAds } from "@/lib/swr";
 import { formatDate } from "@/lib/utils";
 import { HomeAdCarousel } from "@/components/ads/HomeAdCarousel";
+// TODO: Sentiment Index disabled for now
+// import { SentimentWidget } from "@/components/sentiment/SentimentWidget";
 
 // Reusable event card for meetup/hackathon 3-column sections - News style
 function EventColumnCard({ event, icon: Icon, accentColor = "accent-primary" }: { event: any; icon: any; accentColor?: string }) {
@@ -272,6 +274,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* TODO: Sentiment Index disabled for now
+      <section className="py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <SentimentWidget />
+        </div>
+      </section>
+      */}
 
       {/* Featured Events: 3 columns - Most Voted | Minting Soon | Top Forever Mint */}
       {loading ? (

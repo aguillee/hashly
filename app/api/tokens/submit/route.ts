@@ -113,8 +113,47 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingToken) {
+      // If token exists and is already approved, just return it
+      if (existingToken.isApproved) {
+        return NextResponse.json(
+          { error: "Token already exists and is approved", token: existingToken },
+          { status: 409 }
+        );
+      }
+
+      // Check if user has El Santuario NFT to auto-approve existing unapproved token
+      const elSantuarioTokenId = "0.0.9954622";
+      let hasElSantuario = false;
+
+      try {
+        const mirrorResponse = await fetch(
+          `https://mainnet.mirrornode.hedera.com/api/v1/accounts/${user.walletAddress}/nfts?token.id=${elSantuarioTokenId}&limit=1`
+        );
+        if (mirrorResponse.ok) {
+          const nftData = await mirrorResponse.json();
+          hasElSantuario = nftData.nfts && nftData.nfts.length > 0;
+        }
+      } catch (error) {
+        console.error("Error checking El Santuario NFT:", error);
+      }
+
+      if (hasElSantuario || user.isAdmin) {
+        // Approve the existing token
+        const updatedToken = await prisma.token.update({
+          where: { tokenAddress: cleanTokenId },
+          data: { isApproved: true },
+        });
+
+        return NextResponse.json({
+          success: true,
+          token: updatedToken,
+          autoApproved: true,
+          message: "Token approved successfully",
+        });
+      }
+
       return NextResponse.json(
-        { error: "Token already exists", token: existingToken },
+        { error: "Token already submitted, pending approval", token: existingToken },
         { status: 409 }
       );
     }
