@@ -57,10 +57,10 @@ export function VoteLimitProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-  const showLimitReachedModal = React.useCallback(async () => {
-    // Fetch fresh data before showing modal
-    await fetchVoteLimitData();
+  const showLimitReachedModal = React.useCallback(() => {
+    // Show modal immediately, fetch data in background
     setIsModalOpen(true);
+    fetchVoteLimitData();
   }, [fetchVoteLimitData]);
 
   const refreshVoteLimit = React.useCallback(() => {
@@ -73,20 +73,34 @@ export function VoteLimitProvider({ children }: { children: React.ReactNode }) {
     setIsModalOpen(false);
   }, []);
 
+  // Default values for immediate display
+  const defaultData: VoteLimitData = {
+    limit: 5,
+    remaining: 0,
+    used: 5,
+    resetsAt: new Date(Date.UTC(
+      new Date().getUTCFullYear(),
+      new Date().getUTCMonth(),
+      new Date().getUTCDate() + 1,
+      0, 0, 0, 0
+    )).toISOString(),
+    history: [],
+  };
+
+  const displayData = voteLimitData || defaultData;
+
   return (
     <VoteLimitContext.Provider value={{ showLimitReachedModal, refreshVoteLimit }}>
       {children}
-      {voteLimitData && (
-        <VoteLimitModal
-          open={isModalOpen}
-          onClose={handleClose}
-          remaining={voteLimitData.remaining}
-          limit={voteLimitData.limit}
-          used={voteLimitData.used}
-          resetsAt={voteLimitData.resetsAt}
-          history={voteLimitData.history || []}
-        />
-      )}
+      <VoteLimitModal
+        open={isModalOpen}
+        onClose={handleClose}
+        remaining={displayData.remaining}
+        limit={displayData.limit}
+        used={displayData.used}
+        resetsAt={displayData.resetsAt}
+        history={displayData.history || []}
+      />
     </VoteLimitContext.Provider>
   );
 }

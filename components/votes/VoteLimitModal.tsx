@@ -111,10 +111,10 @@ export function VoteLimitModal({
         {/* Explanation */}
         <div className="p-3 rounded-lg bg-bg-secondary/50 border border-border/50 space-y-2">
           <p className="text-sm text-text-secondary">
-            Each wallet is limited to <strong className="text-text-primary">{limit} votes per day</strong> on Forever Mints, NFT Collections, and Tokens.
+            Each wallet is limited to <strong className="text-text-primary">{limit} votes per day</strong> across all voteable content: NFT Mints, Forever Mints, Meetups, Hackathons, NFT Collections, and Tokens.
           </p>
           <p className="text-xs text-text-secondary/80">
-            Every vote is recorded on-chain via Hedera Consensus Service (HCS), which incurs a small transaction fee. This limit helps us maintain the platform&apos;s sustainability while preventing abuse.
+            Every vote is recorded on-chain via Hedera Consensus Service (HCS), which incurs a transaction fee. This limit helps us maintain the platform&apos;s sustainability while preventing abuse.
           </p>
         </div>
 
