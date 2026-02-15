@@ -22,6 +22,7 @@ import { CalendarView } from "@/components/events/CalendarView";
 import { useWalletStore, useEventsFilterStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { mutate } from "@/lib/swr";
+import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
 
 // Types
 interface Event {
@@ -63,6 +64,7 @@ const sourceFilters = [
 
 export default function CalendarPage() {
   const { isConnected } = useWalletStore();
+  const { showLimitReachedModal, refreshVoteLimit } = useVoteLimitContext();
   const {
     status,
     sortBy,
@@ -171,6 +173,12 @@ export default function CalendarPage() {
         // Invalidate featured and forever mints cache so homepage updates
         mutate("/api/events/featured");
         mutate((key: string) => typeof key === "string" && key.startsWith("/api/forever-mints"), undefined, { revalidate: true });
+
+        // Refresh vote limit in navbar
+        refreshVoteLimit();
+      } else if (response.status === 429) {
+        // Daily vote limit reached - show modal
+        showLimitReachedModal();
       }
     } catch (error) {
       console.error("Failed to vote:", error);

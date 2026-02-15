@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { ClientProviders } from "@/components/wallet/ClientProviders";
+import { VoteLimitProvider } from "@/contexts/VoteLimitContext";
 
 // Dynamic imports for client components that use browser APIs
 const Navbar = dynamic(
@@ -41,10 +42,12 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen bg-background antialiased flex flex-col">
         <ClientProviders>
-          <Navbar />
-          <main className="pt-16 flex-1">{children}</main>
-          <Footer />
-          <Toaster />
+          <VoteLimitProvider>
+            <Navbar />
+            <main className="pt-16 flex-1">{children}</main>
+            <Footer />
+            <Toaster />
+          </VoteLimitProvider>
         </ClientProviders>
         <Analytics />
         <SpeedInsights />

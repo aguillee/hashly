@@ -33,6 +33,7 @@ import { useWalletStore } from "@/store";
 import { cn, parseMintPrice } from "@/lib/utils";
 import { mutate } from "@/lib/swr";
 import { XIcon } from "@/components/ui/XIcon";
+import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
 
 interface MintPhase {
   id: string;
@@ -82,6 +83,7 @@ export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { isConnected } = useWalletStore();
+  const { showLimitReachedModal, refreshVoteLimit } = useVoteLimitContext();
   const [event, setEvent] = React.useState<EventDetail | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [voting, setVoting] = React.useState(false);
@@ -169,6 +171,11 @@ export default function EventDetailPage() {
         // Invalidate featured and forever mints cache so homepage updates
         mutate("/api/events/featured");
         mutate((key: string) => typeof key === "string" && key.startsWith("/api/forever-mints"), undefined, { revalidate: true });
+        // Refresh vote limit in navbar
+        refreshVoteLimit();
+      } else if (response.status === 429) {
+        // Daily vote limit reached - show modal
+        showLimitReachedModal();
       } else {
         const data = await response.json();
         alert(data.error || "Failed to vote");

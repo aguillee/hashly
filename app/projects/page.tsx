@@ -25,6 +25,7 @@ import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toaster";
 import { ShareToXButton } from "@/components/ui/ShareToXButton";
+import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
 
 interface Collection {
   id: string;
@@ -101,6 +102,7 @@ export default function ProjectsPage() {
 
   const { isConnected, user } = useWalletStore();
   const { toast } = useToast();
+  const { showLimitReachedModal, refreshVoteLimit } = useVoteLimitContext();
 
   // Debounce search query (300ms)
   const debouncedSearch = useDebounce(search, 300);
@@ -231,6 +233,11 @@ export default function ProjectsPage() {
           title: "Vote recorded!",
           description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted`,
         });
+        // Refresh vote limit in navbar
+        refreshVoteLimit();
+      } else if (response.status === 429) {
+        // Daily vote limit reached - show modal
+        showLimitReachedModal();
       } else {
         const error = await response.json();
         toast({
@@ -285,6 +292,11 @@ export default function ProjectsPage() {
           title: "Vote recorded!",
           description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted`,
         });
+        // Refresh vote limit in navbar
+        refreshVoteLimit();
+      } else if (response.status === 429) {
+        // Daily vote limit reached - show modal
+        showLimitReachedModal();
       } else {
         const error = await response.json();
         toast({

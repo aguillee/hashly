@@ -320,6 +320,20 @@ model SentimentVote {
   @@map("sentiment_votes")
 }
 
+// Daily vote limit tracking (5 votes per wallet per day)
+model DailyVoteLimit {
+  id            String   @id @default(cuid())
+  walletAddress String   @map("wallet_address")
+  date          String   // "2024-02-13" (UTC date)
+  voteCount     Int      @default(0) @map("vote_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([walletAddress, date])
+  @@index([walletAddress])
+  @@map("daily_vote_limits")
+}
+
 // Daily aggregated data for fast queries and historical charts
 model SentimentDaily {
   id              String   @id @default(cuid())

@@ -11,6 +11,7 @@ import {
 import { checkRateLimit } from "@/lib/rate-limit";
 import { collectionVoteSchema, validateRequest } from "@/lib/validations";
 import { submitAssetVoteToHCS } from "@/lib/hcs-votes";
+import { checkVoteLimit, incrementVoteCount } from "@/lib/vote-limit";
 
 // Points awarded for token votes
 const POINTS_PER_TOKEN_VOTE = 1;
@@ -31,6 +32,24 @@ export async function POST(
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
+      );
+    }
+
+    // Check daily vote limit
+    const voteLimit = await checkVoteLimit(user.walletAddress);
+    if (!voteLimit.canVote) {
+      return NextResponse.json(
+        {
+          error: "Daily vote limit reached",
+          remaining: 0,
+          resetsAt: new Date(Date.UTC(
+            new Date().getUTCFullYear(),
+            new Date().getUTCMonth(),
+            new Date().getUTCDate() + 1,
+            0, 0, 0, 0
+          )).toISOString()
+        },
+        { status: 429 }
       );
     }
 
@@ -206,11 +225,15 @@ export async function POST(
       }
     }
 
+    // Increment daily vote count
+    const updatedLimit = await incrementVoteCount(user.walletAddress);
+
     return NextResponse.json({
       success: true,
       totalVotes: updatedToken?.totalVotes || 0,
       yourVoteWeight: newWeight,
       nftBonus: useNftVotes ? voteWeight - 1 : 0,
+      votesRemaining: updatedLimit.remaining,
     });
   } catch (error) {
     console.error("Token vote error:", error);

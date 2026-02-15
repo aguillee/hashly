@@ -143,5 +143,13 @@ export function useStats() {
   });
 }
 
+// Vote limit (daily remaining votes)
+export function useVoteLimit() {
+  return useSWR("/api/users/vote-limit", fetcher, {
+    revalidateOnFocus: true,
+    dedupingInterval: 5000,
+  });
+}
+
 // Export mutate for manual revalidation
 export { mutate } from "swr";
