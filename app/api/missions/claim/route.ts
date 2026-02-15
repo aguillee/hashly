@@ -64,9 +64,26 @@ export async function POST(request: NextRequest) {
     const approvedEvents = user.events.filter(e => e.isApproved).length;
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
-    const collectionVotesCount = await prisma.collectionVote.count({
-      where: { walletAddress: payload.walletAddress as string },
-    });
+    // Get today's date string for sentiment votes (UTC)
+    const todayDateStr = now.toISOString().split("T")[0];
+
+    const [collectionVotesCount, todaySentimentVotes, totalSentimentDays] = await Promise.all([
+      prisma.collectionVote.count({
+        where: { walletAddress: payload.walletAddress as string },
+      }),
+      prisma.sentimentVote.count({
+        where: {
+          walletAddress: payload.walletAddress as string,
+          date: todayDateStr,
+        },
+      }),
+      prisma.sentimentVote.groupBy({
+        by: ["date"],
+        where: { walletAddress: payload.walletAddress as string },
+      }),
+    ]);
+
+    const sentimentDaysCount = totalSentimentDays.length;
 
     let isCompleted = false;
     switch (missionId) {
@@ -102,6 +119,22 @@ export async function POST(request: NextRequest) {
         break;
       case "collection_votes_100":
         isCompleted = collectionVotesCount >= mission.requirement;
+        break;
+      // Sentiment missions
+      case "daily_sentiment":
+        isCompleted = todaySentimentVotes >= mission.requirement;
+        break;
+      case "first_sentiment_vote":
+        isCompleted = sentimentDaysCount > 0;
+        break;
+      case "sentiment_week_streak":
+        isCompleted = sentimentDaysCount >= mission.requirement;
+        break;
+      case "sentiment_votes_30":
+        isCompleted = sentimentDaysCount >= mission.requirement;
+        break;
+      case "sentiment_votes_100":
+        isCompleted = sentimentDaysCount >= mission.requirement;
         break;
     }
 

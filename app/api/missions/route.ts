@@ -47,15 +47,32 @@ export async function GET(request: NextRequest) {
     const totalVotes = user.votes.length;
     const approvedEvents = user.events.filter(e => e.isApproved).length;
 
-    // Get collection votes count and user missions in parallel
-    const [collectionVotesCount, userMissions] = await Promise.all([
+    // Get today's date string for sentiment votes (UTC)
+    const todayDateStr = now.toISOString().split("T")[0];
+
+    // Get collection votes count, sentiment votes, and user missions in parallel
+    const [collectionVotesCount, todaySentimentVotes, totalSentimentDays, userMissions] = await Promise.all([
       prisma.collectionVote.count({
+        where: { walletAddress: payload.walletAddress as string },
+      }),
+      // Count today's sentiment votes (max 3 categories)
+      prisma.sentimentVote.count({
+        where: {
+          walletAddress: payload.walletAddress as string,
+          date: todayDateStr,
+        },
+      }),
+      // Count unique days with sentiment votes (for achievements)
+      prisma.sentimentVote.groupBy({
+        by: ["date"],
         where: { walletAddress: payload.walletAddress as string },
       }),
       prisma.userMission.findMany({
         where: { userId: user.id },
       }),
     ]);
+
+    const sentimentDaysCount = totalSentimentDays.length;
 
     const stats = {
       totalVotes,
@@ -64,6 +81,8 @@ export async function GET(request: NextRequest) {
       todayVotes,
       weekVotes,
       collectionVotes: collectionVotesCount,
+      todaySentimentVotes,
+      sentimentDaysCount,
     };
 
     // Check if user has logged in today
@@ -118,6 +137,29 @@ export async function GET(request: NextRequest) {
         case "collection_votes_100":
           progress = Math.min(collectionVotesCount, def.requirement);
           completed = collectionVotesCount >= def.requirement;
+          break;
+        // Sentiment missions
+        case "daily_sentiment":
+          progress = Math.min(todaySentimentVotes, def.requirement);
+          completed = todaySentimentVotes >= def.requirement;
+          break;
+        case "first_sentiment_vote":
+          progress = sentimentDaysCount > 0 ? 1 : 0;
+          completed = sentimentDaysCount > 0;
+          break;
+        case "sentiment_week_streak":
+          // Check consecutive days - simplified: use sentimentDaysCount for now
+          // TODO: implement proper streak counting if needed
+          progress = Math.min(sentimentDaysCount, def.requirement);
+          completed = sentimentDaysCount >= def.requirement;
+          break;
+        case "sentiment_votes_30":
+          progress = Math.min(sentimentDaysCount, def.requirement);
+          completed = sentimentDaysCount >= def.requirement;
+          break;
+        case "sentiment_votes_100":
+          progress = Math.min(sentimentDaysCount, def.requirement);
+          completed = sentimentDaysCount >= def.requirement;
           break;
       }
 

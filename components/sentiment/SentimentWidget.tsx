@@ -28,8 +28,22 @@ interface SentimentWidgetData {
       global: number | null;
       smoothedGlobal: number | null;
     };
+    votes: {
+      nft: { bullish: number; bearish: number };
+      network: { bullish: number; bearish: number };
+      hbar: { bullish: number; bearish: number };
+    };
     totalVoters: number;
   };
+  history: Array<{
+    date: string;
+    nftScore: number | null;
+    networkScore: number | null;
+    hbarScore: number | null;
+    globalScore: number | null;
+    totalVoters: number;
+    totalVotes: number;
+  }>;
 }
 
 const getScoreColorClass = (score: number | null) => {
@@ -63,7 +77,8 @@ export function SentimentWidget() {
   React.useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch("/api/sentiment?days=1");
+        // Fetch 3 days for smoothed score calculation
+        const response = await fetch("/api/sentiment?days=3");
         if (response.ok) {
           const result = await response.json();
           setData(result);
@@ -215,7 +230,7 @@ export function SentimentWidget() {
 
             {/* Category bars */}
             {hasData && data && (
-              <div className="flex-1 space-y-1.5">
+              <div className="space-y-1.5 w-36">
                 {CATEGORIES.map((cat) => {
                   const score = data.today.scores[cat.id] ?? 50;
                   const Icon = cat.icon;
@@ -226,7 +241,7 @@ export function SentimentWidget() {
                         <Icon className={cn("h-3 w-3", cat.color)} />
                         <span className="text-[9px] text-text-secondary font-medium">{cat.label}</span>
                       </div>
-                      <div className="flex-1 h-1 bg-bg-secondary rounded-sm overflow-hidden">
+                      <div className="w-12 h-1 bg-bg-secondary rounded-sm overflow-hidden">
                         <div
                           className={cn(
                             "h-full rounded-sm transition-all duration-500",
@@ -259,9 +274,13 @@ export function SentimentWidget() {
           {/* Footer */}
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-dashed border-border/50">
             <div className="flex items-center gap-1.5 text-[10px] text-text-secondary">
-              <Users className="h-3 w-3" />
-              <span className="font-medium">{data?.today.totalVoters || 0}</span>
-              <span>voters today</span>
+              <Activity className="h-3 w-3" />
+              <span className="font-medium">
+                {data?.today.votes
+                  ? Object.values(data.today.votes).reduce((sum, cat) => sum + cat.bullish + cat.bearish, 0)
+                  : 0}
+              </span>
+              <span>votes</span>
             </div>
             {!hasData && (
               <span className="text-[10px] text-accent-primary font-medium">Be the first to vote!</span>

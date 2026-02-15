@@ -55,6 +55,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify the HCS transaction belongs to this user (prevents spoofing)
+    if (hcsTransactionId) {
+      const isValid = await verifyHcsTransaction(hcsTransactionId, user.walletAddress);
+      if (!isValid) {
+        return NextResponse.json(
+          {
+            error: "Invalid HCS transaction",
+            message: "The transaction payer does not match your wallet address",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // Check if already voted today for this category
     const existingVote = await prisma.sentimentVote.findUnique({
       where: {
@@ -108,6 +122,89 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Verify that the HCS transaction was paid by the claimed wallet address
+ * This prevents users from submitting votes with fake transaction IDs
+ */
+async function verifyHcsTransaction(
+  transactionId: string,
+  walletAddress: string
+): Promise<boolean> {
+  // Transaction ID format from wallet: "0.0.xxxxx@seconds.nanos"
+  // Mirror node format: "0.0.xxxxx-seconds-nanos"
+  const atIndex = transactionId.indexOf("@");
+  if (atIndex === -1) {
+    console.error("Invalid transaction ID format (no @):", transactionId);
+    return false;
+  }
+
+  const accountId = transactionId.substring(0, atIndex);
+  const timestamp = transactionId.substring(atIndex + 1).replace(".", "-");
+  const mirrorTxId = `${accountId}-${timestamp}`;
+
+  console.log(`Verifying HCS transaction: ${transactionId} -> ${mirrorTxId}`);
+
+  // Retry with delays - mirror node can take a few seconds to index
+  const maxRetries = 5;
+  const delayMs = 2000; // 2 seconds between retries
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(
+        `https://mainnet.mirrornode.hedera.com/api/v1/transactions/${mirrorTxId}`
+      );
+
+      if (response.status === 404) {
+        // Transaction not yet indexed, wait and retry
+        console.log(`Attempt ${attempt}/${maxRetries}: Transaction not yet indexed, waiting...`);
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+          continue;
+        }
+        console.error("Transaction not found after all retries");
+        return false;
+      }
+
+      if (!response.ok) {
+        console.error(`Failed to fetch transaction: ${response.status}`);
+        return false;
+      }
+
+      const data = await response.json();
+
+      // Check if any transaction in the response has this wallet as payer
+      if (data.transactions && Array.isArray(data.transactions)) {
+        for (const tx of data.transactions) {
+          if (tx.transaction_id) {
+            // Extract payer from transaction_id (format: "0.0.xxxxx-seconds-nanos")
+            const payerMatch = tx.transaction_id.match(/^(\d+\.\d+\.\d+)-/);
+            if (payerMatch) {
+              const payer = payerMatch[1];
+              if (payer.toLowerCase() === walletAddress.toLowerCase()) {
+                console.log(`Transaction verified on attempt ${attempt}`);
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      console.warn(
+        `Transaction payer mismatch: expected ${walletAddress}, got different payer`
+      );
+      return false;
+    } catch (error) {
+      console.error(`Attempt ${attempt}/${maxRetries} error:`, error);
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+
+  console.error("Error verifying HCS transaction after all retries");
+  return false;
 }
 
 /**

@@ -257,10 +257,11 @@ export default function SentimentPage() {
   }
 
   const globalScore = data?.today.scores.smoothedGlobal ?? data?.today.scores.global ?? null;
-  const totalVotes = data ?
-    (data.today.votes.nft.bullish + data.today.votes.nft.bearish +
-     data.today.votes.network.bullish + data.today.votes.network.bearish +
-     data.today.votes.hbar.bullish + data.today.votes.hbar.bearish) : 0;
+
+  // Calculate total votes from today.votes (already includes 3 days)
+  const totalVotes3Days = data?.today.votes
+    ? Object.values(data.today.votes).reduce((sum, cat) => sum + cat.bullish + cat.bearish, 0)
+    : 0;
 
   // Get score color class for the main display
   const getScoreColorClass = (score: number | null) => {
@@ -342,21 +343,15 @@ export default function SentimentPage() {
                 {/* Stats row */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4 pt-3 border-t border-dashed border-border/50">
                   <div className="flex items-center gap-1.5 text-xs text-text-secondary">
-                    <Users className="h-3.5 w-3.5" />
-                    <span className="font-mono font-medium">{data?.today.totalVoters || 0}</span>
-                    <span>voters</span>
-                  </div>
-                  <span className="text-border">•</span>
-                  <div className="flex items-center gap-1.5 text-xs text-text-secondary">
                     <Zap className="h-3.5 w-3.5" />
-                    <span className="font-mono font-medium">{totalVotes}</span>
+                    <span className="font-mono font-medium">{totalVotes3Days}</span>
                     <span>votes</span>
                   </div>
                   <span className="text-border">•</span>
                   <div className="flex items-center gap-1.5 text-xs text-text-secondary">
                     <Clock className="h-3.5 w-3.5" />
+                    <span>vote again in</span>
                     <span className="font-mono font-medium">{timeRemaining}</span>
-                    <span>reset</span>
                   </div>
                 </div>
               </div>
@@ -717,11 +712,11 @@ export default function SentimentPage() {
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1 h-1 rounded-full bg-accent-primary" />
-                3-day smoothing for stable scores
+                3-day smoothing: Today 50% • Yesterday 30% • 2d ago 20%
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1 h-1 rounded-full bg-accent-primary" />
-                Network 50% • HBAR 30% • NFT 20%
+                Category weights: Network 50% • HBAR 30% • NFT 20%
               </li>
             </ul>
           </div>

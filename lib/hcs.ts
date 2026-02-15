@@ -15,7 +15,7 @@ export interface SentimentVoteMessage {
   wallet: string;
   category: "nft" | "network" | "hbar";
   vote: "bullish" | "bearish";
-  date: string; // "2024-02-13"
+  date: string;
   timestamp: number;
 }
 
@@ -37,6 +37,24 @@ export function createSentimentVoteMessage(
     date,
     timestamp: Date.now(),
   };
+}
+
+/**
+ * Parse a vote message
+ */
+export function parseSentimentVoteMessage(
+  payload: any
+): { wallet: string; category: string; vote: string; date: string } | null {
+  if (payload.type === "sentiment_vote") {
+    return {
+      wallet: payload.wallet,
+      category: payload.category,
+      vote: payload.vote,
+      date: payload.date,
+    };
+  }
+
+  return null;
 }
 
 /**

@@ -98,11 +98,42 @@ export async function GET(request: NextRequest) {
       return d.date === date.toISOString().split("T")[0];
     });
 
-    const smoothedGlobalScore = calculateSmoothedScore(
+    // Calculate smoothed scores for each category and global
+    let smoothedNftScore = calculateSmoothedScore(
+      todayData?.nftScore ?? null,
+      yesterday?.nftScore ?? null,
+      dayBefore?.nftScore ?? null
+    );
+    if (smoothedNftScore === null && yesterday?.nftScore !== null && yesterday?.nftScore !== undefined) {
+      smoothedNftScore = yesterday.nftScore;
+    }
+
+    let smoothedNetworkScore = calculateSmoothedScore(
+      todayData?.networkScore ?? null,
+      yesterday?.networkScore ?? null,
+      dayBefore?.networkScore ?? null
+    );
+    if (smoothedNetworkScore === null && yesterday?.networkScore !== null && yesterday?.networkScore !== undefined) {
+      smoothedNetworkScore = yesterday.networkScore;
+    }
+
+    let smoothedHbarScore = calculateSmoothedScore(
+      todayData?.hbarScore ?? null,
+      yesterday?.hbarScore ?? null,
+      dayBefore?.hbarScore ?? null
+    );
+    if (smoothedHbarScore === null && yesterday?.hbarScore !== null && yesterday?.hbarScore !== undefined) {
+      smoothedHbarScore = yesterday.hbarScore;
+    }
+
+    let smoothedGlobalScore = calculateSmoothedScore(
       todayData?.globalScore ?? null,
       yesterday?.globalScore ?? null,
       dayBefore?.globalScore ?? null
     );
+    if (smoothedGlobalScore === null && yesterday?.globalScore !== null && yesterday?.globalScore !== undefined) {
+      smoothedGlobalScore = yesterday.globalScore;
+    }
 
     // Get user's votes for today if wallet provided
     let userVotes: Record<string, string> = {};
@@ -127,38 +158,52 @@ export async function GET(request: NextRequest) {
       today: {
         date: today,
         scores: {
-          nft: todayData?.nftScore ?? null,
-          network: todayData?.networkScore ?? null,
-          hbar: todayData?.hbarScore ?? null,
+          nft: smoothedNftScore,
+          network: smoothedNetworkScore,
+          hbar: smoothedHbarScore,
           global: todayData?.globalScore ?? null,
           smoothedGlobal: smoothedGlobalScore,
         },
         votes: {
           nft: {
-            bullish: todayData?.nftBullish ?? 0,
-            bearish: todayData?.nftBearish ?? 0,
+            bullish: (todayData?.nftBullish ?? 0) + (yesterday?.nftBullish ?? 0) + (dayBefore?.nftBullish ?? 0),
+            bearish: (todayData?.nftBearish ?? 0) + (yesterday?.nftBearish ?? 0) + (dayBefore?.nftBearish ?? 0),
           },
           network: {
-            bullish: todayData?.networkBullish ?? 0,
-            bearish: todayData?.networkBearish ?? 0,
+            bullish: (todayData?.networkBullish ?? 0) + (yesterday?.networkBullish ?? 0) + (dayBefore?.networkBullish ?? 0),
+            bearish: (todayData?.networkBearish ?? 0) + (yesterday?.networkBearish ?? 0) + (dayBefore?.networkBearish ?? 0),
           },
           hbar: {
-            bullish: todayData?.hbarBullish ?? 0,
-            bearish: todayData?.hbarBearish ?? 0,
+            bullish: (todayData?.hbarBullish ?? 0) + (yesterday?.hbarBullish ?? 0) + (dayBefore?.hbarBullish ?? 0),
+            bearish: (todayData?.hbarBearish ?? 0) + (yesterday?.hbarBearish ?? 0) + (dayBefore?.hbarBearish ?? 0),
           },
         },
         totalVoters: todayData?.totalVoters ?? 0,
       },
       userVotes,
       timeUntilReset: getTimeUntilMidnightUTC(),
-      history: dailyData.map((d) => ({
-        date: d.date,
-        globalScore: d.globalScore,
-        nftScore: d.nftScore,
-        networkScore: d.networkScore,
-        hbarScore: d.hbarScore,
-        totalVoters: d.totalVoters,
-      })),
+      history: (() => {
+        // Build history excluding today (today's data appears tomorrow)
+        const historyMap = new Map<string, any>();
+
+        // Add all daily data except today
+        dailyData.forEach((d) => {
+          if (d.date !== today) {
+            historyMap.set(d.date, {
+              date: d.date,
+              globalScore: d.globalScore,
+              nftScore: d.nftScore,
+              networkScore: d.networkScore,
+              hbarScore: d.hbarScore,
+              totalVoters: d.totalVoters,
+              totalVotes: d.nftBullish + d.nftBearish + d.networkBullish + d.networkBearish + d.hbarBullish + d.hbarBearish,
+            });
+          }
+        });
+
+        // Return sorted by date descending
+        return Array.from(historyMap.values()).sort((a, b) => b.date.localeCompare(a.date));
+      })(),
     });
   } catch (error) {
     console.error("Failed to fetch sentiment:", error);
