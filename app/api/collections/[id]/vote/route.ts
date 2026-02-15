@@ -193,16 +193,20 @@ export async function POST(
       },
     });
 
-    // Submit vote to HCS (async, don't wait)
+    // Submit vote to HCS (wait for it to complete in serverless)
     if (updatedCollection?.tokenAddress) {
-      submitAssetVoteToHCS(
-        user.walletAddress,
-        updatedCollection.tokenAddress,
-        "nft",
-        voteType.toLowerCase() as "up" | "down",
-        walletNFTs.hasSantuario ? 1 : 0,
-        walletNFTs.totalDragons
-      ).catch((err) => console.error("HCS submit failed:", err));
+      try {
+        await submitAssetVoteToHCS(
+          user.walletAddress,
+          updatedCollection.tokenAddress,
+          "nft",
+          voteType.toLowerCase() as "up" | "down",
+          walletNFTs.hasSantuario ? 1 : 0,
+          walletNFTs.totalDragons
+        );
+      } catch (err) {
+        console.error("HCS submit failed:", err);
+      }
     }
 
     return NextResponse.json({

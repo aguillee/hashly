@@ -399,12 +399,16 @@ export async function POST(
     };
     const hcsEventType = eventTypeMap[event.event_type] || "nft";
 
-    submitEventVoteToHCS(
-      user.walletAddress,
-      eventId,
-      hcsEventType,
-      voteType.toLowerCase() as "up" | "down"
-    ).catch((err) => console.error("HCS submit failed:", err));
+    try {
+      await submitEventVoteToHCS(
+        user.walletAddress,
+        eventId,
+        hcsEventType,
+        voteType.toLowerCase() as "up" | "down"
+      );
+    } catch (err) {
+      console.error("HCS submit failed:", err);
+    }
 
     return NextResponse.json({
       success: true,
