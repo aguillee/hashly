@@ -126,8 +126,16 @@ export async function submitAssetVoteToHCS(
   elSantuarioCount: number,
   santuarioHederaCount: number
 ): Promise<{ transactionId: string; sequenceNumber: number } | null> {
+  console.log("[HCS] submitAssetVoteToHCS called", { wallet, targetId, targetType, vote });
+  console.log("[HCS] Config check:", {
+    hasTopicId: !!HCS_ASSETS_TOPIC_ID,
+    hasOperatorId: !!HEDERA_OPERATOR_ID,
+    hasOperatorKey: !!HEDERA_OPERATOR_KEY,
+    topicId: HCS_ASSETS_TOPIC_ID
+  });
+
   if (!HCS_ASSETS_TOPIC_ID || !HEDERA_OPERATOR_ID || !HEDERA_OPERATOR_KEY) {
-    console.warn("HCS not configured, skipping vote submission");
+    console.warn("[HCS] Not configured, skipping vote submission");
     return null;
   }
 
@@ -151,19 +159,21 @@ export async function submitAssetVoteToHCS(
       timestamp: Date.now(),
     };
 
+    console.log("[HCS] Submitting message to topic:", HCS_ASSETS_TOPIC_ID);
     const response = await new TopicMessageSubmitTransaction()
       .setTopicId(HCS_ASSETS_TOPIC_ID)
       .setMessage(JSON.stringify(message))
       .execute(client);
 
     const receipt = await response.getReceipt(client);
+    console.log("[HCS] SUCCESS! Sequence:", receipt.topicSequenceNumber?.toString());
 
     return {
       transactionId: response.transactionId.toString(),
       sequenceNumber: Number(receipt.topicSequenceNumber),
     };
   } catch (error) {
-    console.error("Failed to submit asset vote to HCS:", error);
+    console.error("[HCS] Failed to submit asset vote:", error);
     return null;
   } finally {
     client.close();
