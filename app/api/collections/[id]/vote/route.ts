@@ -10,6 +10,7 @@ import {
 } from "@/lib/hedera";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { collectionVoteSchema, validateRequest } from "@/lib/validations";
+import { submitAssetVoteToHCS } from "@/lib/hcs-votes";
 
 // Points awarded for collection votes
 const POINTS_PER_COLLECTION_VOTE = 1;
@@ -188,8 +189,21 @@ export async function POST(
       where: { id: collectionId },
       select: {
         totalVotes: true,
+        tokenAddress: true,
       },
     });
+
+    // Submit vote to HCS (async, don't wait)
+    if (updatedCollection?.tokenAddress) {
+      submitAssetVoteToHCS(
+        user.walletAddress,
+        updatedCollection.tokenAddress,
+        "nft",
+        voteType.toLowerCase() as "up" | "down",
+        walletNFTs.hasSantuario ? 1 : 0,
+        walletNFTs.totalDragons
+      ).catch((err) => console.error("HCS submit failed:", err));
+    }
 
     return NextResponse.json({
       success: true,

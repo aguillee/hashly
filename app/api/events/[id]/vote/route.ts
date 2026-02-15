@@ -11,6 +11,7 @@ import {
 } from "@/lib/hedera";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { voteSchema, validateRequest } from "@/lib/validations";
+import { submitEventVoteToHCS } from "@/lib/hcs-votes";
 
 const POINTS_PER_VOTE = 10;
 
@@ -389,6 +390,21 @@ export async function POST(
         votesDown: true,
       },
     });
+
+    // Submit vote to HCS (async, don't wait)
+    const eventTypeMap: Record<string, "nft" | "meetup" | "hackathon"> = {
+      "MINT_EVENT": "nft",
+      "ECOSYSTEM_MEETUP": "meetup",
+      "HACKATHON": "hackathon",
+    };
+    const hcsEventType = eventTypeMap[event.event_type] || "nft";
+
+    submitEventVoteToHCS(
+      user.walletAddress,
+      eventId,
+      hcsEventType,
+      voteType.toLowerCase() as "up" | "down"
+    ).catch((err) => console.error("HCS submit failed:", err));
 
     return NextResponse.json({
       success: true,
