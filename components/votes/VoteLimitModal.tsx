@@ -43,27 +43,27 @@ export function VoteLimitModal({
 
   const getVoteIcon = (item: VoteHistoryItem) => {
     if (item.type === "event") {
-      return <Calendar className="h-4 w-4 text-accent-primary" />;
+      return <Calendar className="h-3 w-3 text-accent-primary" />;
     } else if (item.type === "collection") {
-      return <Layers className="h-4 w-4 text-accent-purple" />;
+      return <Layers className="h-3 w-3 text-accent-purple" />;
     } else {
-      return <Coins className="h-4 w-4 text-accent-coral" />;
+      return <Coins className="h-3 w-3 text-accent-coral" />;
     }
   };
 
   const getVoteDirection = (item: VoteHistoryItem) => {
     if (item.voteType) {
       return item.voteType === "UP" ? (
-        <ThumbsUp className="h-3.5 w-3.5 text-green-500" />
+        <ThumbsUp className="h-3 w-3 text-green-500" />
       ) : (
-        <ThumbsDown className="h-3.5 w-3.5 text-red-500" />
+        <ThumbsDown className="h-3 w-3 text-red-500" />
       );
     }
     if (item.voteWeight !== undefined) {
       return item.voteWeight > 0 ? (
-        <ThumbsUp className="h-3.5 w-3.5 text-green-500" />
+        <ThumbsUp className="h-3 w-3 text-green-500" />
       ) : (
-        <ThumbsDown className="h-3.5 w-3.5 text-red-500" />
+        <ThumbsDown className="h-3 w-3 text-red-500" />
       );
     }
     return null;
@@ -83,53 +83,45 @@ export function VoteLimitModal({
         </div>
       </DialogHeader>
 
-      <DialogBody className="space-y-4">
-        {/* Status */}
-        <div className={`p-4 rounded-lg border ${remaining === 0 ? "bg-red-500/10 border-red-500/30" : "bg-bg-secondary border-border"}`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-text-secondary text-sm">Votes remaining today</span>
-            <span className={`text-2xl font-bold ${remaining === 0 ? "text-red-500" : "text-text-primary"}`}>
+      <DialogBody className="space-y-3">
+        {/* Status - Compact */}
+        <div className={`p-3 rounded-lg border ${remaining === 0 ? "bg-red-500/10 border-red-500/30" : "bg-bg-secondary border-border"}`}>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-text-secondary text-xs">Remaining</span>
+            <span className={`text-lg font-bold ${remaining === 0 ? "text-red-500" : "text-text-primary"}`}>
               {remaining}/{limit}
             </span>
           </div>
-          <div className="w-full bg-bg-card rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-bg-card rounded-full h-1.5 overflow-hidden">
             <div
               className={`h-full transition-all duration-300 ${remaining === 0 ? "bg-red-500" : "bg-accent-coral"}`}
               style={{ width: `${(remaining / limit) * 100}%` }}
             />
           </div>
+          {/* Reset time inline */}
+          <div className="flex items-center gap-1.5 mt-2 text-xs text-text-secondary">
+            <Clock className="h-3 w-3" />
+            <span>Resets in {hoursUntilReset}h {minutesUntilReset}m</span>
+          </div>
         </div>
 
-        {/* Reset time */}
-        <div className="flex items-center gap-2 text-sm text-text-secondary">
-          <Clock className="h-4 w-4" />
-          <span>
-            Resets in {hoursUntilReset}h {minutesUntilReset}m (at 00:00 UTC)
-          </span>
-        </div>
+        {/* Explanation - More compact */}
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Limited to <strong className="text-text-primary">{limit} votes/day</strong> across all content. Each vote is recorded on-chain (HCS) to ensure transparency and sustainability.
+        </p>
 
-        {/* Explanation */}
-        <div className="p-3 rounded-lg bg-bg-secondary/50 border border-border/50 space-y-2">
-          <p className="text-sm text-text-secondary">
-            Each wallet is limited to <strong className="text-text-primary">{limit} votes per day</strong> across all voteable content: NFT Mints, Forever Mints, Meetups, Hackathons, NFT Collections, and Tokens.
-          </p>
-          <p className="text-xs text-text-secondary/80">
-            Every vote is recorded on-chain via Hedera Consensus Service (HCS), which incurs a transaction fee. This limit helps us maintain the platform&apos;s sustainability while preventing abuse.
-          </p>
-        </div>
-
-        {/* Vote History */}
+        {/* Vote History - Compact */}
         {history.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium text-text-primary mb-2">Today&apos;s votes</h4>
-            <div className="space-y-2">
+            <h4 className="text-xs font-medium text-text-secondary mb-1.5">Today&apos;s votes</h4>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
               {history.map((item, index) => (
                 <div
                   key={`${item.type}-${item.id}-${index}`}
-                  className="flex items-center gap-3 p-2 rounded-lg bg-bg-secondary/50"
+                  className="flex items-center gap-2 p-1.5 rounded bg-bg-secondary/50"
                 >
                   {/* Image */}
-                  <div className="relative w-8 h-8 rounded-md overflow-hidden bg-bg-card flex-shrink-0">
+                  <div className="relative w-6 h-6 rounded overflow-hidden bg-bg-card flex-shrink-0">
                     {item.imageUrl ? (
                       <Image
                         src={item.imageUrl}
@@ -146,20 +138,14 @@ export function VoteLimitModal({
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      {getVoteIcon(item)}
-                      <span className="text-sm font-medium text-text-primary truncate">
-                        {item.name}
-                        {item.symbol && <span className="text-text-secondary"> ({item.symbol})</span>}
-                      </span>
-                    </div>
-                    <div className="text-xs text-text-secondary">
-                      {formatTime(item.timestamp)}
-                    </div>
+                    <span className="text-xs font-medium text-text-primary truncate block">
+                      {item.name}
+                    </span>
                   </div>
 
-                  {/* Vote direction */}
-                  <div className="flex-shrink-0">
+                  {/* Vote direction & time */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-[10px] text-text-secondary">{formatTime(item.timestamp)}</span>
                     {getVoteDirection(item)}
                   </div>
                 </div>
@@ -167,16 +153,10 @@ export function VoteLimitModal({
             </div>
           </div>
         )}
-
-        {history.length === 0 && used > 0 && (
-          <p className="text-sm text-text-secondary text-center py-2">
-            Vote history not available
-          </p>
-        )}
       </DialogBody>
 
-      <DialogFooter>
-        <Button onClick={onClose} className="w-full">
+      <DialogFooter className="p-3 pt-0 border-t-0">
+        <Button onClick={onClose} size="sm" className="w-full">
           OK
         </Button>
       </DialogFooter>

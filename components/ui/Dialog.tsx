@@ -36,7 +36,7 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
@@ -45,7 +45,9 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
       {/* Content */}
       <div
         className={cn(
-          "relative z-10 bg-bg-card border border-border rounded-xl shadow-2xl max-w-md w-full mx-4 animate-scale-in",
+          "relative z-10 bg-bg-card border border-border shadow-2xl w-full max-h-[85vh] overflow-y-auto",
+          "rounded-t-xl sm:rounded-xl sm:max-w-sm sm:mx-4",
+          "animate-slide-up sm:animate-scale-in",
           className
         )}
       >
