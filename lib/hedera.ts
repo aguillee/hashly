@@ -42,7 +42,9 @@ export async function getNFTsForWallet(
     let nextLink: string | null = `/api/v1/accounts/${walletAddress}/nfts?token.id=${tokenId}&limit=100`;
 
     while (nextLink) {
-      const response: Response = await fetch(`${MIRROR_NODE_URL}${nextLink}`);
+      const response: Response = await fetch(`${MIRROR_NODE_URL}${nextLink}`, {
+        cache: "no-store",
+      });
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -85,7 +87,8 @@ export async function verifyNFTOwnership(
 ): Promise<boolean> {
   try {
     const response = await fetch(
-      `${MIRROR_NODE_URL}/api/v1/tokens/${tokenId}/nfts/${serialNumber}`
+      `${MIRROR_NODE_URL}/api/v1/tokens/${tokenId}/nfts/${serialNumber}`,
+      { cache: "no-store" }
     );
 
     if (!response.ok) {

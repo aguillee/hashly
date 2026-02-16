@@ -14,7 +14,7 @@ const HEDERA_OPERATOR_KEY = process.env.HEDERA_OPERATOR_KEY!;
 
 // NFT Token IDs for voting power
 const EL_SANTUARIO_TOKEN_ID = "0.0.9954622";
-const SANTUARIO_HEDERA_TOKEN_ID = "0.0.8583540";
+const SANTUARIO_HEDERA_TOKEN_ID = "0.0.7235629";
 
 // Voting power constants
 const BASE_VOTING_POWER = 1;
