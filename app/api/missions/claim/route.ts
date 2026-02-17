@@ -42,10 +42,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Mission not found" }, { status: 404 });
     }
 
-    // Get user
+    // Get user (without loading all votes/events to avoid timeout)
     const user = await prisma.user.findUnique({
       where: { walletAddress: payload.walletAddress as string },
-      include: { votes: true, events: true },
     });
 
     if (!user) {
@@ -58,32 +57,26 @@ export async function POST(request: NextRequest) {
     const startOfWeek = new Date(startOfDay);
     startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
 
-    const todayVotes = user.votes.filter(v => new Date(v.createdAt) >= startOfDay).length;
-    const weekVotes = user.votes.filter(v => new Date(v.createdAt) >= startOfWeek).length;
-    const totalVotes = user.votes.length;
-    const approvedEvents = user.events.filter(e => e.isApproved).length;
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
-    // Get today's date string for sentiment votes (UTC)
-    const todayDateStr = now.toISOString().split("T")[0];
-
-    const [collectionVotesCount, todaySentimentVotes, totalSentimentDays] = await Promise.all([
+    // Count votes efficiently in DB instead of loading all into memory
+    const [todayVotes, weekVotes, totalVotes, approvedEvents, collectionVotesCount] = await Promise.all([
+      prisma.vote.count({
+        where: { userId: user.id, createdAt: { gte: startOfDay } },
+      }),
+      prisma.vote.count({
+        where: { userId: user.id, createdAt: { gte: startOfWeek } },
+      }),
+      prisma.vote.count({
+        where: { userId: user.id },
+      }),
+      prisma.event.count({
+        where: { createdById: user.id, isApproved: true },
+      }),
       prisma.collectionVote.count({
         where: { walletAddress: payload.walletAddress as string },
       }),
-      prisma.sentimentVote.count({
-        where: {
-          walletAddress: payload.walletAddress as string,
-          date: todayDateStr,
-        },
-      }),
-      prisma.sentimentVote.groupBy({
-        by: ["date"],
-        where: { walletAddress: payload.walletAddress as string },
-      }),
     ]);
-
-    const sentimentDaysCount = totalSentimentDays.length;
 
     let isCompleted = false;
     switch (missionId) {
@@ -119,22 +112,6 @@ export async function POST(request: NextRequest) {
         break;
       case "collection_votes_100":
         isCompleted = collectionVotesCount >= mission.requirement;
-        break;
-      // Sentiment missions
-      case "daily_sentiment":
-        isCompleted = todaySentimentVotes >= mission.requirement;
-        break;
-      case "first_sentiment_vote":
-        isCompleted = sentimentDaysCount > 0;
-        break;
-      case "sentiment_week_streak":
-        isCompleted = sentimentDaysCount >= mission.requirement;
-        break;
-      case "sentiment_votes_30":
-        isCompleted = sentimentDaysCount >= mission.requirement;
-        break;
-      case "sentiment_votes_100":
-        isCompleted = sentimentDaysCount >= mission.requirement;
         break;
     }
 

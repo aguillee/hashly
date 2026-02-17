@@ -93,9 +93,14 @@ export default function MissionsPage() {
         );
         // Refresh to get updated points
         await loadMissionsAndStats();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error || `Error ${response.status}`;
+        alert(`No se pudo reclamar: ${errorMsg}`);
       }
     } catch (error) {
       console.error("Failed to claim mission:", error);
+      alert("Error de conexión al reclamar la misión");
     } finally {
       setClaimingId(null);
     }
