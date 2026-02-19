@@ -99,7 +99,6 @@ export async function GET(request: NextRequest) {
       where: {
         status: "LIVE",
         isForeverMint: false,
-        endDate: null,
         mintDate: {
           not: null,
           lt: sevenDaysAgo,
