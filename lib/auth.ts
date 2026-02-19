@@ -2,14 +2,14 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "./db";
 
-// JWT_SECRET must be set in environment — no fallback in production
-const jwtSecretValue = process.env.JWT_SECRET;
-if (!jwtSecretValue && process.env.NODE_ENV === "production") {
-  throw new Error("JWT_SECRET environment variable is required in production");
+// JWT_SECRET is read lazily to avoid build-time errors (env vars may not be available during `next build`)
+function getJWTSecret() {
+  const value = process.env.JWT_SECRET;
+  if (!value && process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET environment variable is required in production");
+  }
+  return new TextEncoder().encode(value || "development-secret-key-change-in-production");
 }
-const JWT_SECRET = new TextEncoder().encode(
-  jwtSecretValue || "development-secret-key-change-in-production"
-);
 
 const ADMIN_WALLETS = (process.env.ADMIN_WALLETS || "").split(",").filter(Boolean);
 
@@ -24,12 +24,12 @@ export async function createToken(payload: JWTPayload): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(JWT_SECRET);
+    .sign(getJWTSecret());
 }
 
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJWTSecret());
     return payload as unknown as JWTPayload;
   } catch {
     return null;
