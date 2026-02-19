@@ -137,7 +137,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
     data: { status: "LIVE" }
   });
 
-  // 2. Delete LIVE events older than 7 days directly (except Forever Mints)
+  // 2. Delete LIVE mint events older than 7 days (only MINT_EVENT, not meetups/hackathons)
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -145,6 +145,7 @@ async function syncLaunchpadsFromKabila(adminUserId: string) {
     where: {
       status: "LIVE",
       isForeverMint: false,
+      NOT: { event_type: { in: ["ECOSYSTEM_MEETUP", "HACKATHON"] } },
       mintDate: {
         not: null,
         lt: sevenDaysAgo

@@ -101,3 +101,48 @@ export function parseMintPrice(price: string): {
     isHbar: true,
   };
 }
+
+// Generate Google Calendar URL for an event
+export function getGoogleCalendarUrl(event: {
+  title: string;
+  description?: string;
+  mintDate: string;
+  endDate?: string | null;
+  location?: string | null;
+  id: string;
+}): string {
+  const formatGCalDate = (date: Date) =>
+    date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
+  const start = new Date(event.mintDate);
+  const end = event.endDate
+    ? new Date(event.endDate)
+    : new Date(start.getTime() + 60 * 60 * 1000); // default 1h
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: event.title,
+    dates: `${formatGCalDate(start)}/${formatGCalDate(end)}`,
+    details: `${stripHtmlBasic(event.description || "")}
+
+View on Hashly: https://hash-ly.com/events/${event.id}`.trim(),
+  });
+
+  if (event.location) {
+    params.set("location", event.location);
+  }
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function stripHtmlBasic(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}

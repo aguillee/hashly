@@ -26,6 +26,7 @@ import {
   Mic2,
   Award,
   Check,
+  CalendarPlus,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -33,7 +34,7 @@ import { Button } from "@/components/ui/Button";
 import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { useWalletStore } from "@/store";
-import { cn, parseMintPrice } from "@/lib/utils";
+import { cn, parseMintPrice, getGoogleCalendarUrl } from "@/lib/utils";
 import { mutate } from "@/lib/swr";
 import { XIcon } from "@/components/ui/XIcon";
 import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
@@ -73,6 +74,8 @@ interface EventDetail {
   votesUp: number;
   votesDown: number;
   event_type: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
+  isForeverMint?: boolean;
+  location?: string | null;
   prizes?: string | null;
   custom_links?: CustomLink[] | null;
   createdBy: {
@@ -837,6 +840,29 @@ export default function EventDetailPage() {
               <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               Share
             </Button>
+            {!event.isForeverMint && (
+              <Button
+                variant="secondary"
+                className="px-3 sm:px-4"
+                title="Add to Google Calendar"
+                onClick={() => {
+                  window.open(
+                    getGoogleCalendarUrl({
+                      title: event.title,
+                      description: event.description,
+                      mintDate: event.mintDate,
+                      endDate: event.endDate,
+                      location: event.location,
+                      id: event.id,
+                    }),
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+              >
+                <CalendarPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+            )}
             <Button
               variant="secondary"
               className="px-3 sm:px-4"

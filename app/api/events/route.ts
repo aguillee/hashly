@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Delete LIVE events older than 7 days (except Forever Mints; only those without endDate)
+    // Delete LIVE mint events older than 7 days (only MINT_EVENT, not meetups/hackathons)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
         status: "LIVE",
         isForeverMint: false,
         endDate: null,
+        NOT: { event_type: { in: ["ECOSYSTEM_MEETUP", "HACKATHON"] } },
         mintDate: {
           not: null,
           lt: sevenDaysAgo,
@@ -135,6 +136,7 @@ export async function GET(request: NextRequest) {
           title: true,
           description: true,
           mintDate: true,
+          endDate: true,
           mintPrice: true,
           supply: true,
           imageUrl: true,
@@ -194,6 +196,7 @@ export async function GET(request: NextRequest) {
       events: events.map((e) => ({
         ...e,
         mintDate: e.mintDate?.toISOString() || null, // Can be null for TBA events
+        endDate: e.endDate?.toISOString() || null,
         createdAt: e.createdAt.toISOString(),
         userVote: userVotesData[e.id]?.voteType || null,
         canVote: userVotesData[e.id]?.canVote ?? true,

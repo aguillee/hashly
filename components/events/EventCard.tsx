@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Calendar, ThumbsUp, ThumbsDown, Clock, Box, Star, MapPin, Globe, Users } from "lucide-react";
+import { Calendar, CalendarPlus, ThumbsUp, ThumbsDown, Clock, Box, Star, MapPin, Globe, Users } from "lucide-react";
 import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { formatDate, formatTimeRemaining, getVoteScore, parseMintPrice } from "@/lib/utils";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { ShareToXButton } from "@/components/ui/ShareToXButton";
+import { getGoogleCalendarUrl } from "@/lib/utils";
 
 interface EventCardProps {
   event: {
@@ -16,6 +17,7 @@ interface EventCardProps {
     title: string;
     description: string;
     mintDate: string;
+    endDate?: string | null;
     mintPrice: string;
     supply: number | null;
     imageUrl: string | null;
@@ -255,6 +257,27 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
               shareUrl={`https://hash-ly.com/events/${event.id}`}
               className="p-1.5 ml-1"
             />
+            {isUpcoming && (
+              <button
+                onClick={() => {
+                  window.open(
+                    getGoogleCalendarUrl({
+                      title: event.title,
+                      mintDate: event.mintDate,
+                      endDate: event.endDate,
+                      location: event.location,
+                      id: event.id,
+                    }),
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+                title="Add to Google Calendar"
+                className="p-1.5 ml-0.5 text-text-secondary hover:text-accent-primary transition-colors"
+              >
+                <CalendarPlus className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
           {/* View more */}

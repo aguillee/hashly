@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, ArrowLeft, Link as LinkIcon, Send, Plus, Trash2, Layers, Clock, MapPin, Globe, Users, Code2, Trophy } from "lucide-react";
+import { Calendar, Hexagon, ArrowLeft, Link as LinkIcon, Send, Plus, Trash2, Layers, Clock, MapPin, Globe, Users, Code2, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
@@ -327,7 +327,7 @@ export default function NewEventPage() {
                       : "bg-bg-card text-text-secondary hover:text-text-primary"
                   )}
                 >
-                  <Calendar className="h-4 w-4" />
+                  <Hexagon className="h-4 w-4" />
                   Mint Event
                 </button>
                 <button

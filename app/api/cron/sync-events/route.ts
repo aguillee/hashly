@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     });
     results.cleanup.deletedEnded = deletedEnded.count;
 
-    // 3. Delete LIVE events older than 7 days (except Forever Mints)
+    // 3. Delete LIVE mint events older than 7 days (only MINT_EVENT, not meetups/hackathons)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -99,6 +99,7 @@ export async function GET(request: NextRequest) {
       where: {
         status: "LIVE",
         isForeverMint: false,
+        NOT: { event_type: { in: ["ECOSYSTEM_MEETUP", "HACKATHON"] } },
         mintDate: {
           not: null,
           lt: sevenDaysAgo,

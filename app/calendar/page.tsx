@@ -7,6 +7,7 @@ import {
   Search,
   Plus,
   Sparkles,
+  Hexagon,
   TrendingUp,
   Clock,
   LayoutGrid,
@@ -30,6 +31,7 @@ interface Event {
   title: string;
   description: string;
   mintDate: string;
+  endDate?: string | null;
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
@@ -40,6 +42,10 @@ interface Event {
   voteLockedUntil?: string | null;
   isForeverMint?: boolean;
   source?: "SENTX" | "KABILA";
+  event_type?: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
+  host?: string | null;
+  location?: string | null;
+  location_type?: string | null;
 }
 
 interface UserVote {
@@ -47,10 +53,15 @@ interface UserVote {
   voteType: "UP" | "DOWN";
 }
 
-const statusFilters = [
-  { value: "all", label: "All Events", icon: Sparkles },
-  { value: "live", label: "Live Now", icon: TrendingUp },
+const stateFilters = [
+  { value: "all", label: "All", icon: Sparkles },
+  { value: "live", label: "Live", icon: TrendingUp },
   { value: "upcoming", label: "Upcoming", icon: Clock },
+];
+
+const typeFilters = [
+  { value: "all", label: "All Types", icon: Sparkles },
+  { value: "mints", label: "Mint Events", icon: Hexagon },
   { value: "forever", label: "Forever Mints", icon: Infinity },
   { value: "meetups", label: "Meetups", icon: Users },
   { value: "hackathons", label: "Hackathons", icon: Code2 },
@@ -79,6 +90,7 @@ export default function CalendarPage() {
   const [loading, setLoading] = React.useState(true);
   const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("grid");
   const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA">("all");
+  const [stateFilter, setStateFilter] = React.useState<"all" | "live" | "upcoming">("all");
   const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
 
   // Track if initial URL params have been processed
@@ -106,21 +118,32 @@ export default function CalendarPage() {
       setLoading(true);
       const params = new URLSearchParams();
 
-      // Handle special filters
+      // Handle type filters
       if (status === "forever") {
         params.append("foreverMints", "only");
+      } else if (status === "mints") {
+        params.append("eventType", "MINT_EVENT");
+        params.append("foreverMints", "exclude");
       } else if (status === "meetups") {
         params.append("eventType", "ECOSYSTEM_MEETUP");
       } else if (status === "hackathons") {
         params.append("eventType", "HACKATHON");
       } else {
-        if (status !== "all") params.append("status", status);
+        // "all" types - exclude forever mints from default view
         params.append("foreverMints", "exclude");
+      }
+
+      // Handle state filters
+      if (stateFilter === "live") {
+        params.append("status", "live");
+      } else if (stateFilter === "upcoming") {
+        params.append("status", "upcoming");
       }
 
       if (searchQuery) params.append("search", searchQuery);
       if (sourceFilter !== "all") params.append("source", sourceFilter);
       params.append("sortBy", sortBy);
+      params.append("limit", "100");
 
       const response = await fetch(`/api/events?${params.toString()}`);
       const data = await response.json();
@@ -140,7 +163,7 @@ export default function CalendarPage() {
     } finally {
       setLoading(false);
     }
-  }, [status, sortBy, searchQuery, sourceFilter]);
+  }, [status, stateFilter, sortBy, searchQuery, sourceFilter]);
 
   // Fetch events when params change
   React.useEffect(() => {
@@ -264,23 +287,48 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Filters - News style with border-l-4 */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-bg-card/50 border-l-4 border-accent-primary rounded-r-md">
-          {/* Status Filters - Scrollable on mobile */}
-          <div className="overflow-x-auto pb-2 -mb-2 scrollbar-hide">
-            <div className="flex items-center gap-1.5 min-w-max">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide flex-shrink-0 mr-1 font-semibold">Type:</span>
-              {statusFilters.map((filter) => {
+        {/* Filters - Single scrollable line */}
+        <div className="mb-4 sm:mb-6 p-2.5 sm:p-3 bg-bg-card/50 border-l-4 border-accent-primary rounded-r-md overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-max">
+            {/* State */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">State:</span>
+              {stateFilters.map((filter) => {
                 const Icon = filter.icon;
                 return (
                   <button
                     key={filter.value}
-                    onClick={() => setStatus(filter.value as "all" | "upcoming" | "live" | "forever" | "meetups")}
+                    onClick={() => setStateFilter(filter.value as "all" | "live" | "upcoming")}
                     className={cn(
-                      "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
+                      "flex items-center gap-1 px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
+                      stateFilter === filter.value
+                        ? "bg-accent-primary text-white"
+                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="w-px h-5 bg-border/50" />
+
+            {/* Type */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">Type:</span>
+              {typeFilters.map((filter) => {
+                const Icon = filter.icon;
+                return (
+                  <button
+                    key={filter.value}
+                    onClick={() => setStatus(filter.value as "all" | "mints" | "forever" | "meetups" | "hackathons")}
+                    className={cn(
+                      "flex items-center gap-1 px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
                       status === filter.value
                         ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/80"
+                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
                     )}
                   >
                     <Icon className="h-3 w-3" />
@@ -289,57 +337,51 @@ export default function CalendarPage() {
                 );
               })}
             </div>
-          </div>
 
-          {/* Separator */}
-          <div className="border-t border-dashed border-border/50 my-2 sm:my-3" />
+            <div className="w-px h-5 bg-border/50" />
 
-          {/* Source & Sort - Compact row */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            {/* Source Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold">Source:</span>
-              <div className="flex gap-0.5 sm:gap-1">
-                {sourceFilters.map((filter) => (
-                  <button
-                    key={filter.value}
-                    onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
-                    className={cn(
-                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-all",
-                      sourceFilter === filter.value
-                        ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                    )}
-                  >
-                    {filter.label === "All Sources" ? "All" : filter.label}
-                  </button>
-                ))}
-              </div>
+            {/* Source */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">Source:</span>
+              {sourceFilters.map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
+                  className={cn(
+                    "px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
+                    sourceFilter === filter.value
+                      ? "bg-accent-primary text-white"
+                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                  )}
+                >
+                  {filter.label === "All Sources" ? "All" : filter.label}
+                </button>
+              ))}
             </div>
 
-            {/* Sort By */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold">Sort:</span>
-              <div className="flex gap-0.5 sm:gap-1">
-                {[
-                  { value: "date", label: "Date" },
-                  { value: "votes", label: "Votes" },
-                  { value: "newest", label: "New" },
-                ].map((sort) => (
-                  <button
-                    key={sort.value}
-                    onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
-                    className={cn(
-                      "px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-all",
-                      sortBy === sort.value
-                        ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                    )}
-                  >
-                    {sort.label}
-                  </button>
-                ))}
-              </div>
+            <div className="w-px h-5 bg-border/50" />
+
+            {/* Sort */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">Sort:</span>
+              {[
+                { value: "date", label: "Date" },
+                { value: "votes", label: "Votes" },
+                { value: "newest", label: "New" },
+              ].map((sort) => (
+                <button
+                  key={sort.value}
+                  onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
+                  className={cn(
+                    "px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
+                    sortBy === sort.value
+                      ? "bg-accent-primary text-white"
+                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                  )}
+                >
+                  {sort.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
