@@ -282,7 +282,7 @@ export default function BadgeDetailPage() {
       .filter((w) => /^0\.0\.\d+$/.test(w));
 
     // Deduplicate within the batch itself first
-    const wallets = [...new Set(rawWallets)];
+    const wallets = Array.from(new Set(rawWallets));
     const batchDuplicates = rawWallets.length - wallets.length;
 
     if (wallets.length === 0) {
