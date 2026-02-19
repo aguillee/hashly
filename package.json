@@ -14,7 +14,7 @@
   "dependencies": {
     "@hashgraph/hedera-wallet-connect": "^2.0.4",
     "@hashgraph/proto": "^2.25.0",
-    "@hashgraph/sdk": "^2.40.0",
+    "@hashgraph/sdk": "^2.80.0",
     "@prisma/client": "^5.10.0",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",

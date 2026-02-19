@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/auth";
+import { getBadgePointsForWallets } from "@/lib/badge-points";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,12 +17,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Get badge points from blockchain
+    const badgeData = await getBadgePointsForWallets([user.walletAddress]);
+    const badgeInfo = badgeData.get(user.walletAddress) || { badgePoints: 0, badgeCount: 0 };
+
     return NextResponse.json({
       user: {
         id: user.id,
         walletAddress: user.walletAddress,
         alias: user.alias,
         points: user.points,
+        badgePoints: badgeInfo.badgePoints,
+        badgeCount: badgeInfo.badgeCount,
+        totalPoints: user.points + badgeInfo.badgePoints,
         loginStreak: user.loginStreak,
         isAdmin: user.isAdmin,
       },

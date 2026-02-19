@@ -39,10 +39,3 @@ prisma/*.db
 prisma/*.db-journal
 .env*.local
 
-# Sentiment Index (not ready for production)
-app/sentiment/
-app/api/sentiment/
-components/sentiment/
-scripts/sync-hcs-votes.ts
-lib/hcs.ts
-lib/missions.ts

@@ -151,5 +151,27 @@ export function useVoteLimit() {
   });
 }
 
+// Events with attendance badges
+export function useEventsWithBadge(limit = 10) {
+  return useSWR(`/api/events/with-badge?limit=${limit}`, fetcher, {
+    revalidateOnFocus: true,
+    refreshInterval: 60000,
+  });
+}
+
+// Badge status for an event
+export function useBadgeStatus(eventId: string | null) {
+  return useSWR(eventId ? `/api/events/${eventId}/badge-status` : null, fetcher, {
+    revalidateOnFocus: true,
+  });
+}
+
+// Host requests (user's own requests)
+export function useHostRequests() {
+  return useSWR("/api/host-requests", fetcher, {
+    revalidateOnFocus: true,
+  });
+}
+
 // Export mutate for manual revalidation
 export { mutate } from "swr";

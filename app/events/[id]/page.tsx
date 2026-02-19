@@ -23,6 +23,9 @@ import {
   Trophy,
   Code2,
   Link2,
+  Mic2,
+  Award,
+  Check,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -34,6 +37,8 @@ import { cn, parseMintPrice } from "@/lib/utils";
 import { mutate } from "@/lib/swr";
 import { XIcon } from "@/components/ui/XIcon";
 import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
+import { RequestHostModal } from "@/components/badges/RequestHostModal";
+import { useBadgeStatus } from "@/lib/swr";
 
 interface MintPhase {
   id: string;
@@ -89,6 +94,12 @@ export default function EventDetailPage() {
   const [voting, setVoting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [voteCountdown, setVoteCountdown] = React.useState<string | null>(null);
+  const [showHostModal, setShowHostModal] = React.useState(false);
+
+  // Badge status - fetch for all event types to show badge differentiation
+  const { data: badgeStatusData, mutate: mutateBadgeStatus } = useBadgeStatus(
+    params.id as string
+  );
 
   React.useEffect(() => {
     if (params.id) {
@@ -294,6 +305,7 @@ export default function EventDetailPage() {
   const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
   const isHackathon = event.event_type === "HACKATHON";
   const isStarsOnly = isMeetup || isHackathon; // Stars-only voting for meetups and hackathons
+  const hasBadgeToken = badgeStatusData?.badge?.tokenId;
 
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -330,7 +342,13 @@ export default function EventDetailPage() {
                   </span>
                 </div>
                 {/* Status badge - top right */}
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 flex items-center gap-2">
+                  {hasBadgeToken && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-accent-coral/90 text-white text-[10px] sm:text-xs font-bold rounded backdrop-blur-sm">
+                      <Award className="h-3 w-3" />
+                      NFT Badge
+                    </span>
+                  )}
                   {getStatusBadge(event.status)}
                 </div>
               </div>
@@ -339,6 +357,14 @@ export default function EventDetailPage() {
               <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold">{event.title}</h1>
+                  {hasBadgeToken && (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-coral/15 border border-accent-coral/30 text-accent-coral text-[10px] sm:text-xs font-semibold">
+                        <Award className="h-3 w-3" />
+                        Attendance Badge NFT
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {!event.imageUrl && (
                   <div className="flex items-center gap-2">
@@ -707,6 +733,100 @@ export default function EventDetailPage() {
             </div>
           </div>
 
+          {/* Attendance Badge - only for meetups */}
+          {isMeetup && (
+            <div className="bg-bg-card/80 border-l-4 border-accent-coral rounded-r-md overflow-hidden">
+              <div className="p-4 sm:p-6">
+                <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
+                  <div className="w-8 h-8 rounded bg-accent-coral/10 flex items-center justify-center">
+                    <Award className="h-4 w-4 text-accent-coral" />
+                  </div>
+                  Attendance Badge
+                </h3>
+
+                {badgeStatusData?.badge ? (
+                  <div className="space-y-3">
+                    {badgeStatusData.badge.status === "DISTRIBUTED" ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20">
+                        <Check className="h-4 w-4 text-success" />
+                        <span className="text-sm text-success font-medium">
+                          Badge distributed ({badgeStatusData.badge.supply} claimed)
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-accent-coral/10 border border-accent-coral/20">
+                        <Mic2 className="h-4 w-4 text-accent-coral" />
+                        <span className="text-sm text-accent-coral font-medium">
+                          Badge in progress
+                        </span>
+                      </div>
+                    )}
+                    {badgeStatusData.badge.tokenId && (
+                      <p className="text-xs text-text-secondary">
+                        Token ID: <span className="font-mono">{badgeStatusData.badge.tokenId}</span>
+                      </p>
+                    )}
+                  </div>
+                ) : badgeStatusData?.hostRequest ? (
+                  <div className="space-y-2">
+                    <div className={cn(
+                      "flex items-center gap-2 p-3 rounded-lg border",
+                      badgeStatusData.hostRequest.status === "PENDING"
+                        ? "bg-yellow-500/10 border-yellow-500/20"
+                        : badgeStatusData.hostRequest.status === "APPROVED"
+                          ? "bg-success/10 border-success/20"
+                          : "bg-error/10 border-error/20"
+                    )}>
+                      <span className={cn(
+                        "text-sm font-medium",
+                        badgeStatusData.hostRequest.status === "PENDING"
+                          ? "text-yellow-500"
+                          : badgeStatusData.hostRequest.status === "APPROVED"
+                            ? "text-success"
+                            : "text-error"
+                      )}>
+                        {badgeStatusData.hostRequest.status === "PENDING"
+                          ? "Host request pending..."
+                          : badgeStatusData.hostRequest.status === "APPROVED"
+                            ? "You can create badge!"
+                            : "Request rejected"}
+                      </span>
+                    </div>
+                    {badgeStatusData.hostRequest.status === "APPROVED" && (
+                      <Link href={`/profile/badges/${event.id}`}>
+                        <Button size="sm" className="w-full">
+                          <Mic2 className="h-4 w-4 mr-2" />
+                          Create Badge
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-text-secondary">
+                      No attendance badge yet. Become the host to create one!
+                    </p>
+                    {isConnected ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-accent-coral text-accent-coral hover:bg-accent-coral/10"
+                        onClick={() => setShowHostModal(true)}
+                      >
+                        <Mic2 className="h-4 w-4 mr-2" />
+                        Request to Host
+                      </Button>
+                    ) : (
+                      <p className="text-xs text-text-secondary text-center">
+                        Connect wallet to request hosting
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Share */}
           <div className="flex gap-2">
             <Button
@@ -725,7 +845,7 @@ export default function EventDetailPage() {
                 const url = `https://hash-ly.com/events/${event.id}`;
                 window.open(
                   `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-                  "_blank",
+                  "-blank",
                   "noopener,noreferrer,width=550,height=420"
                 );
               }}
@@ -740,6 +860,17 @@ export default function EventDetailPage() {
           </p>
         </div>
       </div>
+
+      {/* Host Request Modal */}
+      {isMeetup && (
+        <RequestHostModal
+          isOpen={showHostModal}
+          onClose={() => setShowHostModal(false)}
+          eventId={event.id}
+          eventTitle={event.title}
+          onSuccess={() => mutateBadgeStatus()}
+        />
+      )}
     </div>
   );
 }

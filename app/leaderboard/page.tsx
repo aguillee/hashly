@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Trophy, Medal, Crown, Zap, TrendingUp, Gift, Clock, Users } from "lucide-react";
+import { Trophy, Medal, Crown, Zap, TrendingUp, Gift, Clock, Users, Award, Target } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,10 @@ interface LeaderboardEntry {
   walletAddress: string;
   alias: string | null;
   points: number;
+  missionPoints: number;
+  badgePoints: number;
+  badgeCount: number;
+  totalPoints: number;
 }
 
 const SEASON_END = new Date("2026-02-28T23:59:59Z");
@@ -50,6 +54,7 @@ export default function LeaderboardPage() {
   const leaderboard: LeaderboardEntry[] = data?.leaderboard || [];
   const userRank: number | null = data?.userRank || null;
   const totalUsers: number = data?.totalUsers || 0;
+  const userData = data?.userData || null;
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -170,7 +175,7 @@ export default function LeaderboardPage() {
           <div className="relative mb-6 sm:mb-8 group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg sm:rounded-lg blur opacity-30 group-hover:opacity-50 transition-opacity" />
             <div className="relative p-4 sm:p-6 rounded-lg sm:rounded-lg bg-bg-card border border-border">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md sm:rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center flex-shrink-0">
                     <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
@@ -181,13 +186,32 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs sm:text-sm text-text-secondary font-medium">Your Points</p>
+                  <p className="text-xs sm:text-sm text-text-secondary font-medium">Total Points</p>
                   <div className="flex items-center justify-end gap-1.5 sm:gap-2 text-2xl sm:text-3xl font-bold">
                     <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
-                    <span className="gradient-text tabular-nums">{(user.points ?? 0).toLocaleString()}</span>
+                    <span className="gradient-text tabular-nums">{(userData?.totalPoints ?? user.points ?? 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
+              {/* Points breakdown */}
+              {userData && (
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/50">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50">
+                    <Target className="h-4 w-4 text-blue-400" />
+                    <div>
+                      <p className="text-[10px] text-text-secondary">Mission Pts</p>
+                      <p className="text-sm font-bold text-text-primary tabular-nums">{userData.missionPoints.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50">
+                    <Award className="h-4 w-4 text-accent-coral" />
+                    <div>
+                      <p className="text-[10px] text-text-secondary">Badge Pts ({userData.badgeCount})</p>
+                      <p className="text-sm font-bold text-text-primary tabular-nums">{userData.badgePoints.toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -258,12 +282,39 @@ export default function LeaderboardPage() {
                             <Gift className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-400 flex-shrink-0" />
                           )}
                         </div>
+                        {/* Points breakdown on mobile */}
+                        <div className="flex items-center gap-2 mt-1 sm:hidden">
+                          <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
+                            <Target className="h-2.5 w-2.5 text-blue-400" />
+                            {entry.missionPoints.toLocaleString()}
+                          </span>
+                          {entry.badgeCount > 0 && (
+                            <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
+                              <Award className="h-2.5 w-2.5 text-accent-coral" />
+                              {entry.badgePoints.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Points */}
+                      {/* Points breakdown - desktop */}
+                      <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1 px-2 py-1 rounded bg-blue-500/10 border border-blue-500/20">
+                          <Target className="h-3 w-3 text-blue-400" />
+                          <span className="text-xs font-medium text-blue-400 tabular-nums">{entry.missionPoints.toLocaleString()}</span>
+                        </div>
+                        {entry.badgeCount > 0 && (
+                          <div className="flex items-center gap-1 px-2 py-1 rounded bg-accent-coral/10 border border-accent-coral/20">
+                            <Award className="h-3 w-3 text-accent-coral" />
+                            <span className="text-xs font-medium text-accent-coral tabular-nums">{entry.badgePoints.toLocaleString()}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Total Points */}
                       <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-md bg-accent-primary/10 border border-accent-primary/20 flex-shrink-0">
                         <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent-primary" />
-                        <span className="font-bold text-accent-primary text-sm sm:text-base tabular-nums">{entry.points.toLocaleString()}</span>
+                        <span className="font-bold text-accent-primary text-sm sm:text-base tabular-nums">{entry.totalPoints.toLocaleString()}</span>
                       </div>
                     </div>
                   );

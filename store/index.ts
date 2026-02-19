@@ -6,6 +6,9 @@ interface User {
   walletAddress: string;
   alias: string | null;
   points: number;
+  badgePoints: number;
+  badgeCount: number;
+  totalPoints: number;
   loginStreak: number;
   isAdmin: boolean;
 }

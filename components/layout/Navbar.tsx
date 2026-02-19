@@ -148,7 +148,7 @@ export function Navbar() {
                 >
                   <Zap className="h-4 w-4 text-accent-primary" />
                   <span className="font-semibold text-text-primary text-sm">
-                    {(user.points ?? 0).toLocaleString()}
+                    {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
                   </span>
                 </Link>
               )}
@@ -245,7 +245,7 @@ export function Navbar() {
                       >
                         <Zap className="h-4 w-4 text-accent-primary" />
                         <span className="font-semibold text-text-primary">
-                          {(user.points ?? 0).toLocaleString()} pts
+                          {(user.totalPoints ?? user.points ?? 0).toLocaleString()} pts
                         </span>
                       </Link>
                     )}

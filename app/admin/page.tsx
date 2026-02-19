@@ -19,6 +19,7 @@ import {
   EyeOff,
   Eye,
   Coins,
+  Mic2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -714,7 +715,7 @@ export default function AdminPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
@@ -771,6 +772,22 @@ export default function AdminPage() {
                 <div>
                   <p className="text-sm font-medium">Home Ads</p>
                   <p className="text-xs text-text-secondary">Manage homepage carousel</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/hosts">
+          <Card hover>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-accent-coral/10">
+                  <Mic2 className="h-6 w-6 text-accent-coral" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Host Requests</p>
+                  <p className="text-xs text-text-secondary">Approve badge hosts</p>
                 </div>
               </div>
             </CardContent>

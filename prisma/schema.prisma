@@ -23,7 +23,6 @@ model User {
   shares          Share[]
   userMissions    UserMission[]
   votes           Vote[]
-  sentimentVotes  SentimentVote[]
 
   @@map("users")
 }
@@ -291,35 +290,6 @@ model TokenVote {
   @@map("token_votes")
 }
 
-enum SentimentCategory {
-  NFT
-  NETWORK
-  HBAR
-}
-
-enum SentimentVoteType {
-  BULLISH
-  BEARISH
-}
-
-// Individual votes - one per user per category per day
-model SentimentVote {
-  id                String            @id @default(cuid())
-  walletAddress     String            @map("wallet_address")
-  category          SentimentCategory
-  vote              SentimentVoteType
-  date              String            // "2024-02-13" (UTC date)
-  hcsTransactionId  String?           @map("hcs_transaction_id") // Hedera tx proof
-  hcsSequenceNumber BigInt?           @map("hcs_sequence_number")
-  createdAt         DateTime          @default(now()) @map("created_at")
-  user              User              @relation(fields: [walletAddress], references: [walletAddress])
-
-  @@unique([walletAddress, category, date])
-  @@index([date, category])
-  @@index([walletAddress])
-  @@map("sentiment_votes")
-}
-
 // Daily vote limit tracking (5 votes per wallet per day)
 model DailyVoteLimit {
   id            String   @id @default(cuid())
@@ -334,29 +304,87 @@ model DailyVoteLimit {
   @@map("daily_vote_limits")
 }
 
-// Daily aggregated data for fast queries and historical charts
-model SentimentDaily {
-  id              String   @id @default(cuid())
-  date            String   @unique // "2024-02-13"
+// Host request for Attendance Badge
+model HostRequest {
+  id            String            @id @default(cuid())
+  walletAddress String            @map("wallet_address")
+  eventId       String            @map("event_id")
+  status        HostRequestStatus @default(PENDING)
+  message       String?           // Optional message from requester
+  rejectedReason String?          @map("rejected_reason")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+  reviewedAt    DateTime?         @map("reviewed_at")
+  reviewedBy    String?           @map("reviewed_by") // Admin wallet
 
-  // Raw vote counts
-  nftBullish      Int      @default(0) @map("nft_bullish")
-  nftBearish      Int      @default(0) @map("nft_bearish")
-  networkBullish  Int      @default(0) @map("network_bullish")
-  networkBearish  Int      @default(0) @map("network_bearish")
-  hbarBullish     Int      @default(0) @map("hbar_bullish")
-  hbarBearish     Int      @default(0) @map("hbar_bearish")
-
-  // Calculated scores (0-100)
-  nftScore        Float?   @map("nft_score")
-  networkScore    Float?   @map("network_score")
-  hbarScore       Float?   @map("hbar_score")
-  globalScore     Float?   @map("global_score") // Smoothed combined score
-
-  totalVoters     Int      @default(0) @map("total_voters")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  @@index([date])
-  @@map("sentiment_daily")
+  @@unique([walletAddress, eventId])
+  @@index([status])
+  @@index([eventId])
+  @@map("host_requests")
 }
+
+enum HostRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Attendance Badge configuration for an event
+model AttendanceBadge {
+  id          String              @id @default(cuid())
+  eventId     String              @unique @map("event_id")
+  hostWallet  String              @map("host_wallet")
+  tokenId     String?             @map("token_id") // Hedera NFT Token ID
+  name        String
+  description String?
+  imageUrl    String?             @map("image_url")
+  imageCid    String?             @map("image_cid") // IPFS CID for image
+  metadataCid String?             @map("metadata_cid") // IPFS CID for HIP-412 metadata JSON
+  status          AttendanceBadgeStatus @default(DRAFT)
+  supply          Int                 @default(0) // Number minted
+  airdropAttempts Int                 @default(0) @map("airdrop_attempts")
+  airdropDeadline DateTime?           @map("airdrop_deadline")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  mintedAt        DateTime?           @map("minted_at")
+  claims          BadgeClaim[]
+
+  @@index([hostWallet])
+  @@index([status])
+  @@map("attendance_badges")
+}
+
+enum AttendanceBadgeStatus {
+  DRAFT       // Badge created but token not yet created on Hedera
+  TOKEN_CREATED // Token ID created on Hedera, ready to mint
+  MINTED      // NFTs minted to host wallet
+  DISTRIBUTED // Airdrops sent to attendees
+  EXPIRED     // Deadline passed or 3 attempts exhausted
+}
+
+// Individual badge claims (airdrops sent)
+model BadgeClaim {
+  id            String          @id @default(cuid())
+  badgeId       String          @map("badge_id")
+  walletAddress String          @map("wallet_address")
+  serialNumber  Int             @map("serial_number")
+  txId          String?         @map("tx_id") // Airdrop transaction ID
+  status        BadgeClaimStatus @default(PENDING)
+  errorReason   String?         @map("error_reason")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  badge         AttendanceBadge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([badgeId, walletAddress])
+  @@unique([badgeId, serialNumber])
+  @@index([walletAddress])
+  @@map("badge_claims")
+}
+
+enum BadgeClaimStatus {
+  PENDING   // Queued for airdrop
+  SENT      // Airdrop sent
+  CLAIMED   // User accepted airdrop
+  FAILED    // Airdrop failed
+}
+

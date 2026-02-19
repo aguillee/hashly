@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/auth";
 import { handleDailyCheckin } from "@/lib/points";
+import { detectBadgesForWallet } from "@/lib/badge-points";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,11 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await handleDailyCheckin(user.id);
+
+    // Detect badge NFTs in wallet (non-blocking, runs in background)
+    detectBadgesForWallet(user.walletAddress).catch((err) =>
+      console.error("Badge detection error:", err)
+    );
 
     return NextResponse.json(result);
   } catch (error) {

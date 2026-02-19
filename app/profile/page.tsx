@@ -20,7 +20,9 @@ import {
   Pencil,
   X,
   Save,
+  Mic2,
 } from "lucide-react";
+import { HostedBadges } from "@/components/badges/HostedBadges";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
@@ -393,6 +395,15 @@ export default function ProfilePage() {
               </p>
             </div>
           )}
+        </div>
+
+        {/* Hosted Events Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Mic2 className="h-5 w-5 text-accent-coral" />
+            <h2 className="text-xl font-bold">Hosted Events</h2>
+          </div>
+          <HostedBadges />
         </div>
 
         {loading ? (

@@ -84,7 +84,7 @@ export function ConnectButton() {
           <div className="px-3 py-2 border-b border-border">
             <p className="text-sm font-medium text-text-primary">{user.walletAddress}</p>
             <p className="text-xs text-text-secondary">
-              {user.points.toLocaleString()} pts • {user.loginStreak} day streak
+              {(user.totalPoints ?? user.points).toLocaleString()} pts • {user.loginStreak} day streak
             </p>
           </div>
 
