@@ -8,6 +8,7 @@ interface User {
   points: number;
   badgePoints: number;
   badgeCount: number;
+  referralPoints: number;
   totalPoints: number;
   loginStreak: number;
   isAdmin: boolean;

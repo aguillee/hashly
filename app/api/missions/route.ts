@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { MISSION_DEFINITIONS } from "@/lib/missions";
+import { getCurrentSeason } from "@/lib/seasons";
 
 export const dynamic = "force-dynamic";
 
@@ -123,6 +124,7 @@ export async function GET(request: NextRequest) {
 
       // Check if already claimed in current period
       const userMission = userMissions.find(um => um.missionId === def.id);
+      const currentSeason = getCurrentSeason();
       let claimed = false;
       if (userMission?.claimedAt) {
         if (def.type === "DAILY") {
@@ -130,7 +132,8 @@ export async function GET(request: NextRequest) {
         } else if (def.type === "WEEKLY") {
           claimed = userMission.claimedAt >= startOfWeek;
         } else {
-          claimed = true; // Achievements are claimed once
+          // Achievements: claimed once per season (re-claimable each new season)
+          claimed = userMission.claimedAt >= currentSeason.startDate;
         }
       }
 

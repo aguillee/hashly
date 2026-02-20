@@ -3,6 +3,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
+import { getCurrentSeason } from "@/lib/seasons";
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,6 +49,8 @@ export async function GET(request: NextRequest) {
 
     const totalUsers = await prisma.user.count();
 
+    const season = getCurrentSeason();
+
     const stats = {
       totalVotes: user.votes.length,
       totalEvents: user.events.length,
@@ -55,6 +58,12 @@ export async function GET(request: NextRequest) {
       rank: usersAbove + 1,
       totalUsers,
       pointHistory: user.pointHistory,
+      season: {
+        number: season.number,
+        name: season.name,
+        startDate: season.startDate.toISOString(),
+        endDate: season.endDate.toISOString(),
+      },
     };
 
     return NextResponse.json(stats);

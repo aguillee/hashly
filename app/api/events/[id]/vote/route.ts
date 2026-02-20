@@ -13,6 +13,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { voteSchema, validateRequest } from "@/lib/validations";
 import { submitEventVoteToHCS } from "@/lib/hcs-votes";
 import { checkVoteLimit, incrementVoteCount } from "@/lib/vote-limit";
+import { awardReferralCommission } from "@/lib/referral-points";
 
 const POINTS_PER_VOTE = 10;
 
@@ -234,6 +235,9 @@ export async function POST(
             },
           }),
         ]);
+
+        // Award 5% referral commission (fire-and-forget)
+        awardReferralCommission(user.id, POINTS_PER_VOTE, "VOTE");
       } catch (txError: any) {
         // P2002 = Unique constraint violation (race condition — vote already created)
         if (txError?.code === "P2002") {

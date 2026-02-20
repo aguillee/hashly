@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import { checkNFTOwnership, getNFTHolders } from "./hedera-nft";
+import { getCurrentSeason } from "./seasons";
 
 const BADGE_POINTS_PER_EVENT = 100;
 
@@ -10,7 +11,9 @@ const BADGE_POINTS_PER_EVENT = 100;
  * Blockchain is the source of truth: if the token exists and the wallet holds the NFT, it counts.
  */
 export async function calculateBadgePoints(
-  walletAddress: string
+  walletAddress: string,
+  seasonStart?: Date,
+  seasonEnd?: Date
 ): Promise<{
   badgePoints: number;
   badgeCount: number;
@@ -21,11 +24,16 @@ export async function calculateBadgePoints(
     badgeName: string;
   }>;
 }> {
-  // Get all badges with a token on Hedera (blockchain is source of truth)
+  // Build where clause — optionally filter by season (mintedAt range)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = { tokenId: { not: null } };
+  if (seasonStart && seasonEnd) {
+    where.mintedAt = { gte: seasonStart, lt: seasonEnd };
+  }
+
+  // Get badges with a token on Hedera (blockchain is source of truth)
   const distributedBadges = await prisma.attendanceBadge.findMany({
-    where: {
-      tokenId: { not: null },
-    },
+    where,
     select: {
       id: true,
       eventId: true,
@@ -84,7 +92,9 @@ export async function calculateBadgePoints(
  * then cross-reference with the wallet list
  */
 export async function getBadgePointsForWallets(
-  walletAddresses: string[]
+  walletAddresses: string[],
+  seasonStart?: Date,
+  seasonEnd?: Date
 ): Promise<Map<string, { badgePoints: number; badgeCount: number }>> {
   const result = new Map<string, { badgePoints: number; badgeCount: number }>();
 
@@ -93,11 +103,16 @@ export async function getBadgePointsForWallets(
     result.set(wallet, { badgePoints: 0, badgeCount: 0 });
   }
 
-  // Get all badges with a token on Hedera (blockchain is source of truth)
+  // Build where clause — optionally filter by season (mintedAt range)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = { tokenId: { not: null } };
+  if (seasonStart && seasonEnd) {
+    where.mintedAt = { gte: seasonStart, lt: seasonEnd };
+  }
+
+  // Get badges with a token on Hedera (blockchain is source of truth)
   const distributedBadges = await prisma.attendanceBadge.findMany({
-    where: {
-      tokenId: { not: null },
-    },
+    where,
     select: {
       id: true,
       tokenId: true,
@@ -223,14 +238,20 @@ export async function getLeaderboardWithBadges(limit: number = 50) {
       walletAddress: true,
       alias: true,
       points: true,
+      referralPoints: true,
     },
     orderBy: { points: "desc" },
     take: limit * 2, // Get more to account for reordering
   });
 
-  // Get badge points for all these wallets
+  // Get badge points for all these wallets (filtered by current season)
+  const season = getCurrentSeason();
   const walletAddresses = users.map((u) => u.walletAddress);
-  const badgePointsMap = await getBadgePointsForWallets(walletAddresses);
+  const badgePointsMap = await getBadgePointsForWallets(
+    walletAddresses,
+    season.startDate,
+    season.endDate
+  );
 
   // Combine and sort
   const leaderboardData = users.map((user) => {
@@ -246,7 +267,8 @@ export async function getLeaderboardWithBadges(limit: number = 50) {
       missionPoints: user.points,
       badgePoints: badgeData.badgePoints,
       badgeCount: badgeData.badgeCount,
-      totalPoints: user.points + badgeData.badgePoints,
+      referralPoints: user.referralPoints,
+      totalPoints: user.points + badgeData.badgePoints + user.referralPoints,
     };
   });
 

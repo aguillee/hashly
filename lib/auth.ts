@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "./db";
+import { generateReferralCode } from "./referral-points";
 
 // JWT_SECRET is read lazily to avoid build-time errors (env vars may not be available during `next build`)
 function getJWTSecret() {
@@ -60,10 +61,12 @@ export async function getOrCreateUser(walletAddress: string) {
   });
 
   if (!user) {
+    const referralCode = await generateReferralCode();
     user = await prisma.user.create({
       data: {
         walletAddress,
         isAdmin: shouldBeAdmin,
+        referralCode,
       },
     });
   } else if (shouldBeAdmin && !user.isAdmin) {

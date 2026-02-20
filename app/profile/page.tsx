@@ -23,6 +23,7 @@ import {
   Mic2,
 } from "lucide-react";
 import { HostedBadges } from "@/components/badges/HostedBadges";
+import { ReferralSection } from "@/components/referral/ReferralSection";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
@@ -283,9 +284,16 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-center md:justify-start gap-2">
                   <Zap className="h-8 w-8 text-accent-primary" />
                   <span className="text-4xl font-bold gradient-text">
-                    {(user.points ?? 0).toLocaleString()}
+                    {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
                   </span>
                 </div>
+                {((user.badgePoints ?? 0) > 0 || (user.referralPoints ?? 0) > 0) && (
+                  <div className="flex items-center justify-center md:justify-start gap-3 mt-1 text-xs text-text-secondary">
+                    <span>{user.points ?? 0} missions</span>
+                    {(user.badgePoints ?? 0) > 0 && <span>+ {user.badgePoints} badges</span>}
+                    {(user.referralPoints ?? 0) > 0 && <span>+ {user.referralPoints} referrals</span>}
+                  </div>
+                )}
               </div>
 
               {/* Streak */}
@@ -395,6 +403,11 @@ export default function ProfilePage() {
               </p>
             </div>
           )}
+        </div>
+
+        {/* Referrals Section */}
+        <div className="mb-8">
+          <ReferralSection />
         </div>
 
         {/* Hosted Events Section */}

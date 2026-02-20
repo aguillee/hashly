@@ -12,6 +12,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { collectionVoteSchema, validateRequest } from "@/lib/validations";
 import { submitAssetVoteToHCS } from "@/lib/hcs-votes";
 import { checkVoteLimit, incrementVoteCount } from "@/lib/vote-limit";
+import { awardReferralCommission } from "@/lib/referral-points";
 
 // Points awarded for token votes
 const POINTS_PER_TOKEN_VOTE = 1;
@@ -187,6 +188,9 @@ export async function POST(
             },
           }),
         ]);
+
+        // Award 5% referral commission (fire-and-forget)
+        awardReferralCommission(dbUser.id, POINTS_PER_TOKEN_VOTE, "TOKEN_VOTE");
       }
     }
 

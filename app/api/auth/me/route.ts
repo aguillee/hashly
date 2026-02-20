@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/auth";
 import { getBadgePointsForWallets } from "@/lib/badge-points";
+import { getCurrentSeason } from "@/lib/seasons";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,8 +18,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get badge points from blockchain
-    const badgeData = await getBadgePointsForWallets([user.walletAddress]);
+    // Get badge points from blockchain (filtered by current season)
+    const season = getCurrentSeason();
+    const badgeData = await getBadgePointsForWallets(
+      [user.walletAddress],
+      season.startDate,
+      season.endDate
+    );
     const badgeInfo = badgeData.get(user.walletAddress) || { badgePoints: 0, badgeCount: 0 };
 
     return NextResponse.json({
@@ -29,7 +35,8 @@ export async function GET(request: NextRequest) {
         points: user.points,
         badgePoints: badgeInfo.badgePoints,
         badgeCount: badgeInfo.badgeCount,
-        totalPoints: user.points + badgeInfo.badgePoints,
+        referralPoints: user.referralPoints,
+        totalPoints: user.points + badgeInfo.badgePoints + user.referralPoints,
         loginStreak: user.loginStreak,
         isAdmin: user.isAdmin,
       },

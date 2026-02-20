@@ -173,5 +173,12 @@ export function useHostRequests() {
   });
 }
 
+// Referral stats
+export function useReferralStats() {
+  return useSWR("/api/referral/stats", fetcher, {
+    revalidateOnFocus: true,
+  });
+}
+
 // Export mutate for manual revalidation
 export { mutate } from "swr";

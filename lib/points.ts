@@ -1,4 +1,6 @@
 import { prisma } from "./db";
+import { awardReferralCommission } from "./referral-points";
+import { getCurrentSeason } from "./seasons";
 
 // UTC date helpers
 function utcDateString(date: Date): string {
@@ -63,6 +65,9 @@ export async function addPoints(
       },
     }),
   ]);
+
+  // Award 5% referral commission to referrer (fire-and-forget)
+  awardReferralCommission(userId, points, action);
 
   return {
     points,
@@ -146,6 +151,9 @@ export async function handleDailyCheckin(userId: string): Promise<{
         },
       }),
     ]);
+
+    // Award 5% referral commission for streak bonus (fire-and-forget)
+    awardReferralCommission(userId, pointsEarned, "STREAK_BONUS");
 
     return {
       success: true,
@@ -231,8 +239,11 @@ export async function awardMissionPoints(
           throw new Error("ALREADY_CLAIMED");
         }
       } else {
-        // ACHIEVEMENT - once only
-        throw new Error("ALREADY_CLAIMED");
+        // ACHIEVEMENT - once per season (re-claimable each new season)
+        const currentSeason = getCurrentSeason();
+        if (existing.claimedAt >= currentSeason.startDate) {
+          throw new Error("ALREADY_CLAIMED");
+        }
       }
     }
 
@@ -265,6 +276,10 @@ export async function awardMissionPoints(
         completedAt: now,
       },
     });
+
+    // Award 5% referral commission for mission claim (fire-and-forget, outside tx)
+    // We use setTimeout to ensure it runs after the transaction commits
+    setTimeout(() => awardReferralCommission(userId, points, "MISSION_CLAIM"), 0);
 
     return {
       pointsEarned: points,

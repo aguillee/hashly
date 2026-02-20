@@ -15,41 +15,57 @@ interface LeaderboardEntry {
   missionPoints: number;
   badgePoints: number;
   badgeCount: number;
+  referralPoints: number;
   totalPoints: number;
 }
 
-const SEASON_END = new Date("2026-02-28T23:59:59Z");
 const PRIZE_CUTOFF = 8;
 
-function useCountdown(targetDate: Date) {
-  const [timeLeft, setTimeLeft] = React.useState(() => {
-    const diff = targetDate.getTime() - Date.now();
-    return diff > 0 ? diff : 0;
-  });
+function useCountdown(targetDate: Date | null) {
+  const [timeLeft, setTimeLeft] = React.useState(0);
 
   React.useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (!targetDate) {
+      setTimeLeft(0);
+      return;
+    }
+
+    // Set initial value
+    const calc = () => {
+      const diff = targetDate.getTime() - Date.now();
+      return diff > 0 ? diff : 0;
+    };
+    setTimeLeft(calc());
 
     const interval = setInterval(() => {
-      const diff = targetDate.getTime() - Date.now();
-      setTimeLeft(diff > 0 ? diff : 0);
+      const val = calc();
+      setTimeLeft(val);
+      if (val <= 0) clearInterval(interval);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetDate, timeLeft]);
+  }, [targetDate]);
 
   const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
   const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-  return { days, hours, minutes, seconds, ended: timeLeft <= 0 };
+  return { days, hours, minutes, seconds, ended: !targetDate || timeLeft <= 0 };
 }
 
 export default function LeaderboardPage() {
   const { user } = useWalletStore();
   const { data, isLoading: loading } = useLeaderboard();
-  const countdown = useCountdown(SEASON_END);
+
+  // Dynamic season info from API — memoize Date to avoid infinite re-renders
+  const seasonEndStr = data?.season?.endDate || null;
+  const seasonEndDate = React.useMemo(
+    () => (seasonEndStr ? new Date(seasonEndStr) : null),
+    [seasonEndStr]
+  );
+  const seasonName = data?.season?.name || "Season 0";
+  const countdown = useCountdown(seasonEndDate);
 
   const leaderboard: LeaderboardEntry[] = data?.leaderboard || [];
   const userRank: number | null = data?.userRank || null;
@@ -117,7 +133,7 @@ export default function LeaderboardPage() {
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Leaderboard</h1>
                 <p className="text-xs sm:text-sm text-text-secondary">
-                  {totalUsers} contributors · Season 0
+                  {totalUsers} contributors · {seasonName}
                 </p>
               </div>
             </div>
@@ -195,19 +211,26 @@ export default function LeaderboardPage() {
               </div>
               {/* Points breakdown */}
               {userData && (
-                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/50">
+                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border/50">
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50">
                     <Target className="h-4 w-4 text-blue-400" />
                     <div>
-                      <p className="text-[10px] text-text-secondary">Mission Pts</p>
+                      <p className="text-[10px] text-text-secondary">Mission</p>
                       <p className="text-sm font-bold text-text-primary tabular-nums">{userData.missionPoints.toLocaleString()}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50">
                     <Award className="h-4 w-4 text-accent-coral" />
                     <div>
-                      <p className="text-[10px] text-text-secondary">Badge Pts ({userData.badgeCount})</p>
+                      <p className="text-[10px] text-text-secondary">Badge</p>
                       <p className="text-sm font-bold text-text-primary tabular-nums">{userData.badgePoints.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50">
+                    <Users className="h-4 w-4 text-green-500" />
+                    <div>
+                      <p className="text-[10px] text-text-secondary">Referral</p>
+                      <p className="text-sm font-bold text-text-primary tabular-nums">{(userData.referralPoints || 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -294,6 +317,12 @@ export default function LeaderboardPage() {
                               {entry.badgePoints.toLocaleString()}
                             </span>
                           )}
+                          {entry.referralPoints > 0 && (
+                            <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
+                              <Users className="h-2.5 w-2.5 text-green-500" />
+                              {entry.referralPoints.toLocaleString()}
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -307,6 +336,12 @@ export default function LeaderboardPage() {
                           <div className="flex items-center gap-1 px-2 py-1 rounded bg-accent-coral/10 border border-accent-coral/20">
                             <Award className="h-3 w-3 text-accent-coral" />
                             <span className="text-xs font-medium text-accent-coral tabular-nums">{entry.badgePoints.toLocaleString()}</span>
+                          </div>
+                        )}
+                        {entry.referralPoints > 0 && (
+                          <div className="flex items-center gap-1 px-2 py-1 rounded bg-green-500/10 border border-green-500/20">
+                            <Users className="h-3 w-3 text-green-500" />
+                            <span className="text-xs font-medium text-green-500 tabular-nums">{entry.referralPoints.toLocaleString()}</span>
                           </div>
                         )}
                       </div>

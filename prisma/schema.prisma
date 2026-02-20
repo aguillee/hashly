@@ -9,20 +9,26 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  walletAddress String         @unique @map("wallet_address")
-  points        Int            @default(0)
-  loginStreak   Int            @default(0) @map("login_streak")
-  lastLogin     DateTime?      @map("last_login")
-  isAdmin       Boolean        @default(false) @map("is_admin")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  alias         String?        @map("alias")
+  id             String         @id @default(cuid())
+  walletAddress  String         @unique @map("wallet_address")
+  points         Int            @default(0)
+  loginStreak    Int            @default(0) @map("login_streak")
+  lastLogin      DateTime?      @map("last_login")
+  isAdmin        Boolean        @default(false) @map("is_admin")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  alias          String?        @map("alias")
+  referralCode   String?        @unique @map("referral_code")
+  referralPoints Int            @default(0) @map("referral_points")
+  referredAt     DateTime?      @map("referred_at")
   events          Event[]
   pointHistory    PointHistory[]
   shares          Share[]
   userMissions    UserMission[]
   votes           Vote[]
+  referralsMade   Referral[]     @relation("referralsMade")
+  referredBy      Referral?      @relation("referredBy")
+  seasonSnapshots SeasonSnapshot[]
 
   @@map("users")
 }
@@ -386,5 +392,64 @@ enum BadgeClaimStatus {
   SENT      // Airdrop sent
   CLAIMED   // User accepted airdrop
   FAILED    // Airdrop failed
+}
+
+// Referral system
+model Referral {
+  id                String            @id @default(cuid())
+  referrerId        String            @map("referrer_id")
+  refereeId         String            @unique @map("referee_id")
+  referrerBonusPaid        Boolean  @default(false) @map("referrer_bonus_paid")
+  referrerBonusSeasonNumber Int?    @map("referrer_bonus_season_number")
+  createdAt                DateTime @default(now()) @map("created_at")
+  referrer          User              @relation("referralsMade", fields: [referrerId], references: [id])
+  referee           User              @relation("referredBy", fields: [refereeId], references: [id])
+  earnings          ReferralEarning[]
+
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+model ReferralEarning {
+  id         String   @id @default(cuid())
+  referralId String   @map("referral_id")
+  points     Int
+  sourceType String   @map("source_type") // SIGNUP_BONUS | REFERRER_BONUS | COMMISSION
+  description String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  referral   Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@index([referralId])
+  @@map("referral_earnings")
+}
+
+// Seasons (monthly)
+model Season {
+  id        String           @id @default(cuid())
+  number    Int              @unique
+  startDate DateTime         @map("start_date")
+  endDate   DateTime         @map("end_date")
+  createdAt DateTime         @default(now()) @map("created_at")
+  snapshots SeasonSnapshot[]
+
+  @@map("seasons")
+}
+
+model SeasonSnapshot {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  seasonId       String   @map("season_id")
+  missionPoints  Int      @map("mission_points")
+  badgePoints    Int      @map("badge_points")
+  referralPoints Int      @map("referral_points")
+  totalPoints    Int      @map("total_points")
+  rank           Int?
+  createdAt      DateTime @default(now()) @map("created_at")
+  user           User     @relation(fields: [userId], references: [id])
+  season         Season   @relation(fields: [seasonId], references: [id])
+
+  @@unique([userId, seasonId])
+  @@index([seasonId, totalPoints(sort: Desc)])
+  @@map("season_snapshots")
 }
 
