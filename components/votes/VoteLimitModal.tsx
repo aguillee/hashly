@@ -78,23 +78,23 @@ export function VoteLimitModal({
     <Dialog open={open} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <div className="flex items-center gap-2">
-          <Vote className="h-5 w-5 text-accent-coral" />
+          <Vote className="h-5 w-5 text-accent-primary" />
           Daily Vote Limit
         </div>
       </DialogHeader>
 
       <DialogBody className="space-y-3">
         {/* Status - Compact */}
-        <div className={`p-3 rounded-lg border ${remaining === 0 ? "bg-red-500/10 border-red-500/30" : "bg-bg-secondary border-border"}`}>
+        <div className={`p-3 rounded-lg border ${remaining === 0 ? "bg-bg-secondary border-text-secondary/30" : "bg-bg-secondary border-border"}`}>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-text-secondary text-xs">Remaining</span>
-            <span className={`text-lg font-bold ${remaining === 0 ? "text-red-500" : "text-text-primary"}`}>
+            <span className={`text-lg font-bold ${remaining === 0 ? "text-text-secondary" : "text-text-primary"}`}>
               {remaining}/{limit}
             </span>
           </div>
           <div className="w-full bg-bg-card rounded-full h-1.5 overflow-hidden">
             <div
-              className={`h-full transition-all duration-300 ${remaining === 0 ? "bg-red-500" : "bg-accent-coral"}`}
+              className={`h-full transition-all duration-300 ${remaining === 0 ? "bg-text-secondary" : "bg-accent-primary"}`}
               style={{ width: `${(remaining / limit) * 100}%` }}
             />
           </div>

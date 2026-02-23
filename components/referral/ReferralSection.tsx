@@ -137,7 +137,7 @@ export function ReferralSection() {
           Your Referral Code
         </p>
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-bg-secondary rounded-md px-3 py-2.5 font-mono text-lg tracking-widest text-accent-primary text-center select-all">
+          <div className="flex-1 bg-bg-secondary rounded-md px-3 py-2.5 text-lg tracking-widest text-accent-primary text-center select-all">
             {data.referralCode || "—"}
           </div>
           <button
@@ -186,7 +186,7 @@ export function ReferralSection() {
                 setCodeInput(e.target.value.toUpperCase().slice(0, 8))
               }
               placeholder="ENTER CODE"
-              className="flex-1 bg-bg-secondary border border-border rounded-md px-3 py-2 text-sm font-mono tracking-wider text-text-primary placeholder:text-text-secondary/40 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+              className="flex-1 bg-bg-secondary border border-border rounded-md px-3 py-2 text-sm tracking-wider text-text-primary placeholder:text-text-secondary/40 focus:outline-none focus:ring-1 focus:ring-accent-primary"
               maxLength={8}
               disabled={applying}
             />

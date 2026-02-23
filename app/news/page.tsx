@@ -127,7 +127,7 @@ export default function NewsPage() {
     <div className="min-h-screen">
       {/* Compact Header */}
       <div className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title row */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
@@ -196,7 +196,7 @@ export default function NewsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
@@ -258,7 +258,7 @@ export default function NewsPage() {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={cn(
-                          "w-8 h-8 sm:w-9 sm:h-9 text-xs sm:text-sm rounded-md border transition-colors font-mono",
+                          "w-8 h-8 sm:w-9 sm:h-9 text-xs sm:text-sm rounded-md border transition-colors",
                           currentPage === page
                             ? "bg-purple-500 border-purple-500 text-white"
                             : "bg-bg-card border-border hover:border-purple-500/50"
@@ -322,11 +322,11 @@ function NewsCard({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "group flex flex-col bg-bg-card/80 overflow-hidden transition-all duration-200",
-        "border-l-4 rounded-r-lg",
+        "group flex flex-col bg-bg-card overflow-hidden transition-all duration-200",
+        "border border-border/50 rounded-xl",
         item.isGenfinity
-          ? "border-l-purple-500 hover:border-l-purple-400"
-          : "border-l-accent-primary/50 hover:border-l-accent-primary"
+          ? "hover:border-purple-500/30"
+          : "hover:border-accent-primary/30"
       )}
     >
       {/* Image - 2:1 ratio to match Genfinity images */}
@@ -335,7 +335,7 @@ function NewsCard({
           <img
             src={item.image}
             alt={item.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover transition-transform duration-500"
           />
         ) : (
           <div className={cn(
@@ -357,14 +357,14 @@ function NewsCard({
         <div className="absolute top-2 left-2">
           <div className="flex items-center gap-1.5 px-2 py-1 bg-black/70 rounded text-white text-xs">
             <Calendar className="h-3 w-3" />
-            <span className="font-mono">{formatDate(item.pubDate)}</span>
+            <span className="">{formatDate(item.pubDate)}</span>
           </div>
         </div>
 
         {/* Genfinity Badge - skewed tag style */}
         {item.isGenfinity && (
           <div className="absolute top-2 right-2">
-            <span className="skew-tag inline-block px-2 py-0.5 bg-purple-600 text-white text-[9px] sm:text-[10px] font-bold tracking-wide">
+            <span className="rounded-full inline-block px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[9px] sm:text-[10px] font-medium">
               <span>GENFINITY</span>
             </span>
           </div>
@@ -372,7 +372,7 @@ function NewsCard({
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-3 sm:p-4 flex flex-col border-t border-border/30">
+      <div className="flex-1 p-3 sm:p-4 flex flex-col border-t border-border">
         {/* Creator with dot */}
         {item.creator && (
           <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-text-secondary/70 mb-1.5">
@@ -392,7 +392,7 @@ function NewsCard({
         </p>
 
         {/* Read More - underline style */}
-        <div className="mt-3 pt-2 border-t border-dashed border-border/50">
+        <div className="mt-3 pt-2 border-t border-border">
           <span className="text-xs text-text-secondary group-hover:text-accent-primary transition-colors flex items-center gap-1">
             read more <span className="group-hover:translate-x-1 transition-transform">→</span>
           </span>

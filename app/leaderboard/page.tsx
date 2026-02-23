@@ -76,19 +76,19 @@ export default function LeaderboardPage() {
     switch (rank) {
       case 1:
         return (
-          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/30">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
             <Crown className="h-5 w-5 text-white" />
           </div>
         );
       case 2:
         return (
-          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg shadow-gray-400/30">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center">
             <Medal className="h-5 w-5 text-white" />
           </div>
         );
       case 3:
         return (
-          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center">
             <Medal className="h-5 w-5 text-white" />
           </div>
         );
@@ -105,23 +105,23 @@ export default function LeaderboardPage() {
     if (rank <= PRIZE_CUTOFF) {
       switch (rank) {
         case 1:
-          return "bg-gradient-to-r from-yellow-500/10 via-yellow-400/5 to-transparent border-yellow-500/30";
+          return "bg-bg-card border-yellow-500/30";
         case 2:
-          return "bg-gradient-to-r from-gray-400/10 via-gray-300/5 to-transparent border-gray-400/30";
+          return "bg-bg-card border-gray-400/30";
         case 3:
-          return "bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border-amber-500/30";
+          return "bg-bg-card border-amber-500/30";
         default:
-          return "bg-gradient-to-r from-purple-500/5 via-transparent to-transparent border-purple-500/20 hover:border-purple-500/40";
+          return "bg-bg-card border-purple-500/20 hover:border-purple-500/40";
       }
     }
-    return "bg-bg-card/50 border-border/50 hover:border-accent-primary/30 hover:bg-accent-primary/5";
+    return "bg-bg-card border-border hover:border-accent-primary/30";
   };
 
   return (
     <div className="min-h-screen">
       {/* Compact Header - News style */}
       <div className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title row */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
@@ -148,10 +148,10 @@ export default function LeaderboardPage() {
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-card dark:bg-bg-secondary border border-border">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="text-xs text-text-secondary hidden sm:inline">ends in</span>
-                <span className="font-mono text-sm font-bold text-text-primary">
+                <span className="text-sm font-bold text-text-primary">
                   {countdown.days}d {String(countdown.hours).padStart(2, "0")}h {String(countdown.minutes).padStart(2, "0")}m
                 </span>
-                <span className="font-mono text-sm font-bold text-yellow-500">
+                <span className="text-sm font-bold text-yellow-500">
                   {String(countdown.seconds).padStart(2, "0")}s
                 </span>
               </div>
@@ -160,11 +160,10 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Prize Banner */}
-        <div className="relative mb-8 group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/30 via-purple-500/30 to-yellow-500/30 rounded-lg blur opacity-40" />
-          <div className="relative p-5 sm:p-6 rounded-lg bg-bg-card border border-yellow-500/20">
+        <div className="mb-8">
+          <div className="p-5 sm:p-6 rounded-lg bg-bg-card border border-yellow-500/20">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0">
                 <img
@@ -188,9 +187,8 @@ export default function LeaderboardPage() {
 
         {/* User's Rank */}
         {user && userRank && (
-          <div className="relative mb-6 sm:mb-8 group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg sm:rounded-lg blur opacity-30 group-hover:opacity-50 transition-opacity" />
-            <div className="relative p-4 sm:p-6 rounded-lg sm:rounded-lg bg-bg-card border border-border">
+          <div className="mb-6 sm:mb-8">
+            <div className="p-4 sm:p-6 rounded-lg sm:rounded-lg bg-bg-card border border-border">
               <div className="flex items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-md sm:rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center flex-shrink-0">
@@ -205,13 +203,13 @@ export default function LeaderboardPage() {
                   <p className="text-xs sm:text-sm text-text-secondary font-medium">Total Points</p>
                   <div className="flex items-center justify-end gap-1.5 sm:gap-2 text-2xl sm:text-3xl font-bold">
                     <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
-                    <span className="gradient-text tabular-nums">{(userData?.totalPoints ?? user.points ?? 0).toLocaleString()}</span>
+                    <span className="text-accent-primary font-bold tabular-nums">{(userData?.totalPoints ?? user.points ?? 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
               {/* Points breakdown */}
               {userData && (
-                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border/50">
+                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border">
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50">
                     <Target className="h-4 w-4 text-blue-400" />
                     <div>
@@ -220,7 +218,7 @@ export default function LeaderboardPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50">
-                    <Award className="h-4 w-4 text-accent-coral" />
+                    <Award className="h-4 w-4 text-purple-500" />
                     <div>
                       <p className="text-[10px] text-text-secondary">Badge</p>
                       <p className="text-sm font-bold text-text-primary tabular-nums">{userData.badgePoints.toLocaleString()}</p>
@@ -240,7 +238,7 @@ export default function LeaderboardPage() {
         )}
 
         {/* Leaderboard */}
-        <div className="rounded-lg border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden">
+        <div className="rounded-lg border border-border bg-bg-card backdrop-blur-sm overflow-hidden">
           <div className="p-6 border-b border-border">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-text-primary">Top 50</h2>
@@ -313,7 +311,7 @@ export default function LeaderboardPage() {
                           </span>
                           {entry.badgeCount > 0 && (
                             <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
-                              <Award className="h-2.5 w-2.5 text-accent-coral" />
+                              <Award className="h-2.5 w-2.5 text-purple-500" />
                               {entry.badgePoints.toLocaleString()}
                             </span>
                           )}
@@ -333,9 +331,9 @@ export default function LeaderboardPage() {
                           <span className="text-xs font-medium text-blue-400 tabular-nums">{entry.missionPoints.toLocaleString()}</span>
                         </div>
                         {entry.badgeCount > 0 && (
-                          <div className="flex items-center gap-1 px-2 py-1 rounded bg-accent-coral/10 border border-accent-coral/20">
-                            <Award className="h-3 w-3 text-accent-coral" />
-                            <span className="text-xs font-medium text-accent-coral tabular-nums">{entry.badgePoints.toLocaleString()}</span>
+                          <div className="flex items-center gap-1 px-2 py-1 rounded bg-purple-500/10 border border-purple-500/20">
+                            <Award className="h-3 w-3 text-purple-500" />
+                            <span className="text-xs font-medium text-purple-500 tabular-nums">{entry.badgePoints.toLocaleString()}</span>
                           </div>
                         )}
                         {entry.referralPoints > 0 && (

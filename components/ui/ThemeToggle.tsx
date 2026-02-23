@@ -10,13 +10,13 @@ export function ThemeToggle() {
 
   React.useEffect(() => {
     setMounted(true);
-    // Check localStorage - default to light mode if not set
+    // Check localStorage - default to light mode
     const stored = localStorage.getItem("theme");
     if (stored === "dark") {
       setIsDark(true);
       document.documentElement.classList.add("dark");
     } else {
-      // Default to light mode (day mode)
+      // Default to light mode
       setIsDark(false);
       document.documentElement.classList.remove("dark");
     }
@@ -39,7 +39,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <Button variant="ghost" size="sm" className="w-9 h-9 p-0">
-        <Sun className="h-4 w-4" />
+        <Moon className="h-4 w-4" />
       </Button>
     );
   }

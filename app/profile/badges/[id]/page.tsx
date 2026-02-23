@@ -601,7 +601,7 @@ export default function BadgeDetailPage() {
 
   return (
     <div className="min-h-screen py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <button
           onClick={() => router.back()}
@@ -732,7 +732,7 @@ export default function BadgeDetailPage() {
         </div>
 
         {/* Action Panel */}
-        <div className="rounded-lg border border-border bg-bg-card/50 p-6">
+        <div className="rounded-lg border border-border bg-bg-card p-6">
           {/* Wallet Status */}
           {!["DISTRIBUTED", "EXPIRED"].includes(badge.status) && (
             <div className={`mb-6 p-4 rounded-lg border ${
@@ -897,7 +897,7 @@ export default function BadgeDetailPage() {
                       onChange={(e) => setWalletList(e.target.value)}
                       rows={4}
                       placeholder={"0.0.123456\n0.0.789012\n0.0.345678"}
-                      className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+                      className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
                     />
                     <p className="text-xs text-text-secondary mt-1">
                       One per line or comma-separated
@@ -929,7 +929,7 @@ export default function BadgeDetailPage() {
                   <div className="max-h-48 overflow-y-auto divide-y divide-border">
                     {addedWallets.map((wallet) => (
                       <div key={wallet} className="flex items-center justify-between px-4 py-2 hover:bg-bg-secondary/50">
-                        <span className="font-mono text-xs text-text-primary">{wallet}</span>
+                        <span className="text-xs text-text-primary">{wallet}</span>
                         {!hasMinted && (
                           <button
                             onClick={() => handleRemoveWallet(wallet)}
@@ -1180,7 +1180,7 @@ export default function BadgeDetailPage() {
                     const isAssociated = associations.get(claim.walletAddress);
                     return (
                       <tr key={claim.id} className="border-t border-border">
-                        <td className="p-3 font-mono text-xs">{claim.walletAddress}</td>
+                        <td className="p-3 text-xs">{claim.walletAddress}</td>
                         <td className="p-3">#{claim.serialNumber}</td>
                         {associationsChecked && (
                           <td className="p-3">

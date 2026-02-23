@@ -140,7 +140,7 @@ export function HostedBadges() {
 
   if (loading) {
     return (
-      <div className="p-8 rounded-lg bg-bg-card/50 border border-border text-center">
+      <div className="p-8 rounded-lg bg-bg-card border border-border text-center">
         <Loader2 className="h-8 w-8 animate-spin text-accent-primary mx-auto mb-2" />
         <p className="text-text-secondary">Loading hosted events...</p>
       </div>
@@ -153,7 +153,7 @@ export function HostedBadges() {
 
   if (!hasContent) {
     return (
-      <div className="p-8 rounded-lg bg-bg-card/50 border border-border text-center">
+      <div className="p-8 rounded-lg bg-bg-card border border-border text-center">
         <Award className="h-12 w-12 text-text-secondary mx-auto mb-3" />
         <p className="text-text-secondary mb-2">No hosted events yet</p>
         <p className="text-sm text-text-secondary/70">
@@ -174,7 +174,7 @@ export function HostedBadges() {
             .map((request) => (
               <div
                 key={request.id}
-                className="flex items-center gap-4 p-4 rounded-lg bg-bg-card/50 border border-border"
+                className="flex items-center gap-4 p-4 rounded-lg bg-bg-card border border-border"
               >
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
                   {request.event?.imageUrl ? (
@@ -214,7 +214,7 @@ export function HostedBadges() {
               href={`/profile/badges/${badge.id}`}
               className="block"
             >
-              <div className="flex items-center gap-4 p-4 rounded-lg bg-bg-card/50 border border-border hover:border-accent-primary/50 transition-all group">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-bg-card border border-border hover:border-text-tertiary transition-colors duration-150 group">
                 <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
                   {badge.imageUrl ? (
                     <Image

@@ -8,9 +8,10 @@ interface ImageUploadProps {
   value?: string;
   onChange: (url: string) => void;
   className?: string;
+  recommendedSize?: string;
 }
 
-export function ImageUpload({ value, onChange, className }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, className, recommendedSize }: ImageUploadProps) {
   const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -152,6 +153,11 @@ export function ImageUpload({ value, onChange, className }: ImageUploadProps) {
                   <span className="text-xs text-text-secondary/70">
                     JPG, PNG, GIF, WebP (máx. 3MB)
                   </span>
+                  {recommendedSize && (
+                    <span className="text-xs text-text-secondary/70">
+                      Recommended: {recommendedSize}
+                    </span>
+                  )}
                 </>
               )}
             </div>

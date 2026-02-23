@@ -28,32 +28,40 @@ interface Token {
 const rankConfig: Record<number, {
   badge: string;
   ring: string;
+  ringPulse: string;
   borderLeft: string;
   cardBg: string;
+  cardEffect: string;
   icon: React.ElementType;
   label: string;
 }> = {
   1: {
-    badge: "bg-yellow-500 text-black",
-    ring: "ring-1 ring-yellow-400/60",
-    borderLeft: "border-l-yellow-500",
-    cardBg: "bg-gradient-to-br from-yellow-500/15 via-yellow-400/5 to-transparent",
+    badge: "bg-yellow-500 text-black podium-badge-shine",
+    ring: "ring-2 ring-yellow-400/60",
+    ringPulse: "podium-ring-pulse-1",
+    borderLeft: "border-yellow-500/40 hover:border-yellow-500/70",
+    cardBg: "bg-gradient-to-b from-yellow-500/[0.06] to-bg-card",
+    cardEffect: "podium-card-1",
     icon: Crown,
     label: "1st",
   },
   2: {
-    badge: "bg-slate-400 text-gray-800",
-    ring: "ring-1 ring-slate-300/50",
-    borderLeft: "border-l-slate-400",
-    cardBg: "bg-gradient-to-br from-slate-400/15 via-slate-300/5 to-transparent",
+    badge: "bg-slate-400 text-gray-800 podium-badge-shine",
+    ring: "ring-2 ring-slate-300/50",
+    ringPulse: "podium-ring-pulse-2",
+    borderLeft: "border-slate-400/40 hover:border-slate-400/70",
+    cardBg: "bg-gradient-to-b from-slate-400/[0.06] to-bg-card",
+    cardEffect: "podium-card-2",
     icon: Medal,
     label: "2nd",
   },
   3: {
-    badge: "bg-amber-600 text-white",
-    ring: "ring-1 ring-amber-600/50",
-    borderLeft: "border-l-amber-600",
-    cardBg: "bg-gradient-to-br from-amber-600/15 via-amber-500/5 to-transparent",
+    badge: "bg-amber-600 text-white podium-badge-shine",
+    ring: "ring-2 ring-amber-600/50",
+    ringPulse: "podium-ring-pulse-3",
+    borderLeft: "border-amber-600/40 hover:border-amber-600/70",
+    cardBg: "bg-gradient-to-b from-amber-600/[0.06] to-bg-card",
+    cardEffect: "podium-card-3",
     icon: Award,
     label: "3rd",
   },
@@ -104,16 +112,22 @@ export function TopTokensPodium() {
               className="flex-shrink-0 w-[140px] sm:w-auto sm:flex-1 snap-start group"
             >
               <div className={cn(
-                "relative p-3 transition-all h-full overflow-hidden border-l-4 rounded-r-lg cursor-pointer",
+                "relative p-3 transition-all h-full overflow-hidden rounded-lg cursor-pointer",
                 isTop3
-                  ? cn(config.borderLeft, config.cardBg, "hover:brightness-110")
-                  : "bg-bg-card/80 border-l-border hover:border-l-accent-secondary/50"
+                  ? cn("border", config.borderLeft, config.cardBg, config.cardEffect)
+                  : "border border-border/50 bg-bg-card hover:border-accent-secondary/30"
               )}>
+                {/* Top 3 shimmer sweep */}
+                {isTop3 && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+                  </div>
+                )}
                 {/* Rank badge - skewed tag style */}
                 <div className="absolute top-2 right-2">
                   {isTop3 ? (
                     <span className={cn(
-                      "skew-tag inline-block px-2 py-0.5 text-[9px] font-bold tracking-wide",
+                      "rounded-full inline-block px-2 py-0.5 text-[9px] font-medium",
                       config.badge
                     )}>
                       <span className="flex items-center gap-0.5">
@@ -122,7 +136,7 @@ export function TopTokensPodium() {
                       </span>
                     </span>
                   ) : (
-                    <span className="skew-tag inline-block px-2 py-0.5 text-[9px] font-bold tracking-wide bg-bg-secondary text-text-secondary">
+                    <span className="rounded-full inline-block px-2 py-0.5 text-[9px] font-medium bg-bg-secondary text-text-secondary">
                       <span>#{token.rank}</span>
                     </span>
                   )}
@@ -132,7 +146,8 @@ export function TopTokensPodium() {
                 <div className={cn(
                   "mx-auto rounded-md overflow-hidden bg-bg-secondary mb-2",
                   isTop3 ? "w-12 h-12" : "w-10 h-10",
-                  config?.ring || ""
+                  config?.ring || "",
+                  isTop3 ? config?.ringPulse : ""
                 )}>
                   {token.icon ? (
                     <img
@@ -163,7 +178,7 @@ export function TopTokensPodium() {
                 {/* Market Cap */}
                 {token.marketCap && token.marketCap > 0 && (
                   <div className="mt-1.5 text-center">
-                    <p className="text-[10px] text-text-secondary font-mono">
+                    <p className="text-[10px] text-text-secondary">
                       MC: ${token.marketCap >= 1000000
                         ? `${(token.marketCap / 1000000).toFixed(1)}M`
                         : token.marketCap >= 1000
@@ -174,10 +189,10 @@ export function TopTokensPodium() {
                 )}
 
                 {/* Votes */}
-                <div className="mt-2 pt-2 border-t border-dashed border-border/50">
+                <div className="mt-2 pt-2 border-t border-border">
                   <p className="text-xs font-bold text-center flex items-center justify-center gap-0.5">
                     <TrendingUp className="h-3 w-3 text-green-500" />
-                    <span className="text-green-500 font-mono">
+                    <span className="text-green-500">
                       {token.totalVotes > 0 ? `+${token.totalVotes}` : token.totalVotes}
                     </span>
                   </p>

@@ -55,7 +55,7 @@ function AdSlide({ ad, isActive, onClickTrack }: { ad: HomeAd; isActive: boolean
           <img
             src={image}
             alt={title || ""}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-cover transition-transform duration-700"
           />
         ) : (
           <div className="w-full h-full" />
@@ -144,7 +144,7 @@ export function HomeAdCarousel({ ads }: HomeAdCarouselProps) {
   if (!currentAd) return null;
 
   return (
-    <div className="relative h-full rounded-md overflow-hidden border-l-4 border-l-orange-500 bg-bg-card/80">
+    <div className="relative h-full rounded-xl overflow-hidden border border-border/50 bg-bg-card">
       {/* All slides stacked - crossfade via opacity */}
       {ads.map((ad, i) => (
         <div

@@ -139,7 +139,7 @@ export function CalendarView({ events }: CalendarViewProps) {
 
   return (
     <div className="relative">
-      <div className="bg-bg-card/80 rounded-lg border border-border overflow-hidden">
+      <div className="bg-bg-card rounded-xl border border-border overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-2.5 sm:p-4 border-b border-border">
           <h2 className="text-base sm:text-xl font-bold">
@@ -174,7 +174,7 @@ export function CalendarView({ events }: CalendarViewProps) {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-3 px-3 sm:px-4 py-1.5 sm:py-2 border-b border-border/50 text-[10px] sm:text-xs text-text-secondary">
+        <div className="flex items-center gap-3 px-3 sm:px-4 py-1.5 sm:py-2 border-b border-border text-[10px] sm:text-xs text-text-secondary">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent-primary" /> Mint Event</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500" /> Forever Mint</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500" /> Meetup</span>
@@ -316,14 +316,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     key={event.id}
                     href={`/events/${event.id}`}
                     className={cn(
-                      "block p-3 rounded-md border border-border/50 hover:border-border hover:bg-bg-secondary/30 transition-all group border-l-4",
-                      event.isForeverMint
-                        ? "border-l-purple-500"
-                        : event.event_type === "ECOSYSTEM_MEETUP"
-                        ? "border-l-sky-500"
-                        : event.event_type === "HACKATHON"
-                        ? "border-l-amber-500"
-                        : "border-l-accent-primary"
+                      "block p-3 rounded-xl border border-border/50 hover:border-accent-primary/30 hover:bg-bg-secondary/30 transition-all group"
                     )}
                   >
                     <div className="flex gap-3">

@@ -4,12 +4,12 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t border-dashed border-border/50 bg-bg-card/80 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <footer className="relative z-10 border-t border-border glass mt-auto">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo/Brand */}
           <div className="flex items-center gap-2">
-            <span className="text-base font-bold text-text-primary">Hashly</span>
+            <span className="text-base font-bold gradient-text">Hashly</span>
             <span className="text-text-secondary text-xs">
               · Discover Events on Hedera
             </span>
@@ -21,7 +21,7 @@ export function Footer() {
               href="https://x.com/hashly_h"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-secondary text-text-secondary hover:text-text-primary hover:bg-bg-secondary/80 transition-colors text-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass text-text-secondary hover:text-accent-primary hover:shadow-glow transition-all duration-200 text-xs"
               aria-label="Follow Hashly on X"
             >
               <svg
@@ -37,14 +37,14 @@ export function Footer() {
           </div>
 
           {/* Copyright */}
-          <div className="text-text-secondary/60 text-xs font-mono">
+          <div className="text-text-tertiary text-xs">
             © {new Date().getFullYear()}
           </div>
         </div>
 
         {/* Beta Notice */}
-        <div className="mt-4 pt-3 border-t border-dashed border-border/30 text-center">
-          <p className="text-[10px] text-text-secondary/50 uppercase tracking-wider">
+        <div className="mt-4 pt-3 border-t border-border text-center">
+          <p className="text-[10px] text-text-tertiary">
             Beta version · May contain errors
           </p>
         </div>

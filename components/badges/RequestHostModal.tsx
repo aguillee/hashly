@@ -60,7 +60,7 @@ export function RequestHostModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
       <div className="relative z-10 bg-bg-card border border-border rounded-t-xl sm:rounded-xl p-6 w-full sm:max-w-md mx-0 sm:mx-4 animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
@@ -72,8 +72,8 @@ export function RequestHostModal({
         </button>
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-accent-coral/20 flex items-center justify-center">
-            <Mic2 className="h-5 w-5 text-accent-coral" />
+          <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+            <Mic2 className="h-5 w-5 text-purple-500" />
           </div>
           <div>
             <h3 className="font-semibold text-text-primary">Request to Host</h3>

@@ -454,6 +454,7 @@ export default function AdminEditEventPage() {
               <ImageUpload
                 value={formData.imageUrl}
                 onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+                recommendedSize="1200×630"
               />
             </div>
 

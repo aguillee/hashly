@@ -702,7 +702,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div className="p-3 rounded-md bg-accent-primary/10">
@@ -782,8 +782,8 @@ export default function AdminPage() {
           <Card hover>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-accent-coral/10">
-                  <Mic2 className="h-6 w-6 text-accent-coral" />
+                <div className="p-3 rounded-lg bg-purple-500/10">
+                  <Mic2 className="h-6 w-6 text-purple-500" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Host Requests</p>
@@ -1007,7 +1007,7 @@ export default function AdminPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{collection.name}</p>
-                    <p className="text-xs text-text-secondary font-mono truncate">{collection.tokenAddress}</p>
+                    <p className="text-xs text-text-secondary truncate">{collection.tokenAddress}</p>
                   </div>
                   <Button
                     variant="ghost"
@@ -1181,7 +1181,7 @@ export default function AdminPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{token.symbol}</p>
-                    <p className="text-xs text-text-secondary font-mono truncate">{token.tokenAddress}</p>
+                    <p className="text-xs text-text-secondary truncate">{token.tokenAddress}</p>
                   </div>
                   <Button
                     variant="ghost"
@@ -1372,7 +1372,7 @@ export default function AdminPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm truncate">{collection.name}</h3>
                         <div className="flex items-center gap-2 text-xs text-text-secondary">
-                          <span className="font-mono">{collection.tokenAddress}</span>
+                          <span className="">{collection.tokenAddress}</span>
                           {collection.supply > 0 && (
                             <>
                               <span>•</span>
@@ -1458,7 +1458,7 @@ export default function AdminPage() {
                       className="flex items-center justify-between p-3 bg-bg-secondary rounded-lg"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="font-mono text-sm truncate">{admin.walletAddress}</p>
+                        <p className="text-sm truncate">{admin.walletAddress}</p>
                         {admin.walletAddress === user?.walletAddress && (
                           <Badge variant="default" className="text-xs mt-1">You</Badge>
                         )}

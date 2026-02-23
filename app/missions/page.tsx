@@ -130,16 +130,16 @@ export default function MissionsPage() {
     return (
       <div
         className={cn(
-          "flex items-center gap-4 p-5 rounded-lg border transition-all duration-300",
+          "flex items-center gap-3 p-3 rounded-lg border transition-all duration-300",
           mission.completed
-            ? "bg-success/5 border-success/30"
-            : "bg-bg-card/50 border-border hover:border-accent-primary/30 hover:bg-accent-primary/5"
+            ? "bg-bg-card border-success/30"
+            : "bg-bg-card border-border hover:border-accent-primary/30"
         )}
       >
         {/* Icon */}
         <div
           className={cn(
-            "w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0",
+            "w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0",
             mission.completed
               ? "bg-success/20 text-success"
               : "bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-accent-primary"
@@ -224,82 +224,50 @@ export default function MissionsPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-accent-primary/5 via-accent-secondary/5 to-transparent" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-secondary/10 rounded-full blur-3xl" />
-
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary shadow-xl shadow-accent-primary/30 mb-6">
-            <Sparkles className="h-10 w-10 text-white" />
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4">
-            <span className="gradient-text">Missions</span>
+      {/* Header */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
+            <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
+            Missions
           </h1>
-          <p className="text-lg text-text-secondary max-w-xl mx-auto">
-            Complete actions to earn points automatically
-          </p>
-        </div>
-      </section>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Points Card */}
-        <div className="relative mb-8 group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity" />
-          <div className="relative p-6 rounded-lg bg-bg-card border border-border">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
-                  <Star className="h-7 w-7 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm text-text-secondary font-medium">Your Stats</p>
-                  <p className="text-2xl font-bold text-text-primary">Keep earning!</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-text-secondary font-medium">Total Points</p>
-                <div className="flex items-center gap-2 text-2xl font-bold">
-                  <Zap className="h-6 w-6 text-accent-primary" />
-                  <span className="gradient-text">{(user.points ?? 0).toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Streak */}
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
-              <div className="w-10 h-10 rounded-md bg-orange-500/20 flex items-center justify-center">
-                <Flame className="h-5 w-5 text-orange-500" />
-              </div>
-              <div className="flex-1">
-                <span className="font-semibold text-text-primary">{user.loginStreak} day streak</span>
-                <p className="text-sm text-text-secondary">Keep logging in to earn bonus points!</p>
-              </div>
-              {user.loginStreak >= 7 && (
-                <Badge variant="coral">On fire!</Badge>
-              )}
-            </div>
-
-            {/* Stats */}
-            {stats && (
-              <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
-                <div className="text-center p-4 rounded-lg bg-bg-secondary/50">
-                  <p className="text-2xl font-bold text-text-primary">{stats.totalVotes}</p>
-                  <p className="text-xs text-text-secondary font-medium">Total Votes</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-bg-secondary/50">
-                  <p className="text-2xl font-bold text-text-primary">{stats.totalEvents}</p>
-                  <p className="text-xs text-text-secondary font-medium">Events Created</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-bg-secondary/50">
-                  <p className="text-2xl font-bold text-text-primary">{stats.todayVotes}</p>
-                  <p className="text-xs text-text-secondary font-medium">Today's Votes</p>
-                </div>
-              </div>
-            )}
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-accent-primary" />
+            <span className="text-lg font-bold text-text-primary">{(user.points ?? 0).toLocaleString()}</span>
+            <span className="text-xs text-text-secondary">pts</span>
           </div>
         </div>
+
+        {/* Stats bar */}
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
+            <Flame className="h-3.5 w-3.5 text-orange-500" />
+            <span className="font-semibold text-text-primary">{user.loginStreak}d streak</span>
+            {user.loginStreak >= 7 && <Badge variant="purple" size="sm">On fire!</Badge>}
+          </div>
+          {stats && (
+            <>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
+                <Vote className="h-3.5 w-3.5 text-accent-primary" />
+                <span className="font-bold text-text-primary">{stats.totalVotes}</span>
+                <span className="text-text-secondary text-xs">votes</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
+                <Calendar className="h-3.5 w-3.5 text-accent-primary" />
+                <span className="font-bold text-text-primary">{stats.totalEvents}</span>
+                <span className="text-text-secondary text-xs">events</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
+                <Target className="h-3.5 w-3.5 text-accent-secondary" />
+                <span className="font-bold text-text-primary">{stats.todayVotes}</span>
+                <span className="text-text-secondary text-xs">today</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
@@ -311,17 +279,15 @@ export default function MissionsPage() {
         ) : (
           <>
             {/* Daily Missions */}
-            <div className="rounded-lg border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden mb-6">
-              <div className="p-6 border-b border-border flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md bg-accent-primary/20 flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-accent-primary" />
-                  </div>
-                  <h2 className="text-xl font-bold text-text-primary">Daily Missions</h2>
-                </div>
-                <Badge variant="outline">Resets daily</Badge>
+            <div className="rounded-lg border border-border bg-bg-card overflow-hidden mb-4">
+              <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-accent-primary" />
+                  Daily Missions
+                </h2>
+                <Badge variant="outline" size="sm">Resets daily</Badge>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-3 space-y-2">
                 {dailyMissions.length > 0 ? (
                   dailyMissions.map((mission) => (
                     <MissionCard key={mission.id} mission={mission} />
@@ -335,17 +301,15 @@ export default function MissionsPage() {
             </div>
 
             {/* Weekly Missions */}
-            <div className="rounded-lg border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden mb-6">
-              <div className="p-6 border-b border-border flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md bg-accent-secondary/20 flex items-center justify-center">
-                    <Target className="h-5 w-5 text-accent-secondary" />
-                  </div>
-                  <h2 className="text-xl font-bold text-text-primary">Weekly Missions</h2>
-                </div>
-                <Badge variant="outline">Resets weekly</Badge>
+            <div className="rounded-lg border border-border bg-bg-card overflow-hidden mb-4">
+              <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  <Target className="h-4 w-4 text-accent-secondary" />
+                  Weekly Missions
+                </h2>
+                <Badge variant="outline" size="sm">Resets weekly</Badge>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-3 space-y-2">
                 {weeklyMissions.length > 0 ? (
                   weeklyMissions.map((mission) => (
                     <MissionCard key={mission.id} mission={mission} />
@@ -359,17 +323,15 @@ export default function MissionsPage() {
             </div>
 
             {/* Achievements */}
-            <div className="rounded-lg border border-border bg-bg-card/50 backdrop-blur-sm overflow-hidden">
-              <div className="p-6 border-b border-border flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md bg-yellow-500/20 flex items-center justify-center">
-                    <Trophy className="h-5 w-5 text-yellow-500" />
-                  </div>
-                  <h2 className="text-xl font-bold text-text-primary">Achievements</h2>
-                </div>
-                <Badge variant="coral">Permanent</Badge>
+            <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
+              <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-yellow-500" />
+                  Achievements
+                </h2>
+                <Badge variant="purple" size="sm">Permanent</Badge>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-3 space-y-2">
                 {achievements.length > 0 ? (
                   achievements.map((mission) => (
                     <MissionCard key={mission.id} mission={mission} />

@@ -219,7 +219,7 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen py-4 sm:py-8">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
         {/* Compact Header - News style */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
           <div className="flex items-center gap-3">
@@ -232,7 +232,7 @@ export default function CalendarPage() {
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Event Calendar</h1>
               <p className="text-xs sm:text-sm text-text-secondary">
-                <span className="font-mono">{events.length}</span> events on Hedera
+                <span className="">{events.length}</span> events on Hedera
               </p>
             </div>
           </div>
@@ -288,7 +288,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Filters - Single scrollable line */}
-        <div className="mb-4 sm:mb-6 p-2.5 sm:p-3 bg-bg-card/50 border-l-4 border-accent-primary rounded-r-md overflow-x-auto scrollbar-hide">
+        <div className="mb-4 sm:mb-6 p-2.5 sm:p-3 bg-bg-card border border-border/50 rounded-xl overflow-x-auto scrollbar-hide">
           <div className="flex items-center gap-2 sm:gap-3 min-w-max">
             {/* State */}
             <div className="flex items-center gap-1">

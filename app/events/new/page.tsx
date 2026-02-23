@@ -701,10 +701,8 @@ export default function NewEventPage() {
               <ImageUpload
                 value={formData.imageUrl}
                 onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+                recommendedSize="1200×630"
               />
-              <p className="text-xs text-text-secondary mt-2">
-                Recommended: 800x400px (JPG, PNG, GIF, WebP, max 3MB)
-              </p>
             </div>
 
             {/* Social Links (for both types but meetup also has custom links above) */}

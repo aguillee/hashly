@@ -36,149 +36,37 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [scrolled, setScrolled] = React.useState(false);
   const [voteLimitModalOpen, setVoteLimitModalOpen] = React.useState(false);
   const pathname = usePathname();
   const { user } = useWalletStore();
   const { data: voteLimit } = useVoteLimit();
 
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const isOutOfVotes = voteLimit?.remaining === 0;
 
   return (
     <>
-      <nav
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          scrolled
-            ? "bg-bg-card/80 backdrop-blur-xl shadow-lg border-b border-border"
-            : "bg-transparent"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 py-2 sm:py-3 lg:py-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
-              <Image
-                src="/logo-navbar.png"
-                alt="Hashly"
-                width={40}
-                height={40}
-                className="group-hover:scale-105 transition-transform duration-300 w-9 h-9 sm:w-12 sm:h-12"
-                priority
-              />
-              <div className="hidden xs:block">
-                <span className="font-bold text-lg sm:text-xl text-text-primary">Hashly</span>
-              </div>
-            </Link>
+      <nav className="fixed top-0 left-0 right-0 z-50">
+        <div className="bg-bg-card border-b border-border">
+          <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-14">
+              {/* Logo */}
+              <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
+                <Image
+                  src="/logo-navbar.png"
+                  alt="Hashly"
+                  width={36}
+                  height={36}
+                  className="w-8 h-8 sm:w-9 sm:h-9"
+                  priority
+                />
+                <div className="hidden xs:flex flex-col">
+                  <span className="font-bold text-lg leading-none text-text-primary">Hashly</span>
+                  <span className="text-[9px] text-text-secondary font-medium tracking-wider uppercase">Discover Hedera</span>
+                </div>
+              </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1 bg-bg-card/50 backdrop-blur-sm rounded-lg p-1 border border-border">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = pathname === link.href;
-
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
-                      isActive
-                        ? "bg-accent-primary text-white"
-                        : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                );
-              })}
-
-              {/* Admin link */}
-              {user?.isAdmin && (
-                <Link
-                  href="/admin"
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
-                    pathname.startsWith("/admin")
-                      ? "bg-accent-coral text-white"
-                      : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
-                  )}
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </Link>
-              )}
-            </div>
-
-            {/* Right Section */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              {/* Votes Remaining Badge (if connected) - hidden on mobile */}
-              {user && voteLimit && (
-                <button
-                  onClick={() => setVoteLimitModalOpen(true)}
-                  className={cn(
-                    "hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-all duration-200 cursor-pointer",
-                    isOutOfVotes
-                      ? "bg-red-500/10 border-red-500/50 hover:bg-red-500/20"
-                      : "bg-bg-card border-border hover:border-accent-coral/50"
-                  )}
-                  title="Click to see vote limit details"
-                >
-                  <Vote className={cn("h-4 w-4", isOutOfVotes ? "text-red-500" : "text-accent-coral")} />
-                  <span className={cn("font-semibold text-sm", isOutOfVotes ? "text-red-500" : "text-text-primary")}>
-                    {voteLimit.remaining}/{voteLimit.limit}
-                  </span>
-                </button>
-              )}
-
-              {/* Points Badge (if connected) - hidden on mobile */}
-              {user && (
-                <Link
-                  href="/profile"
-                  className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
-                >
-                  <Zap className="h-4 w-4 text-accent-primary" />
-                  <span className="font-semibold text-text-primary text-sm">
-                    {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
-                  </span>
-                </Link>
-              )}
-
-              {/* Theme toggle - hidden on small mobile, shown in mobile menu instead */}
-              <div className="hidden sm:block">
-                <ThemeToggle />
-              </div>
-              <ConnectButton />
-
-              {/* Mobile menu button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden p-2"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <div className="md:hidden py-3 border-t border-border bg-bg-card/95 backdrop-blur-xl animate-fade-in">
-              <div className="flex flex-col gap-1">
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center gap-1">
                 {navLinks.map((link) => {
                   const Icon = link.icon;
                   const isActive = pathname === link.href;
@@ -187,76 +75,174 @@ export function Navbar() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors duration-200",
+                        "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors",
                         isActive
-                          ? "bg-accent-primary text-white"
+                          ? "text-white bg-accent-primary"
                           : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                       )}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-4 w-4" />
                       {link.label}
                     </Link>
                   );
                 })}
 
+                {/* Admin link */}
                 {user?.isAdmin && (
                   <Link
                     href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors duration-200",
+                      "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors",
                       pathname.startsWith("/admin")
-                        ? "bg-accent-coral text-white"
+                        ? "text-white bg-accent-coral"
                         : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                     )}
                   >
-                    <Shield className="h-5 w-5" />
+                    <Shield className="h-4 w-4" />
                     Admin
                   </Link>
                 )}
+              </div>
 
-                {/* Mobile-only: Votes, Points and Theme */}
-                <div className="flex items-center justify-between px-4 pt-3 mt-2 border-t border-dashed border-border/50">
-                  <div className="flex items-center gap-4">
-                    {user && voteLimit && (
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setVoteLimitModalOpen(true);
-                        }}
+              {/* Right Section */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Votes Remaining Badge */}
+                {user && voteLimit && (
+                  <button
+                    onClick={() => setVoteLimitModalOpen(true)}
+                    className={cn(
+                      "hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer",
+                      isOutOfVotes
+                        ? "text-text-secondary bg-bg-secondary"
+                        : "text-accent-primary bg-accent-primary/10 hover:bg-accent-primary/20"
+                    )}
+                    title="Click to see vote limit details"
+                  >
+                    <Vote className="h-3.5 w-3.5" />
+                    <span className="tabular-nums">
+                      {voteLimit.remaining}/{voteLimit.limit}
+                    </span>
+                  </button>
+                )}
+
+                {/* Points Badge */}
+                {user && (
+                  <Link
+                    href="/profile"
+                    className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-500 bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                    <span className="tabular-nums">
+                      {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
+                    </span>
+                  </Link>
+                )}
+
+                {/* Separator */}
+                {user && <div className="hidden md:block w-px h-5 bg-border mx-1" />}
+
+                {/* Theme toggle */}
+                <div className="hidden sm:block">
+                  <ThemeToggle />
+                </div>
+                <ConnectButton />
+
+                {/* Mobile menu button */}
+                <button
+                  className="md:hidden p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? (
+                    <X className="h-5 w-5" />
+                  ) : (
+                    <Menu className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Navigation */}
+            {mobileMenuOpen && (
+              <div className="md:hidden pb-4 pt-2 border-t border-border">
+                <div className="flex flex-col gap-1">
+                  {navLinks.map((link) => {
+                    const Icon = link.icon;
+                    const isActive = pathname === link.href;
+
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
                         className={cn(
-                          "flex items-center gap-1.5 text-sm",
-                          isOutOfVotes ? "text-red-500" : "text-text-secondary"
+                          "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                          isActive
+                            ? "text-white bg-accent-primary"
+                            : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                         )}
                       >
-                        <Vote className={cn("h-4 w-4", isOutOfVotes ? "text-red-500" : "text-accent-coral")} />
-                        <span className={cn("font-semibold", isOutOfVotes ? "text-red-500" : "text-text-primary")}>
-                          {voteLimit.remaining}/{voteLimit.limit}
-                        </span>
-                      </button>
-                    )}
-                    {user && (
-                      <Link
-                        href="/profile"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 text-sm text-text-secondary"
-                      >
-                        <Zap className="h-4 w-4 text-accent-primary" />
-                        <span className="font-semibold text-text-primary">
-                          {(user.totalPoints ?? user.points ?? 0).toLocaleString()} pts
-                        </span>
+                        <Icon className="h-[18px] w-[18px]" />
+                        {link.label}
                       </Link>
-                    )}
-                  </div>
-                  <div className="sm:hidden">
-                    <ThemeToggle />
+                    );
+                  })}
+
+                  {user?.isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        pathname.startsWith("/admin")
+                          ? "text-white bg-accent-coral"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                      )}
+                    >
+                      <Shield className="h-[18px] w-[18px]" />
+                      Admin
+                    </Link>
+                  )}
+
+                  {/* Mobile-only: Votes, Points and Theme */}
+                  <div className="flex items-center justify-between px-4 pt-3 mt-2 border-t border-border">
+                    <div className="flex items-center gap-3">
+                      {user && voteLimit && (
+                        <button
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setVoteLimitModalOpen(true);
+                          }}
+                          className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-semibold",
+                            isOutOfVotes
+                              ? "text-text-secondary"
+                              : "text-accent-primary bg-accent-primary/10"
+                          )}
+                        >
+                          <Vote className="h-4 w-4" />
+                          <span>{voteLimit.remaining}/{voteLimit.limit}</span>
+                        </button>
+                      )}
+                      {user && (
+                        <Link
+                          href="/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-semibold text-amber-500 bg-amber-500/10"
+                        >
+                          <Zap className="h-4 w-4" />
+                          <span>{(user.totalPoints ?? user.points ?? 0).toLocaleString()} pts</span>
+                        </Link>
+                      )}
+                    </div>
+                    <div className="sm:hidden">
+                      <ThemeToggle />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </nav>
 

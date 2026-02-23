@@ -260,14 +260,15 @@ export default function EventDetailPage() {
     switch (status) {
       case "LIVE":
         return (
-          <span className="skew-tag inline-block px-2 py-0.5 bg-green-600 text-white text-[10px] sm:text-xs font-bold tracking-wide">
-            <span>LIVE NOW</span>
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500/15 text-green-400 border border-green-500/20 rounded-full text-xs font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            LIVE NOW
           </span>
         );
       default:
         return (
-          <span className="skew-tag inline-block px-2 py-0.5 bg-accent-primary text-white text-[10px] sm:text-xs font-bold tracking-wide">
-            <span>UPCOMING</span>
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-accent-primary/15 text-accent-primary border border-accent-primary/20 rounded-full text-xs font-semibold">
+            UPCOMING
           </span>
         );
     }
@@ -293,7 +294,7 @@ export default function EventDetailPage() {
 
   if (error || !event) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-6xl mx-auto px-4 py-12 text-center">
         <AlertCircle className="h-12 w-12 mx-auto mb-4 text-error" />
         <h1 className="text-2xl font-bold mb-2">{error || "Event not found"}</h1>
         <p className="text-text-secondary mb-4">The event you're looking for doesn't exist or has been removed.</p>
@@ -311,7 +312,7 @@ export default function EventDetailPage() {
   const hasBadgeToken = badgeStatusData?.badge?.tokenId;
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Back Button */}
       <Link
         href="/"
@@ -324,8 +325,8 @@ export default function EventDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Content */}
         <div className="md:col-span-2 space-y-4 sm:space-y-6">
-          {/* Header Card - News style with border-l-4 */}
-          <div className={`bg-bg-card/80 border-l-4 rounded-r-md overflow-hidden ${event.status === "LIVE" ? "border-green-500" : "border-accent-primary"}`}>
+          {/* Header Card */}
+          <div className={`bg-bg-card border border-border/50 rounded-xl overflow-hidden`}>
             {event.imageUrl && (
               <div className="aspect-video relative overflow-hidden">
                 <img
@@ -335,7 +336,7 @@ export default function EventDetailPage() {
                 />
                 {/* Date badge - top left */}
                 <div className="absolute top-3 left-3">
-                  <span className="px-2 py-1 text-[10px] sm:text-xs font-mono bg-text-primary/90 text-bg-primary rounded">
+                  <span className="px-2 py-1 text-[10px] sm:text-xs bg-text-primary/90 text-bg-primary rounded">
                     {new Date(event.mintDate).toLocaleDateString("en-US", {
                       timeZone: "UTC",
                       weekday: "short",
@@ -371,7 +372,7 @@ export default function EventDetailPage() {
                 </div>
                 {!event.imageUrl && (
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 text-[10px] sm:text-xs font-mono bg-bg-secondary text-text-primary rounded">
+                    <span className="px-2 py-1 text-[10px] sm:text-xs bg-bg-secondary text-text-primary rounded">
                       {new Date(event.mintDate).toLocaleDateString("en-US", {
                         timeZone: "UTC",
                         weekday: "short",
@@ -390,7 +391,7 @@ export default function EventDetailPage() {
               />
 
               {/* Links */}
-              <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-dashed border-border/50">
+              <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
                 {event.websiteUrl && (
                   <a
                     href={event.websiteUrl}
@@ -447,8 +448,8 @@ export default function EventDetailPage() {
 
           {/* Mint Phases - only for mint events */}
           {!isMeetup && !isHackathon && event.phases.length > 0 && (
-            <div className="bg-bg-card/80 border-l-4 border-purple-500 rounded-r-md overflow-hidden">
-              <div className="p-4 sm:p-6 border-b border-dashed border-border/50">
+            <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
+              <div className="p-4 sm:p-6 border-b border-border">
                 <h3 className="font-bold flex items-center gap-2">
                   <div className="w-8 h-8 rounded bg-purple-500/10 flex items-center justify-center">
                     <Layers className="h-4 w-4 text-purple-500" />
@@ -465,12 +466,12 @@ export default function EventDetailPage() {
                       <div
                         key={phase.id}
                         className={cn(
-                          "p-4 rounded-md border-l-2",
+                          "p-4 rounded-xl border",
                           status === "active"
-                            ? "bg-success/5 border-l-green-500"
+                            ? "bg-success/5 border-green-500/30"
                             : status === "ended"
-                            ? "bg-bg-secondary border-l-border opacity-60"
-                            : "bg-bg-secondary/50 border-l-accent-primary"
+                            ? "bg-bg-secondary border-border/50 opacity-60"
+                            : "bg-bg-secondary/50 border-accent-primary/30"
                         )}
                       >
                         <div className="flex items-center justify-between mb-2">
@@ -480,15 +481,16 @@ export default function EventDetailPage() {
                               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-purple-500/20 text-purple-400 rounded">WL</span>
                             )}
                             {status === "active" && (
-                              <span className="skew-tag inline-block px-2 py-0.5 bg-green-600 text-white text-[10px] font-bold tracking-wide">
-                                <span>ACTIVE</span>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/15 text-green-400 border border-green-500/20 rounded-full text-[10px] font-semibold">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                                ACTIVE
                               </span>
                             )}
                           </div>
                           {(() => {
                             const phasePriceInfo = parseMintPrice(phase.price);
                             return (
-                              <span className="text-lg font-bold text-accent-primary flex items-center gap-1 font-mono">
+                              <span className="text-lg font-bold text-accent-primary flex items-center gap-1">
                                 {phasePriceInfo.isHbar ? (
                                   <HbarIcon className="h-4 w-4" />
                                 ) : (
@@ -502,24 +504,24 @@ export default function EventDetailPage() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <p className="text-text-secondary text-xs">Starts</p>
-                            <p className="font-medium font-mono text-sm">{formatShortDate(phase.startDate)}</p>
+                            <p className="font-medium text-sm">{formatShortDate(phase.startDate)}</p>
                           </div>
                           {phase.endDate && (
                             <div>
                               <p className="text-text-secondary text-xs">Ends</p>
-                              <p className="font-medium font-mono text-sm">{formatShortDate(phase.endDate)}</p>
+                              <p className="font-medium text-sm">{formatShortDate(phase.endDate)}</p>
                             </div>
                           )}
                           {phase.supply && (
                             <div>
                               <p className="text-text-secondary text-xs">Supply</p>
-                              <p className="font-medium font-mono text-sm">{phase.supply.toLocaleString()}</p>
+                              <p className="font-medium text-sm">{phase.supply.toLocaleString()}</p>
                             </div>
                           )}
                           {phase.maxPerWallet && (
                             <div>
                               <p className="text-text-secondary text-xs">Max/Wallet</p>
-                              <p className="font-medium font-mono text-sm">{phase.maxPerWallet}</p>
+                              <p className="font-medium text-sm">{phase.maxPerWallet}</p>
                             </div>
                           )}
                         </div>
@@ -534,7 +536,7 @@ export default function EventDetailPage() {
         {/* Sidebar */}
         <div className="space-y-4 sm:space-y-6">
           {/* Event Info - News style */}
-          <div className="bg-bg-card/80 border-l-4 border-accent-primary rounded-r-md overflow-hidden">
+          <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="w-10 h-10 rounded bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
@@ -542,7 +544,7 @@ export default function EventDetailPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-text-secondary">{event.endDate ? "Start Date" : "Event Date"}</p>
-                  <p className="font-medium text-sm sm:text-base font-mono whitespace-normal leading-tight">{formatDate(event.mintDate)}</p>
+                  <p className="font-medium text-sm sm:text-base whitespace-normal leading-tight">{formatDate(event.mintDate)}</p>
                 </div>
               </div>
 
@@ -553,7 +555,7 @@ export default function EventDetailPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-text-secondary">End Date</p>
-                    <p className="font-medium text-sm sm:text-base font-mono whitespace-normal leading-tight">{formatDate(event.endDate)}</p>
+                    <p className="font-medium text-sm sm:text-base whitespace-normal leading-tight">{formatDate(event.endDate)}</p>
                   </div>
                 </div>
               )}
@@ -564,7 +566,7 @@ export default function EventDetailPage() {
                 </div>
                 <div>
                   <p className="text-xs text-text-secondary">{isStarsOnly ? "Time Until Event" : "Time Until Mint"}</p>
-                  <p className="font-bold text-base sm:text-lg font-mono">{getTimeUntil(event.mintDate)}</p>
+                  <p className="font-bold text-base sm:text-lg">{getTimeUntil(event.mintDate)}</p>
                 </div>
               </div>
 
@@ -587,7 +589,7 @@ export default function EventDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs text-text-secondary">Entry Price</p>
-                    <p className="font-bold text-base sm:text-lg font-mono">
+                    <p className="font-bold text-base sm:text-lg">
                       {!event.mintPrice || event.mintPrice === "0" || event.mintPrice.toLowerCase().includes("free")
                         ? "Free"
                         : `$${event.mintPrice}`}
@@ -609,7 +611,7 @@ export default function EventDetailPage() {
                         </div>
                         <div>
                           <p className="text-xs text-text-secondary">Mint Price</p>
-                          <p className="font-bold text-base sm:text-lg font-mono">
+                          <p className="font-bold text-base sm:text-lg">
                             {priceInfo.isHbar ? `${priceInfo.value} HBAR` : `$${priceInfo.value}`}
                           </p>
                         </div>
@@ -624,7 +626,7 @@ export default function EventDetailPage() {
                       </div>
                       <div>
                         <p className="text-xs text-text-secondary">Total Supply</p>
-                        <p className="font-bold text-base sm:text-lg font-mono">{event.supply.toLocaleString()}</p>
+                        <p className="font-bold text-base sm:text-lg">{event.supply.toLocaleString()}</p>
                       </div>
                     </div>
                   )}
@@ -634,7 +636,7 @@ export default function EventDetailPage() {
           </div>
 
           {/* Voting - News style */}
-          <div className="bg-bg-card/80 border-l-4 border-yellow-500 rounded-r-md overflow-hidden">
+          <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
             <div className="p-4 sm:p-6">
               <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
                 <div className="w-8 h-8 rounded bg-yellow-500/10 flex items-center justify-center">
@@ -646,11 +648,11 @@ export default function EventDetailPage() {
                 {isStarsOnly ? (
                   <div className="flex items-center justify-center gap-1.5">
                     <Star className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 fill-yellow-400" />
-                    <span className="text-3xl sm:text-4xl font-bold text-yellow-400 font-mono">{event.votesUp}</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-yellow-400">{event.votesUp}</span>
                   </div>
                 ) : (
                   <span className={cn(
-                    "text-3xl sm:text-4xl font-bold font-mono",
+                    "text-3xl sm:text-4xl font-bold",
                     score > 0 ? "text-success" : score < 0 ? "text-error" : "text-text-secondary"
                   )}>
                     {score > 0 ? "+" : ""}{score}
@@ -670,7 +672,7 @@ export default function EventDetailPage() {
               {/* Vote locked message - only show if connected */}
               {isConnected && event.userVote && !event.canVote && voteCountdown && (
                 <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-md bg-orange-500/10 border border-orange-500/30 text-center">
-                  <p className="text-xs sm:text-sm text-orange-500 font-medium font-mono">
+                  <p className="text-xs sm:text-sm text-orange-500 font-medium">
                     {isStarsOnly ? "Rate" : "Vote"} again in {voteCountdown}
                   </p>
                 </div>
@@ -738,7 +740,7 @@ export default function EventDetailPage() {
 
           {/* Attendance Badge - only for meetups */}
           {isMeetup && (
-            <div className="bg-bg-card/80 border-l-4 border-accent-coral rounded-r-md overflow-hidden">
+            <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
               <div className="p-4 sm:p-6">
                 <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
                   <div className="w-8 h-8 rounded bg-accent-coral/10 flex items-center justify-center">
@@ -766,7 +768,7 @@ export default function EventDetailPage() {
                     )}
                     {badgeStatusData.badge.tokenId && (
                       <p className="text-xs text-text-secondary">
-                        Token ID: <span className="font-mono">{badgeStatusData.badge.tokenId}</span>
+                        Token ID: <span className="">{badgeStatusData.badge.tokenId}</span>
                       </p>
                     )}
                   </div>

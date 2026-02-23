@@ -329,7 +329,7 @@ export default function AdminAdsPage() {
   if (!isConnected || !user?.isAdmin) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Header */}
       <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
         <Link
@@ -477,6 +477,7 @@ export default function AdminAdsPage() {
                     <ImageUpload
                       value={formImageUrl}
                       onChange={(url) => setFormImageUrl(url)}
+                      recommendedSize="800×400"
                     />
                   </div>
                   <div>
@@ -571,14 +572,14 @@ export default function AdminAdsPage() {
                       "p-2.5 sm:p-3 rounded-lg border transition-colors",
                       ad.isActive
                         ? "bg-bg-secondary border-border"
-                        : "bg-bg-secondary/50 border-border/50 opacity-60"
+                        : "bg-bg-secondary/50 border-border opacity-60"
                     )}
                   >
                     {/* Mobile Layout - Stacked */}
                     <div className="flex items-start gap-2 sm:hidden">
                       {/* Order + Thumbnail */}
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] font-mono text-text-secondary">
+                        <span className="text-[10px] text-text-secondary">
                           #{index + 1}
                         </span>
                         <div className="w-12 h-9 rounded overflow-hidden bg-bg-card flex-shrink-0">
@@ -662,7 +663,7 @@ export default function AdminAdsPage() {
                     {/* Desktop Layout - Horizontal */}
                     <div className="hidden sm:flex items-center gap-3">
                       {/* Order number */}
-                      <span className="text-xs font-mono text-text-secondary w-5 text-center flex-shrink-0">
+                      <span className="text-xs text-text-secondary w-5 text-center flex-shrink-0">
                         {index + 1}
                       </span>
 
@@ -866,6 +867,7 @@ export default function AdminAdsPage() {
                             <ImageUpload
                               value={editImageUrl}
                               onChange={(url) => setEditImageUrl(url)}
+                              recommendedSize="800×400"
                             />
                           </div>
                           <div>

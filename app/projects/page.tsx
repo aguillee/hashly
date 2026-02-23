@@ -321,19 +321,19 @@ export default function ProjectsPage() {
     switch (rank) {
       case 1:
         return (
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/30 flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center flex-shrink-0">
             <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       case 2:
         return (
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg shadow-gray-400/30 flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center flex-shrink-0">
             <Medal className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       case 3:
         return (
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/30 flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center flex-shrink-0">
             <Medal className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
@@ -349,13 +349,13 @@ export default function ProjectsPage() {
   const getRankStyle = (rank: number) => {
     switch (rank) {
       case 1:
-        return "bg-gradient-to-r from-yellow-500/10 via-yellow-400/5 to-transparent border-yellow-500/30";
+        return "bg-bg-card border-yellow-500/30";
       case 2:
-        return "bg-gradient-to-r from-gray-400/10 via-gray-300/5 to-transparent border-gray-400/30";
+        return "bg-bg-card border-gray-400/30";
       case 3:
-        return "bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border-amber-500/30";
+        return "bg-bg-card border-amber-500/30";
       default:
-        return "bg-bg-card/50 border-border/50 hover:border-accent-primary/30 hover:bg-accent-primary/5";
+        return "bg-bg-card border-border hover:border-accent-primary/30";
     }
   };
 
@@ -427,7 +427,7 @@ export default function ProjectsPage() {
     <div className="min-h-screen">
       {/* Compact Header - News style */}
       <div className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -457,7 +457,7 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Search and Add Project */}
         <div className="flex gap-2 sm:gap-3 mb-6">
           <div className="relative flex-1">
@@ -591,7 +591,7 @@ export default function ProjectsPage() {
             </div>
 
             {searchResults.length === 0 && tokenSearchResults.length === 0 ? (
-              <div className="rounded-lg border border-border bg-bg-card/50 p-8 text-center">
+              <div className="rounded-lg border border-border bg-bg-card p-8 text-center">
                 <Search className="h-8 w-8 mx-auto text-text-secondary mb-3" />
                 <p className="text-text-secondary text-sm mb-3">No projects found</p>
                 {isConnected && (
@@ -609,7 +609,7 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* NFT Search Results */}
                 {searchResults.length > 0 && (
-                  <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+                  <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
                     <div className="p-4 border-b border-border flex items-center gap-2">
                       <Layers className="h-5 w-5 text-accent-primary" />
                       <span className="font-semibold text-text-primary">NFT Collections ({searchResults.length})</span>
@@ -633,7 +633,7 @@ export default function ProjectsPage() {
 
                 {/* Token Search Results */}
                 {tokenSearchResults.length > 0 && (
-                  <div className="rounded-lg border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
+                  <div className="rounded-lg border border-accent-secondary/30 bg-bg-card overflow-hidden">
                     <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
                       <Coins className="h-5 w-5 text-accent-secondary" />
                       <span className="font-semibold text-text-primary">Tokens ({tokenSearchResults.length})</span>
@@ -662,7 +662,7 @@ export default function ProjectsPage() {
             {/* Main Grid: Top NFTs (left) + Top Tokens (right) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
               {/* Top 30 NFTs - Left Column */}
-              <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+              <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
                 <div className="p-4 border-b border-border flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-yellow-500" />
                   <span className="font-semibold text-text-primary">Top 30 NFTs</span>
@@ -697,7 +697,7 @@ export default function ProjectsPage() {
               </div>
 
               {/* Top 30 Tokens - Right Column */}
-              <div className="rounded-lg border border-accent-secondary/30 bg-bg-card/50 overflow-hidden">
+              <div className="rounded-lg border border-accent-secondary/30 bg-bg-card overflow-hidden">
                 <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
                   <Coins className="h-5 w-5 text-accent-secondary" />
                   <span className="font-semibold text-text-primary">Top 30 Tokens</span>
@@ -730,71 +730,6 @@ export default function ProjectsPage() {
               </div>
             </div>
 
-            {/* Worst Voted Section - Two columns: NFTs left, Tokens right */}
-            {(worstCollections.length > 0 || worstTokens.length > 0) && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                {/* Worst NFTs - Left */}
-                <div className="rounded-lg border border-red-500/30 bg-bg-card/50 overflow-hidden">
-                  <div className="p-4 border-b border-red-500/30 flex items-center gap-2">
-                    <TrendingDown className="h-5 w-5 text-red-500" />
-                    <span className="font-semibold text-text-primary">Worst Voted NFTs</span>
-                  </div>
-                  <div className="p-3 overflow-x-auto lg:overflow-visible">
-                    {worstCollections.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Layers className="h-6 w-6 mx-auto text-text-secondary mb-2" />
-                        <p className="text-text-secondary text-sm">No worst NFTs yet</p>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2 min-w-max lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:min-w-0">
-                        {worstCollections.slice(0, 6).map((collection) => (
-                          <CollectionRow
-                            key={collection.id}
-                            collection={collection}
-                            votingId={votingId}
-                            onVote={handleVote}
-                            getRankIcon={() => (
-                              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0">
-                                <span className="text-red-400 font-bold text-[10px] sm:text-xs">#{collection.rank}</span>
-                              </div>
-                            )}
-                            getRankStyle={() => "bg-red-500/5 border-red-500/20 hover:border-red-500/40"}
-                            compact
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Worst Tokens - Right */}
-                <div className="rounded-lg border border-orange-500/30 bg-bg-card/50 overflow-hidden">
-                  <div className="p-4 border-b border-orange-500/30 flex items-center gap-2">
-                    <TrendingDown className="h-5 w-5 text-orange-500" />
-                    <span className="font-semibold text-text-primary">Worst Voted Tokens</span>
-                  </div>
-                  <div className="p-3 overflow-x-auto lg:overflow-visible">
-                    {worstTokens.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Coins className="h-6 w-6 mx-auto text-text-secondary mb-2" />
-                        <p className="text-text-secondary text-sm">No worst tokens yet</p>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2 min-w-max lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:min-w-0">
-                        {worstTokens.slice(0, 6).map((token) => (
-                          <TokenRowCompact
-                            key={token.id}
-                            token={token}
-                            votingId={votingTokenId}
-                            onVote={handleTokenVote}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </>
         )}
 
@@ -905,7 +840,7 @@ function CollectionRow({
           <ExternalLink className="h-3 w-3 flex-shrink-0" />
         </a>
         <div className="flex items-center gap-2 sm:gap-3 text-xs text-text-secondary">
-          <span className="font-mono hidden sm:inline">{collection.tokenAddress}</span>
+          <span className="hidden sm:inline">{collection.tokenAddress}</span>
           <span className="flex items-center gap-1">
             <Users className="h-3 w-3" />
             {collection.owners.toLocaleString()}
@@ -993,7 +928,7 @@ function TokenRow({
           <span className="font-bold">{token.symbol}</span>
           <span className="text-text-secondary text-xs hidden sm:inline">({token.name})</span>
           {token.marketCap && token.marketCap > 0 && (
-            <span className="text-xs text-accent-secondary font-mono ml-1">
+            <span className="text-xs text-accent-secondary ml-1">
               MC: ${token.marketCap >= 1000000
                 ? `${(token.marketCap / 1000000).toFixed(1)}M`
                 : token.marketCap >= 1000
@@ -1003,7 +938,7 @@ function TokenRow({
           )}
         </div>
         <div className="flex items-center gap-2 text-xs text-text-secondary">
-          <span className="font-mono">{token.tokenAddress}</span>
+          <span className="">{token.tokenAddress}</span>
           <a
             href={`https://www.saucerswap.finance/swap/HBAR/${token.tokenAddress}`}
             target="_blank"
@@ -1066,7 +1001,7 @@ function TokenRowCompact({
   const voteIsUp = hasVoted && token.userVote!.voteWeight > 0;
 
   return (
-    <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all duration-200 w-36 lg:w-auto bg-orange-500/5 border-orange-500/20 hover:border-orange-500/40">
+    <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all duration-200 w-36 lg:w-auto bg-bg-card border-orange-500/20 hover:border-orange-500/40">
       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0">
         <span className="text-orange-400 font-bold text-[10px] sm:text-xs">#{token.rank}</span>
       </div>
@@ -1081,7 +1016,7 @@ function TokenRowCompact({
       </div>
       <p className="text-xs font-bold text-center truncate w-full">${token.symbol}</p>
       {token.marketCap && token.marketCap > 0 && (
-        <p className="text-[10px] text-accent-secondary font-mono">
+        <p className="text-[10px] text-accent-secondary">
           MC: ${token.marketCap >= 1000000
             ? `${(token.marketCap / 1000000).toFixed(1)}M`
             : token.marketCap >= 1000

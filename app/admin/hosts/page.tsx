@@ -142,12 +142,12 @@ export default function AdminHostsPage() {
 
   return (
     <div className="min-h-screen py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-accent-coral/20 flex items-center justify-center">
-              <Mic2 className="h-6 w-6 text-accent-coral" />
+            <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <Mic2 className="h-6 w-6 text-purple-500" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-text-primary">Host Requests</h1>
@@ -227,7 +227,7 @@ export default function AdminHostsPage() {
                         <User className="h-4 w-4 text-text-secondary" />
                         <span className="text-sm text-text-secondary">
                           Requested by:{" "}
-                          <span className="text-text-primary font-mono">
+                          <span className="text-text-primary">
                             {request.user?.alias || formatWallet(request.walletAddress)}
                           </span>
                         </span>
