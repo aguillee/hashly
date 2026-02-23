@@ -27,6 +27,9 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useWalletStore } from "@/store";
 import { useHederaTransactions } from "@/hooks/useHederaTransactions";
+import { useInscriptionPoller } from "@/hooks/useInscriptionPoller";
+import { compressImage } from "@/lib/image-compress";
+import { buildHIP412Metadata } from "@/lib/hashinals";
 
 const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() === "testnet"
   ? "https://testnet.mirrornode.hedera.com"
@@ -57,6 +60,8 @@ interface BadgeDetail {
   metadataCid: string | null;
   imageTopicId: string | null;
   metadataTopicId: string | null;
+  imageInscriptionTxId: string | null;
+  metadataInscriptionTxId: string | null;
   tokenId: string | null;
   status: "DRAFT" | "TOKEN_CREATED" | "MINTED" | "DISTRIBUTED" | "EXPIRED";
   supply: number;
@@ -106,7 +111,7 @@ export default function BadgeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isConnected } = useWalletStore();
-  const { createNFTToken, mintNFTs, airdropNFTs, uploadBadgeMetadataOnChain, isExecuting, isReady } = useHederaTransactions();
+  const { createNFTToken, mintNFTs, airdropNFTs, inscribeFileOnChain, isExecuting, isReady } = useHederaTransactions();
 
   const [badge, setBadge] = React.useState<BadgeDetail | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -130,9 +135,13 @@ export default function BadgeDetailPage() {
   const [fileSize, setFileSize] = React.useState<number | null>(null);
   const [estimatedCost, setEstimatedCost] = React.useState<string | null>(null);
 
+  // Compression states
+  const [originalFile, setOriginalFile] = React.useState<File | null>(null);
+  const [compressionTarget, setCompressionTarget] = React.useState<number | null>(null);
+  const [isCompressing, setIsCompressing] = React.useState(false);
+
   // Action states
   const [saving, setSaving] = React.useState(false);
-  const [uploading, setUploading] = React.useState(false);
   const [inscriptionProgress, setInscriptionProgress] = React.useState<string | null>(null);
   const [actionMessage, setActionMessage] = React.useState<{ type: "success" | "error" | "warning"; text: string } | null>(null);
 
@@ -143,6 +152,9 @@ export default function BadgeDetailPage() {
 
   const badgeId = params.id as string;
 
+  // Inscription polling hook
+  const poller = useInscriptionPoller(badgeId);
+
   React.useEffect(() => {
     if (!isConnected) {
       router.push("/");
@@ -150,6 +162,25 @@ export default function BadgeDetailPage() {
     }
     loadBadge();
   }, [isConnected, badgeId]);
+
+  // Watch poller for completion events
+  React.useEffect(() => {
+    if (!poller.isPolling) return;
+
+    if (poller.phase === "image" && poller.progress >= 1) {
+      poller.stopPolling();
+      loadBadge();
+      setActionMessage({ type: "success", text: "Image inscribed on Hedera! Now inscribe the metadata." });
+    } else if (poller.phase === "metadata" && poller.progress >= 1) {
+      poller.stopPolling();
+      loadBadge();
+      setActionMessage({ type: "success", text: "Metadata inscribed! Both inscriptions complete." });
+    } else if (poller.phase === "complete") {
+      poller.stopPolling();
+      loadBadge();
+      setActionMessage({ type: "success", text: "All inscriptions complete!" });
+    }
+  }, [poller.phase, poller.progress, poller.isPolling]);
 
   async function loadBadge() {
     try {
@@ -170,6 +201,14 @@ export default function BadgeDetailPage() {
       } else {
         setImagePreview(data.badge.imageUrl);
       }
+
+      // Reload recovery: auto-start polling if there are pending inscriptions
+      if (
+        (data.badge.imageInscriptionTxId && !data.badge.imageTopicId) ||
+        (data.badge.metadataInscriptionTxId && !data.badge.metadataTopicId)
+      ) {
+        poller.startPolling();
+      }
     } catch {
       setError("Failed to load badge");
     } finally {
@@ -180,15 +219,15 @@ export default function BadgeDetailPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setOriginalFile(file);
       setImageFile(file);
       setFileSize(file.size);
+      setCompressionTarget(null);
 
-      // Estimate cost locally (avoids using signer/session for quote)
-      // Kiloscribe charges ~0.16 HBAR/KB based on observed pricing
       const fileSizeKB = file.size / 1024;
       const imageCost = fileSizeKB * 0.16;
-      const metadataCost = 0.5; // ~0.5 HBAR for small metadata JSON
-      setEstimatedCost((imageCost + metadataCost).toFixed(4));
+      const metadataCost = 0.5;
+      setEstimatedCost((imageCost + metadataCost).toFixed(2));
 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -198,109 +237,160 @@ export default function BadgeDetailPage() {
     }
   };
 
-  const saveBadge = async () => {
-    const needsImage = !imageFile && !badge?.imageTopicId;
-    if (needsImage) {
-      setActionMessage({ type: "error", text: "Please select an image" });
+  const handleCompress = async (targetKB: number | null) => {
+    if (!originalFile) return;
+
+    // Restore original
+    if (targetKB === null) {
+      setImageFile(originalFile);
+      setFileSize(originalFile.size);
+      const fileSizeKB = originalFile.size / 1024;
+      setEstimatedCost(((fileSizeKB * 0.16) + 0.5).toFixed(2));
+      setCompressionTarget(null);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(originalFile);
       return;
     }
 
-    if (!isReady) {
-      setActionMessage({ type: "error", text: "Wallet not connected. Please connect your wallet to sign transactions." });
+    setIsCompressing(true);
+    try {
+      const compressed = await compressImage(originalFile, targetKB);
+      setImageFile(compressed);
+      setFileSize(compressed.size);
+      const fileSizeKB = compressed.size / 1024;
+      setEstimatedCost(((fileSizeKB * 0.16) + 0.5).toFixed(2));
+      setCompressionTarget(targetKB);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(compressed);
+    } catch {
+      setActionMessage({ type: "error", text: "Failed to compress image" });
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  // Inscribe image on chain (non-blocking: sign → save txId → poll)
+  const inscribeImage = async () => {
+    if (!imageFile || !isReady) {
+      setActionMessage({ type: "error", text: !imageFile ? "Please select an image" : "Wallet not connected" });
       return;
     }
 
-    setSaving(true);
-    setUploading(true);
-    setInscriptionProgress(null);
     setActionMessage(null);
+    setInscriptionProgress(null);
 
     try {
-      // Determine if we need to inscribe (new image or metadata-only)
-      const needsInscription = imageFile || (badge?.imageTopicId && !badge?.metadataTopicId);
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const fileBuffer = new Uint8Array(arrayBuffer);
+      const contentType = imageFile.type || "image/png";
 
-      if (needsInscription) {
-        let fileBuffer: Uint8Array;
-        let contentType: string;
+      const { transactionId, jobId } = await inscribeFileOnChain(
+        fileBuffer,
+        contentType,
+        imageFile.name,
+        (step) => setInscriptionProgress(step)
+      );
 
-        if (imageFile) {
-          const arrayBuffer = await imageFile.arrayBuffer();
-          fileBuffer = new Uint8Array(arrayBuffer);
-          contentType = imageFile.type || "image/png";
-        } else {
-          // Metadata-only: we still need a dummy buffer (won't be used since existingImageTopicId is set)
-          fileBuffer = new Uint8Array(0);
-          contentType = "image/png";
-        }
+      setInscriptionProgress(null);
 
-        // Inscribe image + metadata on Hedera via WalletConnect (user signs & pays)
-        // If image is already inscribed, skip re-inscribing it (saves HBAR)
-        const result = await uploadBadgeMetadataOnChain({
-          imageBuffer: fileBuffer,
-          imageContentType: contentType,
-          name: badgeName,
-          description: description || `Attendance badge for ${badge?.event?.title || "event"}`,
-          existingImageTopicId: badge?.imageTopicId || undefined,
-          eventTitle: badge?.event?.title || undefined,
-          eventDate: badge?.event?.mintDate || undefined,
-          eventLocation: badge?.event?.location || undefined,
-          onProgress: (step) => {
-            setInscriptionProgress(step);
-          },
-        });
+      // Save pending txId for reload recovery
+      await fetch(`/api/badges/${badgeId}/register-hashinals`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phase: "image_start", transactionId: jobId || transactionId }),
+      });
 
-        // Register the topic IDs in the database
-        const res = await fetch(`/api/badges/${badgeId}/register-hashinals`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            imageTopicId: result.imageTopicId,
-            metadataTopicId: result.metadataTopicId,
-            metadataUri: result.metadataUri,
-            name: badgeName,
-          }),
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Failed to register metadata");
-        }
-
-        setActionMessage({
-          type: "success",
-          text: `Inscribed on Hedera! Image: ${result.imageTopicId}, Metadata: ${result.metadataTopicId}`,
-        });
-      } else {
-        // Just update description
-        const res = await fetch(`/api/badges/${badgeId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ description }),
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Failed to save");
-        }
-
-        setActionMessage({ type: "success", text: "Saved!" });
-      }
-
+      poller.startPolling();
+      setActionMessage({ type: "success", text: "Image signed! Inscription in progress..." });
       setImageFile(null);
+      setOriginalFile(null);
+    } catch (err) {
+      setInscriptionProgress(null);
+      if (isUserRejection(err)) {
+        setActionMessage({ type: "warning", text: "Transaction rejected. You can try again." });
+      } else {
+        setActionMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to inscribe image" });
+      }
+    }
+  };
+
+  // Inscribe metadata on chain (non-blocking: sign → save txId → poll)
+  const inscribeMetadata = async () => {
+    if (!badge?.imageTopicId || !isReady) {
+      setActionMessage({ type: "error", text: "Image must be inscribed first" });
+      return;
+    }
+
+    setActionMessage(null);
+    setInscriptionProgress(null);
+
+    try {
+      const metadata = buildHIP412Metadata({
+        name: badgeName,
+        description: description || `Attendance badge for ${badge.event?.title || "event"}`,
+        imageTopicId: badge.imageTopicId,
+        imageContentType: "image/jpeg",
+        attributes: [
+          ...(badge.event?.title ? [{ trait_type: "Event", value: badge.event.title }] : []),
+          ...(badge.event?.mintDate ? [{ trait_type: "Date", value: badge.event.mintDate }] : []),
+          ...(badge.event?.location ? [{ trait_type: "Location", value: badge.event.location }] : []),
+        ],
+        properties: {
+          event_id: badge.eventId,
+        },
+      });
+
+      const metadataJson = JSON.stringify(metadata, null, 2);
+      const metadataBuffer = new TextEncoder().encode(metadataJson);
+
+      const { transactionId, jobId } = await inscribeFileOnChain(
+        metadataBuffer,
+        "application/json",
+        "metadata.json",
+        (step) => setInscriptionProgress(step)
+      );
+
+      setInscriptionProgress(null);
+
+      await fetch(`/api/badges/${badgeId}/register-hashinals`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phase: "metadata_start", transactionId: jobId || transactionId }),
+      });
+
+      poller.startPolling();
+      setActionMessage({ type: "success", text: "Metadata signed! Inscription in progress..." });
+    } catch (err) {
+      setInscriptionProgress(null);
+      if (isUserRejection(err)) {
+        setActionMessage({ type: "warning", text: "Transaction rejected. You can try again." });
+      } else {
+        setActionMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to inscribe metadata" });
+      }
+    }
+  };
+
+  // Save description only
+  const saveDescription = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/badges/${badgeId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save");
+      }
+      setActionMessage({ type: "success", text: "Description saved!" });
       await loadBadge();
     } catch (err) {
-      if (isUserRejection(err)) {
-        setActionMessage({ type: "warning", text: "Transaction rejected. You can try again when ready." });
-      } else {
-        setActionMessage({
-          type: "error",
-          text: err instanceof Error ? err.message : "Failed to save",
-        });
-      }
+      setActionMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to save" });
     } finally {
       setSaving(false);
-      setUploading(false);
-      setInscriptionProgress(null);
     }
   };
 
@@ -902,6 +992,7 @@ export default function BadgeDetailPage() {
                   Badge Image {badge.imageTopicId && <span className="text-success text-xs">(Stored on Hedera)</span>}
                 </label>
 
+                {/* On-chain inscription status */}
                 {badge.imageTopicId && !imageFile && (
                   <div className="mb-3 p-3 bg-bg-secondary rounded-lg border border-border">
                     <div className="flex items-center gap-2 text-sm text-text-secondary">
@@ -927,9 +1018,10 @@ export default function BadgeDetailPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-primary file:text-white file:cursor-pointer"
+                  disabled={poller.isPolling}
+                  className="w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-primary file:text-white file:cursor-pointer disabled:opacity-50"
                 />
-                {badge.imageTopicId && !imageFile && (
+                {badge.imageTopicId && !imageFile && !poller.isPolling && (
                   <p className="text-xs text-text-secondary mt-1">
                     Select a new image to replace the current one
                   </p>
@@ -937,7 +1029,7 @@ export default function BadgeDetailPage() {
 
                 {/* File size & estimated cost */}
                 {imageFile && fileSize && (
-                  <div className="mt-3 p-3 rounded-lg bg-bg-secondary border border-border">
+                  <div className="mt-3 p-3 rounded-lg bg-bg-secondary border border-border space-y-3">
                     <div className="flex items-center gap-4 text-sm">
                       <span className="text-text-secondary">
                         File Size:{" "}
@@ -958,52 +1050,126 @@ export default function BadgeDetailPage() {
                         </span>
                       )}
                     </div>
+
+                    {/* Compression buttons — only shown if original file > 200KB */}
+                    {originalFile && originalFile.size > 200 * 1024 && (
+                      <div>
+                        <p className="text-xs text-text-secondary mb-2">Reduce quality to save on inscription costs:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {[50, 100, 200].map((kb) => (
+                            <button
+                              key={kb}
+                              onClick={() => handleCompress(kb)}
+                              disabled={isCompressing}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                compressionTarget === kb
+                                  ? "bg-accent-primary text-white border-accent-primary"
+                                  : "bg-bg-primary border-border text-text-secondary hover:border-accent-primary hover:text-accent-primary"
+                              }`}
+                            >
+                              {isCompressing ? "..." : `${kb} KB (~${((kb * 0.16) + 0.5).toFixed(2)} ℏ)`}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => handleCompress(null)}
+                            disabled={isCompressing}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                              compressionTarget === null
+                                ? "bg-accent-primary text-white border-accent-primary"
+                                : "bg-bg-primary border-border text-text-secondary hover:border-accent-primary hover:text-accent-primary"
+                            }`}
+                          >
+                            Original
+                          </button>
+                        </div>
+                        {compressionTarget !== null && (
+                          <p className="text-xs text-text-secondary mt-1">
+                            Image converted to JPEG and compressed
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Inscription progress */}
+              {/* Signing progress (wallet interaction) */}
               {inscriptionProgress && (
                 <div className="p-3 bg-accent-primary/10 border border-accent-primary/30 rounded-lg">
                   <div className="flex items-center gap-2 text-sm text-accent-primary">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>{inscriptionProgress}</span>
                   </div>
-                  <p className="text-xs text-text-secondary mt-1">
-                    Please approve each transaction in your wallet. The image and metadata are being stored on-chain.
+                </div>
+              )}
+
+              {/* Inscription progress bar (polling) */}
+              {poller.isPolling && (
+                <div className="p-4 bg-accent-primary/10 border border-accent-primary/30 rounded-lg space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 text-accent-primary">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="font-medium">
+                        {poller.phase === "image" ? "Inscribing image on Hedera..." : "Inscribing metadata on Hedera..."}
+                      </span>
+                    </div>
+                    <span className="text-accent-primary font-bold">
+                      {Math.round(poller.progress * 100)}%
+                    </span>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="w-full h-2 bg-bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-accent-primary rounded-full transition-all duration-500"
+                      style={{ width: `${Math.max(poller.progress * 100, 2)}%` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-text-secondary">
+                    <span>
+                      {poller.messages}/{poller.maxMessages} messages
+                    </span>
+                    {poller.maxMessages > 0 && poller.messages < poller.maxMessages && (
+                      <span>
+                        ~{Math.max(1, Math.ceil((poller.maxMessages - poller.messages) * 3 / 60))} min remaining
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-text-secondary">
+                    You can leave this page and come back. The inscription continues in the background.
                   </p>
                 </div>
               )}
 
-              <div className="flex gap-3">
-                {(imageFile || !badge.imageTopicId) && (
-                  <Button onClick={saveBadge} disabled={saving || uploading || !imageFile || !isReady}>
-                    {saving || uploading ? (
+              {/* Action buttons */}
+              <div className="flex flex-wrap gap-3">
+                {/* Inscribe Image button — when no image inscribed yet */}
+                {!badge.imageTopicId && !poller.isPolling && (
+                  <Button onClick={inscribeImage} disabled={!imageFile || !isReady || isExecuting}>
+                    {isExecuting ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    {badge.imageTopicId && !badge.metadataTopicId
-                      ? "Inscribe Metadata"
-                      : badge.imageTopicId
-                      ? "Re-inscribe Image"
-                      : "Inscribe on Hedera"}
+                    Inscribe Image on Hedera
                   </Button>
                 )}
 
-                {/* Show inscribe metadata button when image is done but metadata isn't */}
-                {badge.imageTopicId && !badge.metadataTopicId && !imageFile && (
-                  <Button onClick={saveBadge} disabled={saving || uploading || !isReady}>
-                    {saving || uploading ? (
+                {/* Inscribe Metadata button — when image is done but metadata isn't */}
+                {badge.imageTopicId && !badge.metadataTopicId && !poller.isPolling && (
+                  <Button onClick={inscribeMetadata} disabled={!isReady || isExecuting}>
+                    {isExecuting ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    Inscribe Metadata
+                    Inscribe Metadata on Hedera
                   </Button>
                 )}
 
-                {(badge.imageTopicId || badge.imageCid) && badge.metadataTopicId && (
+                {/* Create Token button — when both inscriptions complete */}
+                {badge.imageTopicId && badge.metadataTopicId && (
                   <Button
                     onClick={createToken}
                     disabled={isExecuting || !isReady}
-                    variant={imageFile ? "outline" : "default"}
                   >
                     {isExecuting ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -1013,10 +1179,18 @@ export default function BadgeDetailPage() {
                     Create Token on Hedera
                   </Button>
                 )}
+
+                {/* Save description button */}
+                {badge.imageTopicId && badge.metadataTopicId && (
+                  <Button onClick={saveDescription} disabled={saving} variant="outline">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Save Description
+                  </Button>
+                )}
               </div>
 
               {/* On-chain metadata indicator */}
-              {badge.imageTopicId && (
+              {badge.imageTopicId && badge.metadataTopicId && (
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/30">
                   <svg className="h-4 w-4 text-success flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />

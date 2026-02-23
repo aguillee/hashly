@@ -40,8 +40,27 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { imageTopicId, metadataTopicId, metadataUri, name } = body;
+    const { phase, transactionId, imageTopicId, metadataTopicId, metadataUri, name } = body;
 
+    // Mode A: Register inscription start (save pending tx ID for reload recovery)
+    if (phase === "image_start" || phase === "metadata_start") {
+      if (!transactionId) {
+        return NextResponse.json(
+          { error: "transactionId required for inscription start" },
+          { status: 400 }
+        );
+      }
+
+      const data = phase === "image_start"
+        ? { imageInscriptionTxId: transactionId }
+        : { metadataInscriptionTxId: transactionId };
+
+      await prisma.attendanceBadge.update({ where: { id }, data });
+
+      return NextResponse.json({ success: true, phase, transactionId });
+    }
+
+    // Mode B: Register completed inscription (existing behavior)
     if (!imageTopicId || !metadataTopicId) {
       return NextResponse.json(
         { error: "imageTopicId and metadataTopicId are required" },
@@ -64,7 +83,9 @@ export async function POST(
         name: name || badge.name,
         imageTopicId,
         metadataTopicId,
-        // Clear legacy IPFS fields
+        // Clear pending tx IDs and legacy IPFS fields
+        imageInscriptionTxId: null,
+        metadataInscriptionTxId: null,
         imageCid: null,
         metadataCid: null,
       },

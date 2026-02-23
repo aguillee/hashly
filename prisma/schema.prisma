@@ -348,6 +348,8 @@ model AttendanceBadge {
   metadataCid     String?             @map("metadata_cid") // IPFS CID (legacy)
   imageTopicId    String?             @map("image_topic_id") // HCS-1 topic for image
   metadataTopicId String?             @map("metadata_topic_id") // HCS-1 topic for metadata
+  imageInscriptionTxId    String?     @map("image_inscription_tx_id") // Pending Kiloscribe tx ID for image
+  metadataInscriptionTxId String?     @map("metadata_inscription_tx_id") // Pending Kiloscribe tx ID for metadata
   status          AttendanceBadgeStatus @default(DRAFT)
   supply          Int                 @default(0) // Number minted
   airdropAttempts Int                 @default(0) @map("airdrop_attempts")
