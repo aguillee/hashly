@@ -166,7 +166,7 @@ export default function BadgeDetailPage() {
 
       // Use HCS-1 resolver for on-chain images, fallback to imageUrl (IPFS/legacy)
       if (data.badge.imageTopicId) {
-        setImagePreview(`/api/hashinals/resolve?topicId=${data.badge.imageTopicId}`);
+        setImagePreview(`https://kiloscribe.com/api/inscription-cdn/${data.badge.imageTopicId}?network=mainnet`);
       } else {
         setImagePreview(data.badge.imageUrl);
       }

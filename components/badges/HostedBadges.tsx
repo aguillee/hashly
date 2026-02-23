@@ -219,7 +219,7 @@ export function HostedBadges() {
                 <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
                   {badge.imageTopicId ? (
                     <Image
-                      src={`/api/hashinals/resolve?topicId=${badge.imageTopicId}`}
+                      src={`https://kiloscribe.com/api/inscription-cdn/${badge.imageTopicId}?network=mainnet`}
                       alt={badge.name}
                       fill
                       className="object-cover"

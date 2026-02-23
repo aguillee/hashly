@@ -19,6 +19,7 @@ const nextConfig = {
       { protocol: "https", hostname: "*.pinata.cloud" },
       { protocol: "https", hostname: "dwk1opv266jxs.cloudfront.net" },
       { protocol: "https", hostname: "*.cloudfront.net" },
+      { protocol: "https", hostname: "kiloscribe.com" },
     ],
   },
   experimental: {
