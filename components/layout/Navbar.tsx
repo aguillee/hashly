@@ -59,7 +59,7 @@ export function Navbar() {
                   className="w-8 h-8 sm:w-9 sm:h-9"
                   priority
                 />
-                <div className="hidden xs:flex flex-col">
+                <div className="hidden sm:flex flex-col">
                   <span className="font-bold text-lg leading-none text-text-primary">Hashly</span>
                   <span className="text-[9px] text-text-secondary font-medium tracking-wider uppercase">Discover Hedera</span>
                 </div>
