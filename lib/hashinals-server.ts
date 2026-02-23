@@ -12,7 +12,7 @@ export async function resolveHCS1(
   topicId: string
 ): Promise<{ data: Buffer; mimeType: string }> {
   const MIRROR_NODE =
-    process.env.NEXT_PUBLIC_HEDERA_NETWORK === "testnet"
+    process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() === "testnet"
       ? "https://testnet.mirrornode.hedera.com"
       : "https://mainnet.mirrornode.hedera.com";
 

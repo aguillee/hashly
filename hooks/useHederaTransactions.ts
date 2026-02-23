@@ -21,7 +21,7 @@ import {
 } from "@hashgraphonline/standards-sdk";
 import { buildHIP412Metadata } from "@/lib/hashinals";
 
-const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK === "testnet"
+const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() === "testnet"
   ? "https://testnet.mirrornode.hedera.com"
   : "https://mainnet.mirrornode.hedera.com";
 
@@ -323,7 +323,7 @@ export function useHederaTransactions() {
   const KILOSCRIBE_BASE_URL =
     process.env.NEXT_PUBLIC_KILOSCRIBE_BASE_URL || "https://v2-api.tier.bot/api";
   const HEDERA_NETWORK =
-    (process.env.NEXT_PUBLIC_HEDERA_NETWORK as "mainnet" | "testnet") || "mainnet";
+    ((process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() || "mainnet") as "mainnet" | "testnet");
 
   /**
    * Get an estimated cost quote for inscribing a file on-chain.

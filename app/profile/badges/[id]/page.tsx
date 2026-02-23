@@ -28,11 +28,11 @@ import { Button } from "@/components/ui/Button";
 import { useWalletStore } from "@/store";
 import { useHederaTransactions } from "@/hooks/useHederaTransactions";
 
-const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK === "testnet"
+const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() === "testnet"
   ? "https://testnet.mirrornode.hedera.com"
   : "https://mainnet.mirrornode.hedera.com";
 
-const HASHSCAN_NETWORK = process.env.NEXT_PUBLIC_HEDERA_NETWORK === "testnet"
+const HASHSCAN_NETWORK = process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() === "testnet"
   ? "testnet"
   : "mainnet";
 

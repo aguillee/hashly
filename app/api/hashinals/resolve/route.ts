@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const topicId = searchParams.get("topicId");
   const network = (searchParams.get("network") ||
-    process.env.NEXT_PUBLIC_HEDERA_NETWORK ||
+    process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() ||
     "mainnet") as "mainnet" | "testnet";
 
   if (!topicId || !/^0\.0\.\d+$/.test(topicId)) {
