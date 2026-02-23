@@ -305,7 +305,7 @@ export default function EventDetailPage() {
     );
   }
 
-  const score = event.votesUp - event.votesDown;
+  const score = Math.abs(event.votesUp) - Math.abs(event.votesDown);
   const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
   const isHackathon = event.event_type === "HACKATHON";
   const isStarsOnly = isMeetup || isHackathon; // Stars-only voting for meetups and hackathons
@@ -695,16 +695,16 @@ export default function EventDetailPage() {
                     <Star className={cn("h-4 w-4", event.userVote === "UP" && !event.canVote && "fill-white")} />
                     {event.userVote === "UP" && !event.canVote ? "Starred" : "Give a Star"}
                   </Button>
-                  {event.userVote === "UP" && !event.canVote && (
+                  {event.userVote === "UP" && (
                     <p className="text-center text-sm text-text-secondary mt-2">
-                      You starred this event ⭐
+                      {event.canVote ? "You can star again" : "You starred this event ⭐"}
                     </p>
                   )}
                 </>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   <Button
-                    variant={event.userVote === "UP" ? "default" : "secondary"}
+                    variant={event.userVote === "UP" && !event.canVote ? "default" : "secondary"}
                     onClick={() => handleVote("UP")}
                     disabled={voting || !isConnected || !event.canVote}
                     className={cn(
@@ -713,10 +713,10 @@ export default function EventDetailPage() {
                     )}
                   >
                     <ThumbsUp className="h-4 w-4" />
-                    {event.votesUp}
+                    {Math.abs(event.votesUp)}
                   </Button>
                   <Button
-                    variant={event.userVote === "DOWN" ? "default" : "secondary"}
+                    variant={event.userVote === "DOWN" && !event.canVote ? "default" : "secondary"}
                     onClick={() => handleVote("DOWN")}
                     disabled={voting || !isConnected || !event.canVote}
                     className={cn(
@@ -725,14 +725,14 @@ export default function EventDetailPage() {
                     )}
                   >
                     <ThumbsDown className="h-4 w-4" />
-                    {event.votesDown}
+                    {Math.abs(event.votesDown)}
                   </Button>
                 </div>
               )}
 
               {isConnected && event.userVote && !isStarsOnly && (
                 <p className="text-xs text-text-secondary text-center mt-3">
-                  You voted {event.userVote === "UP" ? "👍" : "👎"}
+                  {event.canVote ? "You can vote again" : `You voted ${event.userVote === "UP" ? "👍" : "👎"}`}
                 </p>
               )}
             </div>

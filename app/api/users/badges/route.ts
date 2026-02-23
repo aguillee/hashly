@@ -10,6 +10,7 @@ interface UserBadge {
   name: string;
   description: string | null;
   imageUrl: string | null;
+  imageTopicId: string | null;
   serials: number[];
   event: {
     id: string;
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
         name: true,
         description: true,
         imageUrl: true,
+        imageTopicId: true,
         eventId: true,
       },
     });
@@ -87,6 +89,7 @@ export async function GET(request: NextRequest) {
           name: badge.name,
           description: badge.description,
           imageUrl: badge.imageUrl,
+          imageTopicId: badge.imageTopicId,
           serials: ownership.serials,
           event: event
             ? {

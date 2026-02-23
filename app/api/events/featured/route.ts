@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
     let highestScore = -Infinity;
 
     for (const event of events.filter(e => e.status === "UPCOMING")) {
-      const score = event.votesUp - event.votesDown;
+      const score = Math.abs(event.votesUp) - Math.abs(event.votesDown);
       if (score > highestScore) {
         highestScore = score;
         mostVoted = event;
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
     let highestLiveScore = -Infinity;
 
     for (const event of events.filter(e => e.status === "LIVE")) {
-      const score = event.votesUp - event.votesDown;
+      const score = Math.abs(event.votesUp) - Math.abs(event.votesDown);
       if (score > highestLiveScore) {
         highestLiveScore = score;
         mostVotedLive = event;
@@ -205,25 +205,25 @@ export async function GET(request: NextRequest) {
       mostVoted: mostVoted
         ? {
             ...mostVoted,
-            score: mostVoted.votesUp - mostVoted.votesDown,
+            score: Math.abs(mostVoted.votesUp) - Math.abs(mostVoted.votesDown),
           }
         : null,
       nextUp: nextUp
         ? {
             ...nextUp,
-            score: nextUp.votesUp - nextUp.votesDown,
+            score: Math.abs(nextUp.votesUp) - Math.abs(nextUp.votesDown),
           }
         : null,
       mostVotedLive: mostVotedLive
         ? {
             ...mostVotedLive,
-            score: mostVotedLive.votesUp - mostVotedLive.votesDown,
+            score: Math.abs(mostVotedLive.votesUp) - Math.abs(mostVotedLive.votesDown),
           }
         : null,
       topForeverMint: topForeverMint
         ? {
             ...topForeverMint,
-            score: topForeverMint.votesUp - topForeverMint.votesDown,
+            score: Math.abs(topForeverMint.votesUp) - Math.abs(topForeverMint.votesDown),
           }
         : null,
       // Ecosystem Meetups (3 columns: most voted, next upcoming, deduplicated)

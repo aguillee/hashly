@@ -34,6 +34,7 @@ interface HostedBadge {
   eventId: string;
   name: string;
   imageUrl: string | null;
+  imageTopicId: string | null;
   tokenId: string | null;
   status: "DRAFT" | "TOKEN_CREATED" | "MINTED" | "DISTRIBUTED";
   supply: number;
@@ -216,7 +217,14 @@ export function HostedBadges() {
             >
               <div className="flex items-center gap-4 p-4 rounded-xl bg-bg-card border border-border hover:border-text-tertiary transition-colors duration-150 group">
                 <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
-                  {badge.imageUrl ? (
+                  {badge.imageTopicId ? (
+                    <Image
+                      src={`/api/hashinals/resolve?topicId=${badge.imageTopicId}`}
+                      alt={badge.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : badge.imageUrl ? (
                     <Image
                       src={badge.imageUrl}
                       alt={badge.name}

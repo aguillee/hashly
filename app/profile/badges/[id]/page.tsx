@@ -28,6 +28,14 @@ import { Button } from "@/components/ui/Button";
 import { useWalletStore } from "@/store";
 import { useHederaTransactions } from "@/hooks/useHederaTransactions";
 
+const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK === "testnet"
+  ? "https://testnet.mirrornode.hedera.com"
+  : "https://mainnet.mirrornode.hedera.com";
+
+const HASHSCAN_NETWORK = process.env.NEXT_PUBLIC_HEDERA_NETWORK === "testnet"
+  ? "testnet"
+  : "mainnet";
+
 interface BadgeClaim {
   id: string;
   walletAddress: string;
@@ -47,6 +55,8 @@ interface BadgeDetail {
   imageUrl: string | null;
   imageCid: string | null;
   metadataCid: string | null;
+  imageTopicId: string | null;
+  metadataTopicId: string | null;
   tokenId: string | null;
   status: "DRAFT" | "TOKEN_CREATED" | "MINTED" | "DISTRIBUTED" | "EXPIRED";
   supply: number;
@@ -96,7 +106,7 @@ export default function BadgeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isConnected } = useWalletStore();
-  const { createNFTToken, mintNFTs, airdropNFTs, isExecuting, isReady } = useHederaTransactions();
+  const { createNFTToken, mintNFTs, airdropNFTs, uploadBadgeMetadataOnChain, isExecuting, isReady } = useHederaTransactions();
 
   const [badge, setBadge] = React.useState<BadgeDetail | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -116,9 +126,14 @@ export default function BadgeDetailPage() {
   // Badge name is auto-generated from event title
   const badgeName = badge?.event?.title ? `${badge.event.title} Badge` : badge?.name || "";
 
+  // File info & cost estimate
+  const [fileSize, setFileSize] = React.useState<number | null>(null);
+  const [estimatedCost, setEstimatedCost] = React.useState<string | null>(null);
+
   // Action states
   const [saving, setSaving] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
+  const [inscriptionProgress, setInscriptionProgress] = React.useState<string | null>(null);
   const [actionMessage, setActionMessage] = React.useState<{ type: "success" | "error" | "warning"; text: string } | null>(null);
 
   // Association check states
@@ -148,7 +163,13 @@ export default function BadgeDetailPage() {
       const data = await res.json();
       setBadge(data.badge);
       setDescription(data.badge.description || "");
-      setImagePreview(data.badge.imageUrl);
+
+      // Use HCS-1 resolver for on-chain images, fallback to imageUrl (IPFS/legacy)
+      if (data.badge.imageTopicId) {
+        setImagePreview(`/api/hashinals/resolve?topicId=${data.badge.imageTopicId}`);
+      } else {
+        setImagePreview(data.badge.imageUrl);
+      }
     } catch {
       setError("Failed to load badge");
     } finally {
@@ -160,6 +181,15 @@ export default function BadgeDetailPage() {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
+      setFileSize(file.size);
+
+      // Estimate cost locally (avoids using signer/session for quote)
+      // Kiloscribe charges ~0.16 HBAR/KB based on observed pricing
+      const fileSizeKB = file.size / 1024;
+      const imageCost = fileSizeKB * 0.16;
+      const metadataCost = 0.5; // ~0.5 HBAR for small metadata JSON
+      setEstimatedCost((imageCost + metadataCost).toFixed(4));
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -169,39 +199,79 @@ export default function BadgeDetailPage() {
   };
 
   const saveBadge = async () => {
-    if (!imageFile && !badge?.imageCid) {
+    const needsImage = !imageFile && !badge?.imageTopicId;
+    if (needsImage) {
       setActionMessage({ type: "error", text: "Please select an image" });
+      return;
+    }
+
+    if (!isReady) {
+      setActionMessage({ type: "error", text: "Wallet not connected. Please connect your wallet to sign transactions." });
       return;
     }
 
     setSaving(true);
     setUploading(true);
+    setInscriptionProgress(null);
     setActionMessage(null);
 
     try {
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        if (description) {
-          formData.append("description", description);
+      // Determine if we need to inscribe (new image or metadata-only)
+      const needsInscription = imageFile || (badge?.imageTopicId && !badge?.metadataTopicId);
+
+      if (needsInscription) {
+        let fileBuffer: Uint8Array;
+        let contentType: string;
+
+        if (imageFile) {
+          const arrayBuffer = await imageFile.arrayBuffer();
+          fileBuffer = new Uint8Array(arrayBuffer);
+          contentType = imageFile.type || "image/png";
+        } else {
+          // Metadata-only: we still need a dummy buffer (won't be used since existingImageTopicId is set)
+          fileBuffer = new Uint8Array(0);
+          contentType = "image/png";
         }
 
-        const res = await fetch(`/api/badges/${badgeId}/upload-metadata`, {
+        // Inscribe image + metadata on Hedera via WalletConnect (user signs & pays)
+        // If image is already inscribed, skip re-inscribing it (saves HBAR)
+        const result = await uploadBadgeMetadataOnChain({
+          imageBuffer: fileBuffer,
+          imageContentType: contentType,
+          name: badgeName,
+          description: description || `Attendance badge for ${badge?.event?.title || "event"}`,
+          existingImageTopicId: badge?.imageTopicId || undefined,
+          eventTitle: badge?.event?.title || undefined,
+          eventDate: badge?.event?.mintDate || undefined,
+          eventLocation: badge?.event?.location || undefined,
+          onProgress: (step) => {
+            setInscriptionProgress(step);
+          },
+        });
+
+        // Register the topic IDs in the database
+        const res = await fetch(`/api/badges/${badgeId}/register-hashinals`, {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageTopicId: result.imageTopicId,
+            metadataTopicId: result.metadataTopicId,
+            metadataUri: result.metadataUri,
+            name: badgeName,
+          }),
         });
 
         if (!res.ok) {
           const data = await res.json();
-          throw new Error(data.error || "Failed to upload to IPFS");
+          throw new Error(data.error || "Failed to register metadata");
         }
 
-        const data = await res.json();
         setActionMessage({
           type: "success",
-          text: `Uploaded to IPFS! CID: ${data.imageCid.slice(0, 12)}...`,
+          text: `Inscribed on Hedera! Image: ${result.imageTopicId}, Metadata: ${result.metadataTopicId}`,
         });
       } else {
+        // Just update description
         const res = await fetch(`/api/badges/${badgeId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -219,13 +289,18 @@ export default function BadgeDetailPage() {
       setImageFile(null);
       await loadBadge();
     } catch (err) {
-      setActionMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Failed to save",
-      });
+      if (isUserRejection(err)) {
+        setActionMessage({ type: "warning", text: "Transaction rejected. You can try again when ready." });
+      } else {
+        setActionMessage({
+          type: "error",
+          text: err instanceof Error ? err.message : "Failed to save",
+        });
+      }
     } finally {
       setSaving(false);
       setUploading(false);
+      setInscriptionProgress(null);
     }
   };
 
@@ -311,7 +386,7 @@ export default function BadgeDetailPage() {
       newWallets.map(async (wallet) => {
         try {
           const res = await fetch(
-            `https://mainnet.mirrornode.hedera.com/api/v1/accounts/${wallet}`,
+            `${MIRROR_NODE}/api/v1/accounts/${wallet}`,
             { cache: "no-store" }
           );
           if (res.ok) {
@@ -359,8 +434,8 @@ export default function BadgeDetailPage() {
       return;
     }
 
-    if (!badge.metadataCid) {
-      setActionMessage({ type: "error", text: "Badge metadata not uploaded to IPFS" });
+    if (!badge.metadataTopicId && !badge.metadataCid) {
+      setActionMessage({ type: "error", text: "Badge metadata not inscribed on Hedera yet" });
       return;
     }
 
@@ -372,7 +447,11 @@ export default function BadgeDetailPage() {
     setActionMessage(null);
     setShowMintConfirm(false);
     try {
-      const metadata = addedWallets.map(() => badge.metadataCid!);
+      // Use Hashinals URI (hcs://1/topicId) or legacy IPFS CID
+      const metadataUri = badge.metadataTopicId
+        ? `hcs://1/${badge.metadataTopicId}`
+        : badge.metadataCid!;
+      const metadata = addedWallets.map(() => metadataUri);
 
       const result = await mintNFTs({
         tokenId: badge.tokenId,
@@ -679,7 +758,7 @@ export default function BadgeDetailPage() {
                   <Copy className="h-3 w-3" />
                 </button>
                 <a
-                  href={`https://hashscan.io/mainnet/token/${badge.tokenId}`}
+                  href={`https://hashscan.io/${HASHSCAN_NETWORK}/token/${badge.tokenId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent-primary hover:text-accent-secondary"
@@ -820,18 +899,27 @@ export default function BadgeDetailPage() {
 
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
-                  Badge Image {badge.imageCid && <span className="text-success text-xs">(Uploaded to IPFS)</span>}
+                  Badge Image {badge.imageTopicId && <span className="text-success text-xs">(Stored on Hedera)</span>}
                 </label>
 
-                {badge.imageCid && !imageFile && (
+                {badge.imageTopicId && !imageFile && (
                   <div className="mb-3 p-3 bg-bg-secondary rounded-lg border border-border">
                     <div className="flex items-center gap-2 text-sm text-text-secondary">
                       <CheckCircle className="h-4 w-4 text-success" />
-                      <span>Image saved to IPFS</span>
+                      <span>Image inscribed on Hedera</span>
                       <code className="text-xs bg-bg-primary px-2 py-0.5 rounded">
-                        {badge.imageCid.slice(0, 12)}...
+                        {badge.imageTopicId}
                       </code>
                     </div>
+                    {badge.metadataTopicId && (
+                      <div className="flex items-center gap-2 text-sm text-text-secondary mt-1">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                        <span>Metadata inscribed on Hedera</span>
+                        <code className="text-xs bg-bg-primary px-2 py-0.5 rounded">
+                          {badge.metadataTopicId}
+                        </code>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -841,24 +929,77 @@ export default function BadgeDetailPage() {
                   onChange={handleImageChange}
                   className="w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-primary file:text-white file:cursor-pointer"
                 />
-                {badge.imageCid && (
+                {badge.imageTopicId && !imageFile && (
                   <p className="text-xs text-text-secondary mt-1">
                     Select a new image to replace the current one
                   </p>
                 )}
+
+                {/* File size & estimated cost */}
+                {imageFile && fileSize && (
+                  <div className="mt-3 p-3 rounded-lg bg-bg-secondary border border-border">
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-text-secondary">
+                        File Size:{" "}
+                        <span className="text-text-primary font-medium">
+                          {fileSize < 1024
+                            ? `${fileSize} B`
+                            : fileSize < 1024 * 1024
+                            ? `${(fileSize / 1024).toFixed(2)} KB`
+                            : `${(fileSize / (1024 * 1024)).toFixed(2)} MB`}
+                        </span>
+                      </span>
+                      {estimatedCost && (
+                        <span className="text-text-secondary">
+                          Estimated Cost:{" "}
+                          <span className="text-text-primary font-medium">
+                            ~{estimatedCost} ℏ
+                          </span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
+              {/* Inscription progress */}
+              {inscriptionProgress && (
+                <div className="p-3 bg-accent-primary/10 border border-accent-primary/30 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-accent-primary">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>{inscriptionProgress}</span>
+                  </div>
+                  <p className="text-xs text-text-secondary mt-1">
+                    Please approve each transaction in your wallet. The image and metadata are being stored on-chain.
+                  </p>
+                </div>
+              )}
+
               <div className="flex gap-3">
-                {(imageFile || !badge.imageCid) && (
-                  <Button onClick={saveBadge} disabled={saving || uploading || !imageFile}>
+                {(imageFile || !badge.imageTopicId) && (
+                  <Button onClick={saveBadge} disabled={saving || uploading || !imageFile || !isReady}>
                     {saving || uploading ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    {badge.imageCid ? "Update Image" : "Upload to IPFS"}
+                    {badge.imageTopicId && !badge.metadataTopicId
+                      ? "Inscribe Metadata"
+                      : badge.imageTopicId
+                      ? "Re-inscribe Image"
+                      : "Inscribe on Hedera"}
                   </Button>
                 )}
 
-                {badge.imageCid && (
+                {/* Show inscribe metadata button when image is done but metadata isn't */}
+                {badge.imageTopicId && !badge.metadataTopicId && !imageFile && (
+                  <Button onClick={saveBadge} disabled={saving || uploading || !isReady}>
+                    {saving || uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    Inscribe Metadata
+                  </Button>
+                )}
+
+                {(badge.imageTopicId || badge.imageCid) && badge.metadataTopicId && (
                   <Button
                     onClick={createToken}
                     disabled={isExecuting || !isReady}
@@ -873,6 +1014,18 @@ export default function BadgeDetailPage() {
                   </Button>
                 )}
               </div>
+
+              {/* On-chain metadata indicator */}
+              {badge.imageTopicId && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/30">
+                  <svg className="h-4 w-4 text-success flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  <p className="text-xs text-success font-medium">
+                    Image & metadata permanently stored on Hedera — fully on-chain, no IPFS dependency
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

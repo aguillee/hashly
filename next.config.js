@@ -22,7 +22,24 @@ const nextConfig = {
     ],
   },
   experimental: {
-    serverComponentsExternalPackages: ["@hashgraph/sdk"],
+    serverComponentsExternalPackages: ["@hashgraph/sdk", "zstd-codec"],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Provide Node.js polyfill fallbacks for browser-side SDK packages
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        zlib: false,
+        path: false,
+        os: false,
+      };
+    }
+    return config;
   },
 };
 

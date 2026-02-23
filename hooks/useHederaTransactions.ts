@@ -15,8 +15,15 @@ import {
   PublicKey,
   NftId,
 } from "@hashgraph/sdk";
+import {
+  inscribeWithSigner,
+  type InscriptionInput,
+} from "@hashgraphonline/standards-sdk";
+import { buildHIP412Metadata } from "@/lib/hashinals";
 
-const MIRROR_NODE = "https://mainnet.mirrornode.hedera.com";
+const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK === "testnet"
+  ? "https://testnet.mirrornode.hedera.com"
+  : "https://mainnet.mirrornode.hedera.com";
 
 export interface CreateTokenParams {
   name: string;
@@ -310,10 +317,223 @@ export function useHederaTransactions() {
     [getSigner, walletAddress]
   );
 
+  // === Hashinals (HCS-1) Inscription via Standards SDK ===
+
+  const KILOSCRIBE_API_KEY = process.env.NEXT_PUBLIC_KILOSCRIBE_API_KEY!;
+  const KILOSCRIBE_BASE_URL =
+    process.env.NEXT_PUBLIC_KILOSCRIBE_BASE_URL || "https://v2-api.tier.bot/api";
+  const HEDERA_NETWORK =
+    (process.env.NEXT_PUBLIC_HEDERA_NETWORK as "mainnet" | "testnet") || "mainnet";
+
+  /**
+   * Get an estimated cost quote for inscribing a file on-chain.
+   * Does NOT inscribe — just returns the cost estimate.
+   */
+  const getInscriptionQuote = React.useCallback(
+    async (
+      fileBuffer: Uint8Array | ArrayBuffer,
+      mimeType: string,
+      fileName: string
+    ): Promise<{ totalCostHbar: string }> => {
+      const signer = getSigner();
+
+      if (!KILOSCRIBE_API_KEY) {
+        throw new Error("Kiloscribe API key not configured");
+      }
+
+      const buf = fileBuffer instanceof Uint8Array
+        ? fileBuffer.buffer.slice(
+            fileBuffer.byteOffset,
+            fileBuffer.byteOffset + fileBuffer.byteLength
+          ) as ArrayBuffer
+        : fileBuffer;
+
+      const input: InscriptionInput = {
+        type: "buffer",
+        buffer: buf,
+        fileName,
+        mimeType,
+      };
+
+      const response = await inscribeWithSigner(input, signer as any, {
+        mode: "file",
+        network: HEDERA_NETWORK,
+        apiKey: KILOSCRIBE_API_KEY,
+        baseURL: KILOSCRIBE_BASE_URL,
+        connectionMode: "http" as any,
+        quoteOnly: true,
+      });
+
+      return {
+        totalCostHbar: (response as any).result?.totalCostHbar || "0",
+      };
+    },
+    [getSigner, KILOSCRIBE_API_KEY, KILOSCRIBE_BASE_URL, HEDERA_NETWORK]
+  );
+
+  /**
+   * Inscribe a file on-chain using HCS-1 via Kiloscribe SDK.
+   * User signs via WalletConnect — key never leaves wallet.
+   */
+  const inscribeFileOnChain = React.useCallback(
+    async (
+      fileBuffer: Uint8Array | ArrayBuffer,
+      mimeType: string,
+      fileName: string,
+      onProgress?: (step: string) => void
+    ): Promise<{ topicId: string; transactionId: string }> => {
+      setIsExecuting(true);
+      try {
+        const signer = getSigner();
+
+        if (!KILOSCRIBE_API_KEY) {
+          throw new Error("Kiloscribe API key not configured (NEXT_PUBLIC_KILOSCRIBE_API_KEY)");
+        }
+
+        onProgress?.("Preparing inscription...");
+
+        const buf = fileBuffer instanceof Uint8Array
+          ? fileBuffer.buffer.slice(
+              fileBuffer.byteOffset,
+              fileBuffer.byteOffset + fileBuffer.byteLength
+            ) as ArrayBuffer
+          : fileBuffer;
+
+        const input: InscriptionInput = {
+          type: "buffer",
+          buffer: buf,
+          fileName,
+          mimeType,
+        };
+
+        onProgress?.("Uploading to Kiloscribe & signing transaction...");
+
+        const response = await inscribeWithSigner(input, signer as any, {
+          mode: "file",
+          network: HEDERA_NETWORK,
+          apiKey: KILOSCRIBE_API_KEY,
+          baseURL: KILOSCRIBE_BASE_URL,
+          connectionMode: "http" as any,
+          waitForConfirmation: true,
+          waitMaxAttempts: 120,
+          waitIntervalMs: 3000,
+        });
+
+        if (!response.confirmed || !response.inscription) {
+          throw new Error("Inscription failed — not confirmed");
+        }
+
+        const topicId = response.inscription.topic_id;
+        const transactionId = response.inscription.transactionId || "";
+
+        if (!topicId) {
+          throw new Error("Inscription failed — no topic ID returned");
+        }
+
+        return { topicId, transactionId };
+      } catch (err) {
+        // Log full error for debugging
+        console.error("[Hashinals] Inscription error:", err);
+        throw err;
+      } finally {
+        setIsExecuting(false);
+      }
+    },
+    [getSigner, KILOSCRIBE_API_KEY, KILOSCRIBE_BASE_URL, HEDERA_NETWORK]
+  );
+
+  /**
+   * Inscribe badge image + metadata on-chain.
+   * 1. Inscribes image as HCS-1 file
+   * 2. Builds HIP-412 metadata JSON with hcs://1/{imageTopicId}
+   * 3. Inscribes metadata JSON as HCS-1 file
+   */
+  const uploadBadgeMetadataOnChain = React.useCallback(
+    async (params: {
+      imageBuffer: Uint8Array;
+      imageContentType: string;
+      name: string;
+      description: string;
+      existingImageTopicId?: string; // Skip image inscription if already inscribed
+      eventTitle?: string;
+      eventDate?: string;
+      eventLocation?: string;
+      onProgress?: (step: string) => void;
+    }): Promise<{
+      imageTopicId: string;
+      metadataTopicId: string;
+      metadataUri: string;
+    }> => {
+      setIsExecuting(true);
+      try {
+        let imageTopicId: string;
+
+        if (params.existingImageTopicId) {
+          // Image already inscribed — skip to metadata
+          imageTopicId = params.existingImageTopicId;
+          params.onProgress?.("Image already on-chain, inscribing metadata...");
+        } else {
+          // Step 1: Inscribe image
+          params.onProgress?.("Inscribing image on Hedera...");
+          const imageResult = await inscribeFileOnChain(
+            params.imageBuffer,
+            params.imageContentType,
+            `badge-image.${params.imageContentType.split("/")[1] || "png"}`,
+            params.onProgress
+          );
+          imageTopicId = imageResult.topicId;
+        }
+
+        // Step 2: Build HIP-412 metadata
+        const metadata = buildHIP412Metadata({
+          name: params.name,
+          description: params.description,
+          imageTopicId,
+          imageContentType: params.imageContentType,
+          attributes: [
+            ...(params.eventTitle
+              ? [{ trait_type: "Event", value: params.eventTitle }]
+              : []),
+            ...(params.eventDate
+              ? [{ trait_type: "Date", value: params.eventDate }]
+              : []),
+            ...(params.eventLocation
+              ? [{ trait_type: "Location", value: params.eventLocation }]
+              : []),
+          ],
+        });
+
+        // Step 3: Inscribe metadata JSON
+        params.onProgress?.("Inscribing metadata on Hedera...");
+        const metadataBuffer = new TextEncoder().encode(
+          JSON.stringify(metadata)
+        );
+        const metadataResult = await inscribeFileOnChain(
+          metadataBuffer,
+          "application/json",
+          "metadata.json",
+          params.onProgress
+        );
+
+        return {
+          imageTopicId,
+          metadataTopicId: metadataResult.topicId,
+          metadataUri: `hcs://1/${metadataResult.topicId}`,
+        };
+      } finally {
+        setIsExecuting(false);
+      }
+    },
+    [inscribeFileOnChain]
+  );
+
   return {
     createNFTToken,
     mintNFTs,
     airdropNFTs,
+    inscribeFileOnChain,
+    uploadBadgeMetadataOnChain,
+    getInscriptionQuote,
     isExecuting,
     isReady: !!dAppConnector && !!walletAddress,
   };

@@ -374,21 +374,28 @@ export async function POST(
       if (isDirectionChange) {
         // Direction change: half the swing removes from old counter, half adds to new
         const perCounter = Math.abs(totalVoteChange) / 2;
+        // Fetch current values to prevent going below 0
+        const currentEvent = await prisma.event.findUnique({
+          where: { id: eventId },
+          select: { votesUp: true, votesDown: true },
+        });
         if (totalVoteChange > 0) {
           // DOWN -> UP: move votes from votesDown to votesUp
+          const safeDecrement = Math.min(perCounter, Math.max(0, currentEvent?.votesDown ?? 0));
           await prisma.event.update({
             where: { id: eventId },
             data: {
               votesUp: { increment: perCounter },
-              votesDown: { decrement: perCounter },
+              votesDown: { decrement: safeDecrement },
             },
           });
         } else {
           // UP -> DOWN: move votes from votesUp to votesDown
+          const safeDecrement = Math.min(perCounter, Math.max(0, currentEvent?.votesUp ?? 0));
           await prisma.event.update({
             where: { id: eventId },
             data: {
-              votesUp: { decrement: perCounter },
+              votesUp: { decrement: safeDecrement },
               votesDown: { increment: perCounter },
             },
           });
@@ -438,9 +445,9 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      newScore: (updatedEvent?.votesUp || 0) - (updatedEvent?.votesDown || 0),
-      votesUp: updatedEvent?.votesUp || 0,
-      votesDown: updatedEvent?.votesDown || 0,
+      newScore: Math.abs(updatedEvent?.votesUp || 0) - Math.abs(updatedEvent?.votesDown || 0),
+      votesUp: Math.abs(updatedEvent?.votesUp || 0),
+      votesDown: Math.abs(updatedEvent?.votesDown || 0),
       nftVotesUsed: nftVotesUsed.length > 0 ? nftVotesUsed : undefined,
       totalNftWeight: nftVoteWeight !== 0 ? Math.abs(nftVoteWeight) : undefined,
       votesRemaining: updatedLimit.remaining,

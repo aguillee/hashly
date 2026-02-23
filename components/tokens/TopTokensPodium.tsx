@@ -32,6 +32,7 @@ const rankConfig: Record<number, {
   borderLeft: string;
   cardBg: string;
   cardEffect: string;
+  shimmerColor: string;
   icon: React.ElementType;
   label: string;
 }> = {
@@ -40,8 +41,9 @@ const rankConfig: Record<number, {
     ring: "ring-2 ring-yellow-400/60",
     ringPulse: "podium-ring-pulse-1",
     borderLeft: "border-yellow-500/40 hover:border-yellow-500/70",
-    cardBg: "bg-gradient-to-b from-yellow-500/[0.06] to-bg-card",
+    cardBg: "bg-[#fef9e7] dark:bg-[#1a1a0e]",
     cardEffect: "podium-card-1",
+    shimmerColor: "via-yellow-400/10",
     icon: Crown,
     label: "1st",
   },
@@ -50,8 +52,9 @@ const rankConfig: Record<number, {
     ring: "ring-2 ring-slate-300/50",
     ringPulse: "podium-ring-pulse-2",
     borderLeft: "border-slate-400/40 hover:border-slate-400/70",
-    cardBg: "bg-gradient-to-b from-slate-400/[0.06] to-bg-card",
+    cardBg: "bg-[#f1f5f9] dark:bg-[#161a22]",
     cardEffect: "podium-card-2",
+    shimmerColor: "via-slate-300/10",
     icon: Medal,
     label: "2nd",
   },
@@ -60,8 +63,9 @@ const rankConfig: Record<number, {
     ring: "ring-2 ring-amber-600/50",
     ringPulse: "podium-ring-pulse-3",
     borderLeft: "border-amber-600/40 hover:border-amber-600/70",
-    cardBg: "bg-gradient-to-b from-amber-600/[0.06] to-bg-card",
+    cardBg: "bg-[#fef3e2] dark:bg-[#1a150e]",
     cardEffect: "podium-card-3",
+    shimmerColor: "via-amber-500/10",
     icon: Award,
     label: "3rd",
   },
@@ -120,7 +124,7 @@ export function TopTokensPodium() {
                 {/* Top 3 shimmer sweep */}
                 {isTop3 && (
                   <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+                    <div className={cn("absolute inset-0 bg-gradient-to-r from-transparent to-transparent animate-shimmer", config.shimmerColor)} style={{ backgroundSize: '200% 100%' }} />
                   </div>
                 )}
                 {/* Rank badge - skewed tag style */}

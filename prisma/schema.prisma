@@ -343,9 +343,11 @@ model AttendanceBadge {
   tokenId     String?             @map("token_id") // Hedera NFT Token ID
   name        String
   description String?
-  imageUrl    String?             @map("image_url")
-  imageCid    String?             @map("image_cid") // IPFS CID for image
-  metadataCid String?             @map("metadata_cid") // IPFS CID for HIP-412 metadata JSON
+  imageUrl        String?             @map("image_url")
+  imageCid        String?             @map("image_cid") // IPFS CID (legacy)
+  metadataCid     String?             @map("metadata_cid") // IPFS CID (legacy)
+  imageTopicId    String?             @map("image_topic_id") // HCS-1 topic for image
+  metadataTopicId String?             @map("metadata_topic_id") // HCS-1 topic for metadata
   status          AttendanceBadgeStatus @default(DRAFT)
   supply          Int                 @default(0) // Number minted
   airdropAttempts Int                 @default(0) @map("airdrop_attempts")

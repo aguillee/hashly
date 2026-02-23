@@ -136,13 +136,22 @@ export async function GET(request: NextRequest) {
             const weight = vote.voteWeight;
             const isUpVote = vote.voteType === "UP";
 
+            // Fetch current values to prevent going below 0
+            const currentEvt = await prisma.event.findUnique({
+              where: { id: vote.eventId },
+              select: { votesUp: true, votesDown: true },
+            });
+            const absWeight = Math.abs(weight);
+            const safeUp = isUpVote ? Math.min(absWeight, Math.max(0, currentEvt?.votesUp ?? 0)) : 0;
+            const safeDown = !isUpVote ? Math.min(absWeight, Math.max(0, currentEvt?.votesDown ?? 0)) : 0;
+
             await prisma.$transaction([
               prisma.nftVote.delete({ where: { id: vote.id } }),
               prisma.event.update({
                 where: { id: vote.eventId },
                 data: {
-                  votesUp: isUpVote ? { decrement: Math.abs(weight) } : undefined,
-                  votesDown: !isUpVote ? { decrement: Math.abs(weight) } : undefined,
+                  votesUp: isUpVote ? { decrement: safeUp } : undefined,
+                  votesDown: !isUpVote ? { decrement: safeDown } : undefined,
                 },
               }),
             ]);
