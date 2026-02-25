@@ -56,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${sora.variable}`}>
+    <html lang="en" className={`${sora.variable} dark`}>
       <body className={`${sora.className} min-h-screen bg-background antialiased flex flex-col relative`}>
         {/* Animated background effects */}
         <GlowOrbs />
