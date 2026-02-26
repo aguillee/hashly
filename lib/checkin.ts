@@ -1,7 +1,7 @@
 import { createHmac } from "crypto";
 
 const CHECKIN_SECRET = process.env.CHECKIN_HMAC_SECRET || process.env.JWT_SECRET || "checkin-dev-secret";
-const SLOT_DURATION_MS = 30_000; // 30 seconds
+const SLOT_DURATION_MS = 60_000; // 60 seconds
 
 /**
  * Get the current time slot (changes every 30 seconds)

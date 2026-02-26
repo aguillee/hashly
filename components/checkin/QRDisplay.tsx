@@ -10,7 +10,7 @@ interface QRDisplayProps {
 export default function QRDisplay({ eventId }: QRDisplayProps) {
   const [code, setCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [error, setError] = useState<string | null>(null);
 
   const baseUrl =
@@ -36,10 +36,10 @@ export default function QRDisplay({ eventId }: QRDisplayProps) {
     }
   }, [eventId]);
 
-  // Fetch code on mount and every 30s
+  // Fetch code on mount and every 60s
   useEffect(() => {
     fetchCode();
-    const interval = setInterval(fetchCode, 30_000);
+    const interval = setInterval(fetchCode, 60_000);
     return () => clearInterval(interval);
   }, [fetchCode]);
 
@@ -113,7 +113,7 @@ export default function QRDisplay({ eventId }: QRDisplayProps) {
               stroke="currentColor"
               strokeWidth="3"
               className="text-accent-primary"
-              strokeDasharray={`${(timeLeft / 30) * 125.66} 125.66`}
+              strokeDasharray={`${(timeLeft / 60) * 125.66} 125.66`}
               strokeLinecap="round"
             />
           </svg>
