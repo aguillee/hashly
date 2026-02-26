@@ -3,14 +3,14 @@ import { prisma } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { validateCheckinCode } from "@/lib/checkin";
 import { submitCheckinToHCS } from "@/lib/hcs-votes";
+import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
 
 const checkinSchema = z.object({
   code: z.string().length(12),
-  walletAddress: z.string().regex(/^0\.0\.\d+$/),
 });
 
-// POST /api/checkin/[eventId] — Register check-in (wallet only, no Hashly account needed)
+// POST /api/checkin/[eventId] — Register check-in (requires authenticated session)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ eventId: string }> }
@@ -21,6 +21,16 @@ export async function POST(
   try {
     const { eventId } = await params;
 
+    // Verify authenticated session — wallet ownership proven via WalletConnect signature
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Please connect your wallet first" },
+        { status: 401 }
+      );
+    }
+    const walletAddress = user.walletAddress;
+
     const body = await request.json();
     const validation = checkinSchema.safeParse(body);
     if (!validation.success) {
@@ -30,7 +40,7 @@ export async function POST(
       );
     }
 
-    const { code, walletAddress } = validation.data;
+    const { code } = validation.data;
 
     // Validate the time-based code
     if (!validateCheckinCode(eventId, code)) {

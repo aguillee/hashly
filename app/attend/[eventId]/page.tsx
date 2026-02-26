@@ -46,7 +46,7 @@ export default function AttendPage() {
       const res = await fetch(`/api/checkin/${eventId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, walletAddress }),
+        body: JSON.stringify({ code }),
       });
 
       const data = await res.json();
