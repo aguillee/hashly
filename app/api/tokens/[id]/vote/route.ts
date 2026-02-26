@@ -145,6 +145,18 @@ export async function POST(
       const oldWeight = existingVote.voteWeight;
       voteChange = newWeight - oldWeight;
 
+      if (voteChange === 0) {
+        // Same vote direction and weight — no-op, don't consume daily vote
+        return NextResponse.json({
+          success: true,
+          totalVotes: token.totalVotes,
+          yourVoteWeight: existingVote.voteWeight,
+          nftBonus: 0,
+          votesRemaining: voteLimit.remaining,
+          alreadyVoted: true,
+        });
+      }
+
       await prisma.tokenVote.update({
         where: { id: existingVote.id },
         data: {

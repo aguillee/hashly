@@ -165,8 +165,21 @@ export async function POST(
               nftVoteWeight = -totalNftWeight * 2; // Was +X, now -X
             }
           }
+        } else {
+          // Same vote type on forever mint — no-op, don't consume daily vote
+          const currentEvent = await prisma.event.findUnique({
+            where: { id: eventId },
+            select: { votesUp: true, votesDown: true },
+          });
+          return NextResponse.json({
+            success: true,
+            newScore: Math.abs(currentEvent?.votesUp || 0) - Math.abs(currentEvent?.votesDown || 0),
+            votesUp: Math.abs(currentEvent?.votesUp || 0),
+            votesDown: Math.abs(currentEvent?.votesDown || 0),
+            votesRemaining: voteLimit.remaining,
+            alreadyVoted: true,
+          });
         }
-        // If same vote type, no change needed
       } else {
         // Regular event: Check 24h cooldown
         const hoursSinceVote =
