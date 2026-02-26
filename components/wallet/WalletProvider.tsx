@@ -36,6 +36,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [dAppConnector, setDAppConnector] =
     React.useState<DAppConnector | null>(null);
+  const connectorRef = React.useRef<DAppConnector | null>(null);
   const [isInitialized, setIsInitialized] = React.useState(false);
   const { setConnected, setDisconnected, setUser, walletAddress } =
     useWalletStore();
@@ -91,6 +92,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
       // Initialize with logger
       await connector.init({ logger: "error" });
+      connectorRef.current = connector;
       setDAppConnector(connector);
       setIsInitialized(true);
       console.log("WalletConnect initialized successfully");
@@ -209,14 +211,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function connect() {
-    let currentConnector = dAppConnector;
+    let currentConnector = connectorRef.current;
 
     if (!currentConnector) {
       // Try to reinitialize
       await initConnector();
       // Wait a bit for initialization
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      currentConnector = dAppConnector;
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      currentConnector = connectorRef.current;
       if (!currentConnector) {
         throw new Error(
           "Wallet connector not initialized. Please refresh the page."
@@ -252,6 +254,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       if (message.includes("Subscribing") && message.includes("failed")) {
         console.log("Subscription failed, reinitializing connector...");
         setIsInitialized(false);
+        connectorRef.current = null;
         setDAppConnector(null);
 
         // Wait and reinitialize
@@ -259,9 +262,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         await initConnector();
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        if (dAppConnector) {
+        const retryConnector = connectorRef.current as DAppConnector | null;
+        if (retryConnector) {
           try {
-            const retrySession = await dAppConnector.openModal();
+            const retrySession = await retryConnector.openModal();
             if (retrySession) {
               const accountId = getAccountIdFromSession(retrySession);
               if (accountId) {
@@ -284,8 +288,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   async function disconnect() {
     try {
       // Disconnect from WalletConnect
-      if (dAppConnector) {
-        await dAppConnector.disconnectAll();
+      const connector = connectorRef.current || dAppConnector;
+      if (connector) {
+        await connector.disconnectAll();
       }
 
       // Logout from backend

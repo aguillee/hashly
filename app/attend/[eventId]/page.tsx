@@ -19,6 +19,7 @@ export default function AttendPage() {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const [eventTitle, setEventTitle] = useState("");
+  const [connectError, setConnectError] = useState("");
 
   // No code = no access
   if (!code) {
@@ -146,14 +147,40 @@ export default function AttendPage() {
               </p>
 
               {!isConnected ? (
-                <Button
-                  onClick={connect}
-                  loading={isConnecting}
-                  size="xl"
-                  className="w-full"
-                >
-                  Connect Wallet
-                </Button>
+                <div className="space-y-3">
+                  <Button
+                    onClick={async () => {
+                      setConnectError("");
+                      try {
+                        await connect();
+                      } catch (err: any) {
+                        console.error("Connect wallet error:", err);
+                        const msg = err?.message || "";
+                        if (msg.includes("not initialized") || msg.includes("connector")) {
+                          setConnectError(
+                            "Wallet service is loading. Please wait a moment and try again."
+                          );
+                        } else if (msg.includes("User rejected") || msg.includes("dismissed")) {
+                          setConnectError("Connection was cancelled. Try again when ready.");
+                        } else {
+                          setConnectError(
+                            msg || "Could not connect wallet. Please try again."
+                          );
+                        }
+                      }
+                    }}
+                    loading={isConnecting}
+                    size="xl"
+                    className="w-full"
+                  >
+                    Connect Wallet
+                  </Button>
+                  {connectError && (
+                    <p className="text-sm text-red-400 bg-red-500/10 rounded-lg p-3">
+                      {connectError}
+                    </p>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-4">
                   <p className="text-sm text-text-tertiary font-mono">
