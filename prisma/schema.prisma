@@ -29,6 +29,7 @@ model User {
   referralsMade   Referral[]     @relation("referralsMade")
   referredBy      Referral?      @relation("referredBy")
   seasonSnapshots SeasonSnapshot[]
+  communityProfile CommunityProfile?
 
   @@map("users")
 }
@@ -69,6 +70,7 @@ model Event {
   shares        Share[]
   votes         Vote[]
   homeAds       HomeAd[]
+  checkins      EventCheckin[]
 
   @@unique([source, externalId])
   @@index([isApproved, isForeverMint])
@@ -310,6 +312,21 @@ model DailyVoteLimit {
   @@map("daily_vote_limits")
 }
 
+// Event check-in (proof of attendance)
+model EventCheckin {
+  id            String   @id @default(cuid())
+  eventId       String   @map("event_id")
+  walletAddress String   @map("wallet_address")
+  hcsMessageId  String?  @map("hcs_message_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, walletAddress])
+  @@index([eventId])
+  @@index([walletAddress])
+  @@map("event_checkins")
+}
+
 // Host request for Attendance Badge
 model HostRequest {
   id            String            @id @default(cuid())
@@ -396,6 +413,33 @@ enum BadgeClaimStatus {
   SENT      // Airdrop sent
   CLAIMED   // User accepted airdrop
   FAILED    // Airdrop failed
+}
+
+// Community profiles (HashWorld globe)
+enum CommunityProfileType {
+  USER
+  BUILDER
+  PERSON
+  PROJECT
+}
+
+model CommunityProfile {
+  id            String               @id @default(cuid())
+  userId        String               @unique @map("user_id")
+  type          CommunityProfileType @default(USER)
+  displayName   String               @map("display_name")
+  twitterHandle String?              @map("twitter_handle")
+  countryCode   String               @map("country_code")
+  bio           String?
+  avatarUrl     String?              @map("avatar_url")
+  isVisible     Boolean              @default(true) @map("is_visible")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([countryCode])
+  @@index([isVisible])
+  @@map("community_profiles")
 }
 
 // Referral system

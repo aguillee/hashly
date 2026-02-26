@@ -7,6 +7,7 @@ import {
 // Topic IDs
 const HCS_EVENTS_TOPIC_ID = process.env.HCS_EVENTS_TOPIC_ID!;
 const HCS_ASSETS_TOPIC_ID = process.env.HCS_ASSETS_TOPIC_ID!;
+const HCS_ATTENDANCE_TOPIC_ID = process.env.HCS_ATTENDANCE_TOPIC_ID!;
 
 // Operator credentials (for signing HCS messages)
 const HEDERA_OPERATOR_ID = process.env.HEDERA_OPERATOR_ID!;
@@ -174,6 +175,61 @@ export async function submitAssetVoteToHCS(
     };
   } catch (error) {
     console.error("[HCS] Failed to submit asset vote:", error);
+    return null;
+  } finally {
+    client.close();
+  }
+}
+
+// Event check-in message (dedicated attendance topic)
+export interface EventCheckinMessage {
+  type: "event_checkin";
+  version: 2;
+  wallet: string;
+  event_id: string;
+  event_name: string;
+  event_type: string;
+  timestamp: number;
+}
+
+// Submit event check-in to HCS (dedicated attendance topic)
+export async function submitCheckinToHCS(
+  wallet: string,
+  eventId: string,
+  eventName: string,
+  eventType: string
+): Promise<{ transactionId: string; sequenceNumber: number } | null> {
+  if (!HCS_ATTENDANCE_TOPIC_ID || !HEDERA_OPERATOR_ID || !HEDERA_OPERATOR_KEY) {
+    console.warn("[HCS] Attendance topic not configured, skipping check-in submission");
+    return null;
+  }
+
+  const client = getHederaClient();
+
+  try {
+    const message: EventCheckinMessage = {
+      type: "event_checkin",
+      version: 2,
+      wallet,
+      event_id: eventId,
+      event_name: eventName,
+      event_type: eventType,
+      timestamp: Date.now(),
+    };
+
+    const response = await new TopicMessageSubmitTransaction()
+      .setTopicId(HCS_ATTENDANCE_TOPIC_ID)
+      .setMessage(JSON.stringify(message))
+      .execute(client);
+
+    const receipt = await response.getReceipt(client);
+
+    return {
+      transactionId: response.transactionId.toString(),
+      sequenceNumber: Number(receipt.topicSequenceNumber),
+    };
+  } catch (error) {
+    console.error("[HCS] Failed to submit check-in:", error);
     return null;
   } finally {
     client.close();

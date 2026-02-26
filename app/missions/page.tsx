@@ -14,6 +14,8 @@ import {
   Gift,
   Loader2,
   Star,
+  Users,
+  Award,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
@@ -118,6 +120,8 @@ export default function MissionsPage() {
       trophy: <Trophy className="h-5 w-5" />,
       target: <Target className="h-5 w-5" />,
       gift: <Gift className="h-5 w-5" />,
+      users: <Users className="h-5 w-5" />,
+      badge: <Award className="h-5 w-5" />,
     };
     return icons[iconName] || <Sparkles className="h-5 w-5" />;
   };
@@ -322,14 +326,14 @@ export default function MissionsPage() {
               </div>
             </div>
 
-            {/* Achievements */}
+            {/* Season Missions */}
             <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
               <div className="px-4 py-3 border-b border-border flex items-center justify-between">
                 <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-yellow-500" />
-                  Achievements
+                  Season Missions
                 </h2>
-                <Badge variant="purple" size="sm">Permanent</Badge>
+                <Badge variant="purple" size="sm">Resets each season</Badge>
               </div>
               <div className="p-3 space-y-2">
                 {achievements.length > 0 ? (
@@ -338,7 +342,7 @@ export default function MissionsPage() {
                   ))
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-text-secondary">No achievements available</p>
+                    <p className="text-text-secondary">No season missions available</p>
                   </div>
                 )}
               </div>

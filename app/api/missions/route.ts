@@ -41,48 +41,54 @@ export async function GET(request: NextRequest) {
     const startOfWeek = new Date(startOfDay);
     startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
 
-    // Count all vote types (events + collections + tokens) in parallel
+    // Count votes in parallel — events separate from collections/tokens
     const [
-      todayEventVotes, todayCollectionVotes, todayTokenVotes,
-      weekEventVotes, weekCollectionVotes, weekTokenVotes,
+      todayEventVotes,
+      weekEventVotes,
       totalEventVotes, totalCollectionVotes, totalTokenVotes,
-      approvedEvents, collectionVotesCount, userMissions,
+      approvedEvents,
+      referralCount,
+      badgeCount,
+      userMissions,
     ] = await Promise.all([
-      // Today
+      // Today — events only (for daily_vote, vote_5_events)
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfDay } } }),
-      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: startOfDay } } }),
-      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: startOfDay } } }),
-      // Week
+      // Week — events only (for weekly_votes)
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfWeek } } }),
-      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: startOfWeek } } }),
-      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: startOfWeek } } }),
-      // Total
+      // Total — all types (for first_vote, votes_100, votes_500)
       prisma.vote.count({ where: { userId: user.id } }),
       prisma.collectionVote.count({ where: { walletAddress } }),
       prisma.tokenVote.count({ where: { walletAddress } }),
-      // Other
+      // Approved events
       prisma.event.count({ where: { createdById: user.id, isApproved: true } }),
-      prisma.collectionVote.count({ where: { walletAddress } }),
+      // Activated referrals
+      prisma.referral.count({ where: { referrerId: user.id } }),
+      // Badges owned (SENT or CLAIMED)
+      prisma.badgeClaim.count({
+        where: {
+          walletAddress,
+          status: { in: ["SENT", "CLAIMED"] },
+        },
+      }),
+      // User missions
       prisma.userMission.findMany({ where: { userId: user.id } }),
     ]);
 
-    const todayVotes = todayEventVotes + todayCollectionVotes + todayTokenVotes;
-    const weekVotes = weekEventVotes + weekCollectionVotes + weekTokenVotes;
     const totalVotes = totalEventVotes + totalCollectionVotes + totalTokenVotes;
+
+    // Check if user has logged in today
+    const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
     const stats = {
       totalVotes,
       totalEvents: approvedEvents,
       loginStreak: user.loginStreak,
-      todayVotes,
-      weekVotes,
-      collectionVotes: collectionVotesCount,
+      todayVotes: todayEventVotes,
+      weekVotes: weekEventVotes,
     };
 
-    // Check if user has logged in today
-    const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
-
     // Build missions with progress and claim status
+    const currentSeason = getCurrentSeason();
     const missions = MISSION_DEFINITIONS.map(def => {
       let progress = 0;
       let completed = false;
@@ -93,20 +99,20 @@ export async function GET(request: NextRequest) {
           completed = hasLoggedInToday || false;
           break;
         case "daily_vote":
-          progress = Math.min(todayVotes, def.requirement);
-          completed = todayVotes >= def.requirement;
+          progress = Math.min(todayEventVotes, def.requirement);
+          completed = todayEventVotes >= def.requirement;
           break;
         case "vote_5_events":
-          progress = Math.min(todayVotes, def.requirement);
-          completed = todayVotes >= def.requirement;
+          progress = Math.min(todayEventVotes, def.requirement);
+          completed = todayEventVotes >= def.requirement;
           break;
         case "weekly_streak":
           progress = Math.min(user.loginStreak, def.requirement);
           completed = user.loginStreak >= def.requirement;
           break;
         case "weekly_votes":
-          progress = Math.min(weekVotes, def.requirement);
-          completed = weekVotes >= def.requirement;
+          progress = Math.min(weekEventVotes, def.requirement);
+          completed = weekEventVotes >= def.requirement;
           break;
         case "first_vote":
           progress = Math.min(totalVotes, def.requirement);
@@ -124,19 +130,30 @@ export async function GET(request: NextRequest) {
           progress = Math.min(totalVotes, def.requirement);
           completed = totalVotes >= def.requirement;
           break;
-        case "collection_votes_50":
-          progress = Math.min(collectionVotesCount, def.requirement);
-          completed = collectionVotesCount >= def.requirement;
+        case "season_streak_25":
+          progress = Math.min(user.loginStreak, def.requirement);
+          completed = user.loginStreak >= def.requirement;
           break;
-        case "collection_votes_100":
-          progress = Math.min(collectionVotesCount, def.requirement);
-          completed = collectionVotesCount >= def.requirement;
+        case "referral_1":
+          progress = Math.min(referralCount, def.requirement);
+          completed = referralCount >= def.requirement;
+          break;
+        case "referral_3":
+          progress = Math.min(referralCount, def.requirement);
+          completed = referralCount >= def.requirement;
+          break;
+        case "badge_1":
+          progress = Math.min(badgeCount, def.requirement);
+          completed = badgeCount >= def.requirement;
+          break;
+        case "badge_3":
+          progress = Math.min(badgeCount, def.requirement);
+          completed = badgeCount >= def.requirement;
           break;
       }
 
       // Check if already claimed in current period
       const userMission = userMissions.find(um => um.missionId === def.id);
-      const currentSeason = getCurrentSeason();
       let claimed = false;
       if (userMission?.claimedAt) {
         if (def.type === "DAILY") {
@@ -144,7 +161,7 @@ export async function GET(request: NextRequest) {
         } else if (def.type === "WEEKLY") {
           claimed = userMission.claimedAt >= startOfWeek;
         } else {
-          // Achievements: claimed once per season (re-claimable each new season)
+          // Season achievements: claimed once per season
           claimed = userMission.claimedAt >= currentSeason.startDate;
         }
       }

@@ -96,9 +96,9 @@ export function useInscriptionPoller(badgeId: string) {
       }
     }
 
-    // Poll immediately, then every 3 seconds
+    // Poll immediately, then every 5 seconds
     poll();
-    intervalRef.current = setInterval(poll, 3000);
+    intervalRef.current = setInterval(poll, 5000);
 
     return () => {
       if (intervalRef.current) {

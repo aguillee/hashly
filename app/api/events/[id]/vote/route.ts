@@ -12,7 +12,7 @@ import {
 import { checkRateLimit } from "@/lib/rate-limit";
 import { voteSchema, validateRequest } from "@/lib/validations";
 import { submitEventVoteToHCS } from "@/lib/hcs-votes";
-import { checkVoteLimit, incrementVoteCount } from "@/lib/vote-limit";
+import { reserveVoteSlot } from "@/lib/vote-limit";
 import { awardReferralCommission } from "@/lib/referral-points";
 
 const POINTS_PER_VOTE = 10;
@@ -35,9 +35,9 @@ export async function POST(
       );
     }
 
-    // Check daily vote limit
-    const voteLimit = await checkVoteLimit(user.walletAddress);
-    if (!voteLimit.canVote) {
+    // Atomic daily vote limit: reserve a slot before any logic
+    const voteSlot = await reserveVoteSlot(user.walletAddress);
+    if (!voteSlot.reserved) {
       return NextResponse.json(
         {
           error: "Daily vote limit reached",
@@ -445,9 +445,6 @@ export async function POST(
       console.error("HCS submit failed:", err);
     }
 
-    // Increment daily vote count
-    const updatedLimit = await incrementVoteCount(user.walletAddress);
-
     return NextResponse.json({
       success: true,
       newScore: Math.abs(updatedEvent?.votesUp || 0) - Math.abs(updatedEvent?.votesDown || 0),
@@ -455,7 +452,7 @@ export async function POST(
       votesDown: Math.abs(updatedEvent?.votesDown || 0),
       nftVotesUsed: nftVotesUsed.length > 0 ? nftVotesUsed : undefined,
       totalNftWeight: nftVoteWeight !== 0 ? Math.abs(nftVoteWeight) : undefined,
-      votesRemaining: updatedLimit.remaining,
+      votesRemaining: voteSlot.remaining,
     });
   } catch (error) {
     console.error("Vote error:", error);

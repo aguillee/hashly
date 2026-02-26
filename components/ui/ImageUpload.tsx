@@ -9,9 +9,10 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   className?: string;
   recommendedSize?: string;
+  maxSizeMB?: number;
 }
 
-export function ImageUpload({ value, onChange, className, recommendedSize }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, className, recommendedSize, maxSizeMB = 3 }: ImageUploadProps) {
   const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -28,8 +29,8 @@ export function ImageUpload({ value, onChange, className, recommendedSize }: Ima
         throw new Error("Tipo de archivo no permitido. Usa JPG, PNG, GIF o WebP");
       }
 
-      if (file.size > 3 * 1024 * 1024) {
-        throw new Error("El archivo es muy grande. Máximo 3MB");
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        throw new Error(`El archivo es muy grande. Máximo ${maxSizeMB}MB`);
       }
 
       const formData = new FormData();
@@ -151,7 +152,7 @@ export function ImageUpload({ value, onChange, className, recommendedSize }: Ima
                     Arrastra una imagen o haz clic para seleccionar
                   </span>
                   <span className="text-xs text-text-secondary/70">
-                    JPG, PNG, GIF, WebP (máx. 3MB)
+                    JPG, PNG, GIF, WebP (máx. {maxSizeMB}MB)
                   </span>
                   {recommendedSize && (
                     <span className="text-xs text-text-secondary/70">

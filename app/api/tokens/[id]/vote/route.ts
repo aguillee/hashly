@@ -11,7 +11,7 @@ import {
 import { checkRateLimit } from "@/lib/rate-limit";
 import { collectionVoteSchema, validateRequest } from "@/lib/validations";
 import { submitAssetVoteToHCS } from "@/lib/hcs-votes";
-import { checkVoteLimit, incrementVoteCount } from "@/lib/vote-limit";
+import { reserveVoteSlot } from "@/lib/vote-limit";
 import { awardReferralCommission } from "@/lib/referral-points";
 
 // Points awarded for token votes
@@ -36,9 +36,9 @@ export async function POST(
       );
     }
 
-    // Check daily vote limit
-    const voteLimit = await checkVoteLimit(user.walletAddress);
-    if (!voteLimit.canVote) {
+    // Atomic daily vote limit: reserve a slot before any logic
+    const voteSlot = await reserveVoteSlot(user.walletAddress);
+    if (!voteSlot.reserved) {
       return NextResponse.json(
         {
           error: "Daily vote limit reached",
@@ -229,15 +229,12 @@ export async function POST(
       }
     }
 
-    // Increment daily vote count
-    const updatedLimit = await incrementVoteCount(user.walletAddress);
-
     return NextResponse.json({
       success: true,
       totalVotes: updatedToken?.totalVotes || 0,
       yourVoteWeight: newWeight,
       nftBonus: useNftVotes ? voteWeight - 1 : 0,
-      votesRemaining: updatedLimit.remaining,
+      votesRemaining: voteSlot.remaining,
     });
   } catch (error) {
     console.error("Token vote error:", error);

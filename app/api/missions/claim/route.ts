@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     const walletAddress = payload.walletAddress as string;
 
-    // Get user (without loading all votes/events to avoid timeout)
+    // Get user
     const user = await prisma.user.findUnique({
       where: { walletAddress },
     });
@@ -61,32 +61,36 @@ export async function POST(request: NextRequest) {
 
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
-    // Count all vote types (events + collections + tokens) in parallel
+    // Count votes in parallel — events separate from collections/tokens
     const [
-      todayEventVotes, todayCollectionVotes, todayTokenVotes,
-      weekEventVotes, weekCollectionVotes, weekTokenVotes,
+      todayEventVotes,
+      weekEventVotes,
       totalEventVotes, totalCollectionVotes, totalTokenVotes,
-      approvedEvents, collectionVotesCount,
+      approvedEvents,
+      referralCount,
+      badgeCount,
     ] = await Promise.all([
-      // Today
+      // Today — events only
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfDay } } }),
-      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: startOfDay } } }),
-      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: startOfDay } } }),
-      // Week
+      // Week — events only
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfWeek } } }),
-      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: startOfWeek } } }),
-      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: startOfWeek } } }),
-      // Total
+      // Total — all types
       prisma.vote.count({ where: { userId: user.id } }),
       prisma.collectionVote.count({ where: { walletAddress } }),
       prisma.tokenVote.count({ where: { walletAddress } }),
-      // Other
+      // Approved events
       prisma.event.count({ where: { createdById: user.id, isApproved: true } }),
-      prisma.collectionVote.count({ where: { walletAddress } }),
+      // Activated referrals
+      prisma.referral.count({ where: { referrerId: user.id } }),
+      // Badges owned
+      prisma.badgeClaim.count({
+        where: {
+          walletAddress,
+          status: { in: ["SENT", "CLAIMED"] },
+        },
+      }),
     ]);
 
-    const todayVotes = todayEventVotes + todayCollectionVotes + todayTokenVotes;
-    const weekVotes = weekEventVotes + weekCollectionVotes + weekTokenVotes;
     const totalVotes = totalEventVotes + totalCollectionVotes + totalTokenVotes;
 
     let isCompleted = false;
@@ -95,16 +99,16 @@ export async function POST(request: NextRequest) {
         isCompleted = !!hasLoggedInToday;
         break;
       case "daily_vote":
-        isCompleted = todayVotes >= mission.requirement;
+        isCompleted = todayEventVotes >= mission.requirement;
         break;
       case "vote_5_events":
-        isCompleted = todayVotes >= mission.requirement;
+        isCompleted = todayEventVotes >= mission.requirement;
         break;
       case "weekly_streak":
         isCompleted = user.loginStreak >= mission.requirement;
         break;
       case "weekly_votes":
-        isCompleted = weekVotes >= mission.requirement;
+        isCompleted = weekEventVotes >= mission.requirement;
         break;
       case "first_vote":
         isCompleted = totalVotes >= mission.requirement;
@@ -118,11 +122,20 @@ export async function POST(request: NextRequest) {
       case "votes_500":
         isCompleted = totalVotes >= mission.requirement;
         break;
-      case "collection_votes_50":
-        isCompleted = collectionVotesCount >= mission.requirement;
+      case "season_streak_25":
+        isCompleted = user.loginStreak >= mission.requirement;
         break;
-      case "collection_votes_100":
-        isCompleted = collectionVotesCount >= mission.requirement;
+      case "referral_1":
+        isCompleted = referralCount >= mission.requirement;
+        break;
+      case "referral_3":
+        isCompleted = referralCount >= mission.requirement;
+        break;
+      case "badge_1":
+        isCompleted = badgeCount >= mission.requirement;
+        break;
+      case "badge_3":
+        isCompleted = badgeCount >= mission.requirement;
         break;
     }
 

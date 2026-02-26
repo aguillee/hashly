@@ -22,7 +22,10 @@ import {
   XCircle,
   Check,
   RefreshCw,
+  QrCode,
+  Download,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useWalletStore } from "@/store";
@@ -30,6 +33,9 @@ import { useHederaTransactions } from "@/hooks/useHederaTransactions";
 import { useInscriptionPoller } from "@/hooks/useInscriptionPoller";
 import { compressImage } from "@/lib/image-compress";
 import { buildHIP412Metadata } from "@/lib/hashinals";
+
+const QRDisplay = dynamic(() => import("@/components/checkin/QRDisplay"), { ssr: false });
+const AttendeeList = dynamic(() => import("@/components/checkin/AttendeeList"), { ssr: false });
 
 const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() === "testnet"
   ? "https://testnet.mirrornode.hedera.com"
@@ -128,6 +134,10 @@ export default function BadgeDetailPage() {
   const [showMintConfirm, setShowMintConfirm] = React.useState(false);
   const [hasMinted, setHasMinted] = React.useState(false);
 
+  // QR check-in mode (step 2)
+  const [walletMode, setWalletMode] = React.useState<"manual" | "qr">("manual");
+  const [importingCheckins, setImportingCheckins] = React.useState(false);
+
   // Badge name is auto-generated from event title
   const badgeName = badge?.event?.title ? `${badge.event.title} Badge` : badge?.name || "";
 
@@ -144,6 +154,9 @@ export default function BadgeDetailPage() {
   const [saving, setSaving] = React.useState(false);
   const [inscriptionProgress, setInscriptionProgress] = React.useState<string | null>(null);
   const [actionMessage, setActionMessage] = React.useState<{ type: "success" | "error" | "warning"; text: string } | null>(null);
+
+  // Combined inscription: auto-chain metadata after image
+  const [pendingMetadataInscription, setPendingMetadataInscription] = React.useState(false);
 
   // Association check states
   const [associations, setAssociations] = React.useState<Map<string, boolean>>(new Map());
@@ -170,17 +183,36 @@ export default function BadgeDetailPage() {
     if (poller.phase === "image" && poller.progress >= 1) {
       poller.stopPolling();
       loadBadge();
-      setActionMessage({ type: "success", text: "Image inscribed on Hedera! Now inscribe the metadata." });
+      if (pendingMetadataInscription) {
+        setActionMessage({ type: "success", text: "Image inscribed! Preparing metadata inscription..." });
+      } else {
+        setActionMessage({ type: "success", text: "Image inscribed on Hedera! Now inscribe the metadata." });
+      }
     } else if (poller.phase === "metadata" && poller.progress >= 1) {
       poller.stopPolling();
       loadBadge();
+      setPendingMetadataInscription(false);
       setActionMessage({ type: "success", text: "Metadata inscribed! Both inscriptions complete." });
     } else if (poller.phase === "complete") {
       poller.stopPolling();
       loadBadge();
+      setPendingMetadataInscription(false);
       setActionMessage({ type: "success", text: "All inscriptions complete!" });
     }
   }, [poller.phase, poller.progress, poller.isPolling]);
+
+  // Auto-chain: when image is done and pendingMetadata is true, auto-start metadata inscription
+  React.useEffect(() => {
+    if (pendingMetadataInscription && badge?.imageTopicId && !badge?.metadataTopicId && !poller.isPolling) {
+      // Clear flag IMMEDIATELY to prevent double-trigger on re-renders
+      setPendingMetadataInscription(false);
+      // Small delay to let UI update after loadBadge
+      const timeout = setTimeout(() => {
+        inscribeMetadata();
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [pendingMetadataInscription, badge?.imageTopicId, badge?.metadataTopicId, poller.isPolling]);
 
   async function loadBadge() {
     try {
@@ -372,6 +404,13 @@ export default function BadgeDetailPage() {
     }
   };
 
+  // Inscribe both image + metadata in sequence (user signs twice)
+  const inscribeBoth = async () => {
+    setPendingMetadataInscription(true);
+    await inscribeImage(); // starts image inscription + polling
+    // metadata will be auto-triggered when image completes (see useEffect below)
+  };
+
   // Save description only
   const saveDescription = async () => {
     try {
@@ -516,6 +555,47 @@ export default function BadgeDetailPage() {
   // Remove a wallet from the list
   const handleRemoveWallet = (wallet: string) => {
     setAddedWallets((prev) => prev.filter((w) => w !== wallet));
+  };
+
+  // Import checked-in wallets from QR attendance
+  const handleImportCheckins = async () => {
+    if (!badge?.eventId) return;
+    setImportingCheckins(true);
+    try {
+      const res = await fetch(`/api/checkin/${badge.eventId}/attendees`);
+      if (!res.ok) {
+        const data = await res.json();
+        setActionMessage({ type: "error", text: data.error || "Failed to fetch check-ins" });
+        return;
+      }
+      const data = await res.json();
+      const checkinWallets: string[] = data.attendees.map((a: { walletAddress: string }) => a.walletAddress);
+
+      if (checkinWallets.length === 0) {
+        setActionMessage({ type: "warning", text: "No check-ins yet. Share the QR code with attendees first." });
+        return;
+      }
+
+      const existingSet = new Set(addedWallets);
+      const newWallets = checkinWallets.filter((w) => !existingSet.has(w));
+
+      if (newWallets.length === 0) {
+        setActionMessage({ type: "warning", text: "All checked-in wallets are already in the list" });
+        return;
+      }
+
+      setAddedWallets((prev) => [...prev, ...newWallets]);
+      const dupes = checkinWallets.length - newWallets.length;
+      let msg = `Imported ${newWallets.length} wallet${newWallets.length === 1 ? "" : "s"} from check-ins`;
+      if (dupes > 0) {
+        msg += ` (${dupes} already in list)`;
+      }
+      setActionMessage({ type: "success", text: msg });
+    } catch {
+      setActionMessage({ type: "error", text: "Failed to import check-ins" });
+    } finally {
+      setImportingCheckins(false);
+    }
   };
 
   const handleMintNFTs = async () => {
@@ -1110,53 +1190,69 @@ export default function BadgeDetailPage() {
                     <div className="flex items-center gap-2 text-accent-primary">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span className="font-medium">
-                        {poller.phase === "image" ? "Inscribing image on Hedera..." : "Inscribing metadata on Hedera..."}
+                        {poller.phase === "image"
+                          ? `Step 1/2 — Inscribing image on Hedera...`
+                          : `Step 2/2 — Inscribing metadata on Hedera...`}
                       </span>
                     </div>
                     <span className="text-accent-primary font-bold">
-                      {Math.round(poller.progress * 100)}%
+                      {poller.maxMessages > 0 && poller.messages > 0
+                        ? `${Math.round(poller.progress * 100)}%`
+                        : ""}
                     </span>
                   </div>
 
                   {/* Progress bar */}
-                  <div className="w-full h-2 bg-bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-accent-primary rounded-full transition-all duration-500"
-                      style={{ width: `${Math.max(poller.progress * 100, 2)}%` }}
-                    />
-                  </div>
+                  {poller.maxMessages > 0 && poller.messages > 0 ? (
+                    <div className="w-full h-2.5 bg-bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-accent-primary rounded-full transition-all duration-700 ease-out"
+                        style={{ width: `${Math.max(poller.progress * 100, 3)}%` }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-2.5 bg-bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full w-1/3 bg-accent-primary/60 rounded-full animate-pulse" />
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between text-xs text-text-secondary">
-                    <span>
-                      {poller.messages}/{poller.maxMessages} messages
-                    </span>
-                    {poller.maxMessages > 0 && poller.messages < poller.maxMessages && (
-                      <span>
-                        ~{Math.max(1, Math.ceil((poller.maxMessages - poller.messages) * 3 / 60))} min remaining
-                      </span>
+                    {poller.maxMessages > 0 && poller.messages > 0 ? (
+                      <>
+                        <span>
+                          {poller.messages} / {poller.maxMessages} signatures
+                        </span>
+                        {poller.messages < poller.maxMessages && (
+                          <span>
+                            ~{Math.max(1, Math.ceil((poller.maxMessages - poller.messages) * 5 / 60))} min remaining
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="animate-pulse">Preparing inscription...</span>
                     )}
                   </div>
 
-                  <p className="text-xs text-text-secondary">
-                    You can leave this page and come back. The inscription continues in the background.
+                  <p className="text-xs text-text-tertiary">
+                    You can leave this page and come back — the inscription continues in the background.
                   </p>
                 </div>
               )}
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-3">
-                {/* Inscribe Image button — when no image inscribed yet */}
+                {/* Inscribe on Hedera — single button for image+metadata (two wallet signatures) */}
                 {!badge.imageTopicId && !poller.isPolling && (
-                  <Button onClick={inscribeImage} disabled={!imageFile || !isReady || isExecuting}>
+                  <Button onClick={inscribeBoth} disabled={!imageFile || !isReady || isExecuting}>
                     {isExecuting ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : null}
-                    Inscribe Image on Hedera
+                    Inscribe on Hedera
                   </Button>
                 )}
 
-                {/* Inscribe Metadata button — when image is done but metadata isn't */}
-                {badge.imageTopicId && !badge.metadataTopicId && !poller.isPolling && (
+                {/* Inscribe Metadata only — shown if image is done but metadata failed/wasn't auto-chained */}
+                {badge.imageTopicId && !badge.metadataTopicId && !poller.isPolling && !pendingMetadataInscription && (
                   <Button onClick={inscribeMetadata} disabled={!isReady || isExecuting}>
                     {isExecuting ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -1211,34 +1307,100 @@ export default function BadgeDetailPage() {
               {/* Add wallets input (hidden after minting) */}
               {!hasMinted && (
                 <>
-                  <p className="text-sm text-text-secondary">
-                    Add wallet addresses. You can add them in batches. Duplicates are removed automatically.
-                  </p>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                      Wallet Addresses
-                    </label>
-                    <textarea
-                      value={walletList}
-                      onChange={(e) => setWalletList(e.target.value)}
-                      rows={4}
-                      placeholder={"0.0.123456\n0.0.789012\n0.0.345678"}
-                      className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
-                    />
-                    <p className="text-xs text-text-secondary mt-1">
-                      One per line or comma-separated
-                    </p>
+                  {/* Mode toggle: Manual / QR */}
+                  <div className="flex rounded-lg border border-border overflow-hidden">
+                    <button
+                      onClick={() => setWalletMode("manual")}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+                        walletMode === "manual"
+                          ? "bg-accent-primary text-white"
+                          : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      <Users className="h-4 w-4" />
+                      Manual Entry
+                    </button>
+                    <button
+                      onClick={() => setWalletMode("qr")}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+                        walletMode === "qr"
+                          ? "bg-accent-primary text-white"
+                          : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      <QrCode className="h-4 w-4" />
+                      QR Check-in
+                    </button>
                   </div>
 
-                  <Button onClick={handleAddWallets} disabled={walletList.trim().length === 0 || validatingWallets} variant="outline">
-                    {validatingWallets ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Users className="h-4 w-4 mr-2" />
-                    )}
-                    {validatingWallets ? "Validating..." : "Add Wallets"}
-                  </Button>
+                  {/* Manual entry mode */}
+                  {walletMode === "manual" && (
+                    <>
+                      <p className="text-sm text-text-secondary">
+                        Add wallet addresses. You can add them in batches. Duplicates are removed automatically.
+                      </p>
+
+                      <div>
+                        <label className="block text-sm font-medium text-text-primary mb-2">
+                          Wallet Addresses
+                        </label>
+                        <textarea
+                          value={walletList}
+                          onChange={(e) => setWalletList(e.target.value)}
+                          rows={4}
+                          placeholder={"0.0.123456\n0.0.789012\n0.0.345678"}
+                          className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+                        />
+                        <p className="text-xs text-text-secondary mt-1">
+                          One per line or comma-separated
+                        </p>
+                      </div>
+
+                      <Button onClick={handleAddWallets} disabled={walletList.trim().length === 0 || validatingWallets} variant="outline">
+                        {validatingWallets ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Users className="h-4 w-4 mr-2" />
+                        )}
+                        {validatingWallets ? "Validating..." : "Add Wallets"}
+                      </Button>
+                    </>
+                  )}
+
+                  {/* QR check-in mode */}
+                  {walletMode === "qr" && badge?.eventId && (
+                    <div className="space-y-6">
+                      <p className="text-sm text-text-secondary">
+                        Show this QR code to attendees. They scan it, connect their wallet, and check in.
+                        Then import the wallets below.
+                      </p>
+
+                      {/* QR Code */}
+                      <div className="flex justify-center">
+                        <QRDisplay eventId={badge.eventId} />
+                      </div>
+
+                      {/* Import button */}
+                      <Button
+                        onClick={handleImportCheckins}
+                        disabled={importingCheckins}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {importingCheckins ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-2" />
+                        )}
+                        {importingCheckins ? "Importing..." : "Import Checked-in Wallets"}
+                      </Button>
+
+                      {/* Attendee list */}
+                      <div className="rounded-xl border border-border bg-bg-secondary/30 p-4">
+                        <AttendeeList eventId={badge.eventId} />
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 
