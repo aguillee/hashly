@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { Calendar, Trophy, Menu, X, Shield, Zap, Wallet, Layers, Newspaper, Vote } from "lucide-react";
+import { Calendar, Trophy, Menu, X, Shield, Zap, Wallet, Layers, Newspaper, Vote, Globe } from "lucide-react";
 import { useVoteLimit } from "@/lib/swr";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -27,10 +27,13 @@ const ConnectButton = dynamic(
   }
 );
 
+const IS_DEV = process.env.NODE_ENV === "development";
+
 const navLinks = [
   { href: "/news", label: "News", icon: Newspaper },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/projects", label: "Projects", icon: Layers },
+  ...(IS_DEV ? [{ href: "/community", label: "HashWorld", icon: Globe }] : []),
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 

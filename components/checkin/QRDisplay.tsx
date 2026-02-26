@@ -13,7 +13,11 @@ export default function QRDisplay({ eventId }: QRDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [error, setError] = useState<string | null>(null);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.NEXT_PUBLIC_VERCEL_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      : "http://localhost:3000");
 
   const fetchCode = useCallback(async () => {
     try {
