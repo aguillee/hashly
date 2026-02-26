@@ -166,18 +166,10 @@ export async function POST(
             }
           }
         } else {
-          // Same vote type on forever mint — no-op, don't consume daily vote
-          const currentEvent = await prisma.event.findUnique({
-            where: { id: eventId },
-            select: { votesUp: true, votesDown: true },
-          });
-          return NextResponse.json({
-            success: true,
-            newScore: Math.abs(currentEvent?.votesUp || 0) - Math.abs(currentEvent?.votesDown || 0),
-            votesUp: Math.abs(currentEvent?.votesUp || 0),
-            votesDown: Math.abs(currentEvent?.votesDown || 0),
-            votesRemaining: voteLimit.remaining,
-            alreadyVoted: true,
+          // Same vote type on forever mint — update createdAt so it appears in today's history
+          await prisma.vote.update({
+            where: { id: existingVote.id },
+            data: { createdAt: new Date() },
           });
         }
       } else {
