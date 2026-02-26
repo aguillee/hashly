@@ -42,9 +42,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Mission not found" }, { status: 404 });
     }
 
+    const walletAddress = payload.walletAddress as string;
+
     // Get user (without loading all votes/events to avoid timeout)
     const user = await prisma.user.findUnique({
-      where: { walletAddress: payload.walletAddress as string },
+      where: { walletAddress },
     });
 
     if (!user) {
@@ -59,24 +61,33 @@ export async function POST(request: NextRequest) {
 
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
-    // Count votes efficiently in DB instead of loading all into memory
-    const [todayVotes, weekVotes, totalVotes, approvedEvents, collectionVotesCount] = await Promise.all([
-      prisma.vote.count({
-        where: { userId: user.id, createdAt: { gte: startOfDay } },
-      }),
-      prisma.vote.count({
-        where: { userId: user.id, createdAt: { gte: startOfWeek } },
-      }),
-      prisma.vote.count({
-        where: { userId: user.id },
-      }),
-      prisma.event.count({
-        where: { createdById: user.id, isApproved: true },
-      }),
-      prisma.collectionVote.count({
-        where: { walletAddress: payload.walletAddress as string },
-      }),
+    // Count all vote types (events + collections + tokens) in parallel
+    const [
+      todayEventVotes, todayCollectionVotes, todayTokenVotes,
+      weekEventVotes, weekCollectionVotes, weekTokenVotes,
+      totalEventVotes, totalCollectionVotes, totalTokenVotes,
+      approvedEvents, collectionVotesCount,
+    ] = await Promise.all([
+      // Today
+      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfDay } } }),
+      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: startOfDay } } }),
+      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: startOfDay } } }),
+      // Week
+      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfWeek } } }),
+      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: startOfWeek } } }),
+      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: startOfWeek } } }),
+      // Total
+      prisma.vote.count({ where: { userId: user.id } }),
+      prisma.collectionVote.count({ where: { walletAddress } }),
+      prisma.tokenVote.count({ where: { walletAddress } }),
+      // Other
+      prisma.event.count({ where: { createdById: user.id, isApproved: true } }),
+      prisma.collectionVote.count({ where: { walletAddress } }),
     ]);
+
+    const todayVotes = todayEventVotes + todayCollectionVotes + todayTokenVotes;
+    const weekVotes = weekEventVotes + weekCollectionVotes + weekTokenVotes;
+    const totalVotes = totalEventVotes + totalCollectionVotes + totalTokenVotes;
 
     let isCompleted = false;
     switch (missionId) {
