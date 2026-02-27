@@ -4,14 +4,14 @@ import {
   PrivateKey,
 } from "@hashgraph/sdk";
 
-// Topic IDs
-const HCS_EVENTS_TOPIC_ID = process.env.HCS_EVENTS_TOPIC_ID!;
-const HCS_ASSETS_TOPIC_ID = process.env.HCS_ASSETS_TOPIC_ID!;
-const HCS_ATTENDANCE_TOPIC_ID = process.env.HCS_ATTENDANCE_TOPIC_ID!;
+// Topic IDs (trim to prevent trailing newline from env vars)
+const HCS_EVENTS_TOPIC_ID = (process.env.HCS_EVENTS_TOPIC_ID || "").trim();
+const HCS_ASSETS_TOPIC_ID = (process.env.HCS_ASSETS_TOPIC_ID || "").trim();
+const HCS_ATTENDANCE_TOPIC_ID = (process.env.HCS_ATTENDANCE_TOPIC_ID || "").trim();
 
-// Operator credentials (for signing HCS messages)
-const HEDERA_OPERATOR_ID = process.env.HEDERA_OPERATOR_ID!;
-const HEDERA_OPERATOR_KEY = process.env.HEDERA_OPERATOR_KEY!;
+// Operator credentials (trim to prevent trailing newline from env vars)
+const HEDERA_OPERATOR_ID = (process.env.HEDERA_OPERATOR_ID || "").trim();
+const HEDERA_OPERATOR_KEY = (process.env.HEDERA_OPERATOR_KEY || "").trim();
 
 // NFT Token IDs for voting power
 const EL_SANTUARIO_TOKEN_ID = "0.0.9954622";
