@@ -199,6 +199,14 @@ export async function submitCheckinToHCS(
   eventName: string,
   eventType: string
 ): Promise<{ transactionId: string; sequenceNumber: number } | null> {
+  console.log("[HCS] submitCheckinToHCS called", { wallet, eventId, eventName, eventType });
+  console.log("[HCS] Attendance config check:", {
+    hasTopicId: !!HCS_ATTENDANCE_TOPIC_ID,
+    hasOperatorId: !!HEDERA_OPERATOR_ID,
+    hasOperatorKey: !!HEDERA_OPERATOR_KEY,
+    topicId: HCS_ATTENDANCE_TOPIC_ID,
+  });
+
   if (!HCS_ATTENDANCE_TOPIC_ID || !HEDERA_OPERATOR_ID || !HEDERA_OPERATOR_KEY) {
     console.warn("[HCS] Attendance topic not configured, skipping check-in submission");
     return null;
@@ -217,12 +225,14 @@ export async function submitCheckinToHCS(
       timestamp: Date.now(),
     };
 
+    console.log("[HCS] Submitting check-in to topic:", HCS_ATTENDANCE_TOPIC_ID);
     const response = await new TopicMessageSubmitTransaction()
       .setTopicId(HCS_ATTENDANCE_TOPIC_ID)
       .setMessage(JSON.stringify(message))
       .execute(client);
 
     const receipt = await response.getReceipt(client);
+    console.log("[HCS] Check-in SUCCESS! Sequence:", receipt.topicSequenceNumber?.toString());
 
     return {
       transactionId: response.transactionId.toString(),
