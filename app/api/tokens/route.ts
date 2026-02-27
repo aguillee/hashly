@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120; // Cache for 2 minutes
 
 // SaucerSwap API
 const SAUCERSWAP_API = "https://api.saucerswap.finance/tokens";
@@ -32,13 +32,13 @@ export async function GET(request: NextRequest) {
     const rawSearch = searchParams.get("search");
     const search = rawSearch && rawSearch.trim().length > 0 ? rawSearch.slice(0, 100).trim() : null;
 
-    // Get total count of approved and visible tokens only
-    const total = await prisma.token.count({
-      where: { isApproved: true, isHidden: false },
-    });
-
-    // Get user for vote mapping
-    const user = await getCurrentUser();
+    // Parallelize count + user auth (both independent)
+    const [total, user] = await Promise.all([
+      prisma.token.count({
+        where: { isApproved: true, isHidden: false },
+      }),
+      getCurrentUser(),
+    ]);
 
     // If searching, return search results
     if (search) {

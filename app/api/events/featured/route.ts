@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // Cache for 60 seconds
 
 // GET /api/events/featured - Get featured events (most voted + next up + top forever mint)
 export async function GET(request: NextRequest) {
@@ -12,32 +12,33 @@ export async function GET(request: NextRequest) {
 
     const now = new Date();
 
-    // Get all approved upcoming/live MINT events (excluding forever mints for main featured)
-    const events = await prisma.event.findMany({
-      where: {
-        isApproved: true,
-        status: { in: ["UPCOMING", "LIVE"] },
-        isForeverMint: false,
-        event_type: "MINT_EVENT",
-      },
-      include: {
-        createdBy: {
-          select: { walletAddress: true },
-        },
-        phases: {
-          orderBy: { order: "asc" },
-        },
-      },
-    });
-
-    // Get featured meetups & hackathons
+    // Run ALL queries in parallel
     const [
+      events,
       topMeetupResults,
       upcomingMeetups,
       topHackathonResults,
       upcomingHackathons,
       biggestPrizeHackathon,
+      topForeverMintResults,
     ] = await Promise.all([
+      // All approved upcoming/live MINT events (excluding forever mints)
+      prisma.event.findMany({
+        where: {
+          isApproved: true,
+          status: { in: ["UPCOMING", "LIVE"] },
+          isForeverMint: false,
+          event_type: "MINT_EVENT",
+        },
+        include: {
+          createdBy: {
+            select: { walletAddress: true },
+          },
+          phases: {
+            orderBy: { order: "asc" },
+          },
+        },
+      }),
       // Most voted meetup
       prisma.event.findFirst({
         where: {
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
         orderBy: { mintDate: "asc" },
         take: 3,
       }),
-      // Biggest prize hackathon (has prizes field, non-empty)
+      // Biggest prize hackathon
       prisma.event.findFirst({
         where: {
           isApproved: true,
@@ -88,10 +89,8 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { votesUp: "desc" },
       }),
-    ]);
-
-    // Get top forever mint separately - order by score (votesUp - votesDown)
-    const topForeverMintResults = await prisma.$queryRaw<Array<{
+      // Top forever mint (by score)
+      prisma.$queryRaw<Array<{
       id: string;
       title: string;
       description: string;
@@ -118,7 +117,8 @@ export async function GET(request: NextRequest) {
       WHERE is_forever_mint = true AND is_approved = true
       ORDER BY (votes_up - votes_down) DESC, created_at DESC
       LIMIT 1
-    `;
+    `,
+    ]);
 
     // Map snake_case to camelCase
     const topForeverMint = topForeverMintResults[0] ? {

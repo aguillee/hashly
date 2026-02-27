@@ -24,8 +24,8 @@ export const swrConfig: SWRConfiguration = {
 export function useFeatured() {
   return useSWR("/api/events/featured", fetcher, {
     revalidateOnFocus: true,
-    dedupingInterval: 5000,
-    refreshInterval: 30000, // Auto-refresh every 30s
+    dedupingInterval: 30000,
+    refreshInterval: 300000, // Auto-refresh every 5 min
   });
 }
 
@@ -64,7 +64,7 @@ export function useForeverMints(params?: { limit?: number; offset?: number }) {
 
   return useSWR(url, fetcher, {
     revalidateOnFocus: true,
-    refreshInterval: 30000, // Auto-refresh every 30s
+    refreshInterval: 300000, // Auto-refresh every 5 min
   });
 }
 
@@ -75,9 +75,9 @@ export function useCollections(search?: string) {
     : "/api/collections";
 
   return useSWR(url, fetcher, {
-    dedupingInterval: 10000,
+    dedupingInterval: 30000,
     revalidateOnFocus: true,
-    refreshInterval: 30000,
+    refreshInterval: 300000, // Auto-refresh every 5 min
   });
 }
 
@@ -88,9 +88,9 @@ export function useTokens(search?: string) {
     : "/api/tokens";
 
   return useSWR(url, fetcher, {
-    dedupingInterval: 10000,
+    dedupingInterval: 30000,
     revalidateOnFocus: true,
-    refreshInterval: 30000,
+    refreshInterval: 300000, // Auto-refresh every 5 min
   });
 }
 
@@ -130,7 +130,7 @@ export function useMissions() {
 export function useHomeAds() {
   return useSWR("/api/home-ads", fetcher, {
     revalidateOnFocus: true,
-    refreshInterval: 60000,
+    refreshInterval: 300000, // Auto-refresh every 5 min
   });
 }
 
@@ -155,7 +155,7 @@ export function useVoteLimit() {
 export function useEventsWithBadge(limit = 10) {
   return useSWR(`/api/events/with-badge?limit=${limit}`, fetcher, {
     revalidateOnFocus: true,
-    refreshInterval: 60000,
+    refreshInterval: 300000, // Auto-refresh every 5 min
   });
 }
 

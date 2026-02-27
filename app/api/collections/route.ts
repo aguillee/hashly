@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120; // Cache for 2 minutes
 import {
   fetchSupportedTokenList,
   fetchCollectionStats,
@@ -35,13 +35,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get total count of approved and visible collections only
-    const total = await prisma.collection.count({
-      where: { isApproved: true, isHidden: false },
-    });
-
-    // Get user for vote mapping
-    const user = await getCurrentUser();
+    // Parallelize count + user auth (both independent)
+    const [total, user] = await Promise.all([
+      prisma.collection.count({
+        where: { isApproved: true, isHidden: false },
+      }),
+      getCurrentUser(),
+    ]);
 
     // If searching, return search results (only approved and visible collections)
     if (search) {

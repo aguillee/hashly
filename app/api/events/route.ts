@@ -8,46 +8,36 @@ export const dynamic = "force-dynamic";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createEventSchema, meetupFieldsSchema, validateRequest } from "@/lib/validations";
 
-// GET /api/events - List events
-export async function GET(request: NextRequest) {
-  // Rate limiting
-  const rateLimitResponse = await checkRateLimit(request, "public");
-  if (rateLimitResponse) return rateLimitResponse;
+// Throttle event status updates: run at most once every 5 minutes
+let lastStatusUpdate = 0;
+const STATUS_UPDATE_INTERVAL_MS = 5 * 60 * 1000;
 
-  try {
-    const now = new Date();
+async function maybeUpdateEventStatuses() {
+  const now = Date.now();
+  if (now - lastStatusUpdate < STATUS_UPDATE_INTERVAL_MS) return;
+  lastStatusUpdate = now;
 
-    // === Auto-update event statuses based on time ===
-    // Update UPCOMING events that should now be LIVE (mintDate has passed)
-    // Only for events WITH a mint date (not TBA), and not Forever Mints
-    await prisma.event.updateMany({
+  const currentDate = new Date();
+
+  await Promise.all([
+    // Update UPCOMING → LIVE (mintDate has passed)
+    prisma.event.updateMany({
       where: {
         status: "UPCOMING",
         isForeverMint: false,
-        mintDate: {
-          not: null,
-          lte: now,
-        },
+        mintDate: { not: null, lte: currentDate },
       },
       data: { status: "LIVE" },
-    });
-
-    // Delete events whose endDate has passed (immediate cleanup)
-    await prisma.event.deleteMany({
+    }),
+    // Delete events whose endDate has passed
+    prisma.event.deleteMany({
       where: {
         isForeverMint: false,
-        endDate: {
-          not: null,
-          lt: now,
-        },
+        endDate: { not: null, lt: currentDate },
       },
-    });
-
-    // Delete LIVE mint events older than 7 days (only MINT_EVENT, not meetups/hackathons)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    await prisma.event.deleteMany({
+    }),
+    // Delete LIVE mint events older than 7 days
+    prisma.event.deleteMany({
       where: {
         status: "LIVE",
         isForeverMint: false,
@@ -55,10 +45,22 @@ export async function GET(request: NextRequest) {
         NOT: { event_type: { in: ["ECOSYSTEM_MEETUP", "HACKATHON"] } },
         mintDate: {
           not: null,
-          lt: sevenDaysAgo,
+          lt: new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000),
         },
       },
-    });
+    }),
+  ]);
+}
+
+// GET /api/events - List events
+export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request, "public");
+  if (rateLimitResponse) return rateLimitResponse;
+
+  try {
+    // Throttled status updates (at most once every 5 min)
+    await maybeUpdateEventStatuses();
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
