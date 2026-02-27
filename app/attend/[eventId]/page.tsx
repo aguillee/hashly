@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useWalletStore } from "@/store";
 import { Button } from "@/components/ui/Button";
+import { ShieldX, CheckCircle2, HandMetal, Clock, XCircle, MapPin } from "lucide-react";
 
 type Status = "idle" | "loading" | "success" | "error" | "already" | "expired" | "no-code";
 
@@ -26,7 +27,7 @@ export default function AttendPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="text-5xl mb-4">🚫</div>
+          <div className="mb-4 flex justify-center"><ShieldX className="h-12 w-12 text-error" /></div>
           <h1 className="text-xl font-bold text-text-primary mb-2">
             Access Denied
           </h1>
@@ -76,7 +77,7 @@ export default function AttendPage() {
           {/* Success */}
           {status === "success" && (
             <>
-              <div className="text-6xl mb-4">✅</div>
+              <div className="mb-4 flex justify-center"><CheckCircle2 className="h-14 w-14 text-success" /></div>
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 You're checked in!
               </h1>
@@ -95,7 +96,7 @@ export default function AttendPage() {
           {/* Already checked in */}
           {status === "already" && (
             <>
-              <div className="text-6xl mb-4">👋</div>
+              <div className="mb-4 flex justify-center"><HandMetal className="h-14 w-14 text-yellow-500" /></div>
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 Already checked in
               </h1>
@@ -111,7 +112,7 @@ export default function AttendPage() {
           {/* Expired code */}
           {status === "expired" && (
             <>
-              <div className="text-6xl mb-4">⏰</div>
+              <div className="mb-4 flex justify-center"><Clock className="h-14 w-14 text-orange-500" /></div>
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 Code Expired
               </h1>
@@ -124,7 +125,7 @@ export default function AttendPage() {
           {/* Error */}
           {status === "error" && (
             <>
-              <div className="text-6xl mb-4">❌</div>
+              <div className="mb-4 flex justify-center"><XCircle className="h-14 w-14 text-error" /></div>
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 Check-in Failed
               </h1>
@@ -138,7 +139,7 @@ export default function AttendPage() {
           {/* Idle / Loading - main flow */}
           {(status === "idle" || status === "loading") && (
             <>
-              <div className="text-5xl mb-4">📍</div>
+              <div className="mb-4 flex justify-center"><MapPin className="h-12 w-12 text-accent-primary" /></div>
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 Event Check-in
               </h1>
