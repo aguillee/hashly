@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
     let highestScore = -Infinity;
 
     for (const event of events.filter(e => e.status === "UPCOMING")) {
-      const score = Math.abs(event.votesUp) - Math.abs(event.votesDown);
+      const score = Math.max(0, event.votesUp) - Math.max(0, event.votesDown);
       if (score > highestScore) {
         highestScore = score;
         mostVoted = event;
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
     let highestLiveScore = -Infinity;
 
     for (const event of events.filter(e => e.status === "LIVE")) {
-      const score = Math.abs(event.votesUp) - Math.abs(event.votesDown);
+      const score = Math.max(0, event.votesUp) - Math.max(0, event.votesDown);
       if (score > highestLiveScore) {
         highestLiveScore = score;
         mostVotedLive = event;
@@ -205,25 +205,25 @@ export async function GET(request: NextRequest) {
       mostVoted: mostVoted
         ? {
             ...mostVoted,
-            score: Math.abs(mostVoted.votesUp) - Math.abs(mostVoted.votesDown),
+            score: Math.max(0, mostVoted.votesUp) - Math.max(0, mostVoted.votesDown),
           }
         : null,
       nextUp: nextUp
         ? {
             ...nextUp,
-            score: Math.abs(nextUp.votesUp) - Math.abs(nextUp.votesDown),
+            score: Math.max(0, nextUp.votesUp) - Math.max(0, nextUp.votesDown),
           }
         : null,
       mostVotedLive: mostVotedLive
         ? {
             ...mostVotedLive,
-            score: Math.abs(mostVotedLive.votesUp) - Math.abs(mostVotedLive.votesDown),
+            score: Math.max(0, mostVotedLive.votesUp) - Math.max(0, mostVotedLive.votesDown),
           }
         : null,
       topForeverMint: topForeverMint
         ? {
             ...topForeverMint,
-            score: Math.abs(topForeverMint.votesUp) - Math.abs(topForeverMint.votesDown),
+            score: Math.max(0, topForeverMint.votesUp) - Math.max(0, topForeverMint.votesDown),
           }
         : null,
       // Ecosystem Meetups (3 columns: most voted, next upcoming, deduplicated)

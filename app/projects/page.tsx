@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toaster";
 import { ShareToXButton } from "@/components/ui/ShareToXButton";
 import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
+import { mutate } from "@/lib/swr";
 
 interface Collection {
   id: string;
@@ -233,6 +234,8 @@ export default function ProjectsPage() {
           title: "Vote recorded!",
           description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted`,
         });
+        // Invalidate SWR cache for real-time updates
+        mutate((key: string) => typeof key === "string" && key.startsWith("/api/collections"), undefined, { revalidate: true });
         // Refresh vote limit in navbar
         refreshVoteLimit();
       } else if (response.status === 429) {
@@ -292,6 +295,8 @@ export default function ProjectsPage() {
           title: "Vote recorded!",
           description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted`,
         });
+        // Invalidate SWR cache for real-time updates
+        mutate((key: string) => typeof key === "string" && key.startsWith("/api/tokens"), undefined, { revalidate: true });
         // Refresh vote limit in navbar
         refreshVoteLimit();
       } else if (response.status === 429) {

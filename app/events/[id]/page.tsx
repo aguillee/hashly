@@ -181,9 +181,20 @@ export default function EventDetailPage() {
       });
 
       if (response.ok) {
-        await loadEvent();
-        // Invalidate featured and forever mints cache so homepage updates
+        const data = await response.json();
+        // Optimistic update: use vote API response immediately (no stale data)
+        setEvent((prev: any) => prev ? {
+          ...prev,
+          votesUp: data.votesUp,
+          votesDown: data.votesDown,
+          userVote: voteType,
+          canVote: false,
+        } : prev);
+        // Also refetch full event data in background
+        loadEvent();
+        // Invalidate all relevant SWR caches for real-time updates
         mutate("/api/events/featured");
+        mutate((key: string) => typeof key === "string" && key.startsWith("/api/events"), undefined, { revalidate: true });
         mutate((key: string) => typeof key === "string" && key.startsWith("/api/forever-mints"), undefined, { revalidate: true });
         // Refresh vote limit in navbar
         refreshVoteLimit();
@@ -305,7 +316,7 @@ export default function EventDetailPage() {
     );
   }
 
-  const score = Math.abs(event.votesUp) - Math.abs(event.votesDown);
+  const score = Math.max(0, event.votesUp) - Math.max(0, event.votesDown);
   const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
   const isHackathon = event.event_type === "HACKATHON";
   const isStarsOnly = isMeetup || isHackathon; // Stars-only voting for meetups and hackathons
@@ -713,7 +724,7 @@ export default function EventDetailPage() {
                     )}
                   >
                     <ThumbsUp className="h-4 w-4" />
-                    {Math.abs(event.votesUp)}
+                    {Math.max(0, event.votesUp)}
                   </Button>
                   <Button
                     variant={event.userVote === "DOWN" && !event.canVote ? "default" : "secondary"}
@@ -725,7 +736,7 @@ export default function EventDetailPage() {
                     )}
                   >
                     <ThumbsDown className="h-4 w-4" />
-                    {Math.abs(event.votesDown)}
+                    {Math.max(0, event.votesDown)}
                   </Button>
                 </div>
               )}

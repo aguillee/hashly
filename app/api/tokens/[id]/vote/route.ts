@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -229,9 +230,12 @@ export async function POST(
       }
     }
 
+    // Bust ISR cache so list page shows updated counts immediately
+    revalidatePath("/api/tokens");
+
     return NextResponse.json({
       success: true,
-      totalVotes: updatedToken?.totalVotes || 0,
+      totalVotes: updatedToken?.totalVotes ?? 0,
       yourVoteWeight: newWeight,
       nftBonus: useNftVotes ? voteWeight - 1 : 0,
       votesRemaining: voteSlot.remaining,
@@ -312,9 +316,12 @@ export async function DELETE(
       },
     });
 
+    // Bust ISR cache
+    revalidatePath("/api/tokens");
+
     return NextResponse.json({
       success: true,
-      totalVotes: updatedToken?.totalVotes || 0,
+      totalVotes: updatedToken?.totalVotes ?? 0,
     });
   } catch (error) {
     console.error("Remove token vote error:", error);

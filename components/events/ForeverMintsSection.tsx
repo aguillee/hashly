@@ -82,7 +82,7 @@ export function ForeverMintsSection() {
 
 function ForeverMintCard({ mint }: { mint: ForeverMint }) {
   const priceInfo = parseMintPrice(mint.mintPrice);
-  const score = Math.abs(mint.votesUp) - Math.abs(mint.votesDown);
+  const score = Math.max(0, mint.votesUp) - Math.max(0, mint.votesDown);
 
   return (
     <div className="group relative">

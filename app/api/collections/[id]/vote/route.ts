@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -232,9 +233,12 @@ export async function POST(
       }
     }
 
+    // Bust ISR cache so list page shows updated counts immediately
+    revalidatePath("/api/collections");
+
     return NextResponse.json({
       success: true,
-      totalVotes: updatedCollection?.totalVotes || 0,
+      totalVotes: updatedCollection?.totalVotes ?? 0,
       yourVoteWeight: newWeight,
       nftBonus: useNftVotes ? voteWeight - 1 : 0,
       votesRemaining: voteSlot.remaining,
@@ -315,9 +319,12 @@ export async function DELETE(
       },
     });
 
+    // Bust ISR cache
+    revalidatePath("/api/collections");
+
     return NextResponse.json({
       success: true,
-      totalVotes: updatedCollection?.totalVotes || 0,
+      totalVotes: updatedCollection?.totalVotes ?? 0,
     });
   } catch (error) {
     console.error("Remove collection vote error:", error);

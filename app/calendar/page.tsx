@@ -193,8 +193,9 @@ export default function CalendarPage() {
         );
         setUserVotes((prev) => ({ ...prev, [eventId]: voteType }));
 
-        // Invalidate featured and forever mints cache so homepage updates
+        // Invalidate all relevant SWR caches for real-time updates
         mutate("/api/events/featured");
+        mutate((key: string) => typeof key === "string" && key.startsWith("/api/events"), undefined, { revalidate: true });
         mutate((key: string) => typeof key === "string" && key.startsWith("/api/forever-mints"), undefined, { revalidate: true });
 
         // Refresh vote limit in navbar

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { VoteType } from "@prisma/client";
@@ -379,29 +380,34 @@ export async function POST(
       if (isDirectionChange) {
         // Direction change: half the swing removes from old counter, half adds to new
         const perCounter = Math.abs(totalVoteChange) / 2;
-        // Fetch current values to prevent going below 0
+        // Fetch current values to ensure balanced move (never go below 0)
         const currentEvent = await prisma.event.findUnique({
           where: { id: eventId },
           select: { votesUp: true, votesDown: true },
         });
+        const curUp = Math.max(0, currentEvent?.votesUp ?? 0);
+        const curDown = Math.max(0, currentEvent?.votesDown ?? 0);
+
         if (totalVoteChange > 0) {
           // DOWN -> UP: move votes from votesDown to votesUp
-          const safeDecrement = Math.min(perCounter, Math.max(0, currentEvent?.votesDown ?? 0));
+          const newDown = Math.max(0, curDown - perCounter);
+          const actualRemoved = curDown - newDown;
           await prisma.event.update({
             where: { id: eventId },
             data: {
-              votesUp: { increment: perCounter },
-              votesDown: { decrement: safeDecrement },
+              votesUp: { increment: actualRemoved }, // Only add what we actually removed
+              votesDown: { set: newDown },
             },
           });
         } else {
           // UP -> DOWN: move votes from votesUp to votesDown
-          const safeDecrement = Math.min(perCounter, Math.max(0, currentEvent?.votesUp ?? 0));
+          const newUp = Math.max(0, curUp - perCounter);
+          const actualRemoved = curUp - newUp;
           await prisma.event.update({
             where: { id: eventId },
             data: {
-              votesUp: { decrement: safeDecrement },
-              votesDown: { increment: perCounter },
+              votesDown: { increment: actualRemoved }, // Only add what we actually removed
+              votesUp: { set: newUp },
             },
           });
         }
@@ -445,11 +451,17 @@ export async function POST(
       console.error("HCS submit failed:", err);
     }
 
+    // Bust ISR cache so other pages show updated counts immediately
+    revalidatePath("/api/events/featured");
+
+    const finalUp = Math.max(0, updatedEvent?.votesUp ?? 0);
+    const finalDown = Math.max(0, updatedEvent?.votesDown ?? 0);
+
     return NextResponse.json({
       success: true,
-      newScore: Math.abs(updatedEvent?.votesUp || 0) - Math.abs(updatedEvent?.votesDown || 0),
-      votesUp: Math.abs(updatedEvent?.votesUp || 0),
-      votesDown: Math.abs(updatedEvent?.votesDown || 0),
+      newScore: finalUp - finalDown,
+      votesUp: finalUp,
+      votesDown: finalDown,
       nftVotesUsed: nftVotesUsed.length > 0 ? nftVotesUsed : undefined,
       totalNftWeight: nftVoteWeight !== 0 ? Math.abs(nftVoteWeight) : undefined,
       votesRemaining: voteSlot.remaining,

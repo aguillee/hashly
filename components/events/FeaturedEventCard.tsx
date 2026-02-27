@@ -28,7 +28,7 @@ interface FeaturedEventCardProps {
 }
 
 export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
-  const score = event.score ?? (Math.abs(event.votesUp) - Math.abs(event.votesDown));
+  const score = event.score ?? (Math.max(0, event.votesUp) - Math.max(0, event.votesDown));
   const priceInfo = parseMintPrice(event.mintPrice);
 
   const getTimeUntil = (dateString: string) => {

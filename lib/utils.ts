@@ -58,7 +58,7 @@ export function truncateAddress(address: string): string {
 }
 
 export function getVoteScore(votesUp: number, votesDown: number): number {
-  return Math.abs(votesUp) - Math.abs(votesDown);
+  return Math.max(0, votesUp) - Math.max(0, votesDown);
 }
 
 export function canVoteAgain(lastVoteDate: Date | string | null): boolean {
