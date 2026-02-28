@@ -47,10 +47,11 @@ export function ParticleBackground() {
   const isDarkRef = React.useRef(false);
   const mouseRef = React.useRef({ x: -1000, y: -1000 });
 
-  // Hide on HashWorld page to avoid clashing with the 3D globe
-  if (pathname === "/community") return null;
+  const isCommunity = pathname === "/community";
 
   React.useEffect(() => {
+    // Skip animation on HashWorld page to avoid clashing with the 3D globe
+    if (isCommunity) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -484,7 +485,9 @@ export function ParticleBackground() {
       window.removeEventListener("touchmove", handleTouch);
       observer.disconnect();
     };
-  }, []);
+  }, [isCommunity]);
+
+  if (isCommunity) return null;
 
   return (
     <canvas
