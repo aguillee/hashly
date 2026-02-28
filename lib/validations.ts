@@ -59,7 +59,7 @@ export const createEventSchema = z.object({
   phases: z
     .array(
       z.object({
-        name: z.string().min(1).max(50),
+        name: z.string().min(1).max(100),
         startDate: z.string().datetime(),
         endDate: z.string().datetime().optional().nullable(),
         price: z.string().min(1).max(50),
@@ -138,7 +138,7 @@ export const meetupFieldsSchema = z.object({
   location: z.string().max(300).optional().nullable(),
   customLinks: z.array(
     z.object({
-      name: z.string().max(50),
+      name: z.string().max(100),
       url: z.string().url().max(500),
     })
   ).max(10).optional().nullable(),

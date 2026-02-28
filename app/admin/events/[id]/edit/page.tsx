@@ -13,6 +13,8 @@ import {
   Trophy,
   MapPin,
   Globe,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -24,6 +26,18 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type EventType = "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
+
+interface CustomLink {
+  id: string;
+  name: string;
+  url: string;
+}
+
+const createEmptyLink = (): CustomLink => ({
+  id: crypto.randomUUID(),
+  name: "",
+  url: "",
+});
 
 const LANGUAGES = [
   { value: "en", label: "English" },
@@ -47,6 +61,7 @@ export default function AdminEditEventPage() {
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
+  const [customLinks, setCustomLinks] = React.useState<CustomLink[]>([createEmptyLink()]);
 
   const [formData, setFormData] = React.useState({
     title: "",
@@ -134,6 +149,14 @@ export default function AdminEditEventPage() {
         location_type: e.location_type || "ONLINE",
         prizes: e.prizes || "",
       });
+      // Parse custom links
+      if (e.custom_links && Array.isArray(e.custom_links) && e.custom_links.length > 0) {
+        setCustomLinks(e.custom_links.map((l: any) => ({
+          id: crypto.randomUUID(),
+          name: l.name || "",
+          url: l.url || "",
+        })));
+      }
     } catch (err) {
       setError("Failed to load event");
     } finally {
@@ -148,6 +171,14 @@ export default function AdminEditEventPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  const handleLinkChange = (linkId: string, field: keyof CustomLink, value: string) => {
+    setCustomLinks((prev) => prev.map((l) => l.id === linkId ? { ...l, [field]: value } : l));
+  };
+  const addLink = () => setCustomLinks((prev) => [...prev, createEmptyLink()]);
+  const removeLink = (linkId: string) => {
+    if (customLinks.length > 1) setCustomLinks((prev) => prev.filter((l) => l.id !== linkId));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -165,27 +196,34 @@ export default function AdminEditEventPage() {
         ? new Date(`${formData.endDate}T${formData.endTime || "23:59"}Z`).toISOString()
         : null;
 
+      const isMeetup = formData.event_type === "ECOSYSTEM_MEETUP" || formData.event_type === "HACKATHON";
+      const validLinks = customLinks.filter(l => l.name.trim() && l.url.trim());
+
       const body: Record<string, any> = {
         title: formData.title,
         description: formData.description,
         mintDate: mintDateTime,
         endDate: endDateTime,
         mintPrice: formData.mintPrice,
-        supply: formData.supply ? parseInt(formData.supply) : null,
         imageUrl: formData.imageUrl || null,
-        websiteUrl: formData.websiteUrl || null,
-        twitterUrl: formData.twitterUrl || null,
-        discordUrl: formData.discordUrl || null,
         category: formData.category || null,
         status: formData.status,
         isApproved: formData.isApproved,
         isForeverMint: formData.isForeverMint,
         event_type: formData.event_type,
-        host: formData.host || null,
-        language: formData.language || null,
-        location: formData.location || null,
+        // Meetup/hackathon fields
+        host: isMeetup ? (formData.host || null) : null,
+        language: isMeetup ? (formData.language || null) : null,
+        location: isMeetup ? (formData.location || null) : null,
         location_type: formData.location_type,
-        prizes: formData.prizes || null,
+        prizes: formData.event_type === "HACKATHON" ? (formData.prizes || null) : null,
+        // Mint event fields
+        supply: !isMeetup && formData.supply ? parseInt(formData.supply) : null,
+        websiteUrl: !isMeetup ? (formData.websiteUrl || null) : null,
+        twitterUrl: !isMeetup ? (formData.twitterUrl || null) : null,
+        discordUrl: !isMeetup ? (formData.discordUrl || null) : null,
+        // Custom links for meetups (admin API uses snake_case)
+        ...(isMeetup && validLinks.length > 0 ? { custom_links: validLinks.map(l => ({ name: l.name.trim(), url: l.url.trim() })) } : {}),
       };
 
       const response = await fetch(`/api/admin/events/${eventId}`, {
@@ -436,17 +474,59 @@ export default function AdminEditEventPage() {
               </div>
             </div>
 
-            {/* Mint Price (for mint events) */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Mint Price</label>
-              <Input name="mintPrice" value={formData.mintPrice} onChange={handleChange} placeholder="e.g., 100 HBAR or Free" />
-            </div>
+            {/* Entry Fee (meetups/hackathons) */}
+            {isMeetupOrHackathon && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Entry Fee</label>
+                <Input name="mintPrice" value={formData.mintPrice} onChange={handleChange} placeholder="Leave empty for Free" />
+                <p className="text-xs text-text-secondary mt-1">Leave empty if the event is free</p>
+              </div>
+            )}
 
-            {/* Supply */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Supply</label>
-              <Input type="number" name="supply" value={formData.supply} onChange={handleChange} placeholder="e.g., 10000" />
-            </div>
+            {/* Custom Links (meetups/hackathons) */}
+            {isMeetupOrHackathon && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-accent-primary" />Links
+                  </label>
+                  <Button type="button" variant="outline" size="sm" onClick={addLink} className="gap-1">
+                    <Plus className="h-3 w-3" />Add Link
+                  </Button>
+                </div>
+                {customLinks.map((link) => (
+                  <div key={link.id} className="flex gap-2 items-start">
+                    <div className="w-1/3">
+                      <Input value={link.name} onChange={(e) => handleLinkChange(link.id, "name", e.target.value)} placeholder="Name" />
+                    </div>
+                    <div className="flex-1">
+                      <Input value={link.url} onChange={(e) => handleLinkChange(link.id, "url", e.target.value)} placeholder="https://..." />
+                    </div>
+                    {customLinks.length > 1 && (
+                      <button type="button" onClick={() => removeLink(link.id)} className="p-2 text-text-secondary hover:text-error transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Mint Price (mint events only) */}
+            {!isMeetupOrHackathon && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Mint Price</label>
+                <Input name="mintPrice" value={formData.mintPrice} onChange={handleChange} placeholder="e.g., 100 HBAR or Free" />
+              </div>
+            )}
+
+            {/* Supply (mint events only) */}
+            {!isMeetupOrHackathon && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Supply</label>
+                <Input type="number" name="supply" value={formData.supply} onChange={handleChange} placeholder="e.g., 10000" />
+              </div>
+            )}
 
             {/* Cover Image */}
             <div>
@@ -458,16 +538,18 @@ export default function AdminEditEventPage() {
               />
             </div>
 
-            {/* Social Links */}
-            <div className="space-y-4">
-              <label className="block text-sm font-medium">
-                <LinkIcon className="h-4 w-4 inline mr-1" />
-                Links
-              </label>
-              <Input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} placeholder="Website URL" />
-              <Input name="twitterUrl" value={formData.twitterUrl} onChange={handleChange} placeholder="Twitter/X URL" />
-              <Input name="discordUrl" value={formData.discordUrl} onChange={handleChange} placeholder="Discord URL" />
-            </div>
+            {/* Social Links (mint events only) */}
+            {!isMeetupOrHackathon && (
+              <div className="space-y-4">
+                <label className="block text-sm font-medium">
+                  <LinkIcon className="h-4 w-4 inline mr-1" />
+                  Social Links
+                </label>
+                <Input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} placeholder="Website URL" />
+                <Input name="twitterUrl" value={formData.twitterUrl} onChange={handleChange} placeholder="Twitter/X URL" />
+                <Input name="discordUrl" value={formData.discordUrl} onChange={handleChange} placeholder="Discord URL" />
+              </div>
+            )}
 
             {/* Submit */}
             <div className="flex gap-4 pt-4">

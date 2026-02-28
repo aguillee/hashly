@@ -58,6 +58,19 @@ export async function GET(request: NextRequest) {
       rank: usersAbove + 1,
       totalUsers,
       pointHistory: user.pointHistory,
+      createdEvents: user.events
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .map(e => ({
+          id: e.id,
+          title: e.title,
+          event_type: e.event_type,
+          status: e.status,
+          isApproved: e.isApproved,
+          mintDate: e.mintDate?.toISOString() || null,
+          votesUp: e.votesUp,
+          votesDown: e.votesDown,
+          imageUrl: e.imageUrl,
+        })),
       season: {
         number: season.number,
         name: season.name,

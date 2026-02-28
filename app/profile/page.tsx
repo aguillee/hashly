@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   User,
   Zap,
@@ -21,6 +22,9 @@ import {
   X,
   Save,
   Mic2,
+  Eye,
+  Star,
+  ThumbsUp,
 } from "lucide-react";
 import { HostedBadges } from "@/components/badges/HostedBadges";
 import { ReferralSection } from "@/components/referral/ReferralSection";
@@ -37,6 +41,18 @@ interface PointHistoryItem {
   createdAt: string;
 }
 
+interface CreatedEvent {
+  id: string;
+  title: string;
+  event_type: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
+  status: "UPCOMING" | "LIVE";
+  isApproved: boolean;
+  mintDate: string | null;
+  votesUp: number;
+  votesDown: number;
+  imageUrl: string | null;
+}
+
 interface ProfileStats {
   totalVotes: number;
   totalEvents: number;
@@ -44,6 +60,7 @@ interface ProfileStats {
   rank: number;
   totalUsers: number;
   pointHistory: PointHistoryItem[];
+  createdEvents: CreatedEvent[];
 }
 
 interface NFTData {
@@ -408,6 +425,70 @@ export default function ProfilePage() {
           </div>
           <HostedBadges />
         </div>
+
+        {/* Your Events Section */}
+        {stats && stats.createdEvents && stats.createdEvents.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-4 w-4 text-success" />
+              <h2 className="text-lg font-bold">Your Events</h2>
+              <span className="text-xs text-text-secondary">({stats.createdEvents.length})</span>
+            </div>
+            <div className="space-y-2">
+              {stats.createdEvents.map((evt) => (
+                <div
+                  key={evt.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-bg-card border border-border hover:border-accent-primary/30 transition-all"
+                >
+                  {evt.imageUrl && (
+                    <img
+                      src={evt.imageUrl}
+                      alt={evt.title}
+                      className="w-12 h-12 rounded-md object-cover flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-sm text-text-primary truncate">{evt.title}</p>
+                      <Badge variant={evt.isApproved ? "success" : "warning"}>
+                        {evt.isApproved ? "Approved" : "Pending"}
+                      </Badge>
+                      <span className="text-[10px] text-text-secondary px-1.5 py-0.5 rounded bg-bg-secondary">
+                        {evt.event_type === "MINT_EVENT" ? "Mint" : evt.event_type === "HACKATHON" ? "Hackathon" : "Meetup"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary">
+                      {evt.mintDate && (
+                        <span>{new Date(evt.mintDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                      )}
+                      <span className="flex items-center gap-0.5">
+                        {evt.event_type === "ECOSYSTEM_MEETUP" || evt.event_type === "HACKATHON" ? (
+                          <><Star className="h-3 w-3 text-yellow-400" /> {evt.votesUp}</>
+                        ) : (
+                          <><ThumbsUp className="h-3 w-3" /> {Math.max(0, evt.votesUp) - Math.max(0, evt.votesDown)}</>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <Link
+                      href={`/events/${evt.id}`}
+                      className="p-2 rounded-md bg-bg-secondary hover:bg-border transition-colors text-text-secondary hover:text-text-primary"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </Link>
+                    <Link
+                      href={`/events/${evt.id}/edit`}
+                      className="p-2 rounded-md bg-accent-primary/10 hover:bg-accent-primary/20 transition-colors text-accent-primary"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-8 gap-3">

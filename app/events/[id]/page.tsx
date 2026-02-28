@@ -27,6 +27,7 @@ import {
   Award,
   Check,
   CalendarPlus,
+  Pencil,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -84,6 +85,7 @@ interface EventDetail {
   phases: MintPhase[];
   userVote: "UP" | "DOWN" | null;
   canVote: boolean;
+  canEdit?: boolean;
   voteLockedUntil: string | null;
 }
 
@@ -841,6 +843,17 @@ export default function EventDetailPage() {
                 )}
               </div>
             </div>
+          )}
+
+          {/* Edit Button - only visible to creator/admin */}
+          {event.canEdit && (
+            <Link
+              href={`/events/${event.id}/edit`}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/30 text-accent-primary hover:bg-accent-primary/20 transition-colors text-sm font-medium"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit Event
+            </Link>
           )}
 
           {/* Share */}

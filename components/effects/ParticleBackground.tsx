@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 // 3D point on sphere surface
 interface SphereNode {
@@ -40,10 +41,14 @@ interface AmbientParticle {
 }
 
 export function ParticleBackground() {
+  const pathname = usePathname();
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const rafRef = React.useRef<number>(0);
   const isDarkRef = React.useRef(false);
   const mouseRef = React.useRef({ x: -1000, y: -1000 });
+
+  // Hide on HashWorld page to avoid clashing with the 3D globe
+  if (pathname === "/community") return null;
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
