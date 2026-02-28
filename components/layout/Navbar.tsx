@@ -27,11 +27,13 @@ const ConnectButton = dynamic(
   }
 );
 
+const IS_DEV = process.env.NODE_ENV === "development";
+
 const navLinks = [
   { href: "/news", label: "News", icon: Newspaper },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/projects", label: "Projects", icon: Layers },
-  { href: "/community", label: "HashWorld", icon: Globe },
+  ...(IS_DEV ? [{ href: "/community", label: "HashWorld", icon: Globe }] : []),
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 
