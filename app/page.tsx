@@ -273,9 +273,9 @@ export default function HomePage() {
             </p>
             <div className={`grid gap-3 sm:gap-4 ${
               eventsWithBadge.length === 1
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-3xl"
+                ? "grid-cols-1 sm:grid-cols-2 max-w-2xl"
                 : eventsWithBadge.length === 2
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl"
+                  ? "grid-cols-1 sm:grid-cols-2"
                   : eventsWithBadge.length === 3
                     ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
