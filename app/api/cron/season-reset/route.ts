@@ -171,11 +171,12 @@ export async function GET(request: NextRequest) {
           })),
         });
 
-        // 3. Reset points — preserve any earned in the new season
+        // 3. Reset points and login streak — preserve any earned in the new season
         await tx.user.updateMany({
           data: {
             points: 0,
             referralPoints: 0,
+            loginStreak: 0,
           },
         });
 
