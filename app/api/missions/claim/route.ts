@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import { awardMissionPoints } from "@/lib/points";
 import { MISSION_DEFINITIONS } from "@/lib/missions";
+import { getCurrentSeason } from "@/lib/seasons";
 import { z } from "zod";
 
 const claimSchema = z.object({
@@ -61,37 +62,47 @@ export async function POST(request: NextRequest) {
 
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
-    // Count votes in parallel — events separate from collections/tokens
+    // Season boundary for achievement missions
+    const currentSeason = getCurrentSeason();
+    const seasonStart = currentSeason.startDate;
+
+    // Count votes in parallel — season-scoped for achievements
     const [
       todayEventVotes,
       weekEventVotes,
-      totalEventVotes, totalCollectionVotes, totalTokenVotes,
-      approvedEvents,
-      referralCount,
+      seasonEventVotes, seasonCollectionVotes, seasonTokenVotes,
+      seasonApprovedEvents,
+      seasonReferralCount,
       badgeCount,
+      communityProfile,
     ] = await Promise.all([
       // Today — events only
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfDay } } }),
       // Week — events only
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfWeek } } }),
-      // Total — all types
-      prisma.vote.count({ where: { userId: user.id } }),
-      prisma.collectionVote.count({ where: { walletAddress } }),
-      prisma.tokenVote.count({ where: { walletAddress } }),
-      // Approved events
-      prisma.event.count({ where: { createdById: user.id, isApproved: true } }),
-      // Activated referrals
-      prisma.referral.count({ where: { referrerId: user.id } }),
-      // Badges owned
+      // Season — all types (for achievement missions)
+      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: seasonStart } } }),
+      prisma.collectionVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      prisma.tokenVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      // Approved events this season
+      prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
+      // Activated referrals this season
+      prisma.referral.count({ where: { referrerId: user.id, createdAt: { gte: seasonStart } } }),
+      // Badges owned — NFTs persist across seasons
       prisma.badgeClaim.count({
         where: {
           walletAddress,
           status: { in: ["SENT", "CLAIMED"] },
         },
       }),
+      // HashWorld profile
+      prisma.communityProfile.findUnique({
+        where: { userId: user.id },
+        select: { id: true },
+      }),
     ]);
 
-    const totalVotes = totalEventVotes + totalCollectionVotes + totalTokenVotes;
+    const seasonVotes = seasonEventVotes + seasonCollectionVotes + seasonTokenVotes;
 
     let isCompleted = false;
     switch (missionId) {
@@ -111,31 +122,34 @@ export async function POST(request: NextRequest) {
         isCompleted = weekEventVotes >= mission.requirement;
         break;
       case "first_vote":
-        isCompleted = totalVotes >= mission.requirement;
+        isCompleted = seasonVotes >= mission.requirement;
         break;
       case "first_event":
-        isCompleted = approvedEvents >= mission.requirement;
+        isCompleted = seasonApprovedEvents >= mission.requirement;
         break;
       case "votes_100":
-        isCompleted = totalVotes >= mission.requirement;
+        isCompleted = seasonVotes >= mission.requirement;
         break;
       case "votes_500":
-        isCompleted = totalVotes >= mission.requirement;
+        isCompleted = seasonVotes >= mission.requirement;
         break;
       case "season_streak_25":
         isCompleted = user.loginStreak >= mission.requirement;
         break;
       case "referral_1":
-        isCompleted = referralCount >= mission.requirement;
+        isCompleted = seasonReferralCount >= mission.requirement;
         break;
       case "referral_3":
-        isCompleted = referralCount >= mission.requirement;
+        isCompleted = seasonReferralCount >= mission.requirement;
         break;
       case "badge_1":
         isCompleted = badgeCount >= mission.requirement;
         break;
       case "badge_3":
         isCompleted = badgeCount >= mission.requirement;
+        break;
+      case "hashworld_profile":
+        isCompleted = !!communityProfile;
         break;
     }
 

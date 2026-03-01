@@ -16,6 +16,7 @@ import {
   Star,
   Users,
   Award,
+  Globe,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
@@ -122,6 +123,7 @@ export default function MissionsPage() {
       gift: <Gift className="h-5 w-5" />,
       users: <Users className="h-5 w-5" />,
       badge: <Award className="h-5 w-5" />,
+      globe: <Globe className="h-5 w-5" />,
     };
     return icons[iconName] || <Sparkles className="h-5 w-5" />;
   };

@@ -19,7 +19,34 @@ interface LeaderboardEntry {
   totalPoints: number;
 }
 
-const PRIZE_CUTOFF = 8;
+const PRIZE_TIERS = [
+  {
+    label: "Top 1–5",
+    maxRank: 5,
+    name: "Santuario Hedera",
+    tokenId: "0.0.7235629",
+    image: "https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8",
+    color: "purple",
+  },
+  {
+    label: "Top 6–12",
+    maxRank: 12,
+    name: "HashHogs",
+    tokenId: "0.0.10233551",
+    image: "https://ipfs.io/ipfs/bafybeielr4by7eajkteso4np2qdueuyqdoill7szcd4dnwahfwlthmn6oe/hashhog-_3333.png",
+    color: "yellow",
+  },
+  {
+    label: "Top 13–22",
+    maxRank: 22,
+    name: "Mapache Mafia V2",
+    tokenId: "0.0.10296772",
+    image: "https://gateway.pinata.cloud/ipfs/bafybeigds67rqvsfhorg6cxjszorgp3gxroavaiiuojvqb2zonwm7rfuk4",
+    color: "green",
+  },
+];
+
+const PRIZE_CUTOFF = PRIZE_TIERS[PRIZE_TIERS.length - 1].maxRank; // 22
 
 function useCountdown(targetDate: Date | null) {
   const [timeLeft, setTimeLeft] = React.useState(0);
@@ -70,6 +97,7 @@ export default function LeaderboardPage() {
   const leaderboard: LeaderboardEntry[] = data?.leaderboard || [];
   const userRank: number | null = data?.userRank || null;
   const totalUsers: number = data?.totalUsers || 0;
+  const seasonContributors: number = data?.seasonContributors || 0;
   const userData = data?.userData || null;
 
   const getRankIcon = (rank: number) => {
@@ -111,7 +139,9 @@ export default function LeaderboardPage() {
         case 3:
           return "bg-bg-card border-amber-500/30";
         default:
-          return "bg-bg-card border-purple-500/20 hover:border-purple-500/40";
+          if (rank <= 5) return "bg-bg-card border-purple-500/20 hover:border-purple-500/40";
+          if (rank <= 12) return "bg-bg-card border-yellow-500/20 hover:border-yellow-500/40";
+          return "bg-bg-card border-green-500/20 hover:border-green-500/40";
       }
     }
     return "bg-bg-card border-border hover:border-accent-primary/30";
@@ -133,7 +163,7 @@ export default function LeaderboardPage() {
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Leaderboard</h1>
                 <p className="text-xs sm:text-sm text-text-secondary">
-                  {totalUsers} contributors · {seasonName}
+                  {seasonContributors} contributors · {seasonName}
                 </p>
               </div>
             </div>
@@ -164,23 +194,36 @@ export default function LeaderboardPage() {
         {/* Prize Banner */}
         <div className="mb-8">
           <div className="p-5 sm:p-6 rounded-lg bg-bg-card border border-yellow-500/20">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0">
-                <img
-                  src="https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8"
-                  alt="Santuario Hedera"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Gift className="h-4 w-4 text-yellow-400" />
-                  <span className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">Season Prize</span>
+            <div className="flex items-center gap-2 mb-4">
+              <Gift className="h-4 w-4 text-yellow-400" />
+              <span className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">Season Prizes</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {PRIZE_TIERS.map((tier) => (
+                <div
+                  key={tier.tokenId}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-bg-secondary/50 border border-border"
+                >
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0">
+                    <img
+                      src={tier.image}
+                      alt={tier.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-text-secondary">{tier.label}</p>
+                    <p className={cn(
+                      "text-sm font-bold",
+                      tier.color === "purple" && "text-purple-400",
+                      tier.color === "yellow" && "text-yellow-400",
+                      tier.color === "green" && "text-green-400",
+                    )}>
+                      {tier.name}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-text-primary font-semibold">
-                  Top 1-8 will receive a <span className="text-purple-400">Santuario Hedera NFT</span> as a prize
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -244,7 +287,7 @@ export default function LeaderboardPage() {
               <h2 className="text-xl font-bold text-text-primary">Top 50</h2>
               <div className="flex items-center gap-1.5 text-sm text-text-secondary">
                 <Users className="h-4 w-4" />
-                <span>{totalUsers.toLocaleString()} registered users</span>
+                <span>{seasonContributors.toLocaleString()} registered users</span>
               </div>
             </div>
           </div>

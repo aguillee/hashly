@@ -51,8 +51,18 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // Total registered users
+    // Total registered users (all-time)
     const totalUsers = await prisma.user.count();
+
+    // Users with points this season (contributors)
+    const seasonContributors = await prisma.user.count({
+      where: {
+        OR: [
+          { points: { gt: 0 } },
+          { referralPoints: { gt: 0 } },
+        ],
+      },
+    });
 
     return NextResponse.json({
       leaderboard: leaderboard.map((u, index) => ({
@@ -70,6 +80,7 @@ export async function GET(request: NextRequest) {
       userRank,
       userData,
       totalUsers,
+      seasonContributors,
       season: {
         number: season.number,
         name: season.name,

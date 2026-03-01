@@ -41,54 +41,64 @@ export async function GET(request: NextRequest) {
     const startOfWeek = new Date(startOfDay);
     startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
 
+    // Season boundary for achievement missions
+    const currentSeason = getCurrentSeason();
+    const seasonStart = currentSeason.startDate;
+
     // Count votes in parallel — events separate from collections/tokens
     const [
       todayEventVotes,
       weekEventVotes,
-      totalEventVotes, totalCollectionVotes, totalTokenVotes,
-      approvedEvents,
-      referralCount,
+      // Season-scoped counts (for achievement missions)
+      seasonEventVotes, seasonCollectionVotes, seasonTokenVotes,
+      seasonApprovedEvents,
+      seasonReferralCount,
       badgeCount,
+      communityProfile,
       userMissions,
     ] = await Promise.all([
       // Today — events only (for daily_vote, vote_5_events)
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfDay } } }),
       // Week — events only (for weekly_votes)
       prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfWeek } } }),
-      // Total — all types (for first_vote, votes_100, votes_500)
-      prisma.vote.count({ where: { userId: user.id } }),
-      prisma.collectionVote.count({ where: { walletAddress } }),
-      prisma.tokenVote.count({ where: { walletAddress } }),
-      // Approved events
-      prisma.event.count({ where: { createdById: user.id, isApproved: true } }),
-      // Activated referrals
-      prisma.referral.count({ where: { referrerId: user.id } }),
-      // Badges owned (SENT or CLAIMED)
+      // Season — all types (for first_vote, votes_100, votes_500)
+      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: seasonStart } } }),
+      prisma.collectionVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      prisma.tokenVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      // Approved events this season
+      prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
+      // Activated referrals this season
+      prisma.referral.count({ where: { referrerId: user.id, createdAt: { gte: seasonStart } } }),
+      // Badges owned (SENT or CLAIMED) — NFTs persist across seasons
       prisma.badgeClaim.count({
         where: {
           walletAddress,
           status: { in: ["SENT", "CLAIMED"] },
         },
       }),
+      // HashWorld profile
+      prisma.communityProfile.findUnique({
+        where: { userId: user.id },
+        select: { id: true },
+      }),
       // User missions
       prisma.userMission.findMany({ where: { userId: user.id } }),
     ]);
 
-    const totalVotes = totalEventVotes + totalCollectionVotes + totalTokenVotes;
+    const seasonVotes = seasonEventVotes + seasonCollectionVotes + seasonTokenVotes;
 
     // Check if user has logged in today
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
     const stats = {
-      totalVotes,
-      totalEvents: approvedEvents,
+      totalVotes: seasonVotes,
+      totalEvents: seasonApprovedEvents,
       loginStreak: user.loginStreak,
       todayVotes: todayEventVotes,
       weekVotes: weekEventVotes,
     };
 
     // Build missions with progress and claim status
-    const currentSeason = getCurrentSeason();
     const missions = MISSION_DEFINITIONS.map(def => {
       let progress = 0;
       let completed = false;
@@ -115,32 +125,32 @@ export async function GET(request: NextRequest) {
           completed = weekEventVotes >= def.requirement;
           break;
         case "first_vote":
-          progress = Math.min(totalVotes, def.requirement);
-          completed = totalVotes >= def.requirement;
+          progress = Math.min(seasonVotes, def.requirement);
+          completed = seasonVotes >= def.requirement;
           break;
         case "first_event":
-          progress = Math.min(approvedEvents, def.requirement);
-          completed = approvedEvents >= def.requirement;
+          progress = Math.min(seasonApprovedEvents, def.requirement);
+          completed = seasonApprovedEvents >= def.requirement;
           break;
         case "votes_100":
-          progress = Math.min(totalVotes, def.requirement);
-          completed = totalVotes >= def.requirement;
+          progress = Math.min(seasonVotes, def.requirement);
+          completed = seasonVotes >= def.requirement;
           break;
         case "votes_500":
-          progress = Math.min(totalVotes, def.requirement);
-          completed = totalVotes >= def.requirement;
+          progress = Math.min(seasonVotes, def.requirement);
+          completed = seasonVotes >= def.requirement;
           break;
         case "season_streak_25":
           progress = Math.min(user.loginStreak, def.requirement);
           completed = user.loginStreak >= def.requirement;
           break;
         case "referral_1":
-          progress = Math.min(referralCount, def.requirement);
-          completed = referralCount >= def.requirement;
+          progress = Math.min(seasonReferralCount, def.requirement);
+          completed = seasonReferralCount >= def.requirement;
           break;
         case "referral_3":
-          progress = Math.min(referralCount, def.requirement);
-          completed = referralCount >= def.requirement;
+          progress = Math.min(seasonReferralCount, def.requirement);
+          completed = seasonReferralCount >= def.requirement;
           break;
         case "badge_1":
           progress = Math.min(badgeCount, def.requirement);
@@ -149,6 +159,10 @@ export async function GET(request: NextRequest) {
         case "badge_3":
           progress = Math.min(badgeCount, def.requirement);
           completed = badgeCount >= def.requirement;
+          break;
+        case "hashworld_profile":
+          progress = communityProfile ? 1 : 0;
+          completed = !!communityProfile;
           break;
       }
 
