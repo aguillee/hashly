@@ -6,6 +6,8 @@ export interface MissionDefinition {
   type: "DAILY" | "WEEKLY" | "ACHIEVEMENT";
   requirement: number;
   icon: string;
+  /** If true, can only be claimed once ever (not reset per season). */
+  permanent?: boolean;
 }
 
 export const MISSION_DEFINITIONS: MissionDefinition[] = [
@@ -146,5 +148,6 @@ export const MISSION_DEFINITIONS: MissionDefinition[] = [
     type: "ACHIEVEMENT",
     requirement: 1,
     icon: "globe",
+    permanent: true,
   },
 ];

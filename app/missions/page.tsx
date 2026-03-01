@@ -33,6 +33,7 @@ interface Mission {
   progress: number;
   completed: boolean;
   claimed: boolean;
+  permanent?: boolean;
 }
 
 interface UserStats {
@@ -130,7 +131,8 @@ export default function MissionsPage() {
 
   const dailyMissions = missions.filter((m) => m.type === "DAILY");
   const weeklyMissions = missions.filter((m) => m.type === "WEEKLY");
-  const achievements = missions.filter((m) => m.type === "ACHIEVEMENT");
+  const achievements = missions.filter((m) => m.type === "ACHIEVEMENT" && !m.permanent);
+  const permanentMissions = missions.filter((m) => m.permanent);
 
   const MissionCard = ({ mission }: { mission: Mission }) => {
     return (
@@ -329,7 +331,7 @@ export default function MissionsPage() {
             </div>
 
             {/* Season Missions */}
-            <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
+            <div className="rounded-lg border border-border bg-bg-card overflow-hidden mb-4">
               <div className="px-4 py-3 border-b border-border flex items-center justify-between">
                 <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-yellow-500" />
@@ -349,6 +351,24 @@ export default function MissionsPage() {
                 )}
               </div>
             </div>
+
+            {/* Unique / Permanent Missions */}
+            {permanentMissions.length > 0 && (
+              <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
+                <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                  <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                    <Star className="h-4 w-4 text-accent-primary" />
+                    Unique Missions
+                  </h2>
+                  <Badge variant="default" size="sm">One time only</Badge>
+                </div>
+                <div className="p-3 space-y-2">
+                  {permanentMissions.map((mission) => (
+                    <MissionCard key={mission.id} mission={mission} />
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

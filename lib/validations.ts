@@ -194,11 +194,17 @@ export const reorderHomeAdsSchema = z.object({
 // COMMUNITY PROFILE VALIDATIONS
 // ============================================
 
+const twitterHandleSchema = z
+  .string()
+  .min(1, "X handle is required")
+  .max(15)
+  .regex(/^[a-zA-Z0-9_]+$/, "Invalid X handle format");
+
 export const createCommunityProfileSchema = z.object({
   displayName: z.string().min(1).max(50).trim(),
   countryCode: z.string().min(2).max(3),
   type: z.enum(["USER", "BUILDER", "PERSON", "PROJECT"]),
-  twitterHandle: z.string().max(50).optional().nullable(),
+  twitterHandle: twitterHandleSchema,
   bio: z.string().max(280).optional().nullable(),
 });
 
@@ -206,7 +212,7 @@ export const updateCommunityProfileSchema = z.object({
   displayName: z.string().min(1).max(50).trim().optional(),
   countryCode: z.string().min(2).max(3).optional(),
   type: z.enum(["USER", "BUILDER", "PERSON", "PROJECT"]).optional(),
-  twitterHandle: z.string().max(50).optional().nullable(),
+  twitterHandle: twitterHandleSchema.optional(),
   bio: z.string().max(280).optional().nullable(),
 });
 

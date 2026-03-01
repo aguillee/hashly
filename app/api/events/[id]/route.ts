@@ -75,6 +75,31 @@ export async function GET(
     // Remove votes array from response (we only needed it to check user's vote)
     const { votes, ...eventData } = event;
 
+    // Get adjacent events for prev/next navigation
+    let prevEvent = null;
+    let nextEvent = null;
+
+    if (event.mintDate) {
+      [prevEvent, nextEvent] = await Promise.all([
+        prisma.event.findFirst({
+          where: {
+            isApproved: true,
+            mintDate: { lt: event.mintDate },
+          },
+          orderBy: { mintDate: "desc" },
+          select: { id: true, title: true, mintDate: true },
+        }),
+        prisma.event.findFirst({
+          where: {
+            isApproved: true,
+            mintDate: { gt: event.mintDate },
+          },
+          orderBy: { mintDate: "asc" },
+          select: { id: true, title: true, mintDate: true },
+        }),
+      ]);
+    }
+
     return NextResponse.json({
       ...eventData,
       userVote,
@@ -82,6 +107,8 @@ export async function GET(
       voteLockedUntil,
       canEdit,
       isOwner,
+      prevEvent,
+      nextEvent,
     });
   } catch (error) {
     console.error("Failed to get event:", error);

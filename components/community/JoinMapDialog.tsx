@@ -94,7 +94,18 @@ export function JoinMapDialog({
 
   if (!isOpen) return null;
 
-  const isValid = displayName.trim().length >= 2 && countryCode.length === 2;
+  // Sanitize handle: strip @, URLs, spaces
+  const sanitizeHandle = (raw: string) =>
+    raw
+      .replace(/^@/, "")
+      .replace(/https?:\/\/(www\.)?(twitter\.com|x\.com)\/?/gi, "")
+      .replace(/\s/g, "")
+      .replace(/^\//, "");
+
+  const trimmedHandle = sanitizeHandle(twitterHandle);
+  const isValidHandle = /^[a-zA-Z0-9_]{1,15}$/.test(trimmedHandle);
+  const showHandleError = twitterHandle.length > 0 && !isValidHandle;
+  const isValid = displayName.trim().length >= 2 && countryCode.length === 2 && isValidHandle;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,7 +119,7 @@ export function JoinMapDialog({
         displayName: displayName.trim(),
         countryCode,
         type,
-        twitterHandle: twitterHandle.trim() || undefined,
+        twitterHandle: trimmedHandle || undefined,
         bio: bio.trim() || undefined,
         avatarUrl: avatarUrl || undefined,
       });
@@ -225,7 +236,7 @@ export function JoinMapDialog({
           {/* Twitter handle */}
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">
-              X (Twitter) Handle
+              X (Twitter) Handle *
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-sm">
@@ -235,14 +246,24 @@ export function JoinMapDialog({
                 type="text"
                 value={twitterHandle}
                 onChange={(e) => setTwitterHandle(e.target.value.replace(/^@/, ""))}
-                maxLength={15}
+                maxLength={30}
                 placeholder="username"
-                className="w-full pl-8 pr-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+                className={`w-full pl-8 pr-4 py-2 rounded-lg bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-2 ${
+                  showHandleError
+                    ? "border-error focus:ring-error/50"
+                    : "border-border focus:ring-accent-primary/50"
+                }`}
               />
             </div>
-            <p className="text-xs text-text-secondary mt-1">
-              Others will be able to follow you on X
-            </p>
+            {showHandleError ? (
+              <p className="text-xs text-error mt-1">
+                Enter a valid X username (letters, numbers, underscore only)
+              </p>
+            ) : (
+              <p className="text-xs text-text-secondary mt-1">
+                Others will be able to follow you on X
+              </p>
+            )}
           </div>
 
           {/* Bio */}

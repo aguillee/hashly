@@ -59,6 +59,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    // Sanitize X handle before validation
+    if (body.twitterHandle && typeof body.twitterHandle === "string") {
+      body.twitterHandle = body.twitterHandle
+        .replace(/^@/, "")
+        .replace(/https?:\/\/(www\.)?(twitter\.com|x\.com)\/?/gi, "")
+        .replace(/\s/g, "")
+        .replace(/^\//, "");
+    }
     const validation = validateRequest(createCommunityProfileSchema, body);
     if (!validation.success) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
@@ -70,7 +78,7 @@ export async function POST(request: NextRequest) {
         displayName: validation.data.displayName,
         countryCode: validation.data.countryCode,
         type: validation.data.type,
-        twitterHandle: validation.data.twitterHandle || null,
+        twitterHandle: validation.data.twitterHandle,
         bio: validation.data.bio || null,
         avatarUrl: body.avatarUrl || null,
       },
@@ -109,6 +117,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+    // Sanitize X handle before validation
+    if (body.twitterHandle && typeof body.twitterHandle === "string") {
+      body.twitterHandle = body.twitterHandle
+        .replace(/^@/, "")
+        .replace(/https?:\/\/(www\.)?(twitter\.com|x\.com)\/?/gi, "")
+        .replace(/\s/g, "")
+        .replace(/^\//, "");
+    }
     const validation = validateRequest(updateCommunityProfileSchema, body);
     if (!validation.success) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
@@ -120,7 +136,7 @@ export async function PUT(request: NextRequest) {
         ...(validation.data.displayName !== undefined && { displayName: validation.data.displayName }),
         ...(validation.data.countryCode !== undefined && { countryCode: validation.data.countryCode }),
         ...(validation.data.type !== undefined && { type: validation.data.type }),
-        ...(validation.data.twitterHandle !== undefined && { twitterHandle: validation.data.twitterHandle || null }),
+        ...(validation.data.twitterHandle !== undefined && { twitterHandle: validation.data.twitterHandle }),
         ...(validation.data.bio !== undefined && { bio: validation.data.bio || null }),
         ...(body.avatarUrl !== undefined && { avatarUrl: body.avatarUrl || null }),
       },

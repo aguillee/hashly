@@ -48,6 +48,10 @@ const PRIZE_TIERS = [
 
 const PRIZE_CUTOFF = PRIZE_TIERS[PRIZE_TIERS.length - 1].maxRank; // 22
 
+function getPrizeTier(rank: number) {
+  return PRIZE_TIERS.find((t) => rank <= t.maxRank) || null;
+}
+
 function useCountdown(targetDate: Date | null) {
   const [timeLeft, setTimeLeft] = React.useState(0);
 
@@ -342,9 +346,21 @@ export default function LeaderboardPage() {
                               You
                             </Badge>
                           )}
-                          {inPrizeZone && (
-                            <Gift className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-400 flex-shrink-0" />
-                          )}
+                          {(() => {
+                            const tier = getPrizeTier(entry.rank);
+                            if (!tier) return null;
+                            return (
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-medium",
+                                tier.color === "purple" && "bg-purple-500/15 text-purple-400",
+                                tier.color === "yellow" && "bg-yellow-500/15 text-yellow-400",
+                                tier.color === "green" && "bg-green-500/15 text-green-400",
+                              )}>
+                                <img src={tier.image} alt="" className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm object-cover" />
+                                <span className="hidden sm:inline">{tier.name}</span>
+                              </span>
+                            );
+                          })()}
                         </div>
                         {/* Points breakdown on mobile */}
                         <div className="flex items-center gap-2 mt-1 sm:hidden">

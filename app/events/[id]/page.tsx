@@ -16,6 +16,8 @@ import {
   Star,
   Share2,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Loader2,
   Layers,
   AlertCircle,
@@ -59,6 +61,12 @@ interface CustomLink {
   url: string;
 }
 
+interface AdjacentEvent {
+  id: string;
+  title: string;
+  mintDate: string;
+}
+
 interface EventDetail {
   id: string;
   title: string;
@@ -87,6 +95,8 @@ interface EventDetail {
   canVote: boolean;
   canEdit?: boolean;
   voteLockedUntil: string | null;
+  prevEvent?: AdjacentEvent | null;
+  nextEvent?: AdjacentEvent | null;
 }
 
 export default function EventDetailPage() {
@@ -311,7 +321,7 @@ export default function EventDetailPage() {
         <AlertCircle className="h-12 w-12 mx-auto mb-4 text-error" />
         <h1 className="text-2xl font-bold mb-2">{error || "Event not found"}</h1>
         <p className="text-text-secondary mb-4">The event you're looking for doesn't exist or has been removed.</p>
-        <Link href="/">
+        <Link href="/calendar">
           <Button>Back to Calendar</Button>
         </Link>
       </div>
@@ -326,14 +336,50 @@ export default function EventDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-      {/* Back Button */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-4 sm:mb-6 transition-colors text-sm"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Calendar
-      </Link>
+      {/* Navigation */}
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <Link
+          href="/calendar"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card border border-border transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Calendar
+        </Link>
+
+        {/* Prev / Next */}
+        <div className="flex items-center gap-1.5">
+          {event.prevEvent ? (
+            <Link
+              href={`/events/${event.prevEvent.id}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card border border-border transition-colors"
+              title={event.prevEvent.title}
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Prev
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary/30 border border-border/30 cursor-not-allowed select-none">
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Prev
+            </span>
+          )}
+          {event.nextEvent ? (
+            <Link
+              href={`/events/${event.nextEvent.id}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card border border-border transition-colors"
+              title={event.nextEvent.title}
+            >
+              Next
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary/30 border border-border/30 cursor-not-allowed select-none">
+              Next
+              <ChevronRight className="h-3.5 w-3.5" />
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Content */}

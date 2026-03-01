@@ -163,7 +163,8 @@ export async function POST(request: NextRequest) {
       mission.pointsReward,
       missionId,
       mission.type,
-      `Mission: ${mission.name}`
+      `Mission: ${mission.name}`,
+      { permanent: mission.permanent }
     );
 
     return NextResponse.json({

@@ -28,7 +28,7 @@ const CommunityGlobe = dynamic(
 
 export default function CommunityPage() {
   return (
-    <div className="w-full h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="w-full h-[calc(100dvh-4rem)] overflow-hidden">
       <CommunityGlobe />
     </div>
   );

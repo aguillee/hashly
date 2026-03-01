@@ -216,7 +216,8 @@ export async function awardMissionPoints(
   points: number,
   missionId: string,
   missionType: "DAILY" | "WEEKLY" | "ACHIEVEMENT",
-  description: string
+  description: string,
+  options?: { permanent?: boolean }
 ): Promise<{ pointsEarned: number; newTotal: number }> {
   return prisma.$transaction(async (tx) => {
     const now = new Date();
@@ -227,7 +228,10 @@ export async function awardMissionPoints(
     });
 
     if (existing?.claimedAt) {
-      if (missionType === "DAILY") {
+      if (options?.permanent) {
+        // Permanent missions can only be claimed once ever
+        throw new Error("ALREADY_CLAIMED");
+      } else if (missionType === "DAILY") {
         const startOfDay = utcStartOfDay(now);
         if (existing.claimedAt >= startOfDay) {
           throw new Error("ALREADY_CLAIMED");

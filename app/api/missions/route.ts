@@ -170,7 +170,10 @@ export async function GET(request: NextRequest) {
       const userMission = userMissions.find(um => um.missionId === def.id);
       let claimed = false;
       if (userMission?.claimedAt) {
-        if (def.type === "DAILY") {
+        if (def.permanent) {
+          // Permanent missions: claimed once ever
+          claimed = true;
+        } else if (def.type === "DAILY") {
           claimed = userMission.claimedAt >= startOfDay;
         } else if (def.type === "WEEKLY") {
           claimed = userMission.claimedAt >= startOfWeek;

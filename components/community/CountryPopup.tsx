@@ -17,35 +17,75 @@ export function CountryPopup({ countryCode, profiles, onClose }: CountryPopupPro
   if (!country || profiles.length === 0) return null;
 
   return (
-    <div className="absolute right-4 top-4 bottom-4 w-80 max-w-[calc(100vw-2rem)] z-20 flex flex-col rounded-xl border border-border bg-bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-secondary/50">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{country.emoji}</span>
-          <div>
-            <h3 className="text-sm font-semibold text-text-primary">
-              {country.name}
-            </h3>
-            <p className="text-xs text-text-secondary flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {profiles.length} member{profiles.length !== 1 ? "s" : ""}
-            </p>
+    <>
+      {/* Desktop: right side panel */}
+      <div className="hidden sm:flex absolute right-4 top-4 bottom-4 w-80 max-w-[calc(100vw-2rem)] z-20 flex-col rounded-xl border border-border bg-bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-secondary/50">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{country.emoji}</span>
+            <div>
+              <h3 className="text-sm font-semibold text-text-primary">
+                {country.name}
+              </h3>
+              <p className="text-xs text-text-secondary flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {profiles.length} member{profiles.length !== 1 ? "s" : ""}
+              </p>
+            </div>
           </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-bg-secondary text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-lg hover:bg-bg-secondary text-text-secondary hover:text-text-primary transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
+
+        {/* Profiles list */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {profiles.map((profile) => (
+            <ProfileCard key={profile.id} profile={profile} />
+          ))}
+        </div>
       </div>
 
-      {/* Profiles list */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {profiles.map((profile) => (
-          <ProfileCard key={profile.id} profile={profile} />
-        ))}
+      {/* Mobile: bottom sheet */}
+      <div className="sm:hidden absolute inset-x-0 bottom-0 z-20 flex flex-col max-h-[60vh] rounded-t-xl border-t border-border bg-bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+        {/* Drag handle */}
+        <div className="flex justify-center pt-2 pb-1">
+          <div className="w-10 h-1 rounded-full bg-border" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{country.emoji}</span>
+            <div>
+              <h3 className="text-sm font-semibold text-text-primary">
+                {country.name}
+              </h3>
+              <p className="text-xs text-text-secondary flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {profiles.length} member{profiles.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-bg-secondary text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Profiles list */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {profiles.map((profile) => (
+            <ProfileCard key={profile.id} profile={profile} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

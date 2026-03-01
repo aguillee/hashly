@@ -22,8 +22,8 @@ const GlobeGL = dynamic(() => import("react-globe.gl"), {
   loading: () => null,
 });
 
-// TopoJSON bundled locally (~750KB, 50m resolution)
-const TOPOJSON_URL = "/countries-50m.json";
+// TopoJSON bundled locally (~107KB, 110m resolution — lighter for low-end devices)
+const TOPOJSON_URL = "/countries-110m.json";
 
 interface MarkerData {
   lat: number;
@@ -39,6 +39,15 @@ export function CommunityGlobe() {
   const { isConnected } = useWalletStore();
   const { byCountry, total, mutate: mutateProfiles } = useCommunityProfiles();
   const { profile: myProfile, mutate: mutateMyProfile } = useMyProfile();
+
+  // Mobile detection (disable heavy effects)
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // UI state
   const [geoData, setGeoData] = React.useState<any>(null);
@@ -208,7 +217,7 @@ export function CommunityGlobe() {
               `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect fill="${isDark ? '#0f172a' : '#cbd5e1'}" width="1" height="1"/></svg>`
             )}`}
             backgroundColor="rgba(0,0,0,0)"
-            showAtmosphere={true}
+            showAtmosphere={!isMobile}
             atmosphereColor={isDark ? "#2dd4bf" : "#0d9488"}
             atmosphereAltitude={0.15}
             // Country polygons
@@ -230,7 +239,7 @@ export function CommunityGlobe() {
             polygonSideColor={() => isDark ? "rgba(45, 212, 191, 0.08)" : "rgba(13, 148, 136, 0.1)"}
             polygonStrokeColor={() => isDark ? "rgba(45, 212, 191, 0.3)" : "rgba(13, 148, 136, 0.4)"}
             polygonAltitude={(feat: any) =>
-              getFeatureCode(feat) === hoveredCountry ? 0.02 : 0.005
+              getFeatureCode(feat) === hoveredCountry ? 0.01 : 0.005
             }
             onPolygonClick={handleCountryClick}
             onPolygonHover={(feat: any) => {
@@ -317,9 +326,9 @@ export function CommunityGlobe() {
       )}
 
       {/* Bottom bar: stats + join button */}
-      <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10">
-        <div className="px-4 py-2 rounded-lg bg-bg-card/80 backdrop-blur-lg border border-border">
-          <span className="text-sm text-text-secondary">
+      <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 z-10">
+        <div className="px-3 py-2 rounded-lg bg-bg-card/80 backdrop-blur-lg border border-border text-center sm:text-left">
+          <span className="text-xs sm:text-sm text-text-secondary">
             <span className="text-accent-primary font-bold">{total}</span>{" "}
             member{total !== 1 ? "s" : ""} on HashWorld
           </span>
@@ -331,13 +340,13 @@ export function CommunityGlobe() {
               <Button
                 variant="outline"
                 onClick={() => setShowJoinDialog(true)}
-                className="bg-bg-card/80 backdrop-blur-lg"
+                className="bg-bg-card/80 backdrop-blur-lg w-full sm:w-auto"
               >
                 <Edit3 className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
             ) : (
-              <Button onClick={() => setShowJoinDialog(true)}>
+              <Button onClick={() => setShowJoinDialog(true)} className="w-full sm:w-auto py-3 sm:py-2">
                 <Globe className="h-4 w-4 mr-2" />
                 Join HashWorld
               </Button>
