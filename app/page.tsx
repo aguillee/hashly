@@ -355,11 +355,7 @@ export default function HomePage() {
                 View all →
               </Link>
             </div>
-            <div className={`grid grid-cols-1 gap-3 sm:gap-4 ${
-              [featured?.mostVotedLive, featured?.mostVoted, featured?.nextUp].filter(Boolean).length >= 3
-                ? "md:grid-cols-3"
-                : "md:grid-cols-2"
-            }`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {featured?.mostVotedLive && (
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
