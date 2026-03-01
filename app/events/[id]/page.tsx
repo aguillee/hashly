@@ -120,7 +120,7 @@ export default function EventDetailPage() {
     if (params.id) {
       loadEvent();
     }
-  }, [params.id]);
+  }, [params.id, isConnected]);
 
   // Update vote countdown timer
   React.useEffect(() => {

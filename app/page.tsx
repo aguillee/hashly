@@ -255,6 +255,88 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Attendance Badges ── */}
+      {hasEventsWithBadge && (
+        <section className="py-4 sm:py-6 lg:py-8">
+          <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
+                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+                Attendance Badges
+              </h2>
+              <Link href="/calendar?eventType=ECOSYSTEM_MEETUP" className="text-xs sm:text-sm text-accent-primary hover:underline">
+                View all meetups
+              </Link>
+            </div>
+            <p className="text-sm text-text-secondary mb-4">
+              Events with claimable NFT badges for attendees. Collect them all and earn bonus leaderboard points!
+            </p>
+            <div className={`grid gap-3 sm:gap-4 ${
+              eventsWithBadge.length === 1
+                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-3xl"
+                : eventsWithBadge.length === 2
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl"
+                  : eventsWithBadge.length === 3
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+            }`}>
+              {eventsWithBadge.map((event: any) => (
+                <Link key={event.id} href={`/events/${event.id}`} className="block group">
+                  <div className="relative h-full bg-bg-card overflow-hidden transition-all duration-200 border border-border/50 rounded-xl hover:border-purple-500/30">
+                    <div className="relative aspect-video bg-bg-secondary overflow-hidden">
+                      {event.imageUrl ? (
+                        <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-bg-secondary">
+                          <Award className="h-8 w-8 sm:h-10 sm:w-10 text-text-secondary/30" />
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-2">
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/90 rounded text-white text-xs font-semibold">
+                          <Award className="h-3 w-3" />
+                          <span>NFT Badge</span>
+                        </div>
+                      </div>
+                      {event.badge?.supply && (
+                        <div className="absolute bottom-2 right-2">
+                          <div className="px-2 py-1 bg-black/70 rounded text-white text-xs">
+                            {event.badge.supply} claimed
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 flex flex-col border-t border-border">
+                      {event.host && (
+                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-text-secondary/70 mb-1">
+                          <span className="w-1 h-1 rounded-full bg-purple-500" />
+                          <span className="truncate">{event.host}</span>
+                        </div>
+                      )}
+                      <h4 className="font-bold text-text-primary mb-1 line-clamp-1 group-hover:text-purple-500 transition-colors text-sm leading-tight">
+                        {event.title}
+                      </h4>
+                      <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+                        <Calendar className="h-3 w-3" />
+                        <span>{formatDate(new Date(event.mintDate).toISOString())}</span>
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-border flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                          <span className="text-xs font-bold text-yellow-500">{event.votesUp}</span>
+                        </div>
+                        <span className="text-xs text-text-secondary group-hover:text-purple-500 transition-colors flex items-center gap-1">
+                          claim badge <span className="group-hover:translate-x-1 transition-transform"></span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── NFT Events ── */}
       {loading ? (
         <section className="py-6">
@@ -323,80 +405,6 @@ export default function HomePage() {
           <TopTokensPodium />
         </div>
       </section>
-
-      {/* ── Attendance Badges ── */}
-      {hasEventsWithBadge && (
-        <section className="py-4 sm:py-6 lg:py-8">
-          <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
-                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
-                Attendance Badges
-              </h2>
-              <Link href="/calendar?eventType=ECOSYSTEM_MEETUP" className="text-xs sm:text-sm text-accent-primary hover:underline">
-                View all meetups
-              </Link>
-            </div>
-            <p className="text-sm text-text-secondary mb-4">
-              Events with claimable NFT badges for attendees. Collect them all and earn bonus leaderboard points!
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {eventsWithBadge.map((event: any) => (
-                <Link key={event.id} href={`/events/${event.id}`} className="block group">
-                  <div className="relative h-full bg-bg-card overflow-hidden transition-all duration-200 border border-border/50 rounded-xl hover:border-purple-500/30">
-                    <div className="relative aspect-video bg-bg-secondary overflow-hidden">
-                      {event.imageUrl ? (
-                        <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-bg-secondary">
-                          <Award className="h-8 w-8 sm:h-10 sm:w-10 text-text-secondary/30" />
-                        </div>
-                      )}
-                      <div className="absolute top-2 left-2">
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/90 rounded text-white text-xs font-semibold">
-                          <Award className="h-3 w-3" />
-                          <span>NFT Badge</span>
-                        </div>
-                      </div>
-                      {event.badge?.supply && (
-                        <div className="absolute bottom-2 right-2">
-                          <div className="px-2 py-1 bg-black/70 rounded text-white text-xs">
-                            {event.badge.supply} claimed
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3 sm:p-4 flex flex-col border-t border-border">
-                      {event.host && (
-                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-text-secondary/70 mb-1.5">
-                          <span className="w-1 h-1 rounded-full bg-purple-500" />
-                          <span className="truncate">{event.host}</span>
-                        </div>
-                      )}
-                      <h4 className="font-bold text-text-primary mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-purple-500 transition-colors text-sm sm:text-base leading-tight">
-                        {event.title}
-                      </h4>
-                      <div className="flex items-center gap-1.5 text-xs text-text-secondary">
-                        <Calendar className="h-3 w-3" />
-                        <span>{formatDate(new Date(event.mintDate).toISOString())}</span>
-                      </div>
-                      <div className="mt-3 pt-2 border-t border-border flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                          <span className="text-xs font-bold text-yellow-500">{event.votesUp}</span>
-                        </div>
-                        <span className="text-xs text-text-secondary group-hover:text-purple-500 transition-colors flex items-center gap-1">
-                          claim badge <span className="group-hover:translate-x-1 transition-transform"></span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── Ecosystem Meetups & Hackathons ── */}
       {(hasMeetups || hasHackathons) && (
