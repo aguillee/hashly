@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // Security headers
-  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Frame-Options", "SAMEORIGIN");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-XSS-Protection", "1; mode=block");
@@ -31,7 +31,7 @@ export function middleware(request: NextRequest) {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    "frame-ancestors 'self' https://*.hashpack.app https://*.kabila.app",
   ].join("; ");
 
   response.headers.set("Content-Security-Policy", csp);
