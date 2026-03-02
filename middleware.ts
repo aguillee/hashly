@@ -31,7 +31,6 @@ export function middleware(request: NextRequest) {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'self' https://*.hashpack.app https://*.kabila.app",
   ].join("; ");
 
   response.headers.set("Content-Security-Policy", csp);
