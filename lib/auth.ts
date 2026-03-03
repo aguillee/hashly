@@ -24,7 +24,7 @@ export async function createToken(payload: JWTPayload): Promise<string> {
   return new SignJWT({ ...payload } as Record<string, unknown>)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime("24h")
     .sign(getJWTSecret());
 }
 
