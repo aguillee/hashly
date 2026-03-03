@@ -163,7 +163,7 @@ export default function HomePage() {
 
       {/* ── Hero: Title+HowItWorks left, Ad right ── */}
       <section className="relative overflow-hidden">
-        <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="relative px-4 sm:px-6 py-4 sm:py-6 lg:py-8">
           <div className={`grid ${hasAds ? "lg:grid-cols-[4fr_5fr]" : "lg:grid-cols-1 max-w-3xl mx-auto"} gap-6 lg:gap-8 items-center`}>
             {/* Left: Title + CTA + How It Works stacked */}
             <div className="space-y-4 sm:space-y-5">
@@ -258,7 +258,7 @@ export default function HomePage() {
       {/* ── Attendance Badges ── */}
       {hasEventsWithBadge && (
         <section className="py-4 sm:py-6 lg:py-8">
-          <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
                 <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
@@ -271,14 +271,12 @@ export default function HomePage() {
             <p className="text-sm text-text-secondary mb-4">
               Events with claimable NFT badges for attendees. Collect them all and earn bonus leaderboard points!
             </p>
-            <div className={`grid gap-3 sm:gap-4 ${
+            <div className={`grid gap-4 sm:gap-5 ${
               eventsWithBadge.length === 1
-                ? "grid-cols-1 sm:grid-cols-2 max-w-2xl"
+                ? "grid-cols-1 max-w-xl"
                 : eventsWithBadge.length === 2
-                  ? "grid-cols-1 sm:grid-cols-2"
-                  : eventsWithBadge.length === 3
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                  ? "grid-cols-1 sm:grid-cols-2 max-w-4xl"
+                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             }`}>
               {eventsWithBadge.map((event: any) => (
                 <Link key={event.id} href={`/events/${event.id}`} className="block group">
@@ -337,67 +335,16 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── NFT Events ── */}
-      {loading ? (
-        <section className="py-6">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
-          </div>
-        </section>
-      ) : hasFeaturedEvents ? (
-        <section className="py-4 sm:py-6 lg:py-8">
-          <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">
-                NFT Events
-              </h2>
-              <Link href="/calendar" className="text-xs sm:text-sm text-accent-primary hover:underline">
-                View all →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {featured?.mostVotedLive && (
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-                    <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400" />
-                    Live Now
-                  </h3>
-                  <FeaturedEventCard event={featured.mostVotedLive} variant="nextUp" />
-                </div>
-              )}
-              {featured?.mostVoted && (
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-                    <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400" />
-                    Most Voted
-                  </h3>
-                  <FeaturedEventCard event={featured.mostVoted} variant="nextUp" />
-                </div>
-              )}
-              {featured?.nextUp && (
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-400" />
-                    Minting Soon
-                  </h3>
-                  <FeaturedEventCard event={featured.nextUp} variant="nextUp" />
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
       {/* ── Top Collections ── */}
       <section className="py-4 sm:py-6 lg:py-8">
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6">
           <TopCollectionsPodium />
         </div>
       </section>
 
       {/* ── Top Tokens ── */}
       <section className="py-4 sm:py-6 lg:py-8">
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6">
           <TopTokensPodium />
         </div>
       </section>
@@ -405,7 +352,7 @@ export default function HomePage() {
       {/* ── Ecosystem Meetups & Hackathons ── */}
       {(hasMeetups || hasHackathons) && (
         <section className="py-4 sm:py-6 lg:py-8">
-          <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               {hasMeetups && (
                 <div>
@@ -486,6 +433,57 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ── NFT Events ── */}
+      {loading ? (
+        <section className="py-4 sm:py-6">
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+          </div>
+        </section>
+      ) : hasFeaturedEvents ? (
+        <section className="py-4 sm:py-6">
+          <div className="px-4 sm:px-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">
+                NFT Events
+              </h2>
+              <Link href="/calendar" className="text-xs sm:text-sm text-accent-primary hover:underline">
+                View all →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {featured?.mostVotedLive && (
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400" />
+                    Live Now
+                  </h3>
+                  <FeaturedEventCard event={featured.mostVotedLive} variant="nextUp" />
+                </div>
+              )}
+              {featured?.mostVoted && (
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400" />
+                    Most Voted
+                  </h3>
+                  <FeaturedEventCard event={featured.mostVoted} variant="nextUp" />
+                </div>
+              )}
+              {featured?.nextUp && (
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-400" />
+                    Minting Soon
+                  </h3>
+                  <FeaturedEventCard event={featured.nextUp} variant="nextUp" />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
     </div>
   );
