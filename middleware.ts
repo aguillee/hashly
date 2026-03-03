@@ -1,7 +1,29 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 
-export function middleware(request: NextRequest) {
+function getJWTSecret() {
+  const value = process.env.JWT_SECRET;
+  return new TextEncoder().encode(value || "development-secret-key-change-in-production");
+}
+
+export async function middleware(request: NextRequest) {
+  // Protect /admin routes server-side
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    const token = request.cookies.get("auth-token")?.value;
+    if (!token) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    try {
+      const { payload } = await jwtVerify(token, getJWTSecret());
+      if (!payload.isAdmin) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   const response = NextResponse.next();
 
   // Security headers

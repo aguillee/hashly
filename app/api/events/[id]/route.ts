@@ -36,44 +36,54 @@ export async function GET(
     let voteLockedUntil: string | null = null;
     let canVote = true;
     let canEdit = false;
-    let isOwner = false;
 
     const cookieStore = await cookies();
     const token = cookieStore.get("auth-token")?.value;
+    let authPayload: { userId: string; isAdmin?: boolean } | null = null;
 
     if (token) {
-      const payload = await verifyToken(token);
-      if (payload) {
-        isOwner = event.createdById === payload.userId;
-        canEdit = isOwner || !!payload.isAdmin;
+      authPayload = await verifyToken(token);
+    }
 
-        const existingVote = event.votes.find(
-          (v) => v.userId === payload.userId
-        );
-        if (existingVote) {
-          userVote = existingVote.voteType;
+    // IDOR protection: unapproved events only visible to creator/admin
+    if (!event.isApproved) {
+      const hasAccess = authPayload && (
+        event.createdById === authPayload.userId || !!authPayload.isAdmin
+      );
+      if (!hasAccess) {
+        return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      }
+    }
 
-          // Forever Mints: no cooldown, can always change vote (like collections)
-          if (event.isForeverMint) {
-            canVote = true;
-            voteLockedUntil = null;
-          } else {
-            // Regular events: Check 24h cooldown
-            const hoursSinceVote =
-              (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
+    if (authPayload) {
+      canEdit = event.createdById === authPayload.userId || !!authPayload.isAdmin;
 
-            if (hoursSinceVote < 24) {
-              canVote = false;
-              const unlockTime = new Date(existingVote.createdAt.getTime() + 24 * 60 * 60 * 1000);
-              voteLockedUntil = unlockTime.toISOString();
-            }
+      const existingVote = event.votes.find(
+        (v) => v.userId === authPayload!.userId
+      );
+      if (existingVote) {
+        userVote = existingVote.voteType;
+
+        // Forever Mints: no cooldown, can always change vote (like collections)
+        if (event.isForeverMint) {
+          canVote = true;
+          voteLockedUntil = null;
+        } else {
+          // Regular events: Check 24h cooldown
+          const hoursSinceVote =
+            (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
+
+          if (hoursSinceVote < 24) {
+            canVote = false;
+            const unlockTime = new Date(existingVote.createdAt.getTime() + 24 * 60 * 60 * 1000);
+            voteLockedUntil = unlockTime.toISOString();
           }
         }
       }
     }
 
-    // Remove votes array from response (we only needed it to check user's vote)
-    const { votes, ...eventData } = event;
+    // Remove internal fields from response
+    const { votes, createdById, isApproved, ...eventData } = event;
 
     // Get adjacent events for prev/next navigation
     let prevEvent = null;
@@ -105,8 +115,7 @@ export async function GET(
       userVote,
       canVote,
       voteLockedUntil,
-      canEdit,
-      isOwner,
+      ...(canEdit ? { canEdit: true } : {}),
       prevEvent,
       nextEvent,
     });

@@ -99,7 +99,12 @@ export async function GET(request: NextRequest) {
     }
 
     if (status && status !== "all") {
-      where.status = status.toUpperCase() as EventStatus;
+      const validStatuses = ["UPCOMING", "LIVE"];
+      const upper = status.toUpperCase();
+      if (!validStatuses.includes(upper)) {
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      }
+      where.status = upper as EventStatus;
     }
 
     // Support multiple categories
