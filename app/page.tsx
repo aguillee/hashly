@@ -19,9 +19,9 @@ import {
   Code2,
   Zap,
   Award,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { FeaturedEventCard } from "@/components/events/FeaturedEventCard";
 import { TopCollectionsPodium } from "@/components/collections/TopCollectionsPodium";
 import { TopTokensPodium } from "@/components/tokens/TopTokensPodium";
 import { useWalletStore } from "@/store";
@@ -259,71 +259,65 @@ export default function HomePage() {
       {hasEventsWithBadge && (
         <section className="py-4 sm:py-6 lg:py-8">
           <div className="px-4 sm:px-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
-                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg sm:text-xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
+                <Award className="h-5 w-5 text-purple-500" />
                 Attendance Badges
               </h2>
               <Link href="/calendar?eventType=ECOSYSTEM_MEETUP" className="text-xs sm:text-sm text-accent-primary hover:underline">
                 View all meetups
               </Link>
             </div>
-            <p className="text-sm text-text-secondary mb-4">
-              Events with claimable NFT badges for attendees. Collect them all and earn bonus leaderboard points!
-            </p>
-            <div className={`grid gap-4 sm:gap-5 ${
-              eventsWithBadge.length === 1
-                ? "grid-cols-1 max-w-xl"
-                : eventsWithBadge.length === 2
-                  ? "grid-cols-1 sm:grid-cols-2 max-w-4xl"
-                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-            }`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {eventsWithBadge.map((event: any) => (
                 <Link key={event.id} href={`/events/${event.id}`} className="block group">
-                  <div className="relative h-full bg-bg-card overflow-hidden transition-all duration-200 border border-border/50 rounded-xl hover:border-purple-500/30">
+                  <div className="relative h-full rounded-xl overflow-hidden bg-bg-card border border-border/50 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5">
                     <div className="relative aspect-video bg-bg-secondary overflow-hidden">
                       {event.imageUrl ? (
-                        <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover transition-transform duration-500" />
+                        <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-bg-secondary">
-                          <Award className="h-8 w-8 sm:h-10 sm:w-10 text-text-secondary/30" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-bg-secondary to-bg-card">
+                          <Award className="h-10 w-10 text-text-secondary/20" />
                         </div>
                       )}
-                      <div className="absolute top-2 left-2">
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/90 rounded text-white text-xs font-semibold">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute top-2.5 left-2.5">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-white tracking-wide">
                           <Award className="h-3 w-3" />
-                          <span>NFT Badge</span>
+                          NFT Badge
+                        </span>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <div className="flex items-center gap-2 text-[10px] text-white/80">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(new Date(event.mintDate).toISOString())}
+                          </span>
+                          {event.badge?.supply && (
+                            <span className="px-1.5 py-0.5 bg-white/15 rounded-full">
+                              {event.badge.supply} claimed
+                            </span>
+                          )}
                         </div>
                       </div>
-                      {event.badge?.supply && (
-                        <div className="absolute bottom-2 right-2">
-                          <div className="px-2 py-1 bg-black/70 rounded text-white text-xs">
-                            {event.badge.supply} claimed
-                          </div>
-                        </div>
-                      )}
                     </div>
-                    <div className="p-3 flex flex-col border-t border-border">
+                    <div className="p-3 sm:p-4 flex flex-col gap-2">
                       {event.host && (
-                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-text-secondary/70 mb-1">
-                          <span className="w-1 h-1 rounded-full bg-purple-500" />
+                        <div className="flex items-center gap-1.5 text-[10px] text-text-secondary/70">
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                           <span className="truncate">{event.host}</span>
                         </div>
                       )}
-                      <h4 className="font-bold text-text-primary mb-1 line-clamp-1 group-hover:text-purple-500 transition-colors text-sm leading-tight">
+                      <h4 className="font-bold text-text-primary line-clamp-2 group-hover:text-purple-500 transition-colors text-sm sm:text-base leading-snug">
                         {event.title}
                       </h4>
-                      <div className="flex items-center gap-1.5 text-xs text-text-secondary">
-                        <Calendar className="h-3 w-3" />
-                        <span>{formatDate(new Date(event.mintDate).toISOString())}</span>
-                      </div>
-                      <div className="mt-2 pt-2 border-t border-border flex items-center justify-between">
+                      <div className="flex items-center justify-between pt-2 border-t border-border/50">
                         <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                          <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
                           <span className="text-xs font-bold text-yellow-500">{event.votesUp}</span>
                         </div>
-                        <span className="text-xs text-text-secondary group-hover:text-purple-500 transition-colors flex items-center gap-1">
-                          claim badge <span className="group-hover:translate-x-1 transition-transform"></span>
+                        <span className="text-[11px] font-medium text-text-secondary group-hover:text-purple-500 transition-colors flex items-center gap-1">
+                          claim badge <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                         </span>
                       </div>
                     </div>
@@ -444,40 +438,41 @@ export default function HomePage() {
       ) : hasFeaturedEvents ? (
         <section className="py-4 sm:py-6">
           <div className="px-4 sm:px-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg sm:text-xl font-bold text-text-primary flex items-center gap-1.5 sm:gap-2">
+                <Layers className="h-5 w-5 text-accent-primary" />
                 NFT Events
               </h2>
               <Link href="/calendar" className="text-xs sm:text-sm text-accent-primary hover:underline">
                 View all →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {featured?.mostVotedLive && (
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-                    <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400" />
+                  <h3 className="text-xs sm:text-sm font-bold text-text-primary mb-1.5 flex items-center gap-1.5">
+                    <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-400" />
                     Live Now
                   </h3>
-                  <FeaturedEventCard event={featured.mostVotedLive} variant="nextUp" />
+                  <EventColumnCard event={featured.mostVotedLive} icon={Layers} />
                 </div>
               )}
               {featured?.mostVoted && (
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-                    <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400" />
+                  <h3 className="text-xs sm:text-sm font-bold text-text-primary mb-1.5 flex items-center gap-1.5">
+                    <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-yellow-400 fill-yellow-400" />
                     Most Voted
                   </h3>
-                  <FeaturedEventCard event={featured.mostVoted} variant="nextUp" />
+                  <EventColumnCard event={featured.mostVoted} icon={Layers} />
                 </div>
               )}
               {featured?.nextUp && (
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-text-primary mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-400" />
+                  <h3 className="text-xs sm:text-sm font-bold text-text-primary mb-1.5 flex items-center gap-1.5">
+                    <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-400" />
                     Minting Soon
                   </h3>
-                  <FeaturedEventCard event={featured.nextUp} variant="nextUp" />
+                  <EventColumnCard event={featured.nextUp} icon={Layers} />
                 </div>
               )}
             </div>
