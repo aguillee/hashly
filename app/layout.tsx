@@ -65,7 +65,7 @@ export default function RootLayout({
         <ClientProviders>
           <VoteLimitProvider>
             <Navbar />
-            <main className="pt-16 flex-1 relative z-10">{children}</main>
+            <main className="pt-16 flex-1 relative z-10 overflow-x-hidden">{children}</main>
             <Footer />
             <Toaster />
           </VoteLimitProvider>

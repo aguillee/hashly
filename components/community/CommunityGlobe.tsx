@@ -334,7 +334,7 @@ export function CommunityGlobe() {
           </span>
         </div>
 
-        {isConnected && (
+        {isConnected ? (
           <div>
             {myProfile ? (
               <Button
@@ -351,6 +351,12 @@ export function CommunityGlobe() {
                 Join HashWorld
               </Button>
             )}
+          </div>
+        ) : (
+          <div className="px-3 py-2 rounded-lg bg-bg-card/80 backdrop-blur-lg border border-border text-center">
+            <span className="text-xs sm:text-sm text-text-secondary">
+              Connect your wallet to join HashWorld
+            </span>
           </div>
         )}
       </div>

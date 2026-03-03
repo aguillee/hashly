@@ -99,8 +99,8 @@ export function TopCollectionsPodium() {
         </Link>
       </div>
 
-      {/* Horizontal scrollable row on mobile, grid on desktop */}
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 pt-2 snap-x snap-mandatory scrollbar-hide">
+      {/* Grid layout */}
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
         {top5.map((collection) => {
           const config = rankConfig[collection.rank];
           const isTop3 = collection.rank <= 3;
@@ -112,10 +112,10 @@ export function TopCollectionsPodium() {
               href={`https://sentx.io/nft-marketplace/${collection.tokenAddress}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 w-[140px] sm:w-auto sm:flex-1 snap-start group"
+              className="group"
             >
               <div className={cn(
-                "relative p-3 transition-all h-full overflow-hidden rounded-lg",
+                "relative p-2 sm:p-3 transition-all h-full overflow-hidden rounded-lg",
                 isTop3
                   ? cn("border", config.borderLeft, config.cardBg, config.cardEffect)
                   : "border border-border/50 bg-bg-card hover:border-accent-primary/30"
@@ -126,8 +126,9 @@ export function TopCollectionsPodium() {
                     <div className={cn("absolute inset-0 bg-gradient-to-r from-transparent to-transparent animate-shimmer", config.shimmerColor)} style={{ backgroundSize: '200% 100%' }} />
                   </div>
                 )}
-                {/* Rank badge - skewed tag style */}
-                <div className="absolute top-2 right-2">
+
+                {/* Rank badge - above image */}
+                <div className="flex justify-center mb-1.5">
                   {isTop3 ? (
                     <span className={cn(
                       "rounded-full inline-block px-2 py-0.5 text-[9px] font-medium",
@@ -168,7 +169,7 @@ export function TopCollectionsPodium() {
                 {/* Name */}
                 <p className={cn(
                   "font-bold text-text-primary truncate text-center group-hover:text-accent-primary transition-colors",
-                  isTop3 ? "text-sm" : "text-xs"
+                  isTop3 ? "text-xs sm:text-sm" : "text-xs"
                 )}>
                   {collection.name}
                 </p>

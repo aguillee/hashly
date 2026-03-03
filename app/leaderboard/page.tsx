@@ -232,6 +232,19 @@ export default function LeaderboardPage() {
           </div>
         </div>
 
+        {/* Connect wallet prompt */}
+        {!user && (
+          <div className="mb-6 sm:mb-8">
+            <div className="p-4 sm:p-6 rounded-lg bg-bg-card border border-border text-center">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-accent-primary/10 flex items-center justify-center">
+                <Trophy className="h-6 w-6 text-accent-primary" />
+              </div>
+              <h3 className="text-base font-bold text-text-primary mb-1">Connect wallet to join</h3>
+              <p className="text-sm text-text-secondary">Connect your wallet to earn points and compete for prizes.</p>
+            </div>
+          </div>
+        )}
+
         {/* User's Rank */}
         {user && userRank && (
           <div className="mb-6 sm:mb-8">
