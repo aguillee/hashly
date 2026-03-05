@@ -3,18 +3,19 @@
 import * as React from "react";
 import {
   Newspaper,
-  ExternalLink,
   Loader2,
   RefreshCw,
-  Clock,
   Calendar,
   Search,
   X,
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  MousePointerClick,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useWalletStore } from "@/store";
 
 interface NewsItem {
   id: string;
@@ -27,7 +28,14 @@ interface NewsItem {
   isGenfinity: boolean;
 }
 
+interface NewsStats {
+  [articleId: string]: { views: number; clicks: number };
+}
+
 export default function NewsPage() {
+  const { user, isConnected } = useWalletStore();
+  const isAdmin = isConnected && user?.isAdmin;
+
   const [news, setNews] = React.useState<NewsItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -36,6 +44,10 @@ export default function NewsPage() {
   const [sortBy, setSortBy] = React.useState<"newest" | "oldest">("newest");
   const [currentPage, setCurrentPage] = React.useState(1);
   const ITEMS_PER_PAGE = 25;
+
+  // Admin stats
+  const [stats, setStats] = React.useState<NewsStats>({});
+  const [totals, setTotals] = React.useState({ views: 0, clicks: 0 });
 
   const fetchNews = React.useCallback(async (isRefresh = false) => {
     try {
@@ -59,19 +71,62 @@ export default function NewsPage() {
     }
   }, []);
 
+  const fetchStats = React.useCallback(async () => {
+    try {
+      const response = await fetch("/api/news/stats");
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data.stats);
+        setTotals(data.totals);
+      }
+    } catch {
+      // silent
+    }
+  }, []);
+
   // Initial load
   React.useEffect(() => {
     fetchNews();
   }, [fetchNews]);
 
-  // Auto-refresh every hour
+  // Fetch stats if admin
+  React.useEffect(() => {
+    if (isAdmin) {
+      fetchStats();
+      const interval = setInterval(fetchStats, 60000); // refresh stats every minute
+      return () => clearInterval(interval);
+    }
+  }, [isAdmin, fetchStats]);
+
+  // Auto-refresh news every 24h
   React.useEffect(() => {
     const interval = setInterval(() => {
       fetchNews(true);
-    }, 60 * 60 * 1000);
+    }, 24 * 60 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [fetchNews]);
+
+  // Track views for visible articles
+  const trackedRef = React.useRef<Set<string>>(new Set());
+
+  const trackView = React.useCallback((articleId: string) => {
+    if (trackedRef.current.has(articleId)) return;
+    trackedRef.current.add(articleId);
+    fetch("/api/news/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articleId, type: "view" }),
+    }).catch(() => {});
+  }, []);
+
+  const trackClick = React.useCallback((articleId: string) => {
+    fetch("/api/news/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articleId, type: "click" }),
+    }).catch(() => {});
+  }, []);
 
   const formatDate = (dateString: string) => {
     try {
@@ -148,14 +203,31 @@ export default function NewsPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => fetchNews(true)}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card dark:bg-bg-secondary border border-border hover:border-purple-500/50 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
-                {refreshing ? "..." : "Refresh"}
-              </button>
+              {/* Admin totals */}
+              {isAdmin && (
+                <div className="flex items-center gap-3 mr-2 text-xs text-text-secondary">
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3.5 w-3.5 text-blue-400" />
+                    <span className="font-medium text-blue-400">{totals.views.toLocaleString()}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MousePointerClick className="h-3.5 w-3.5 text-green-400" />
+                    <span className="font-medium text-green-400">{totals.clicks.toLocaleString()}</span>
+                  </span>
+                </div>
+              )}
+
+              {/* Refresh - admin only */}
+              {isAdmin && (
+                <button
+                  onClick={() => fetchNews(true)}
+                  disabled={refreshing}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card dark:bg-bg-secondary border border-border hover:border-purple-500/50 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
+                  {refreshing ? "..." : "Refresh"}
+                </button>
+              )}
             </div>
           </div>
 
@@ -205,19 +277,20 @@ export default function NewsPage() {
           <div className="text-center py-16">
             <Newspaper className="h-12 w-12 mx-auto text-text-secondary mb-4" />
             <p className="text-text-secondary">No news available at the moment</p>
-            <button
-              onClick={() => fetchNews()}
-              className="mt-4 flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-secondary border border-border hover:border-accent-primary/50 transition-colors mx-auto"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Try Again
-            </button>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {paginatedNews.map((item) => (
-                <NewsCard key={item.id} item={item} formatDate={formatDate} />
+                <NewsCard
+                  key={item.id}
+                  item={item}
+                  formatDate={formatDate}
+                  isAdmin={!!isAdmin}
+                  stats={stats[item.id]}
+                  onView={trackView}
+                  onClick={trackClick}
+                />
               ))}
             </div>
 
@@ -235,14 +308,12 @@ export default function NewsPage() {
 
                 <div className="flex items-center gap-0.5 sm:gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    // Show first, last, current, and nearby pages
                     const showPage =
                       page === 1 ||
                       page === totalPages ||
                       Math.abs(page - currentPage) <= 1;
 
                     if (!showPage) {
-                      // Show dots for gaps
                       if (page === 2 || page === totalPages - 1) {
                         return (
                           <span key={page} className="px-1 sm:px-2 text-text-secondary text-xs sm:text-sm">
@@ -312,15 +383,46 @@ export default function NewsPage() {
 function NewsCard({
   item,
   formatDate,
+  isAdmin,
+  stats,
+  onView,
+  onClick,
 }: {
   item: NewsItem;
   formatDate: (date: string) => string;
+  isAdmin: boolean;
+  stats?: { views: number; clicks: number };
+  onView: (id: string) => void;
+  onClick: (id: string) => void;
 }) {
+  // Track view when card becomes visible
+  const cardRef = React.useRef<HTMLAnchorElement>(null);
+
+  React.useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          onView(item.id);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [item.id, onView]);
+
   return (
     <a
+      ref={cardRef}
       href={item.link}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => onClick(item.id)}
       className={cn(
         "group flex flex-col bg-bg-card overflow-hidden transition-all duration-200",
         "border border-border/50 rounded-xl",
@@ -353,20 +455,34 @@ function NewsCard({
           </div>
         )}
 
-        {/* Date badge - same style as other cards */}
+        {/* Date badge */}
         <div className="absolute top-2 left-2">
           <div className="flex items-center gap-1.5 px-2 py-1 bg-black/70 rounded text-white text-xs">
             <Calendar className="h-3 w-3" />
-            <span className="">{formatDate(item.pubDate)}</span>
+            <span>{formatDate(item.pubDate)}</span>
           </div>
         </div>
 
-        {/* Genfinity Badge - skewed tag style */}
+        {/* Genfinity Badge */}
         {item.isGenfinity && (
           <div className="absolute top-2 right-2">
             <span className="rounded-full inline-block px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[9px] sm:text-[10px] font-medium">
               <span>GENFINITY</span>
             </span>
+          </div>
+        )}
+
+        {/* Admin stats overlay */}
+        {isAdmin && stats && (
+          <div className="absolute bottom-2 right-2 flex items-center gap-2">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/80 rounded text-[10px] text-blue-300">
+              <Eye className="h-2.5 w-2.5" />
+              {stats.views}
+            </div>
+            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/80 rounded text-[10px] text-green-300">
+              <MousePointerClick className="h-2.5 w-2.5" />
+              {stats.clicks}
+            </div>
           </div>
         )}
       </div>
@@ -391,7 +507,7 @@ function NewsCard({
           {item.description}
         </p>
 
-        {/* Read More - underline style */}
+        {/* Read More */}
         <div className="mt-3 pt-2 border-t border-border">
           <span className="text-xs text-text-secondary group-hover:text-accent-primary transition-colors flex items-center gap-1">
             read more <span className="group-hover:translate-x-1 transition-transform">→</span>
