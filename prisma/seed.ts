@@ -25,10 +25,10 @@ const missions = [
   {
     id: "vote_5_events",
     name: "Active Voter",
-    description: "Vote on 5 different events today",
+    description: "Vote on 3 different events today",
     pointsReward: 25,
     type: "DAILY" as const,
-    requirement: 5,
+    requirement: 3,
     icon: "vote",
   },
   // Weekly

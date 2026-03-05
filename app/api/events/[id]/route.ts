@@ -69,14 +69,16 @@ export async function GET(
           canVote = true;
           voteLockedUntil = null;
         } else {
-          // Regular events: Check 24h cooldown
-          const hoursSinceVote =
-            (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
+          // Regular events: daily cooldown (resets at 00:00 UTC)
+          const now = new Date();
+          const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+          const votedToday = existingVote.createdAt >= startOfDay;
 
-          if (hoursSinceVote < 24) {
+          if (votedToday) {
             canVote = false;
-            const unlockTime = new Date(existingVote.createdAt.getTime() + 24 * 60 * 60 * 1000);
-            voteLockedUntil = unlockTime.toISOString();
+            const tomorrow = new Date(startOfDay);
+            tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+            voteLockedUntil = tomorrow.toISOString();
           }
         }
       }

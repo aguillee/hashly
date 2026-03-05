@@ -174,24 +174,28 @@ export async function POST(
           });
         }
       } else {
-        // Regular event: Check 24h cooldown
-        const hoursSinceVote =
-          (Date.now() - existingVote.createdAt.getTime()) / (1000 * 60 * 60);
+        // Regular event: Check daily cooldown (resets at 00:00 UTC)
+        const now = new Date();
+        const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        const votedToday = existingVote.createdAt >= startOfDay;
 
-        if (hoursSinceVote < 24) {
+        if (votedToday) {
           // Can't update regular vote yet, but can still use NFT votes
           if (!useNftVotes) {
-            const hoursRemaining = Math.ceil(24 - hoursSinceVote);
+            const tomorrow = new Date(startOfDay);
+            tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+            const msRemaining = tomorrow.getTime() - now.getTime();
+            const hoursRemaining = Math.ceil(msRemaining / (1000 * 60 * 60));
             return NextResponse.json(
               {
-                error: `You can vote again in ${hoursRemaining} hours`,
+                error: `You already voted today. Resets at 00:00 UTC (${hoursRemaining}h)`,
                 hoursRemaining,
               },
               { status: 429 }
             );
           }
         } else {
-          // Update existing regular vote - 24h cooldown passed, can vote again
+          // Update existing regular vote - new day, can vote again
           const oldVoteType = existingVote.voteType;
 
           await prisma.vote.update({
@@ -260,9 +264,10 @@ export async function POST(
     // For Forever Mint: NFT votes work like collections - no cooldown, votes replace (don't accumulate)
     // For Regular events: NFT votes have 24h cooldown and accumulate
     if (useNftVotes && !isForeverMint) {
-      // Regular events: NFT votes with 24h cooldown that accumulate
+      // Regular events: NFT votes with daily cooldown (resets 00:00 UTC)
       const walletNFTs = await getWalletNFTs(user.walletAddress);
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const nftNow = new Date();
+      const nftStartOfDay = new Date(Date.UTC(nftNow.getUTCFullYear(), nftNow.getUTCMonth(), nftNow.getUTCDate()));
 
       // Get existing NFT votes for this wallet on this event
       const existingNftVotes = await prisma.nftVote.findMany({
@@ -285,7 +290,7 @@ export async function POST(
 
         if (existingNftVote) {
           // Check if 24h passed since last NFT vote
-          if (existingNftVote.createdAt < twentyFourHoursAgo) {
+          if (existingNftVote.createdAt < nftStartOfDay) {
             // Update existing NFT vote (reset timestamp, add weight)
             await prisma.nftVote.update({
               where: { id: existingNftVote.id },
@@ -331,7 +336,7 @@ export async function POST(
 
         if (existingNftVote) {
           // Check if 24h passed since last NFT vote
-          if (existingNftVote.createdAt < twentyFourHoursAgo) {
+          if (existingNftVote.createdAt < nftStartOfDay) {
             await prisma.nftVote.update({
               where: { id: existingNftVote.id },
               data: {

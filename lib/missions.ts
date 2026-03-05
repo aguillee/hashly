@@ -33,10 +33,10 @@ export const MISSION_DEFINITIONS: MissionDefinition[] = [
   {
     id: "vote_5_events",
     name: "Active Voter",
-    description: "Vote on 5 different events today (events only)",
+    description: "Vote on 3 different events today (events only)",
     pointsReward: 50,
     type: "DAILY",
-    requirement: 5,
+    requirement: 3,
     icon: "vote",
   },
   // ── Weekly ─────────────────────────────────────────────
