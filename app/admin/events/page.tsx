@@ -177,7 +177,7 @@ export default function AdminEventsPage() {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+              <Loader2 className="h-8 w-8 animate-spin text-brand" />
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="text-center py-12">

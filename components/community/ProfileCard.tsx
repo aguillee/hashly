@@ -8,11 +8,11 @@ interface ProfileCardProps {
 }
 
 const TYPE_CONFIG = {
-  USER: { label: "User", icon: User, bg: "bg-accent-primary/15", text: "text-accent-primary" },
+  USER: { label: "User", icon: User, bg: "bg-brand-subtle", text: "text-brand" },
   BUILDER: { label: "Builder", icon: Hammer, bg: "bg-amber-500/15", text: "text-amber-500" },
   PROJECT: { label: "Project", icon: Building2, bg: "bg-accent-coral/15", text: "text-accent-coral" },
   // Legacy fallback
-  PERSON: { label: "User", icon: User, bg: "bg-accent-primary/15", text: "text-accent-primary" },
+  PERSON: { label: "User", icon: User, bg: "bg-brand-subtle", text: "text-brand" },
 } as const;
 
 export function ProfileCard({ profile }: ProfileCardProps) {

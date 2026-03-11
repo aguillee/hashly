@@ -6,25 +6,27 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.98] active:translate-y-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand/40 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-accent-primary to-accent-secondary text-white shadow-glow hover:shadow-glow-lg hover:scale-[1.02]",
+          "bg-brand text-white hover:opacity-90",
+        brand:
+          "bg-brand text-white hover:bg-teal-600 dark:hover:bg-teal-400 hover:shadow-glow-brand",
         secondary:
-          "glass text-text-primary hover:border-accent-primary/30 hover:shadow-glow",
+          "bg-bg-secondary text-text-primary border border-border hover:bg-bg-tertiary",
         outline:
-          "border border-border bg-transparent text-text-primary hover:bg-white/5 hover:border-accent-primary/30",
+          "border border-border bg-transparent text-text-primary hover:bg-bg-secondary",
         ghost:
-          "text-text-secondary hover:text-text-primary hover:bg-white/5",
+          "text-text-secondary hover:text-text-primary hover:bg-bg-secondary",
         destructive:
-          "bg-red-600 text-white hover:bg-red-600/90 hover:shadow-glow-coral",
+          "bg-red-600 text-white hover:bg-red-700 dark:hover:bg-red-500",
         success:
-          "bg-green-600 text-white hover:bg-green-600/90",
+          "bg-green-600 text-white hover:bg-green-700 dark:hover:bg-green-500",
         coral:
-          "bg-accent-coral text-white hover:bg-accent-coral/90 hover:shadow-glow-coral",
-        link: "text-accent-primary underline-offset-4 hover:underline p-0 h-auto",
+          "bg-accent-coral text-white hover:bg-purple-600 dark:hover:bg-purple-400",
+        link: "text-text-secondary underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {
         default: "h-10 px-5 py-2",

@@ -63,7 +63,7 @@ export function RequestHostModal({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative z-10 bg-bg-card border border-border rounded-t-xl sm:rounded-xl p-6 w-full sm:max-w-md mx-0 sm:mx-4 animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
+      <div className="relative z-10 bg-bg-card border border-border rounded-t-lg sm:rounded-lg p-6 w-full sm:max-w-md mx-0 sm:mx-4 animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-bg-secondary text-text-secondary hover:text-text-primary transition-colors"
@@ -113,7 +113,7 @@ export function RequestHostModal({
                 rows={3}
                 maxLength={500}
                 placeholder="Tell us why you should be the host..."
-                className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-accent-primary/50 resize-none"
+                className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 resize-none"
               />
               <p className="text-xs text-text-secondary mt-1 text-right">
                 {message.length}/500

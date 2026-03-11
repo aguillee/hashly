@@ -53,7 +53,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group block rounded-xl overflow-hidden bg-bg-card border border-border/50 hover:border-accent-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-accent-primary/5"
+      className="group block rounded-lg overflow-hidden bg-bg-card border border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-150"
     >
       {/* Image with gradient overlay */}
       <div className="relative aspect-video bg-bg-secondary overflow-hidden">
@@ -61,7 +61,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
           <img
             src={event.imageUrl}
             alt={event.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-[filter] duration-300 group-hover:brightness-110"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-bg-secondary to-bg-card">
@@ -89,7 +89,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
               LIVE
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-primary/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-white tracking-wide">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand backdrop-blur-sm rounded-full text-[10px] font-bold text-white tracking-wide">
               UPCOMING
             </span>
           )}
@@ -115,12 +115,12 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
       {/* Content */}
       <div className="p-3 sm:p-4 flex flex-col gap-2">
         {/* Title */}
-        <h3 className="font-bold text-text-primary line-clamp-2 group-hover:text-accent-primary transition-colors text-sm sm:text-base leading-snug">
+        <h3 className="font-bold text-text-primary line-clamp-2 group-hover:text-brand transition-colors text-sm sm:text-base leading-snug">
           {event.title}
         </h3>
 
         {/* Footer: price + score + details */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+        <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 font-semibold text-xs text-text-primary">
               {priceInfo.isHbar ? (
@@ -138,7 +138,7 @@ export function FeaturedEventCard({ event, variant }: FeaturedEventCardProps) {
               {score > 0 ? `+${score}` : score}
             </span>
           </div>
-          <span className="text-[11px] font-medium text-text-secondary group-hover:text-accent-primary transition-colors flex items-center gap-1">
+          <span className="text-[11px] font-medium text-text-secondary group-hover:text-brand transition-colors flex items-center gap-1">
             details <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </span>
         </div>

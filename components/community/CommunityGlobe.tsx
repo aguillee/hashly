@@ -310,7 +310,7 @@ export function CommunityGlobe() {
       {!geoData && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-brand" />
             <p className="text-sm text-text-secondary">Loading globe...</p>
           </div>
         </div>
@@ -329,7 +329,7 @@ export function CommunityGlobe() {
       <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 z-10">
         <div className="px-3 py-2 rounded-lg bg-bg-card/80 backdrop-blur-lg border border-border text-center sm:text-left">
           <span className="text-xs sm:text-sm text-text-secondary">
-            <span className="text-accent-primary font-bold">{total}</span>{" "}
+            <span className="text-brand font-bold">{total}</span>{" "}
             member{total !== 1 ? "s" : ""} on HashWorld
           </span>
         </div>

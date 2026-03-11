@@ -3,25 +3,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full text-xs font-semibold transition-all duration-200",
+  "inline-flex items-center rounded-md text-xs font-medium transition-colors duration-150 border border-black/5 dark:border-white/5",
   {
     variants: {
       variant: {
-        default: "bg-accent-primary/15 text-accent-primary border border-accent-primary/20",
-        secondary: "bg-white/5 text-text-secondary border border-border",
-        success: "bg-green-500/15 text-green-400 border border-green-500/20",
-        error: "bg-red-500/15 text-red-400 border border-red-500/20",
-        warning: "bg-amber-500/15 text-amber-400 border border-amber-500/20",
-        coral: "bg-accent-coral/15 text-accent-coral border border-accent-coral/20",
-        outline: "border border-border text-text-secondary hover:border-accent-primary/30",
-        ghost: "bg-white/5 text-text-secondary",
-        live: "bg-green-500/15 text-green-400 border border-green-500/20",
-        purple: "bg-purple-500/15 text-purple-400 border border-purple-500/20",
+        default: "bg-bg-secondary text-text-secondary border border-border",
+        secondary: "bg-bg-secondary text-text-secondary border border-border",
+        brand: "bg-teal-500/10 text-teal-700 dark:text-teal-400",
+        success: "bg-green-500/10 text-green-700 dark:text-green-400",
+        error: "bg-red-500/10 text-red-700 dark:text-red-400",
+        warning: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+        outline: "border border-border text-text-secondary",
+        ghost: "text-text-secondary",
+        live: "bg-green-500/10 text-green-700 dark:text-green-400",
+        coral: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+        purple: "bg-violet-500/10 text-violet-700 dark:text-violet-400",
       },
       size: {
-        default: "px-3 py-1 text-xs",
+        default: "px-2.5 py-0.5 text-xs",
         sm: "px-2 py-0.5 text-[10px]",
-        lg: "px-4 py-1.5 text-sm",
+        lg: "px-3 py-1 text-sm",
       },
     },
     defaultVariants: {

@@ -162,7 +162,7 @@ export default function AdminHostsPage() {
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as typeof filter)}
-              className="appearance-none px-4 py-2 pr-10 rounded-lg bg-bg-card border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+              className="appearance-none px-4 py-2 pr-10 rounded-lg bg-bg-card border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
             >
               <option value="PENDING">Pending</option>
               <option value="APPROVED">Approved</option>
@@ -176,7 +176,7 @@ export default function AdminHostsPage() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-brand" />
           </div>
         ) : requests.length === 0 ? (
           <div className="text-center py-16">
@@ -312,7 +312,7 @@ export default function AdminHostsPage() {
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setShowRejectModal(null)}
             />
-            <div className="relative z-10 bg-bg-card border border-border rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="relative z-10 bg-bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4">
               <h3 className="text-lg font-semibold text-text-primary mb-4">
                 Reject Host Request
               </h3>
@@ -325,7 +325,7 @@ export default function AdminHostsPage() {
                   onChange={(e) => setRejectReason(e.target.value)}
                   rows={3}
                   placeholder="Enter a reason for rejection..."
-                  className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+                  className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                 />
               </div>
               <div className="flex gap-3 justify-end">

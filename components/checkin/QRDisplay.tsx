@@ -63,7 +63,7 @@ export default function QRDisplay({ eventId }: QRDisplayProps) {
         <p className="text-red-400 text-lg">{error}</p>
         <button
           onClick={fetchCode}
-          className="text-accent-primary hover:underline"
+          className="text-brand hover:underline"
         >
           Retry
         </button>
@@ -74,7 +74,7 @@ export default function QRDisplay({ eventId }: QRDisplayProps) {
   if (!code) {
     return (
       <div className="flex items-center justify-center p-12">
-        <div className="w-8 h-8 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -112,7 +112,7 @@ export default function QRDisplay({ eventId }: QRDisplayProps) {
               fill="none"
               stroke="currentColor"
               strokeWidth="3"
-              className="text-accent-primary"
+              className="text-brand"
               strokeDasharray={`${(timeLeft / 60) * 125.66} 125.66`}
               strokeLinecap="round"
             />

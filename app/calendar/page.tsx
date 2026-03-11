@@ -15,6 +15,7 @@ import {
   Infinity,
   Users,
   Code2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -24,6 +25,7 @@ import { useWalletStore, useEventsFilterStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { mutate } from "@/lib/swr";
 import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
+import { useReveal } from "@/hooks/useReveal";
 
 // Types
 interface Event {
@@ -92,6 +94,10 @@ export default function CalendarPage() {
   const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA">("all");
   const [stateFilter, setStateFilter] = React.useState<"all" | "live" | "upcoming">("all");
   const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
+
+  const headerRef = useReveal();
+  const filtersRef = useReveal();
+  const contentRef = useReveal();
 
   // Track if initial URL params have been processed
   const initialLoadRef = React.useRef(false);
@@ -218,216 +224,235 @@ export default function CalendarPage() {
     return () => clearTimeout(timer);
   }, [localSearch, setSearchQuery]);
 
+  // Count active filters
+  const activeFilterCount = [
+    stateFilter !== "all",
+    status !== "all",
+    sourceFilter !== "all",
+  ].filter(Boolean).length;
+
   return (
-    <div className="min-h-screen py-4 sm:py-8">
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
-        {/* Compact Header - News style */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-bg-card dark:bg-[#1a1a2e] border-2 border-accent-primary/50 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform">
-                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-sm border-2 border-bg-primary animate-pulse" />
-            </div>
+    <div className="min-h-screen">
+      {/* Header */}
+      <div ref={headerRef} className="reveal pt-6 pb-4 sm:pt-8 sm:pb-6">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 reveal-delay-1">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Event Calendar</h1>
-              <p className="text-xs sm:text-sm text-text-secondary">
-                <span className="">{events.length}</span> events on Hedera
+              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+                Hedera Events
               </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+                Event Calendar
+              </h1>
+            </div>
+            <div className="flex items-center gap-3 reveal-delay-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+                <Calendar className="h-3.5 w-3.5 text-brand" />
+                <span className="font-bold text-text-primary font-mono tabular-nums">{events.length}</span>
+                <span className="text-text-tertiary text-xs">events</span>
+              </div>
+              {isConnected && (
+                <Link href="/events/new">
+                  <Button className="gap-2 text-sm">
+                    <Plus className="h-4 w-4" />
+                    Submit Event
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
-          {isConnected && (
-            <Link href="/events/new">
-              <Button className="gap-2 text-sm">
-                <Plus className="h-4 w-4" />
-                Submit Event
-              </Button>
-            </Link>
-          )}
-        </div>
 
-        {/* Search Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-3 sm:mb-4">
-          <div className="flex-1">
-            <Input
-              placeholder="Search events..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              icon={<Search className="h-4 w-4" />}
-              className="rounded-md"
-            />
-          </div>
+          {/* Search + View Toggle */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 reveal-delay-3">
+            <div className="flex-1">
+              <Input
+                placeholder="Search events..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                icon={<Search className="h-4 w-4" />}
+                className="rounded-lg"
+              />
+            </div>
 
-          {/* View Mode Toggle - More square */}
-          <div className="flex rounded-md border border-border overflow-hidden w-full sm:w-auto">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={cn(
-                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
-                viewMode === "grid"
-                  ? "bg-accent-primary text-white"
-                  : "bg-bg-card text-text-secondary hover:text-text-primary"
-              )}
-            >
-              <LayoutGrid className="h-4 w-4" />
-              Grid
-            </button>
-            <button
-              onClick={() => setViewMode("calendar")}
-              className={cn(
-                "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
-                viewMode === "calendar"
-                  ? "bg-accent-primary text-white"
-                  : "bg-bg-card text-text-secondary hover:text-text-primary"
-              )}
-            >
-              <CalendarDays className="h-4 w-4" />
-              Calendar
-            </button>
+            {/* View Mode Toggle */}
+            <div className="flex rounded-lg border border-border overflow-hidden w-full sm:w-auto">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn(
+                  "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors duration-150",
+                  viewMode === "grid"
+                    ? "bg-brand/10 text-brand border-r border-border"
+                    : "bg-bg-card text-text-secondary hover:text-text-primary border-r border-border"
+                )}
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Grid
+              </button>
+              <button
+                onClick={() => setViewMode("calendar")}
+                className={cn(
+                  "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors duration-150",
+                  viewMode === "calendar"
+                    ? "bg-brand/10 text-brand"
+                    : "bg-bg-card text-text-secondary hover:text-text-primary"
+                )}
+              >
+                <CalendarDays className="h-4 w-4" />
+                Calendar
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Filters - Single scrollable line */}
-        <div className="mb-4 sm:mb-6 p-2.5 sm:p-3 bg-bg-card border border-border/50 rounded-xl overflow-x-auto scrollbar-hide">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-max">
-            {/* State */}
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">State:</span>
-              {stateFilters.map((filter) => {
-                const Icon = filter.icon;
-                return (
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 pb-8">
+        {/* Filters */}
+        <div ref={filtersRef} className="reveal mb-4 sm:mb-6">
+          <div className="p-2.5 sm:p-3 bg-bg-card border border-border rounded-xl overflow-x-auto scrollbar-hide reveal-delay-1">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-max pr-4">
+              {/* State */}
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">State</span>
+                {stateFilters.map((filter) => {
+                  const Icon = filter.icon;
+                  return (
+                    <button
+                      key={filter.value}
+                      onClick={() => setStateFilter(filter.value as "all" | "live" | "upcoming")}
+                      className={cn(
+                        "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
+                        stateFilter === filter.value
+                          ? "bg-brand/10 text-brand"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                      )}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {filter.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="w-px h-5 bg-border" />
+
+              {/* Type */}
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">Type</span>
+                {typeFilters.map((filter) => {
+                  const Icon = filter.icon;
+                  return (
+                    <button
+                      key={filter.value}
+                      onClick={() => setStatus(filter.value as "all" | "mints" | "forever" | "meetups" | "hackathons")}
+                      className={cn(
+                        "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
+                        status === filter.value
+                          ? "bg-brand/10 text-brand"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                      )}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {filter.label.split(' ')[0]}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="w-px h-5 bg-border" />
+
+              {/* Source */}
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">Source</span>
+                {sourceFilters.map((filter) => (
                   <button
                     key={filter.value}
-                    onClick={() => setStateFilter(filter.value as "all" | "live" | "upcoming")}
+                    onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
                     className={cn(
-                      "flex items-center gap-1 px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
-                      stateFilter === filter.value
-                        ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                      "px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
+                      sourceFilter === filter.value
+                        ? "bg-brand/10 text-brand"
+                        : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                     )}
                   >
-                    <Icon className="h-3 w-3" />
-                    {filter.label}
+                    {filter.label === "All Sources" ? "All" : filter.label}
                   </button>
-                );
-              })}
-            </div>
+                ))}
+              </div>
 
-            <div className="w-px h-5 bg-border/50" />
+              <div className="w-px h-5 bg-border" />
 
-            {/* Type */}
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">Type:</span>
-              {typeFilters.map((filter) => {
-                const Icon = filter.icon;
-                return (
+              {/* Sort */}
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">Sort</span>
+                {[
+                  { value: "date", label: "Date" },
+                  { value: "votes", label: "Votes" },
+                  { value: "newest", label: "New" },
+                ].map((sort) => (
                   <button
-                    key={filter.value}
-                    onClick={() => setStatus(filter.value as "all" | "mints" | "forever" | "meetups" | "hackathons")}
+                    key={sort.value}
+                    onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
                     className={cn(
-                      "flex items-center gap-1 px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
-                      status === filter.value
-                        ? "bg-accent-primary text-white"
-                        : "bg-bg-secondary text-text-secondary hover:text-text-primary"
+                      "px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
+                      sortBy === sort.value
+                        ? "bg-brand/10 text-brand"
+                        : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
                     )}
                   >
-                    <Icon className="h-3 w-3" />
-                    {filter.label.split(' ')[0]}
+                    {sort.label}
                   </button>
-                );
-              })}
-            </div>
-
-            <div className="w-px h-5 bg-border/50" />
-
-            {/* Source */}
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">Source:</span>
-              {sourceFilters.map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
-                  className={cn(
-                    "px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
-                    sourceFilter === filter.value
-                      ? "bg-accent-primary text-white"
-                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                  )}
-                >
-                  {filter.label === "All Sources" ? "All" : filter.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="w-px h-5 bg-border/50" />
-
-            {/* Sort */}
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] sm:text-xs text-text-secondary uppercase tracking-wide font-semibold mr-0.5">Sort:</span>
-              {[
-                { value: "date", label: "Date" },
-                { value: "votes", label: "Votes" },
-                { value: "newest", label: "New" },
-              ].map((sort) => (
-                <button
-                  key={sort.value}
-                  onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
-                  className={cn(
-                    "px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap",
-                    sortBy === sort.value
-                      ? "bg-accent-primary text-white"
-                      : "bg-bg-secondary text-text-secondary hover:text-text-primary"
-                  )}
-                >
-                  {sort.label}
-                </button>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Events Listing */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-accent-primary border-t-transparent" />
-          </div>
-        ) : events.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-md bg-bg-secondary flex items-center justify-center mx-auto mb-4">
-              <Calendar className="h-10 w-10 text-text-secondary" />
+        <div ref={contentRef} className="reveal">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 reveal-delay-1">
+              <Loader2 className="h-8 w-8 animate-spin text-brand mb-4" />
+              <p className="text-text-secondary text-sm">Loading events...</p>
             </div>
-            <h3 className="text-xl font-bold text-text-primary mb-2">
-              No events found
-            </h3>
-            <p className="text-text-secondary mb-6">
-              {searchQuery
-                ? "Try adjusting your search or filters"
-                : "Be the first to submit an event!"}
-            </p>
-            {isConnected && (
-              <Link href="/events/new">
-                <Button className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Submit Event
-                </Button>
-              </Link>
-            )}
-          </div>
-        ) : viewMode === "calendar" ? (
-          <CalendarView events={events} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {events.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                userVote={userVotes[event.id]}
-                onVote={handleVote}
-              />
-            ))}
-          </div>
-        )}
+          ) : events.length === 0 ? (
+            <div className="text-center py-20 reveal-delay-1">
+              <div className="w-16 h-16 rounded-xl bg-bg-secondary border border-border flex items-center justify-center mx-auto mb-4">
+                <Calendar className="h-8 w-8 text-text-tertiary" />
+              </div>
+              <h3 className="text-lg font-bold text-text-primary mb-2">
+                No events found
+              </h3>
+              <p className="text-text-secondary text-sm mb-6 max-w-md mx-auto">
+                {searchQuery
+                  ? "Try adjusting your search or filters"
+                  : "Be the first to submit an event!"}
+              </p>
+              {isConnected && (
+                <Link href="/events/new">
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Submit Event
+                  </Button>
+                </Link>
+              )}
+            </div>
+          ) : viewMode === "calendar" ? (
+            <div className="reveal-delay-1">
+              <CalendarView events={events} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 reveal-delay-1">
+              {events.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  userVote={userVotes[event.id]}
+                  onVote={handleVote}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

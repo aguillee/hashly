@@ -73,7 +73,7 @@ export default function AttendPage() {
   return (
     <div className="flex items-center justify-center min-h-[60vh] px-4">
       <div className="w-full max-w-md">
-        <div className="rounded-xl border border-border bg-bg-card p-8 text-center">
+        <div className="rounded-lg border border-border bg-bg-card p-8 text-center">
           {/* Success */}
           {status === "success" && (
             <>
@@ -88,7 +88,7 @@ export default function AttendPage() {
                 {walletAddress}
               </p>
               {message && (
-                <p className="text-xs text-accent-primary mt-3">{message}</p>
+                <p className="text-xs text-brand mt-3">{message}</p>
               )}
             </>
           )}
@@ -139,7 +139,7 @@ export default function AttendPage() {
           {/* Idle / Loading - main flow */}
           {(status === "idle" || status === "loading") && (
             <>
-              <div className="mb-4 flex justify-center"><MapPin className="h-12 w-12 text-accent-primary" /></div>
+              <div className="mb-4 flex justify-center"><MapPin className="h-12 w-12 text-brand" /></div>
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 Event Check-in
               </h1>

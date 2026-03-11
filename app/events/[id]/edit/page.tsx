@@ -345,7 +345,7 @@ export default function EditEventPage() {
   if (loadingEvent) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
@@ -363,7 +363,7 @@ export default function EditEventPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-accent-primary" />
+            <Calendar className="h-5 w-5 text-brand" />
             Edit Event
           </CardTitle>
         </CardHeader>
@@ -382,19 +382,19 @@ export default function EditEventPage() {
               <div className="flex rounded-md border border-border overflow-hidden opacity-60">
                 <div className={cn(
                   "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium",
-                  eventType === "MINT_EVENT" ? "bg-accent-primary text-white" : "bg-bg-card text-text-secondary"
+                  eventType === "MINT_EVENT" ? "bg-brand text-white" : "bg-bg-card text-text-secondary"
                 )}>
                   <Hexagon className="h-4 w-4" />Mint Event
                 </div>
                 <div className={cn(
                   "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium",
-                  eventType === "ECOSYSTEM_MEETUP" ? "bg-accent-primary text-white" : "bg-bg-card text-text-secondary"
+                  eventType === "ECOSYSTEM_MEETUP" ? "bg-brand text-white" : "bg-bg-card text-text-secondary"
                 )}>
                   <Users className="h-4 w-4" />Meetup
                 </div>
                 <div className={cn(
                   "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium",
-                  eventType === "HACKATHON" ? "bg-accent-primary text-white" : "bg-bg-card text-text-secondary"
+                  eventType === "HACKATHON" ? "bg-brand text-white" : "bg-bg-card text-text-secondary"
                 )}>
                   <Code2 className="h-4 w-4" />Hackathon
                 </div>
@@ -420,7 +420,7 @@ export default function EditEventPage() {
                 onChange={handleChange}
                 required
                 rows={4}
-                className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
+                className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 resize-none"
               />
             </div>
 
@@ -451,7 +451,7 @@ export default function EditEventPage() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Language</label>
-                  <select name="language" value={formData.language} onChange={handleChange} className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                  <select name="language" value={formData.language} onChange={handleChange} className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600">
                     {LANGUAGES.map(lang => (<option key={lang.value} value={lang.value}>{lang.label}</option>))}
                   </select>
                 </div>
@@ -459,10 +459,10 @@ export default function EditEventPage() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Type</label>
                   <div className="flex rounded-md border border-border overflow-hidden">
-                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, locationType: "online" }))} className={cn("flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors", formData.locationType === "online" ? "bg-accent-primary text-white" : "bg-bg-card text-text-secondary hover:text-text-primary")}>
+                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, locationType: "online" }))} className={cn("flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors", formData.locationType === "online" ? "bg-brand text-white" : "bg-bg-card text-text-secondary hover:text-text-primary")}>
                       <Globe className="h-4 w-4" />Online
                     </button>
-                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, locationType: "in_person" }))} className={cn("flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors", formData.locationType === "in_person" ? "bg-accent-primary text-white" : "bg-bg-card text-text-secondary hover:text-text-primary")}>
+                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, locationType: "in_person" }))} className={cn("flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors", formData.locationType === "in_person" ? "bg-brand text-white" : "bg-bg-card text-text-secondary hover:text-text-primary")}>
                       <MapPin className="h-4 w-4" />In Person
                     </button>
                   </div>
@@ -500,7 +500,7 @@ export default function EditEventPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium flex items-center gap-2">
-                      <LinkIcon className="h-4 w-4 text-accent-primary" />Links <span className="text-error">*</span>
+                      <LinkIcon className="h-4 w-4 text-brand" />Links <span className="text-error">*</span>
                     </label>
                     <Button type="button" variant="outline" size="sm" onClick={addLink} className="gap-1">
                       <Plus className="h-3 w-3" />Add Link
@@ -536,7 +536,7 @@ export default function EditEventPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-accent-primary" />Mint Phases
+                      <Clock className="h-4 w-4 text-brand" />Mint Phases
                     </label>
                     <Button type="button" variant="outline" size="sm" onClick={addPhase} className="gap-1">
                       <Plus className="h-3 w-3" />Add Phase
@@ -545,7 +545,7 @@ export default function EditEventPage() {
                   {phases.map((phase, index) => (
                     <div key={phase.id} className="p-4 rounded-md border border-border bg-bg-card space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-accent-primary">Phase {index + 1}</span>
+                        <span className="text-sm font-medium text-brand">Phase {index + 1}</span>
                         {phases.length > 1 && (
                           <button type="button" onClick={() => removePhase(phase.id)} className="p-1 text-text-secondary hover:text-error transition-colors">
                             <Trash2 className="h-4 w-4" />
@@ -583,10 +583,10 @@ export default function EditEventPage() {
                             <Input type="number" value={phase.price} onChange={(e) => handlePhaseChange(phase.id, "price", e.target.value)} placeholder="100" required />
                           </div>
                           <div className="flex rounded-md border border-border overflow-hidden">
-                            <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "HBAR")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "HBAR" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
+                            <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "HBAR")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "HBAR" ? "bg-brand text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
                               <HbarIcon className="h-3 w-3" />HBAR
                             </button>
-                            <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "USDC")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "USDC" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
+                            <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "USDC")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "USDC" ? "bg-brand text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
                               <UsdcIcon className="h-3 w-3" />USDC
                             </button>
                           </div>
@@ -597,7 +597,7 @@ export default function EditEventPage() {
                         <Input type="number" value={phase.maxPerWallet} onChange={(e) => handlePhaseChange(phase.id, "maxPerWallet", e.target.value)} placeholder="5" />
                       </div>
                       <div className="flex items-center gap-3">
-                        <button type="button" onClick={() => handlePhaseChange(phase.id, "isWhitelist", !phase.isWhitelist)} className={cn("relative w-11 h-6 rounded-full transition-colors", phase.isWhitelist ? "bg-accent-primary" : "bg-gray-600")}>
+                        <button type="button" onClick={() => handlePhaseChange(phase.id, "isWhitelist", !phase.isWhitelist)} className={cn("relative w-11 h-6 rounded-full transition-colors", phase.isWhitelist ? "bg-brand" : "bg-gray-600")}>
                           <span className={cn("absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform", phase.isWhitelist ? "translate-x-5" : "translate-x-0")} />
                         </button>
                         <span className="text-sm text-text-secondary">Whitelist Only</span>

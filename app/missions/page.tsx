@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { useReveal } from "@/hooks/useReveal";
 
 interface Mission {
   id: string;
@@ -51,6 +52,12 @@ export default function MissionsPage() {
   const [stats, setStats] = React.useState<UserStats | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [claimingId, setClaimingId] = React.useState<string | null>(null);
+
+  const headerRef = useReveal();
+  const dailyRef = useReveal();
+  const weeklyRef = useReveal();
+  const seasonRef = useReveal();
+  const uniqueRef = useReveal();
 
   React.useEffect(() => {
     if (!isConnected) {
@@ -90,12 +97,9 @@ export default function MissionsPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        // Update local state
         setMissions(prev =>
           prev.map(m => m.id === missionId ? { ...m, claimed: true } : m)
         );
-        // Refresh to get updated points
         await loadMissionsAndStats();
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -135,52 +139,52 @@ export default function MissionsPage() {
   const permanentMissions = missions.filter((m) => m.permanent);
 
   const MissionCard = ({ mission }: { mission: Mission }) => {
+    const progressPercent = Math.min((mission.progress / mission.requirement) * 100, 100);
+
     return (
       <div
         className={cn(
-          "flex items-center gap-3 p-3 rounded-lg border transition-all duration-300",
+          "flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all duration-200",
           mission.completed
-            ? "bg-bg-card border-success/30"
-            : "bg-bg-card border-border hover:border-accent-primary/30"
+            ? "bg-green-500/[0.03] border-green-500/20"
+            : "bg-bg-card border-border hover:border-brand/20"
         )}
       >
         {/* Icon */}
         <div
           className={cn(
-            "w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0",
+            "w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center flex-shrink-0",
             mission.completed
-              ? "bg-success/20 text-success"
-              : "bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 text-accent-primary"
+              ? "bg-green-500/10 text-green-600 dark:text-green-400"
+              : "bg-bg-secondary text-text-secondary"
           )}
         >
-          {mission.completed ? <CheckCircle className="h-6 w-6" /> : getIcon(mission.icon)}
+          {mission.completed ? <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" /> : getIcon(mission.icon)}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-text-primary">{mission.name}</h3>
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="font-semibold text-text-primary text-sm sm:text-base">{mission.name}</h3>
             {mission.completed && (
-              <Badge variant="live" size="sm">
-                Completed
-              </Badge>
+              <Badge variant="success" size="sm">Done</Badge>
             )}
           </div>
-          <p className="text-sm text-text-secondary">{mission.description}</p>
+          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">{mission.description}</p>
 
-          {/* Progress bar */}
+          {/* Progress bar with animation */}
           {!mission.completed && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="text-text-secondary">Progress</span>
-                <span className="font-medium text-text-primary">
+            <div className="mt-2.5">
+              <div className="flex items-center justify-between text-[10px] sm:text-xs mb-1.5">
+                <span className="text-text-tertiary">Progress</span>
+                <span className="font-medium text-text-primary font-mono">
                   {mission.progress} / {mission.requirement}
                 </span>
               </div>
-              <div className="h-2 bg-bg-secondary rounded-full overflow-hidden">
+              <div className="h-1.5 sm:h-2 bg-bg-secondary rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-accent-primary to-accent-secondary rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min((mission.progress / mission.requirement) * 100, 100)}%` }}
+                  className="h-full bg-brand rounded-full transition-all duration-700 ease-out progress-fill"
+                  style={{ width: `${progressPercent}%` }}
                 />
               </div>
             </div>
@@ -194,9 +198,9 @@ export default function MissionsPage() {
               onClick={() => claimMission(mission.id)}
               disabled={claimingId === mission.id}
               className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-md font-bold text-white transition-all",
-                "bg-gradient-to-r from-accent-primary to-accent-secondary hover:shadow-lg hover:shadow-accent-primary/30",
-                "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                "flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold text-white text-sm transition-all duration-150",
+                "bg-brand hover:bg-teal-600 active:scale-[0.98]",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
               {claimingId === mission.id ? (
@@ -204,23 +208,23 @@ export default function MissionsPage() {
               ) : (
                 <Zap className="h-4 w-4" />
               )}
-              <span>Claim +{mission.pointsReward}</span>
+              <span className="font-mono">+{mission.pointsReward}</span>
             </button>
           ) : (
             <div className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-md",
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg",
               mission.claimed
-                ? "bg-success/10 text-success"
-                : "bg-accent-primary/10 border border-accent-primary/20"
+                ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                : "bg-bg-secondary border border-border"
             )}>
-              <Zap className={cn("h-4 w-4", mission.claimed ? "text-success" : "text-accent-primary")} />
-              <span className={cn("font-bold", mission.claimed ? "text-success" : "text-accent-primary")}>
+              <Zap className={cn("h-3.5 w-3.5", mission.claimed ? "" : "text-text-tertiary")} />
+              <span className={cn("font-bold font-mono text-sm", !mission.claimed && "text-text-primary")}>
                 +{mission.pointsReward}
               </span>
             </div>
           )}
           {mission.claimed && (
-            <span className="text-xs font-medium text-success flex items-center gap-1 justify-end mt-2">
+            <span className="text-[10px] font-medium text-green-600 dark:text-green-400 flex items-center gap-1 justify-end mt-1.5">
               <CheckCircle className="h-3 w-3" />
               Claimed
             </span>
@@ -230,144 +234,138 @@ export default function MissionsPage() {
     );
   };
 
+  const MissionSection = ({
+    title,
+    icon,
+    badge,
+    missions: sectionMissions,
+    revealRef,
+    emptyText,
+  }: {
+    title: string;
+    icon: React.ReactNode;
+    badge: string;
+    missions: Mission[];
+    revealRef: React.Ref<HTMLDivElement>;
+    emptyText: string;
+  }) => (
+    <div ref={revealRef} className="reveal mb-5">
+      <div className="flex items-center justify-between mb-3 reveal-delay-1">
+        <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
+          {icon}
+          {title}
+        </h2>
+        <Badge variant="default" size="sm">{badge}</Badge>
+      </div>
+      <div className="space-y-2 reveal-delay-2">
+        {sectionMissions.length > 0 ? (
+          sectionMissions.map((mission) => (
+            <MissionCard key={mission.id} mission={mission} />
+          ))
+        ) : (
+          <div className="text-center py-8 rounded-xl border border-border bg-bg-card">
+            <p className="text-text-secondary text-sm">{emptyText}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl sm:text-2xl font-bold text-text-primary flex items-center gap-2">
-            <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
-            Missions
-          </h1>
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-accent-primary" />
-            <span className="text-lg font-bold text-text-primary">{(user.points ?? 0).toLocaleString()}</span>
-            <span className="text-xs text-text-secondary">pts</span>
+      <div ref={headerRef} className="reveal pt-6 pb-4 sm:pt-8 sm:pb-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between mb-4 reveal-delay-1">
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+                Earn Points
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+                Missions
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-bg-card border border-border">
+              <Zap className="h-4 w-4 text-brand" />
+              <span className="text-lg font-bold text-text-primary font-mono tabular-nums">{(user.points ?? 0).toLocaleString()}</span>
+              <span className="text-xs text-text-tertiary">pts</span>
+            </div>
           </div>
-        </div>
 
-        {/* Stats bar */}
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
-            <Flame className="h-3.5 w-3.5 text-orange-500" />
-            <span className="font-semibold text-text-primary">{user.loginStreak}d streak</span>
-            {user.loginStreak >= 7 && <Badge variant="purple" size="sm">On fire!</Badge>}
+          {/* Stats bar */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap reveal-delay-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+              <Flame className="h-3.5 w-3.5 text-orange-500" />
+              <span className="font-bold text-text-primary font-mono">{user.loginStreak}d</span>
+              <span className="text-text-tertiary text-xs">streak</span>
+            </div>
+            {stats && (
+              <>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+                  <Vote className="h-3.5 w-3.5 text-text-tertiary" />
+                  <span className="font-bold text-text-primary font-mono">{stats.totalVotes}</span>
+                  <span className="text-text-tertiary text-xs">votes</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+                  <Calendar className="h-3.5 w-3.5 text-text-tertiary" />
+                  <span className="font-bold text-text-primary font-mono">{stats.totalEvents}</span>
+                  <span className="text-text-tertiary text-xs">events</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+                  <Target className="h-3.5 w-3.5 text-text-tertiary" />
+                  <span className="font-bold text-text-primary font-mono">{stats.todayVotes}</span>
+                  <span className="text-text-tertiary text-xs">today</span>
+                </div>
+              </>
+            )}
           </div>
-          {stats && (
-            <>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
-                <Vote className="h-3.5 w-3.5 text-accent-primary" />
-                <span className="font-bold text-text-primary">{stats.totalVotes}</span>
-                <span className="text-text-secondary text-xs">votes</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
-                <Calendar className="h-3.5 w-3.5 text-accent-primary" />
-                <span className="font-bold text-text-primary">{stats.totalEvents}</span>
-                <span className="text-text-secondary text-xs">events</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
-                <Target className="h-3.5 w-3.5 text-accent-secondary" />
-                <span className="font-bold text-text-primary">{stats.todayVotes}</span>
-                <span className="text-text-secondary text-xs">today</span>
-              </div>
-            </>
-          )}
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-8">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 flex items-center justify-center mb-4">
-              <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
-            </div>
-            <p className="text-text-secondary">Loading missions...</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-brand mb-4" />
+            <p className="text-text-secondary text-sm">Loading missions...</p>
           </div>
         ) : (
           <>
-            {/* Daily Missions */}
-            <div className="rounded-lg border border-border bg-bg-card overflow-hidden mb-4">
-              <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-                <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-accent-primary" />
-                  Daily Missions
-                </h2>
-                <Badge variant="outline" size="sm">Resets daily</Badge>
-              </div>
-              <div className="p-3 space-y-2">
-                {dailyMissions.length > 0 ? (
-                  dailyMissions.map((mission) => (
-                    <MissionCard key={mission.id} mission={mission} />
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-text-secondary">No daily missions available</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <MissionSection
+              title="Daily Missions"
+              icon={<Calendar className="h-4 w-4 text-text-tertiary" />}
+              badge="Resets daily"
+              missions={dailyMissions}
+              revealRef={dailyRef}
+              emptyText="No daily missions available"
+            />
 
-            {/* Weekly Missions */}
-            <div className="rounded-lg border border-border bg-bg-card overflow-hidden mb-4">
-              <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-                <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                  <Target className="h-4 w-4 text-accent-secondary" />
-                  Weekly Missions
-                </h2>
-                <Badge variant="outline" size="sm">Resets weekly</Badge>
-              </div>
-              <div className="p-3 space-y-2">
-                {weeklyMissions.length > 0 ? (
-                  weeklyMissions.map((mission) => (
-                    <MissionCard key={mission.id} mission={mission} />
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-text-secondary">No weekly missions available</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <MissionSection
+              title="Weekly Missions"
+              icon={<Target className="h-4 w-4 text-text-tertiary" />}
+              badge="Resets weekly"
+              missions={weeklyMissions}
+              revealRef={weeklyRef}
+              emptyText="No weekly missions available"
+            />
 
-            {/* Season Missions */}
-            <div className="rounded-lg border border-border bg-bg-card overflow-hidden mb-4">
-              <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-                <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-yellow-500" />
-                  Season Missions
-                </h2>
-                <Badge variant="purple" size="sm">Resets each season</Badge>
-              </div>
-              <div className="p-3 space-y-2">
-                {achievements.length > 0 ? (
-                  achievements.map((mission) => (
-                    <MissionCard key={mission.id} mission={mission} />
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-text-secondary">No season missions available</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <MissionSection
+              title="Season Missions"
+              icon={<Trophy className="h-4 w-4 text-text-tertiary" />}
+              badge="Resets each season"
+              missions={achievements}
+              revealRef={seasonRef}
+              emptyText="No season missions available"
+            />
 
-            {/* Unique / Permanent Missions */}
             {permanentMissions.length > 0 && (
-              <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
-                <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-                  <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                    <Star className="h-4 w-4 text-accent-primary" />
-                    Unique Missions
-                  </h2>
-                  <Badge variant="default" size="sm">One time only</Badge>
-                </div>
-                <div className="p-3 space-y-2">
-                  {permanentMissions.map((mission) => (
-                    <MissionCard key={mission.id} mission={mission} />
-                  ))}
-                </div>
-              </div>
+              <MissionSection
+                title="Unique Missions"
+                icon={<Star className="h-4 w-4 text-text-tertiary" />}
+                badge="One time only"
+                missions={permanentMissions}
+                revealRef={uniqueRef}
+                emptyText="No unique missions available"
+              />
             )}
           </>
         )}

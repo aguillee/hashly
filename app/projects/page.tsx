@@ -27,6 +27,7 @@ import { useToast } from "@/components/ui/Toaster";
 import { ShareToXButton } from "@/components/ui/ShareToXButton";
 import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
 import { mutate } from "@/lib/swr";
+import { useReveal } from "@/hooks/useReveal";
 
 interface Collection {
   id: string;
@@ -55,7 +56,6 @@ interface Token {
 
 type ProjectType = "nft" | "token";
 
-// Custom hook for debounce
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
 
@@ -73,19 +73,16 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function ProjectsPage() {
-  // NFT Collections state
   const [topCollections, setTopCollections] = React.useState<Collection[]>([]);
   const [worstCollections, setWorstCollections] = React.useState<Collection[]>([]);
   const [searchResults, setSearchResults] = React.useState<Collection[]>([]);
   const [totalCollections, setTotalCollections] = React.useState(0);
 
-  // Tokens state
   const [topTokens, setTopTokens] = React.useState<Token[]>([]);
   const [worstTokens, setWorstTokens] = React.useState<Token[]>([]);
   const [tokenSearchResults, setTokenSearchResults] = React.useState<Token[]>([]);
   const [totalTokens, setTotalTokens] = React.useState(0);
 
-  // UI state
   const [loading, setLoading] = React.useState(true);
   const [loadingTokens, setLoadingTokens] = React.useState(true);
   const [syncing, setSyncing] = React.useState(false);
@@ -95,7 +92,6 @@ export default function ProjectsPage() {
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchLoading, setSearchLoading] = React.useState(false);
 
-  // Modal for adding project
   const [showAddModal, setShowAddModal] = React.useState(false);
   const [newTokenId, setNewTokenId] = React.useState("");
   const [projectType, setProjectType] = React.useState<ProjectType>("nft");
@@ -105,16 +101,16 @@ export default function ProjectsPage() {
   const { toast } = useToast();
   const { showLimitReachedModal, refreshVoteLimit } = useVoteLimitContext();
 
-  // Debounce search query (300ms)
+  const headerRef = useReveal();
+  const contentRef = useReveal();
+
   const debouncedSearch = useDebounce(search, 300);
 
-  // Initial load
   React.useEffect(() => {
     fetchCollections();
     fetchTokens();
   }, []);
 
-  // Real-time search with debounce - search both collections and tokens
   React.useEffect(() => {
     if (debouncedSearch.length > 0) {
       fetchCollections(false, debouncedSearch);
@@ -201,10 +197,7 @@ export default function ProjectsPage() {
 
   async function handleVote(collectionId: string, voteType: "UP" | "DOWN") {
     if (!isConnected) {
-      toast({
-        title: "Connect Wallet",
-        description: "Please connect your wallet to vote",
-      });
+      toast({ title: "Connect Wallet", description: "Please connect your wallet to vote" });
       return;
     }
 
@@ -219,7 +212,6 @@ export default function ProjectsPage() {
 
       if (response.ok) {
         const data = await response.json();
-
         const updateCollection = (c: Collection) =>
           c.id === collectionId
             ? { ...c, totalVotes: data.totalVotes, userVote: { voteWeight: data.yourVoteWeight } }
@@ -230,32 +222,18 @@ export default function ProjectsPage() {
         setSearchResults((prev) => prev.map(updateCollection));
 
         const nftBonus = data.nftBonus > 0 ? ` (+${data.nftBonus} NFT bonus)` : "";
-        toast({
-          title: "Vote recorded!",
-          description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted`,
-        });
-        // Invalidate SWR cache for real-time updates
+        toast({ title: "Vote recorded!", description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted` });
         mutate((key: string) => typeof key === "string" && key.startsWith("/api/collections"), undefined, { revalidate: true });
-        // Refresh vote limit in navbar
         refreshVoteLimit();
       } else if (response.status === 429) {
-        // Daily vote limit reached - show modal
         showLimitReachedModal();
       } else {
         const error = await response.json();
-        toast({
-          title: "Vote failed",
-          description: error.error || "Something went wrong",
-          variant: "error",
-        });
+        toast({ title: "Vote failed", description: error.error || "Something went wrong", variant: "error" });
       }
     } catch (error) {
       console.error("Vote error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit vote",
-        variant: "error",
-      });
+      toast({ title: "Error", description: "Failed to submit vote", variant: "error" });
     } finally {
       setVotingId(null);
     }
@@ -263,10 +241,7 @@ export default function ProjectsPage() {
 
   async function handleTokenVote(tokenId: string, voteType: "UP" | "DOWN") {
     if (!isConnected) {
-      toast({
-        title: "Connect Wallet",
-        description: "Please connect your wallet to vote",
-      });
+      toast({ title: "Connect Wallet", description: "Please connect your wallet to vote" });
       return;
     }
 
@@ -281,7 +256,6 @@ export default function ProjectsPage() {
 
       if (response.ok) {
         const data = await response.json();
-
         setTopTokens((prev) =>
           prev.map((t) =>
             t.id === tokenId
@@ -289,34 +263,19 @@ export default function ProjectsPage() {
               : t
           )
         );
-
         const nftBonus = data.nftBonus > 0 ? ` (+${data.nftBonus} NFT bonus)` : "";
-        toast({
-          title: "Vote recorded!",
-          description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted`,
-        });
-        // Invalidate SWR cache for real-time updates
+        toast({ title: "Vote recorded!", description: `Your vote of ${Math.abs(data.yourVoteWeight)}${nftBonus} has been counted` });
         mutate((key: string) => typeof key === "string" && key.startsWith("/api/tokens"), undefined, { revalidate: true });
-        // Refresh vote limit in navbar
         refreshVoteLimit();
       } else if (response.status === 429) {
-        // Daily vote limit reached - show modal
         showLimitReachedModal();
       } else {
         const error = await response.json();
-        toast({
-          title: "Vote failed",
-          description: error.error || "Something went wrong",
-          variant: "error",
-        });
+        toast({ title: "Vote failed", description: error.error || "Something went wrong", variant: "error" });
       }
     } catch (error) {
       console.error("Token vote error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit vote",
-        variant: "error",
-      });
+      toast({ title: "Error", description: "Failed to submit vote", variant: "error" });
     } finally {
       setVotingTokenId(null);
     }
@@ -326,26 +285,26 @@ export default function ProjectsPage() {
     switch (rank) {
       case 1:
         return (
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center flex-shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.25)]">
             <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       case 2:
         return (
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-zinc-300 to-zinc-400 flex items-center justify-center flex-shrink-0">
             <Medal className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       case 3:
         return (
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center flex-shrink-0">
             <Medal className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
         );
       default:
         return (
           <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-            <span className="text-text-secondary font-bold text-[10px] sm:text-xs">#{rank}</span>
+            <span className="text-text-secondary font-mono font-bold text-[10px] sm:text-xs">#{rank}</span>
           </div>
         );
     }
@@ -353,14 +312,10 @@ export default function ProjectsPage() {
 
   const getRankStyle = (rank: number) => {
     switch (rank) {
-      case 1:
-        return "bg-bg-card border-yellow-500/30";
-      case 2:
-        return "bg-bg-card border-gray-400/30";
-      case 3:
-        return "bg-bg-card border-amber-500/30";
-      default:
-        return "bg-bg-card border-border hover:border-accent-primary/30";
+      case 1: return "bg-bg-card border-amber-400/20 hover:border-amber-400/40";
+      case 2: return "bg-bg-card border-zinc-400/20 hover:border-zinc-400/40";
+      case 3: return "bg-bg-card border-orange-400/20 hover:border-orange-400/40";
+      default: return "bg-bg-card border-border hover:border-brand/20";
     }
   };
 
@@ -377,10 +332,7 @@ export default function ProjectsPage() {
 
     setSubmitting(true);
     try {
-      const endpoint = projectType === "nft"
-        ? "/api/collections/submit"
-        : "/api/tokens/submit";
-
+      const endpoint = projectType === "nft" ? "/api/collections/submit" : "/api/tokens/submit";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -393,7 +345,6 @@ export default function ProjectsPage() {
         const itemName = projectType === "nft"
           ? data.collection?.name
           : data.token?.symbol || data.token?.name;
-
         toast({
           title: data.autoApproved ? "Project Added!" : "Project Submitted!",
           description: data.autoApproved
@@ -403,26 +354,15 @@ export default function ProjectsPage() {
         setNewTokenId("");
         setShowAddModal(false);
         if (data.autoApproved) {
-          if (projectType === "nft") {
-            fetchCollections();
-          } else {
-            fetchTokens();
-          }
+          if (projectType === "nft") fetchCollections();
+          else fetchTokens();
         }
       } else {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to submit project",
-          variant: "error",
-        });
+        toast({ title: "Error", description: data.error || "Failed to submit project", variant: "error" });
       }
     } catch (error) {
       console.error("Failed to submit project:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit project",
-        variant: "error",
-      });
+      toast({ title: "Error", description: "Failed to submit project", variant: "error" });
     } finally {
       setSubmitting(false);
     }
@@ -430,117 +370,112 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Compact Header - News style */}
-      <div className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-bg-card dark:bg-[#1a1a2e] border-2 border-accent-primary/50 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform">
-                  <Layers className="h-5 w-5 sm:h-6 sm:w-6 text-accent-primary" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Hedera Projects</h1>
-                <p className="text-xs sm:text-sm text-text-secondary">
-                  {totalCollections} NFTs · {totalTokens} Tokens
-                </p>
-              </div>
+      {/* Header */}
+      <div ref={headerRef} className="reveal pt-6 pb-4 sm:pt-8 sm:pb-6">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 reveal-delay-1">
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+                Community Ranked
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+                Projects
+              </h1>
+              <p className="text-sm text-text-secondary mt-1">
+                <span className="font-mono">{totalCollections}</span> NFTs &middot; <span className="font-mono">{totalTokens}</span> Tokens
+              </p>
             </div>
 
-            {user?.isAdmin && (
-              <button
-                onClick={() => fetchCollections(true)}
-                disabled={syncing}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card dark:bg-bg-secondary border border-border hover:border-accent-primary/50 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={cn("h-3.5 w-3.5", syncing && "animate-spin")} />
-                {syncing ? "Syncing..." : "Sync"}
-              </button>
+            <div className="flex items-center gap-2">
+              {user?.isAdmin && (
+                <button
+                  onClick={() => fetchCollections(true)}
+                  disabled={syncing}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card border border-border hover:border-brand/30 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={cn("h-3.5 w-3.5", syncing && "animate-spin")} />
+                  {syncing ? "Syncing..." : "Sync"}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Search + Add */}
+          <div className="flex gap-2 sm:gap-3 reveal-delay-2">
+            <div className="relative flex-1">
+              {searchLoading || loadingTokens ? (
+                <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary animate-spin" />
+              ) : (
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+              )}
+              <input
+                type="text"
+                placeholder="Search NFTs or tokens..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-bg-card border border-border focus:outline-none focus:border-brand/50 text-text-primary placeholder:text-text-tertiary text-sm transition-colors"
+              />
+              {search && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            {isConnected && (
+              <Button onClick={() => setShowAddModal(true)} className="gap-2 whitespace-nowrap">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add Project</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
             )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Search and Add Project */}
-        <div className="flex gap-2 sm:gap-3 mb-6">
-          <div className="relative flex-1">
-            {searchLoading || loadingTokens ? (
-              <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-accent-primary animate-spin" />
-            ) : (
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-            )}
-            <input
-              type="text"
-              placeholder="Search NFTs or tokens by name or token ID..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-10 py-2 rounded-md bg-bg-card border border-border focus:outline-none focus:ring-2 focus:ring-accent-primary/50 text-text-primary placeholder:text-text-secondary text-sm"
-            />
-            {search && (
-              <button
-                onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-          {isConnected && (
-            <Button
-              onClick={() => setShowAddModal(true)}
-              className="gap-2 whitespace-nowrap"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Project</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
-          )}
-        </div>
-
-
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pb-16">
         {/* Add Project Modal */}
         {showAddModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-bg-card border border-border rounded-lg p-6 w-full max-w-md mx-4 shadow-lg">
+            <div className="bg-bg-card border border-border rounded-xl p-6 w-full max-w-md mx-4 shadow-elevation-3">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold">Add Project</h2>
+                <h2 className="text-lg font-bold text-text-primary">Add Project</h2>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="text-text-secondary hover:text-text-primary"
+                  className="text-text-secondary hover:text-text-primary transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              {/* Project Type Selector */}
               <div className="flex gap-2 mb-4">
                 <button
                   type="button"
                   onClick={() => setProjectType("nft")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md border transition-all",
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border transition-colors",
                     projectType === "nft"
-                      ? "border-accent-primary bg-accent-primary/10 text-accent-primary"
-                      : "border-border hover:border-accent-primary/50 text-text-secondary"
+                      ? "border-brand bg-brand/5 text-text-primary"
+                      : "border-border hover:bg-bg-secondary text-text-secondary"
                   )}
                 >
                   <Layers className="h-4 w-4" />
-                  <span className="font-medium">NFT Collection</span>
+                  <span className="font-medium text-sm">NFT Collection</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setProjectType("token")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md border transition-all",
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border transition-colors",
                     projectType === "token"
-                      ? "border-accent-secondary bg-accent-secondary/10 text-accent-secondary"
-                      : "border-border hover:border-accent-secondary/50 text-text-secondary"
+                      ? "border-brand bg-brand/5 text-text-primary"
+                      : "border-border hover:bg-bg-secondary text-text-secondary"
                   )}
                 >
                   <Coins className="h-4 w-4" />
-                  <span className="font-medium">Token</span>
+                  <span className="font-medium text-sm">Token</span>
                 </button>
               </div>
 
@@ -557,20 +492,10 @@ export default function ProjectsPage() {
                   disabled={submitting}
                 />
                 <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setShowAddModal(false)}
-                    className="flex-1"
-                    disabled={submitting}
-                  >
+                  <Button type="button" variant="secondary" onClick={() => setShowAddModal(false)} className="flex-1" disabled={submitting}>
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1"
-                    loading={submitting}
-                  >
+                  <Button type="submit" className="flex-1" loading={submitting}>
                     Submit
                   </Button>
                 </div>
@@ -579,169 +504,128 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-accent-primary" />
-          </div>
-        ) : isSearching ? (
-          /* Search Results - Both NFTs and Tokens */
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-text-secondary">
-                {searchResults.length + tokenSearchResults.length} results for "{search}"
-              </span>
-              <Button variant="ghost" size="sm" onClick={clearSearch}>
-                Clear search
-              </Button>
+        <div ref={contentRef} className="reveal">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-brand" />
             </div>
-
-            {searchResults.length === 0 && tokenSearchResults.length === 0 ? (
-              <div className="rounded-lg border border-border bg-bg-card p-8 text-center">
-                <Search className="h-8 w-8 mx-auto text-text-secondary mb-3" />
-                <p className="text-text-secondary text-sm mb-3">No projects found</p>
-                {isConnected && (
-                  <Button
-                    size="sm"
-                    onClick={() => setShowAddModal(true)}
-                    className="gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add this project
-                  </Button>
-                )}
+          ) : isSearching ? (
+            /* Search Results */
+            <div className="space-y-4 reveal-delay-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-text-secondary">
+                  <span className="font-mono">{searchResults.length + tokenSearchResults.length}</span> results for &ldquo;{search}&rdquo;
+                </span>
+                <Button variant="ghost" size="sm" onClick={clearSearch}>Clear search</Button>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* NFT Search Results */}
-                {searchResults.length > 0 && (
-                  <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
-                    <div className="p-4 border-b border-border flex items-center gap-2">
-                      <Layers className="h-5 w-5 text-accent-primary" />
-                      <span className="font-semibold text-text-primary">NFT Collections ({searchResults.length})</span>
-                    </div>
-                    <div className="p-3 max-h-[50vh] overflow-y-auto">
-                      <div className="space-y-2">
+
+              {searchResults.length === 0 && tokenSearchResults.length === 0 ? (
+                <div className="rounded-xl border border-border bg-bg-card p-10 text-center">
+                  <Search className="h-8 w-8 mx-auto text-text-tertiary mb-3" />
+                  <p className="text-text-secondary text-sm mb-3">No projects found</p>
+                  {isConnected && (
+                    <Button size="sm" onClick={() => setShowAddModal(true)} className="gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add this project
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {searchResults.length > 0 && (
+                    <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
+                      <div className="p-4 border-b border-border flex items-center gap-2">
+                        <Layers className="h-4 w-4 text-text-secondary" />
+                        <span className="font-semibold text-text-primary text-sm">NFT Collections (<span className="font-mono">{searchResults.length}</span>)</span>
+                      </div>
+                      <div className="p-3 max-h-[50vh] overflow-y-auto space-y-2">
                         {searchResults.map((collection) => (
-                          <CollectionRow
-                            key={collection.id}
-                            collection={collection}
-                            votingId={votingId}
-                            onVote={handleVote}
-                            getRankIcon={getRankIcon}
-                            getRankStyle={getRankStyle}
-                          />
+                          <CollectionRow key={collection.id} collection={collection} votingId={votingId} onVote={handleVote} getRankIcon={getRankIcon} getRankStyle={getRankStyle} />
                         ))}
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {/* Token Search Results */}
-                {tokenSearchResults.length > 0 && (
-                  <div className="rounded-lg border border-accent-secondary/30 bg-bg-card overflow-hidden">
-                    <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
-                      <Coins className="h-5 w-5 text-accent-secondary" />
-                      <span className="font-semibold text-text-primary">Tokens ({tokenSearchResults.length})</span>
-                    </div>
-                    <div className="p-3 max-h-[50vh] overflow-y-auto">
-                      <div className="space-y-2">
+                  )}
+                  {tokenSearchResults.length > 0 && (
+                    <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
+                      <div className="p-4 border-b border-border flex items-center gap-2">
+                        <Coins className="h-4 w-4 text-text-secondary" />
+                        <span className="font-semibold text-text-primary text-sm">Tokens (<span className="font-mono">{tokenSearchResults.length}</span>)</span>
+                      </div>
+                      <div className="p-3 max-h-[50vh] overflow-y-auto space-y-2">
                         {tokenSearchResults.map((token) => (
-                          <TokenRow
-                            key={token.id}
-                            token={token}
-                            votingId={votingTokenId}
-                            onVote={handleTokenVote}
-                            getRankIcon={getRankIcon}
-                            getRankStyle={getRankStyle}
-                          />
+                          <TokenRow key={token.id} token={token} votingId={votingTokenId} onVote={handleTokenVote} getRankIcon={getRankIcon} getRankStyle={getRankStyle} />
                         ))}
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <>
-            {/* Main Grid: Top NFTs (left) + Top Tokens (right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
-              {/* Top 30 NFTs - Left Column */}
-              <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
-                <div className="p-4 border-b border-border flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  <span className="font-semibold text-text-primary">Top 30 NFTs</span>
-                </div>
-                <div className="p-3 max-h-[70vh] overflow-y-auto">
-                  {topCollections.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Layers className="h-8 w-8 mx-auto text-text-secondary mb-3" />
-                      <p className="text-text-secondary text-sm mb-3">No collections yet</p>
-                      {user?.isAdmin && (
-                        <Button size="sm" onClick={() => fetchCollections(true)} className="gap-2">
-                          <RefreshCw className="h-3 w-3" />
-                          Sync Now
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {topCollections.map((collection) => (
-                        <CollectionRow
-                          key={collection.id}
-                          collection={collection}
-                          votingId={votingId}
-                          onVote={handleVote}
-                          getRankIcon={getRankIcon}
-                          getRankStyle={getRankStyle}
-                        />
-                      ))}
-                    </div>
                   )}
                 </div>
-              </div>
-
-              {/* Top 30 Tokens - Right Column */}
-              <div className="rounded-lg border border-accent-secondary/30 bg-bg-card overflow-hidden">
-                <div className="p-4 border-b border-accent-secondary/30 flex items-center gap-2">
-                  <Coins className="h-5 w-5 text-accent-secondary" />
-                  <span className="font-semibold text-text-primary">Top 30 Tokens</span>
-                </div>
-                <div className="p-3 max-h-[70vh] overflow-y-auto">
-                  {loadingTokens ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-accent-secondary" />
-                    </div>
-                  ) : topTokens.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Coins className="h-8 w-8 mx-auto text-text-secondary mb-3" />
-                      <p className="text-text-secondary text-sm">No tokens yet</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {topTokens.map((token) => (
-                        <TokenRow
-                          key={token.id}
-                          token={token}
-                          votingId={votingTokenId}
-                          onVote={handleTokenVote}
-                          getRankIcon={getRankIcon}
-                          getRankStyle={getRankStyle}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
+          ) : (
+            <>
+              {/* Main Grid: NFTs left + Tokens right */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 reveal-delay-1">
+                {/* Top 30 NFTs */}
+                <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
+                  <div className="p-4 sm:p-5 border-b border-border flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-amber-500" />
+                    <span className="font-semibold text-text-primary text-sm">Top 30 NFTs</span>
+                  </div>
+                  <div className="p-3 max-h-[70vh] overflow-y-auto">
+                    {topCollections.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Layers className="h-8 w-8 mx-auto text-text-tertiary mb-3" />
+                        <p className="text-text-secondary text-sm mb-3">No collections yet</p>
+                        {user?.isAdmin && (
+                          <Button size="sm" onClick={() => fetchCollections(true)} className="gap-2">
+                            <RefreshCw className="h-3 w-3" />Sync Now
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {topCollections.map((collection) => (
+                          <CollectionRow key={collection.id} collection={collection} votingId={votingId} onVote={handleVote} getRankIcon={getRankIcon} getRankStyle={getRankStyle} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-          </>
-        )}
+                {/* Top 30 Tokens */}
+                <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
+                  <div className="p-4 sm:p-5 border-b border-border flex items-center gap-2">
+                    <Coins className="h-4 w-4 text-text-secondary" />
+                    <span className="font-semibold text-text-primary text-sm">Top 30 Tokens</span>
+                  </div>
+                  <div className="p-3 max-h-[70vh] overflow-y-auto">
+                    {loadingTokens ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
+                      </div>
+                    ) : topTokens.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Coins className="h-8 w-8 mx-auto text-text-tertiary mb-3" />
+                        <p className="text-text-secondary text-sm">No tokens yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {topTokens.map((token) => (
+                          <TokenRow key={token.id} token={token} votingId={votingTokenId} onVote={handleTokenVote} getRankIcon={getRankIcon} getRankStyle={getRankStyle} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
-        {/* Voting Info */}
-        <div className="mt-4 text-xs text-text-secondary text-center space-y-1">
-          <p>1 vote per wallet + 1 per dragon + 5 for El Santuario holders</p>
-          <p>Your vote is permanent. You can change it anytime.</p>
+          {/* Voting Info */}
+          <div className="mt-6 text-xs text-text-tertiary text-center space-y-1 reveal-delay-3">
+            <p className="font-mono">1 vote per wallet + 1 per dragon + 5 for El Santuario holders</p>
+            <p>Your vote is permanent. You can change it anytime.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -770,44 +654,24 @@ function CollectionRow({
 
   if (compact) {
     return (
-      <div
-        className={cn(
-          "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all duration-200 w-36 lg:w-auto",
-          getRankStyle(collection.rank)
-        )}
-      >
+      <div className={cn("flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-colors w-36 lg:w-auto", getRankStyle(collection.rank))}>
         {getRankIcon(collection.rank)}
         <div className="w-10 h-10 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
           {collection.image ? (
             <img src={collection.image} alt={collection.name} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Layers className="h-4 w-4 text-text-secondary" />
-            </div>
+            <div className="w-full h-full flex items-center justify-center"><Layers className="h-4 w-4 text-text-tertiary" /></div>
           )}
         </div>
-        <p className="text-xs font-medium text-center truncate w-full">{collection.name}</p>
-        <div className="flex items-center gap-1 text-red-400 text-xs font-bold">
-          <Trophy className="h-3 w-3" />
-          {collection.totalVotes}
+        <p className="text-xs font-medium text-center truncate w-full text-text-primary">{collection.name}</p>
+        <div className="flex items-center gap-1 text-text-secondary text-xs font-mono font-bold">
+          <Trophy className="h-3 w-3" />{collection.totalVotes}
         </div>
         <div className="flex gap-1">
-          <Button
-            variant={hasVoted && voteIsUp ? "default" : "ghost"}
-            size="sm"
-            onClick={() => onVote(collection.id, "UP")}
-            disabled={isVoting}
-            className={cn("h-6 w-6 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
-          >
+          <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "UP")} disabled={isVoting} className={cn("h-6 w-6 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}>
             <ThumbsUp className="h-3 w-3" />
           </Button>
-          <Button
-            variant={hasVoted && !voteIsUp ? "default" : "ghost"}
-            size="sm"
-            onClick={() => onVote(collection.id, "DOWN")}
-            disabled={isVoting}
-            className={cn("h-6 w-6 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
-          >
+          <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "DOWN")} disabled={isVoting} className={cn("h-6 w-6 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}>
             <ThumbsDown className="h-3 w-3" />
           </Button>
         </div>
@@ -816,21 +680,19 @@ function CollectionRow({
   }
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border transition-all duration-200",
-        getRankStyle(collection.rank)
-      )}
-    >
+    <div className={cn(
+      "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-colors duration-150",
+      getRankStyle(collection.rank),
+      hasVoted && voteIsUp && "border-l-2 !border-l-green-500/50",
+      hasVoted && !voteIsUp && "border-l-2 !border-l-red-500/50"
+    )}>
       {getRankIcon(collection.rank)}
 
       <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
         {collection.image ? (
           <img src={collection.image} alt={collection.name} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Layers className="h-4 w-4 text-text-secondary" />
-          </div>
+          <div className="w-full h-full flex items-center justify-center"><Layers className="h-4 w-4 text-text-tertiary" /></div>
         )}
       </div>
 
@@ -839,50 +701,31 @@ function CollectionRow({
           href={`https://sentx.io/nft-marketplace/${collection.tokenAddress}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-text-primary text-sm truncate hover:text-accent-primary flex items-center gap-1"
+          className="font-medium text-text-primary text-sm truncate hover:text-brand flex items-center gap-1 transition-colors"
         >
           <span className="truncate">{collection.name}</span>
           <ExternalLink className="h-3 w-3 flex-shrink-0" />
         </a>
-        <div className="flex items-center gap-2 sm:gap-3 text-xs text-text-secondary">
-          <span className="hidden sm:inline">{collection.tokenAddress}</span>
-          <span className="flex items-center gap-1">
-            <Users className="h-3 w-3" />
-            {collection.owners.toLocaleString()}
-          </span>
-          <span className="flex items-center gap-1">
-            <Layers className="h-3 w-3" />
-            {collection.supply.toLocaleString()}
-          </span>
+        <div className="flex items-center gap-2 sm:gap-3 text-xs text-text-tertiary">
+          <span className="hidden sm:inline font-mono">{collection.tokenAddress}</span>
+          <span className="flex items-center gap-1"><Users className="h-3 w-3" /><span className="font-mono">{collection.owners.toLocaleString()}</span></span>
+          <span className="flex items-center gap-1"><Layers className="h-3 w-3" /><span className="font-mono">{collection.supply.toLocaleString()}</span></span>
         </div>
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-accent-primary/10">
-          <Trophy className="h-3 w-3 text-accent-primary" />
-          <span className="font-bold text-accent-primary text-xs sm:text-sm">{collection.totalVotes}</span>
+        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-bg-secondary">
+          <Trophy className="h-3 w-3 text-text-tertiary" />
+          <span className="font-mono font-bold text-text-primary text-xs sm:text-sm">{collection.totalVotes}</span>
         </div>
-
-        <Button
-          variant={hasVoted && voteIsUp ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onVote(collection.id, "UP")}
-          disabled={isVoting}
-          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
-        >
-          {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className="h-3 w-3" />}
+        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "UP")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white")}>
+          {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className={cn("h-3 w-3", hasVoted && voteIsUp && "fill-current")} />}
         </Button>
-        <Button
-          variant={hasVoted && !voteIsUp ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onVote(collection.id, "DOWN")}
-          disabled={isVoting}
-          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
-        >
-          <ThumbsDown className="h-3 w-3" />
+        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "DOWN")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white")}>
+          <ThumbsDown className={cn("h-3 w-3", hasVoted && !voteIsUp && "fill-current")} />
         </Button>
         <ShareToXButton
-          shareText={`I just voted for ${collection.name} on @hashly_h 🔥\n\nJoin and vote for your favorite collections!`}
+          shareText={`I just voted for ${collection.name} on @hashly_h\n\nJoin and vote for your favorite collections!`}
           shareUrl="https://hash-ly.com/projects"
           className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
         />
@@ -910,30 +753,28 @@ function TokenRow({
   const voteIsUp = hasVoted && token.userVote!.voteWeight > 0;
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-md border transition-all duration-200",
-        getRankStyle(token.rank)
-      )}
-    >
+    <div className={cn(
+      "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-colors duration-150",
+      getRankStyle(token.rank),
+      hasVoted && voteIsUp && "border-l-2 !border-l-green-500/50",
+      hasVoted && !voteIsUp && "border-l-2 !border-l-red-500/50"
+    )}>
       {getRankIcon(token.rank)}
 
       <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-bg-secondary flex-shrink-0">
         {token.icon ? (
           <img src={token.icon} alt={token.symbol} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Coins className="h-4 w-4 text-text-secondary" />
-          </div>
+          <div className="w-full h-full flex items-center justify-center"><Coins className="h-4 w-4 text-text-tertiary" /></div>
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="font-medium text-text-primary text-sm flex items-center gap-1.5">
           <span className="font-bold">{token.symbol}</span>
-          <span className="text-text-secondary text-xs hidden sm:inline">({token.name})</span>
+          <span className="text-text-tertiary text-xs hidden sm:inline">({token.name})</span>
           {token.marketCap && token.marketCap > 0 && (
-            <span className="text-xs text-accent-secondary ml-1">
+            <span className="text-xs text-text-secondary font-mono ml-1">
               MC: ${token.marketCap >= 1000000
                 ? `${(token.marketCap / 1000000).toFixed(1)}M`
                 : token.marketCap >= 1000
@@ -942,13 +783,13 @@ function TokenRow({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 text-xs text-text-secondary">
-          <span className="">{token.tokenAddress}</span>
+        <div className="flex items-center gap-2 text-xs text-text-tertiary">
+          <span className="font-mono">{token.tokenAddress}</span>
           <a
             href={`https://www.saucerswap.finance/swap/HBAR/${token.tokenAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors"
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-bg-secondary text-text-secondary hover:text-text-primary transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             <ArrowLeftRight className="h-3 w-3" />
@@ -958,31 +799,18 @@ function TokenRow({
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-accent-secondary/10">
-          <Trophy className="h-3 w-3 text-accent-secondary" />
-          <span className="font-bold text-accent-secondary text-xs sm:text-sm">{token.totalVotes}</span>
+        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-bg-secondary">
+          <Trophy className="h-3 w-3 text-text-tertiary" />
+          <span className="font-mono font-bold text-text-primary text-xs sm:text-sm">{token.totalVotes}</span>
         </div>
-
-        <Button
-          variant={hasVoted && voteIsUp ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onVote(token.id, "UP")}
-          disabled={isVoting}
-          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
-        >
-          {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className="h-3 w-3" />}
+        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "UP")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white")}>
+          {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className={cn("h-3 w-3", hasVoted && voteIsUp && "fill-current")} />}
         </Button>
-        <Button
-          variant={hasVoted && !voteIsUp ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onVote(token.id, "DOWN")}
-          disabled={isVoting}
-          className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
-        >
-          <ThumbsDown className="h-3 w-3" />
+        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "DOWN")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white")}>
+          <ThumbsDown className={cn("h-3 w-3", hasVoted && !voteIsUp && "fill-current")} />
         </Button>
         <ShareToXButton
-          shareText={`I just voted for $${token.symbol} on @hashly_h 🔥\n\nJoin and vote for your favorite tokens!`}
+          shareText={`I just voted for $${token.symbol} on @hashly_h\n\nJoin and vote for your favorite tokens!`}
           shareUrl="https://hash-ly.com/projects"
           className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
         />
@@ -1006,22 +834,20 @@ function TokenRowCompact({
   const voteIsUp = hasVoted && token.userVote!.voteWeight > 0;
 
   return (
-    <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all duration-200 w-36 lg:w-auto bg-bg-card border-orange-500/20 hover:border-orange-500/40">
-      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0">
-        <span className="text-orange-400 font-bold text-[10px] sm:text-xs">#{token.rank}</span>
+    <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-colors w-36 lg:w-auto bg-bg-card border-border hover:border-brand/20">
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+        <span className="text-text-secondary font-mono font-bold text-[10px] sm:text-xs">#{token.rank}</span>
       </div>
       <div className="w-10 h-10 rounded-full overflow-hidden bg-bg-secondary flex-shrink-0">
         {token.icon ? (
           <img src={token.icon} alt={token.symbol} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Coins className="h-4 w-4 text-text-secondary" />
-          </div>
+          <div className="w-full h-full flex items-center justify-center"><Coins className="h-4 w-4 text-text-tertiary" /></div>
         )}
       </div>
-      <p className="text-xs font-bold text-center truncate w-full">${token.symbol}</p>
+      <p className="text-xs font-bold text-center truncate w-full text-text-primary">${token.symbol}</p>
       {token.marketCap && token.marketCap > 0 && (
-        <p className="text-[10px] text-accent-secondary">
+        <p className="text-[10px] text-text-secondary font-mono">
           MC: ${token.marketCap >= 1000000
             ? `${(token.marketCap / 1000000).toFixed(1)}M`
             : token.marketCap >= 1000
@@ -1029,36 +855,22 @@ function TokenRowCompact({
               : token.marketCap.toFixed(0)}
         </p>
       )}
-      <div className="flex items-center gap-1 text-orange-400 text-xs font-bold">
-        <Trophy className="h-3 w-3" />
-        {token.totalVotes}
+      <div className="flex items-center gap-1 text-text-secondary text-xs font-mono font-bold">
+        <Trophy className="h-3 w-3" />{token.totalVotes}
       </div>
       <a
         href={`https://www.saucerswap.finance/swap/HBAR/${token.tokenAddress}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors text-[10px]"
+        className="flex items-center gap-1 px-2 py-0.5 rounded bg-bg-secondary text-text-secondary hover:text-text-primary transition-colors text-[10px]"
       >
-        <ArrowLeftRight className="h-2.5 w-2.5" />
-        Swap
+        <ArrowLeftRight className="h-2.5 w-2.5" />Swap
       </a>
       <div className="flex gap-1">
-        <Button
-          variant={hasVoted && voteIsUp ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onVote(token.id, "UP")}
-          disabled={isVoting}
-          className={cn("h-6 w-6 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}
-        >
+        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "UP")} disabled={isVoting} className={cn("h-6 w-6 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600")}>
           <ThumbsUp className="h-3 w-3" />
         </Button>
-        <Button
-          variant={hasVoted && !voteIsUp ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onVote(token.id, "DOWN")}
-          disabled={isVoting}
-          className={cn("h-6 w-6 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}
-        >
+        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "DOWN")} disabled={isVoting} className={cn("h-6 w-6 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600")}>
           <ThumbsDown className="h-3 w-3" />
         </Button>
       </div>

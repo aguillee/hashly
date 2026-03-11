@@ -26,14 +26,14 @@ export default function AttendeeList({ eventId }: { eventId: string }) {
         <h3 className="text-lg font-semibold text-text-primary">
           Attendees
         </h3>
-        <span className="bg-accent-primary/20 text-accent-primary px-3 py-1 rounded-full text-sm font-medium">
+        <span className="bg-brand-subtle text-brand px-3 py-1 rounded-full text-sm font-medium">
           {total}
         </span>
       </div>
 
       {isLoading && attendees.length === 0 ? (
         <div className="flex justify-center py-8">
-          <div className="w-6 h-6 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
         </div>
       ) : attendees.length === 0 ? (
         <p className="text-text-tertiary text-center py-8">
@@ -56,7 +56,7 @@ export default function AttendeeList({ eventId }: { eventId: string }) {
               </div>
               <div className="flex items-center gap-2">
                 {a.hcsMessageId && (
-                  <span className="text-xs text-accent-primary" title="Recorded on-chain">
+                  <span className="text-xs text-brand" title="Recorded on-chain">
                     HCS #{a.hcsMessageId}
                   </span>
                 )}

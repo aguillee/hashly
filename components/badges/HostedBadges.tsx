@@ -142,7 +142,7 @@ export function HostedBadges() {
   if (loading) {
     return (
       <div className="p-8 rounded-lg bg-bg-card border border-border text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-primary mx-auto mb-2" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand mx-auto mb-2" />
         <p className="text-text-secondary">Loading hosted events...</p>
       </div>
     );
@@ -215,7 +215,7 @@ export function HostedBadges() {
               href={`/profile/badges/${badge.id}`}
               className="block"
             >
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-bg-card border border-border hover:border-text-tertiary transition-colors duration-150 group">
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-bg-card border border-border hover:border-text-tertiary transition-colors duration-150 group">
                 <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
                   {badge.imageTopicId ? (
                     <Image
@@ -240,13 +240,13 @@ export function HostedBadges() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Award className="h-7 w-7 text-accent-primary" />
+                      <Award className="h-7 w-7 text-brand" />
                     </div>
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-text-primary truncate group-hover:text-accent-primary transition-colors">
+                  <p className="font-medium text-text-primary truncate group-hover:text-brand transition-colors">
                     {badge.name}
                   </p>
                   <p className="text-sm text-text-secondary truncate">
@@ -270,7 +270,7 @@ export function HostedBadges() {
 
                 <div className="flex items-center gap-3">
                   {getStatusBadge(badge.status)}
-                  <ChevronRight className="h-5 w-5 text-text-secondary group-hover:text-accent-primary transition-colors" />
+                  <ChevronRight className="h-5 w-5 text-text-secondary group-hover:text-brand transition-colors" />
                 </div>
               </div>
             </Link>

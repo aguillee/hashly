@@ -117,7 +117,7 @@ export function CalendarView({ events }: CalendarViewProps) {
     if (event.isForeverMint) return "bg-purple-500";
     if (event.event_type === "ECOSYSTEM_MEETUP") return "bg-sky-500";
     if (event.event_type === "HACKATHON") return "bg-amber-500";
-    return "bg-accent-primary";
+    return "bg-brand";
   };
 
   const getEventTypeLabel = (event: Event) => {
@@ -139,7 +139,7 @@ export function CalendarView({ events }: CalendarViewProps) {
 
   return (
     <div className="relative">
-      <div className="bg-bg-card rounded-xl border border-border overflow-hidden">
+      <div className="bg-bg-card rounded-lg border border-border overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-2.5 sm:p-4 border-b border-border">
           <h2 className="text-base sm:text-xl font-bold">
@@ -175,7 +175,7 @@ export function CalendarView({ events }: CalendarViewProps) {
 
         {/* Legend */}
         <div className="flex items-center gap-3 px-3 sm:px-4 py-1.5 sm:py-2 border-b border-border text-[10px] sm:text-xs text-text-secondary">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent-primary" /> Mint Event</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-brand" /> Mint Event</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500" /> Forever Mint</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500" /> Meetup</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Hackathon</span>
@@ -216,8 +216,8 @@ export function CalendarView({ events }: CalendarViewProps) {
                   "min-h-[60px] sm:min-h-[100px] p-1 sm:p-2 border-b border-r border-border transition-colors",
                   index % 7 === 6 && "border-r-0",
                   !isCurrentMonth && "bg-bg-secondary/50",
-                  isCurrentDay && "bg-accent-primary/5",
-                  isSelected && "bg-accent-primary/10 ring-1 ring-accent-primary/40",
+                  isCurrentDay && "bg-brand-subtle",
+                  isSelected && "bg-brand-subtle ring-1 ring-brand/20",
                   dayEvents.length > 0 && "cursor-pointer hover:bg-bg-secondary/30"
                 )}
               >
@@ -226,7 +226,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     "text-[10px] sm:text-sm font-medium mb-0.5 sm:mb-1",
                     !isCurrentMonth && "text-text-secondary/50",
                     isCurrentDay &&
-                      "w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-accent-primary text-white flex items-center justify-center text-[10px] sm:text-sm"
+                      "w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-brand text-white flex items-center justify-center text-[10px] sm:text-sm"
                   )}
                 >
                   {format(day, "d")}
@@ -266,7 +266,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                       </div>
                     ))}
                     {dayEvents.length > 3 && (
-                      <span className="text-[11px] text-text-secondary hover:text-accent-primary transition-colors">
+                      <span className="text-[11px] text-text-secondary hover:text-brand transition-colors">
                         +{dayEvents.length - 3} more
                       </span>
                     )}
@@ -316,7 +316,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     key={event.id}
                     href={`/events/${event.id}`}
                     className={cn(
-                      "block p-3 rounded-xl border border-border/50 hover:border-accent-primary/30 hover:bg-bg-secondary/30 transition-all group"
+                      "block p-3 rounded-lg border border-border hover:border-text-tertiary hover:bg-bg-secondary/30 transition-all group"
                     )}
                   >
                     <div className="flex gap-3">
@@ -345,7 +345,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                             {getEventTypeLabel(event)}
                           </span>
                         </div>
-                        <h4 className="font-semibold text-sm text-text-primary truncate group-hover:text-accent-primary transition-colors">
+                        <h4 className="font-semibold text-sm text-text-primary truncate group-hover:text-brand transition-colors">
                           {event.title}
                         </h4>
 

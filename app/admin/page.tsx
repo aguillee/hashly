@@ -705,8 +705,8 @@ export default function AdminPage() {
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 rounded-md bg-accent-primary/10">
-          <Shield className="h-8 w-8 text-accent-primary" />
+        <div className="p-3 rounded-md bg-brand-subtle">
+          <Shield className="h-8 w-8 text-brand" />
         </div>
         <div>
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
@@ -734,8 +734,8 @@ export default function AdminPage() {
           <Card hover>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-accent-primary/10">
-                  <Calendar className="h-6 w-6 text-accent-primary" />
+                <div className="p-3 rounded-lg bg-brand-subtle">
+                  <Calendar className="h-6 w-6 text-brand" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">All Events</p>
@@ -1275,7 +1275,7 @@ export default function AdminPage() {
                               href={event.websiteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 hover:text-accent-primary"
+                              className="flex items-center gap-1 hover:text-brand"
                             >
                               <ExternalLink className="h-3 w-3" />
                               Website
@@ -1286,7 +1286,7 @@ export default function AdminPage() {
                               href={event.twitterUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 hover:text-accent-primary"
+                              className="flex items-center gap-1 hover:text-brand"
                             >
                               <ExternalLink className="h-3 w-3" />
                               Twitter

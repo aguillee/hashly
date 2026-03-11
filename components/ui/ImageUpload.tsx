@@ -128,22 +128,22 @@ export function ImageUpload({ value, onChange, className, recommendedSize, maxSi
           className={cn(
             "flex flex-col items-center justify-center w-full h-48 rounded-lg border-2 border-dashed cursor-pointer transition-colors",
             dragActive
-              ? "border-accent-primary bg-accent-primary/10"
-              : "border-border hover:border-accent-primary/50 hover:bg-bg-secondary",
+              ? "border-brand bg-brand-subtle"
+              : "border-border hover:border-text-tertiary hover:bg-bg-secondary",
             uploading && "pointer-events-none opacity-60"
           )}
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="h-8 w-8 text-accent-primary animate-spin" />
+              <Loader2 className="h-8 w-8 text-brand animate-spin" />
               <span className="text-sm text-text-secondary">Subiendo...</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 p-4 text-center">
               {dragActive ? (
                 <>
-                  <ImageIcon className="h-8 w-8 text-accent-primary" />
-                  <span className="text-sm text-accent-primary">Suelta la imagen aquí</span>
+                  <ImageIcon className="h-8 w-8 text-brand" />
+                  <span className="text-sm text-brand">Suelta la imagen aquí</span>
                 </>
               ) : (
                 <>

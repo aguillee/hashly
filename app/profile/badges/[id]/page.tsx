@@ -819,7 +819,7 @@ export default function BadgeDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
@@ -862,7 +862,7 @@ export default function BadgeDetailPage() {
 
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           {/* Badge Image */}
-          <div className="relative w-32 h-32 rounded-xl overflow-hidden bg-bg-secondary flex-shrink-0 border border-border">
+          <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0 border border-border">
             {imagePreview ? (
               <Image
                 src={imagePreview}
@@ -872,7 +872,7 @@ export default function BadgeDetailPage() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <Award className="h-12 w-12 text-accent-primary" />
+                <Award className="h-12 w-12 text-brand" />
               </div>
             )}
           </div>
@@ -924,14 +924,14 @@ export default function BadgeDetailPage() {
                 <code className="text-xs bg-bg-secondary px-2 py-1 rounded">
                   {badge.tokenId}
                 </code>
-                <button onClick={copyTokenId} className="text-accent-primary hover:text-accent-secondary">
+                <button onClick={copyTokenId} className="text-brand hover:text-brand">
                   <Copy className="h-3 w-3" />
                 </button>
                 <a
                   href={`https://hashscan.io/${HASHSCAN_NETWORK}/token/${badge.tokenId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent-primary hover:text-accent-secondary"
+                  className="text-brand hover:text-brand"
                 >
                   <ExternalLink className="h-3 w-3" />
                 </a>
@@ -955,7 +955,7 @@ export default function BadgeDetailPage() {
                       isDone
                         ? "bg-success text-white"
                         : isActive
-                        ? "bg-accent-primary text-white ring-4 ring-accent-primary/20"
+                        ? "bg-brand text-white ring-4 ring-brand/20"
                         : isExpiredStep
                         ? "bg-error text-white"
                         : "bg-bg-secondary border-2 border-border text-text-secondary"
@@ -964,7 +964,7 @@ export default function BadgeDetailPage() {
                     {isDone ? <Check className="h-5 w-5" /> : step}
                   </div>
                   <span className={`text-xs font-semibold ${
-                    isActive ? "text-accent-primary" : isDone ? "text-success" : isExpiredStep ? "text-error" : "text-text-secondary"
+                    isActive ? "text-brand" : isDone ? "text-success" : isExpiredStep ? "text-error" : "text-text-secondary"
                   }`}>
                     {label}
                   </span>
@@ -1060,7 +1060,7 @@ export default function BadgeDetailPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="This will be set as the token memo on Hedera"
-                  className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+                  className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                 />
                 <p className="text-xs text-text-secondary mt-1">
                   Stored as the token memo on Hedera (visible on-chain)
@@ -1099,7 +1099,7 @@ export default function BadgeDetailPage() {
                   accept="image/*"
                   onChange={handleImageChange}
                   disabled={poller.isPolling}
-                  className="w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-primary file:text-white file:cursor-pointer disabled:opacity-50"
+                  className="w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand file:text-white file:cursor-pointer disabled:opacity-50"
                 />
                 {badge.imageTopicId && !imageFile && !poller.isPolling && (
                   <p className="text-xs text-text-secondary mt-1">
@@ -1143,8 +1143,8 @@ export default function BadgeDetailPage() {
                               disabled={isCompressing}
                               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                                 compressionTarget === kb
-                                  ? "bg-accent-primary text-white border-accent-primary"
-                                  : "bg-bg-primary border-border text-text-secondary hover:border-accent-primary hover:text-accent-primary"
+                                  ? "bg-brand text-white border-brand"
+                                  : "bg-bg-primary border-border text-text-secondary hover:border-text-tertiary hover:text-brand"
                               }`}
                             >
                               {isCompressing ? "..." : `${kb} KB (~${((kb * 0.16) + 0.5).toFixed(2)} ℏ)`}
@@ -1155,8 +1155,8 @@ export default function BadgeDetailPage() {
                             disabled={isCompressing}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                               compressionTarget === null
-                                ? "bg-accent-primary text-white border-accent-primary"
-                                : "bg-bg-primary border-border text-text-secondary hover:border-accent-primary hover:text-accent-primary"
+                                ? "bg-brand text-white border-brand"
+                                : "bg-bg-primary border-border text-text-secondary hover:border-text-tertiary hover:text-brand"
                             }`}
                           >
                             Original
@@ -1175,8 +1175,8 @@ export default function BadgeDetailPage() {
 
               {/* Signing progress (wallet interaction) */}
               {inscriptionProgress && (
-                <div className="p-3 bg-accent-primary/10 border border-accent-primary/30 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm text-accent-primary">
+                <div className="p-3 bg-brand-subtle border border-brand/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-brand">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>{inscriptionProgress}</span>
                   </div>
@@ -1185,9 +1185,9 @@ export default function BadgeDetailPage() {
 
               {/* Inscription progress bar (polling) */}
               {poller.isPolling && (
-                <div className="p-4 bg-accent-primary/10 border border-accent-primary/30 rounded-lg space-y-3">
+                <div className="p-4 bg-brand-subtle border border-brand/20 rounded-lg space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2 text-accent-primary">
+                    <div className="flex items-center gap-2 text-brand">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span className="font-medium">
                         {poller.phase === "image"
@@ -1195,7 +1195,7 @@ export default function BadgeDetailPage() {
                           : `Step 2/2 — Inscribing metadata on Hedera...`}
                       </span>
                     </div>
-                    <span className="text-accent-primary font-bold">
+                    <span className="text-brand font-bold">
                       {poller.maxMessages > 0 && poller.messages > 0
                         ? `${Math.round(poller.progress * 100)}%`
                         : ""}
@@ -1206,13 +1206,13 @@ export default function BadgeDetailPage() {
                   {poller.maxMessages > 0 && poller.messages > 0 ? (
                     <div className="w-full h-2.5 bg-bg-secondary rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-accent-primary rounded-full transition-all duration-700 ease-out"
+                        className="h-full bg-brand rounded-full transition-all duration-700 ease-out"
                         style={{ width: `${Math.max(poller.progress * 100, 3)}%` }}
                       />
                     </div>
                   ) : (
                     <div className="w-full h-2.5 bg-bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full w-1/3 bg-accent-primary/60 rounded-full animate-pulse" />
+                      <div className="h-full w-1/3 bg-brand/60 rounded-full animate-pulse" />
                     </div>
                   )}
 
@@ -1313,7 +1313,7 @@ export default function BadgeDetailPage() {
                       onClick={() => setWalletMode("manual")}
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
                         walletMode === "manual"
-                          ? "bg-accent-primary text-white"
+                          ? "bg-brand text-white"
                           : "bg-bg-secondary text-text-secondary hover:text-text-primary"
                       }`}
                     >
@@ -1324,7 +1324,7 @@ export default function BadgeDetailPage() {
                       onClick={() => setWalletMode("qr")}
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
                         walletMode === "qr"
-                          ? "bg-accent-primary text-white"
+                          ? "bg-brand text-white"
                           : "bg-bg-secondary text-text-secondary hover:text-text-primary"
                       }`}
                     >
@@ -1349,7 +1349,7 @@ export default function BadgeDetailPage() {
                           onChange={(e) => setWalletList(e.target.value)}
                           rows={4}
                           placeholder={"0.0.123456\n0.0.789012\n0.0.345678"}
-                          className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+                          className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                         />
                         <p className="text-xs text-text-secondary mt-1">
                           One per line or comma-separated
@@ -1396,7 +1396,7 @@ export default function BadgeDetailPage() {
                       </Button>
 
                       {/* Attendee list */}
-                      <div className="rounded-xl border border-border bg-bg-secondary/30 p-4">
+                      <div className="rounded-lg border border-border bg-bg-secondary/30 p-4">
                         <AttendeeList eventId={badge.eventId} />
                       </div>
                     </div>
@@ -1538,7 +1538,7 @@ export default function BadgeDetailPage() {
                         key={n}
                         className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                           n <= badge.airdropAttempts
-                            ? "bg-accent-primary text-white"
+                            ? "bg-brand text-white"
                             : "bg-bg-primary border border-border text-text-secondary"
                         }`}
                       >
@@ -1556,7 +1556,7 @@ export default function BadgeDetailPage() {
                   <p className="text-xs text-text-secondary">Sent</p>
                 </div>
                 <div className="p-3 rounded-lg bg-bg-secondary border border-border text-center">
-                  <p className="text-lg font-bold text-accent-primary">{associationsChecked ? associatedCount : "?"}</p>
+                  <p className="text-lg font-bold text-brand">{associationsChecked ? associatedCount : "?"}</p>
                   <p className="text-xs text-text-secondary">Associated</p>
                 </div>
                 <div className="p-3 rounded-lg bg-bg-secondary border border-border text-center">

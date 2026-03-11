@@ -1,26 +1,25 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Sora } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import "./globals.css";
-import { ClientProviders } from "@/components/wallet/ClientProviders";
-import { VoteLimitProvider } from "@/contexts/VoteLimitContext";
 
 const sora = Sora({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-sora",
 });
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import "./globals.css";
+import { ClientProviders } from "@/components/wallet/ClientProviders";
+import { VoteLimitProvider } from "@/contexts/VoteLimitContext";
 
-// Dynamic imports for client components that use browser APIs
-const Navbar = dynamic(
-  () => import("@/components/layout/Navbar").then((mod) => mod.Navbar),
+const Sidebar = dynamic(
+  () => import("@/components/layout/Sidebar").then((mod) => mod.Sidebar),
   { ssr: false }
 );
 
-const Footer = dynamic(
-  () => import("@/components/layout/Footer").then((mod) => mod.Footer),
+const MobileHeader = dynamic(
+  () => import("@/components/layout/MobileHeader").then((mod) => mod.MobileHeader),
   { ssr: false }
 );
 
@@ -34,15 +33,9 @@ const ParticleBackground = dynamic(
   { ssr: false }
 );
 
-const GlowOrbs = dynamic(
-  () => import("@/components/effects/GlowOrbs").then((mod) => mod.GlowOrbs),
-  { ssr: false }
-);
-
 export const metadata: Metadata = {
   title: "Hashly - Discover Hedera",
-  description:
-    "Discover NFT mints, meetups, hackathons, and everything happening on Hedera. Vote, explore, and never miss an event.",
+  description: "Discover NFT mints, meetups, hackathons, and everything happening on Hedera. Vote, explore, and never miss an event.",
   keywords: ["hedera", "nft", "mint", "calendar", "crypto", "hashgraph", "hashly", "meetups", "hackathons", "events"],
   icons: {
     icon: "/favicon.ico",
@@ -50,23 +43,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sora.variable} dark`}>
-      <body className={`${sora.className} min-h-screen bg-background antialiased flex flex-col relative`}>
-        {/* Animated background effects */}
-        <GlowOrbs />
-        <ParticleBackground />
-
+      <body className="font-sans bg-background text-text-primary antialiased">
         <ClientProviders>
           <VoteLimitProvider>
-            <Navbar />
-            <main className="pt-16 flex-1 relative z-10 overflow-x-hidden">{children}</main>
-            <Footer />
+            <ParticleBackground />
+            <div className="flex h-screen relative z-[1]">
+              <Sidebar />
+              <main className="flex-1 overflow-y-auto overflow-x-hidden">
+                <MobileHeader />
+                {children}
+              </main>
+            </div>
             <Toaster />
           </VoteLimitProvider>
         </ClientProviders>

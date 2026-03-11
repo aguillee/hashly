@@ -43,7 +43,7 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-left text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+        className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-left text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
       >
         {selected ? (
           <span>
@@ -67,7 +67,7 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search countries..."
                 autoFocus
-                className="w-full pl-8 pr-3 py-1.5 rounded-md bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-1 focus:ring-accent-primary/50"
+                className="w-full pl-8 pr-3 py-1.5 rounded-md bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
               />
             </div>
           </div>
@@ -90,7 +90,7 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
                   }}
                   className={`w-full px-4 py-2 text-left text-sm hover:bg-bg-secondary transition-colors flex items-center gap-2 ${
                     value === country.code
-                      ? "bg-accent-primary/10 text-accent-primary"
+                      ? "bg-brand-subtle text-brand"
                       : "text-text-primary"
                   }`}
                 >

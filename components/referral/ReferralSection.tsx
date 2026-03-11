@@ -102,7 +102,7 @@ export function ReferralSection() {
     return (
       <div className="bg-bg-card border border-border rounded-lg p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Users className="h-5 w-5 text-accent-primary" />
+          <Users className="h-5 w-5 text-brand" />
           <h3 className="font-semibold text-text-primary">Referrals</h3>
         </div>
         <div className="flex items-center justify-center py-6">
@@ -119,7 +119,7 @@ export function ReferralSection() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-accent-primary" />
+          <Users className="h-5 w-5 text-brand" />
           <h3 className="font-semibold text-text-primary">Referrals</h3>
         </div>
         <div className="flex items-center gap-1.5 text-sm">
@@ -137,7 +137,7 @@ export function ReferralSection() {
           Your Referral Code
         </p>
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-bg-secondary rounded-md px-3 py-2.5 text-lg tracking-widest text-accent-primary text-center select-all">
+          <div className="flex-1 bg-bg-secondary rounded-md px-3 py-2.5 text-lg tracking-widest text-brand text-center select-all">
             {data.referralCode || "—"}
           </div>
           <button
@@ -186,7 +186,7 @@ export function ReferralSection() {
                 setCodeInput(e.target.value.toUpperCase().slice(0, 8))
               }
               placeholder="ENTER CODE"
-              className="flex-1 bg-bg-secondary border border-border rounded-md px-3 py-2 text-sm tracking-wider text-text-primary placeholder:text-text-secondary/40 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+              className="flex-1 bg-bg-secondary border border-border rounded-md px-3 py-2 text-sm tracking-wider text-text-primary placeholder:text-text-secondary/40 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
               maxLength={8}
               disabled={applying}
             />
@@ -196,7 +196,7 @@ export function ReferralSection() {
               className={cn(
                 "px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
                 codeInput.length === 8
-                  ? "bg-accent-primary text-white hover:bg-accent-primary/90"
+                  ? "bg-brand text-white hover:bg-brand/90"
                   : "bg-bg-secondary text-text-secondary cursor-not-allowed"
               )}
             >
@@ -245,8 +245,8 @@ export function ReferralSection() {
                 className="flex items-center justify-between bg-bg-secondary rounded-md px-3 py-2 text-sm"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-full bg-accent-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Users className="h-3 w-3 text-accent-primary" />
+                  <div className="w-6 h-6 rounded-full bg-brand-subtle flex items-center justify-center flex-shrink-0">
+                    <Users className="h-3 w-3 text-brand" />
                   </div>
                   <span className="font-medium text-text-primary truncate">
                     {referee.alias || formatWallet(referee.walletAddress)}

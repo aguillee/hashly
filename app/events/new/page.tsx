@@ -283,19 +283,19 @@ export default function NewEventPage() {
   if (!isConnected) return null;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-6"
+        className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-4"
       >
         <ArrowLeft className="h-4 w-4" />
         Back
       </Link>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-accent-primary" />
+            <Calendar className="h-5 w-5 text-brand" />
             Submit New Event
           </CardTitle>
           {!user?.isAdmin && (
@@ -306,7 +306,7 @@ export default function NewEventPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="p-3 rounded-lg bg-error/10 border border-error/30 text-error text-sm">
                 {error}
@@ -323,8 +323,8 @@ export default function NewEventPage() {
                   className={cn(
                     "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
                     eventType === "MINT_EVENT"
-                      ? "bg-accent-primary text-white"
-                      : "bg-bg-card text-text-secondary hover:text-text-primary"
+                      ? "bg-bg-secondary text-text-primary border-b-2 border-brand"
+                      : "bg-bg-card text-text-tertiary hover:text-text-secondary"
                   )}
                 >
                   <Hexagon className="h-4 w-4" />
@@ -336,8 +336,8 @@ export default function NewEventPage() {
                   className={cn(
                     "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
                     eventType === "ECOSYSTEM_MEETUP"
-                      ? "bg-accent-primary text-white"
-                      : "bg-bg-card text-text-secondary hover:text-text-primary"
+                      ? "bg-bg-secondary text-text-primary border-b-2 border-brand"
+                      : "bg-bg-card text-text-tertiary hover:text-text-secondary"
                   )}
                 >
                   <Users className="h-4 w-4" />
@@ -349,8 +349,8 @@ export default function NewEventPage() {
                   className={cn(
                     "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
                     eventType === "HACKATHON"
-                      ? "bg-accent-primary text-white"
-                      : "bg-bg-card text-text-secondary hover:text-text-primary"
+                      ? "bg-bg-secondary text-text-primary border-b-2 border-brand"
+                      : "bg-bg-card text-text-tertiary hover:text-text-secondary"
                   )}
                 >
                   <Code2 className="h-4 w-4" />
@@ -359,40 +359,36 @@ export default function NewEventPage() {
               </div>
             </div>
 
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {eventType === "MINT_EVENT" ? "Project Name" : eventType === "HACKATHON" ? "Hackathon Name" : "Event Title"} <span className="text-error">*</span>
-              </label>
-              <Input
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder={eventType === "MINT_EVENT" ? "e.g., Hedera Punks" : eventType === "HACKATHON" ? "e.g., Hedera DeFi Hackathon" : "e.g., Hedera Community Call"}
-                required
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Description <span className="text-error">*</span>
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder={eventType === "MINT_EVENT" ? "Tell us about this project..." : eventType === "HACKATHON" ? "Describe this hackathon..." : "Describe this meetup or event..."}
-                required
-                rows={4}
-                className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
-              />
-            </div>
-
-            {/* ============ MEETUP / HACKATHON FIELDS ============ */}
-            {(eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") && (
-              <>
-                {/* Host / Organizer */}
+            {/* Title + Description side by side on desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  {eventType === "MINT_EVENT" ? "Project Name" : eventType === "HACKATHON" ? "Hackathon Name" : "Event Title"} <span className="text-error">*</span>
+                </label>
+                <Input
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder={eventType === "MINT_EVENT" ? "e.g., Hedera Punks" : eventType === "HACKATHON" ? "e.g., Hedera DeFi Hackathon" : "e.g., Hedera Community Call"}
+                  required
+                />
+              </div>
+              {eventType === "MINT_EVENT" && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Total Supply <span className="text-error">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    name="supply"
+                    value={formData.supply}
+                    onChange={handleChange}
+                    placeholder="e.g., 10000"
+                    required
+                  />
+                </div>
+              )}
+              {(eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") && (
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     {eventType === "HACKATHON" ? "Organizer" : "Host"} <span className="text-error">*</span>
@@ -405,50 +401,78 @@ export default function NewEventPage() {
                     required
                   />
                 </div>
+              )}
+            </div>
 
-                {/* Prizes (Hackathon only) */}
-                {eventType === "HACKATHON" && (
+            {/* Description + Cover Image side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Description <span className="text-error">*</span>
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder={eventType === "MINT_EVENT" ? "Tell us about this project..." : eventType === "HACKATHON" ? "Describe this hackathon..." : "Describe this meetup or event..."}
+                  required
+                  rows={5}
+                  className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 resize-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Cover Image <span className="text-error">*</span>
+                </label>
+                <ImageUpload
+                  value={formData.imageUrl}
+                  onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+                  recommendedSize="1200x630"
+                />
+              </div>
+            </div>
+
+            {/* ============ MEETUP / HACKATHON FIELDS ============ */}
+            {(eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") && (
+              <>
+                {/* Prizes + Entry Fee + Language row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {eventType === "HACKATHON" && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-yellow-500" />
+                        Prizes
+                      </label>
+                      <Input
+                        name="prizes"
+                        value={formData.prizes}
+                        onChange={handleChange}
+                        placeholder="e.g., $50,000 in HBAR"
+                      />
+                    </div>
+                  )}
                   <div>
-                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-yellow-500" />
-                      Prizes
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Entry Fee</label>
                     <Input
-                      name="prizes"
-                      value={formData.prizes}
+                      name="entryFee"
+                      value={formData.entryFee}
                       onChange={handleChange}
-                      placeholder="e.g., $50,000 in HBAR + ecosystem grants"
+                      placeholder="Leave empty if free"
                     />
                   </div>
-                )}
-
-                {/* Entry Fee */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Entry Fee
-                  </label>
-                  <Input
-                    name="entryFee"
-                    value={formData.entryFee}
-                    onChange={handleChange}
-                    placeholder="e.g., $20, 100 HBAR, or leave empty for Free"
-                  />
-                  <p className="text-xs text-text-secondary mt-1">Leave empty if the event is free</p>
-                </div>
-
-                {/* Language */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Language</label>
-                  <select
-                    name="language"
-                    value={formData.language}
-                    onChange={handleChange}
-                    className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
-                  >
-                    {LANGUAGES.map(lang => (
-                      <option key={lang.value} value={lang.value}>{lang.label}</option>
-                    ))}
-                  </select>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Language</label>
+                    <select
+                      name="language"
+                      value={formData.language}
+                      onChange={handleChange}
+                      className="w-full rounded-md border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+                    >
+                      {LANGUAGES.map(lang => (
+                        <option key={lang.value} value={lang.value}>{lang.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {/* Location Type */}
@@ -461,7 +485,7 @@ export default function NewEventPage() {
                       className={cn(
                         "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                         formData.locationType === "online"
-                          ? "bg-accent-primary text-white"
+                          ? "bg-brand text-white"
                           : "bg-bg-card text-text-secondary hover:text-text-primary"
                       )}
                     >
@@ -474,7 +498,7 @@ export default function NewEventPage() {
                       className={cn(
                         "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                         formData.locationType === "in_person"
-                          ? "bg-accent-primary text-white"
+                          ? "bg-brand text-white"
                           : "bg-bg-card text-text-secondary hover:text-text-primary"
                       )}
                     >
@@ -500,57 +524,23 @@ export default function NewEventPage() {
                   </div>
                 )}
 
-                {/* Date & Time */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* All dates in one row */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Date <span className="text-error">*</span>
-                    </label>
-                    <Input
-                      type="date"
-                      name="mintDate"
-                      value={formData.mintDate}
-                      onChange={handleChange}
-                      required
-                    />
+                    <label className="block text-sm font-medium mb-2">Start Date <span className="text-error">*</span></label>
+                    <Input type="date" name="mintDate" value={formData.mintDate} onChange={handleChange} required />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Start Time (UTC) <span className="text-error">*</span>
-                    </label>
-                    <Input
-                      type="time"
-                      name="mintTime"
-                      value={formData.mintTime}
-                      onChange={handleChange}
-                      required
-                    />
+                    <label className="block text-sm font-medium mb-2">Start Time (UTC) <span className="text-error">*</span></label>
+                    <Input type="time" name="mintTime" value={formData.mintTime} onChange={handleChange} required />
                   </div>
-                </div>
-
-                {/* End Date & Time */}
-                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">
-                      End Date <span className="text-error">*</span>
-                    </label>
-                    <Input
-                      type="date"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleChange}
-                      required
-                    />
+                    <label className="block text-sm font-medium mb-2">End Date <span className="text-error">*</span></label>
+                    <Input type="date" name="endDate" value={formData.endDate} onChange={handleChange} required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">End Time (UTC) <span className="text-error">*</span></label>
-                    <Input
-                      type="time"
-                      name="endTime"
-                      value={formData.endTime}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Input type="time" name="endTime" value={formData.endTime} onChange={handleChange} required />
                   </div>
                 </div>
 
@@ -558,7 +548,7 @@ export default function NewEventPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium flex items-center gap-2">
-                      <LinkIcon className="h-4 w-4 text-accent-primary" />
+                      <LinkIcon className="h-4 w-4 text-brand" />
                       Links <span className="text-error">*</span>
                     </label>
                     <Button type="button" variant="outline" size="sm" onClick={addLink} className="gap-1">
@@ -600,26 +590,11 @@ export default function NewEventPage() {
             {/* ============ MINT EVENT FIELDS ============ */}
             {eventType === "MINT_EVENT" && (
               <>
-                {/* Total Supply */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Total Supply <span className="text-error">*</span>
-                  </label>
-                  <Input
-                    type="number"
-                    name="supply"
-                    value={formData.supply}
-                    onChange={handleChange}
-                    placeholder="e.g., 10000"
-                    required
-                  />
-                </div>
-
                 {/* Mint Phases */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-accent-primary" />
+                      <Clock className="h-4 w-4 text-brand" />
                       Mint Phases
                     </label>
                     <Button type="button" variant="outline" size="sm" onClick={addPhase} className="gap-1">
@@ -630,7 +605,7 @@ export default function NewEventPage() {
                     {phases.map((phase, index) => (
                       <div key={phase.id} className="p-4 rounded-md border border-border bg-bg-card space-y-4">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-accent-primary">Phase {index + 1}</span>
+                          <span className="text-sm font-medium text-brand">Phase {index + 1}</span>
                           {phases.length > 1 && (
                             <button type="button" onClick={() => removePhase(phase.id)} className="p-1 text-text-secondary hover:text-error transition-colors">
                               <Trash2 className="h-4 w-4" />
@@ -668,10 +643,10 @@ export default function NewEventPage() {
                               <Input type="number" value={phase.price} onChange={(e) => handlePhaseChange(phase.id, "price", e.target.value)} placeholder="100" required />
                             </div>
                             <div className="flex rounded-md border border-border overflow-hidden">
-                              <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "HBAR")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "HBAR" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
+                              <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "HBAR")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "HBAR" ? "bg-brand text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
                                 <HbarIcon className="h-3 w-3" />HBAR
                               </button>
-                              <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "USDC")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "USDC" ? "bg-accent-primary text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
+                              <button type="button" onClick={() => handlePhaseChange(phase.id, "currency", "USDC")} className={cn("flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors", phase.currency === "USDC" ? "bg-brand text-white" : "bg-bg-secondary text-text-secondary hover:text-text-primary")}>
                                 <UsdcIcon className="h-3 w-3" />USDC
                               </button>
                             </div>
@@ -682,7 +657,7 @@ export default function NewEventPage() {
                           <Input type="number" value={phase.maxPerWallet} onChange={(e) => handlePhaseChange(phase.id, "maxPerWallet", e.target.value)} placeholder="5" />
                         </div>
                         <div className="flex items-center gap-3">
-                          <button type="button" onClick={() => handlePhaseChange(phase.id, "isWhitelist", !phase.isWhitelist)} className={cn("relative w-11 h-6 rounded-full transition-colors", phase.isWhitelist ? "bg-accent-primary" : "bg-gray-600")}>
+                          <button type="button" onClick={() => handlePhaseChange(phase.id, "isWhitelist", !phase.isWhitelist)} className={cn("relative w-11 h-6 rounded-full transition-colors", phase.isWhitelist ? "bg-brand" : "bg-gray-600")}>
                             <span className={cn("absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform", phase.isWhitelist ? "translate-x-5" : "translate-x-0")} />
                           </button>
                           <span className="text-sm text-text-secondary">Whitelist Only</span>
@@ -693,28 +668,18 @@ export default function NewEventPage() {
               </>
             )}
 
-            {/* Cover Image */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Cover Image <span className="text-error">*</span>
-              </label>
-              <ImageUpload
-                value={formData.imageUrl}
-                onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
-                recommendedSize="1200×630"
-              />
-            </div>
-
             {/* Social Links (for both types but meetup also has custom links above) */}
             {eventType === "MINT_EVENT" && (
-              <div className="space-y-4">
-                <label className="block text-sm font-medium">
+              <div>
+                <label className="block text-sm font-medium mb-2">
                   <LinkIcon className="h-4 w-4 inline mr-1" />
                   Social Links
                 </label>
-                <Input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} placeholder="Website URL" />
-                <Input name="twitterUrl" value={formData.twitterUrl} onChange={handleChange} placeholder="Twitter/X URL" />
-                <Input name="discordUrl" value={formData.discordUrl} onChange={handleChange} placeholder="Discord URL" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <Input name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} placeholder="Website URL" />
+                  <Input name="twitterUrl" value={formData.twitterUrl} onChange={handleChange} placeholder="Twitter/X URL" />
+                  <Input name="discordUrl" value={formData.discordUrl} onChange={handleChange} placeholder="Discord URL" />
+                </div>
               </div>
             )}
 

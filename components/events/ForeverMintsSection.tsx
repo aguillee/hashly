@@ -39,7 +39,7 @@ export function ForeverMintsSection() {
     return (
       <section className="py-12">
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-brand" />
         </div>
       </section>
     );
@@ -86,7 +86,7 @@ function ForeverMintCard({ mint }: { mint: ForeverMint }) {
 
   return (
     <div className="group relative">
-      <Card className="relative overflow-hidden rounded-xl border-border bg-bg-card">
+      <Card className="relative overflow-hidden rounded-lg border-border bg-bg-card">
         {/* Image */}
         <Link href={`/events/${mint.id}`}>
           <div className="relative h-36 sm:h-44 bg-bg-secondary overflow-hidden">

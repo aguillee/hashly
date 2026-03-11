@@ -13,9 +13,11 @@ import {
   ChevronRight,
   Eye,
   MousePointerClick,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/store";
+import { useReveal } from "@/hooks/useReveal";
 
 interface NewsItem {
   id: string;
@@ -48,6 +50,9 @@ export default function NewsPage() {
   // Admin stats
   const [stats, setStats] = React.useState<NewsStats>({});
   const [totals, setTotals] = React.useState({ views: 0, clicks: 0 });
+
+  const headerRef = useReveal();
+  const contentRef = useReveal();
 
   const fetchNews = React.useCallback(async (isRefresh = false) => {
     try {
@@ -93,7 +98,7 @@ export default function NewsPage() {
   React.useEffect(() => {
     if (isAdmin) {
       fetchStats();
-      const interval = setInterval(fetchStats, 60000); // refresh stats every minute
+      const interval = setInterval(fetchStats, 60000);
       return () => clearInterval(interval);
     }
   }, [isAdmin, fetchStats]);
@@ -145,7 +150,6 @@ export default function NewsPage() {
   const filteredNews = React.useMemo(() => {
     let result = [...news];
 
-    // Search filter
     if (search.trim()) {
       const searchLower = search.toLowerCase();
       result = result.filter(
@@ -156,7 +160,6 @@ export default function NewsPage() {
       );
     }
 
-    // Sort
     result.sort((a, b) => {
       const dateA = new Date(a.pubDate).getTime();
       const dateB = new Date(b.pubDate).getTime();
@@ -178,51 +181,48 @@ export default function NewsPage() {
     setCurrentPage(1);
   }, [search, sortBy]);
 
+  // Split first article for hero treatment
+  const heroArticle = paginatedNews[0];
+  const restArticles = paginatedNews.slice(1);
+
   return (
     <div className="min-h-screen">
-      {/* Compact Header */}
-      <div className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Title row */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-bg-card dark:bg-[#1a1a2e] border-2 border-purple-500/50 flex items-center justify-center transform -rotate-3 hover:rotate-0 transition-transform">
-                  <Newspaper className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-bg-primary animate-pulse" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-text-primary">
-                  Hedera News
-                </h1>
-                <p className="text-xs sm:text-sm text-text-secondary">
-                  {filteredNews.length} articles {search && `for "${search}"`}
-                </p>
-              </div>
+      {/* Header */}
+      <div ref={headerRef} className="reveal pt-6 pb-4 sm:pt-8 sm:pb-6">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+            <div className="reveal-delay-1">
+              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+                Hedera Ecosystem
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+                News
+              </h1>
+              <p className="text-sm text-text-secondary mt-1">
+                {filteredNews.length} articles {search && `for "${search}"`}
+              </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 reveal-delay-2">
               {/* Admin totals */}
               {isAdmin && (
                 <div className="flex items-center gap-3 mr-2 text-xs text-text-secondary">
                   <span className="flex items-center gap-1">
                     <Eye className="h-3.5 w-3.5 text-blue-400" />
-                    <span className="font-medium text-blue-400">{totals.views.toLocaleString()}</span>
+                    <span className="font-medium font-mono text-blue-400">{totals.views.toLocaleString()}</span>
                   </span>
                   <span className="flex items-center gap-1">
                     <MousePointerClick className="h-3.5 w-3.5 text-green-400" />
-                    <span className="font-medium text-green-400">{totals.clicks.toLocaleString()}</span>
+                    <span className="font-medium font-mono text-green-400">{totals.clicks.toLocaleString()}</span>
                   </span>
                 </div>
               )}
 
-              {/* Refresh - admin only */}
               {isAdmin && (
                 <button
                   onClick={() => fetchNews(true)}
                   disabled={refreshing}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card dark:bg-bg-secondary border border-border hover:border-purple-500/50 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card border border-border hover:border-brand/30 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
                   {refreshing ? "..." : "Refresh"}
@@ -231,17 +231,16 @@ export default function NewsPage() {
             </div>
           </div>
 
-          {/* Search and filters row */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            {/* Search */}
+          {/* Search and filters */}
+          <div className="flex flex-col sm:flex-row gap-3 reveal-delay-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
               <input
                 type="text"
                 placeholder="Search news..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 text-sm rounded-lg bg-bg-card dark:bg-bg-secondary border border-border focus:outline-none focus:border-purple-500/50 text-text-primary placeholder:text-text-secondary"
+                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-lg bg-bg-card border border-border focus:outline-none focus:border-brand/50 text-text-primary placeholder:text-text-tertiary transition-colors"
               />
               {search && (
                 <button
@@ -253,36 +252,111 @@ export default function NewsPage() {
               )}
             </div>
 
-            {/* Sort */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-secondary hidden sm:block">Sort:</span>
-              <button
-                onClick={() => setSortBy(sortBy === "newest" ? "oldest" : "newest")}
-                className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-bg-card dark:bg-bg-secondary border border-border hover:border-purple-500/50 transition-colors"
-              >
-                <ArrowUpDown className="h-3.5 w-3.5" />
-                {sortBy === "newest" ? "Newest" : "Oldest"}
-              </button>
-            </div>
+            <button
+              onClick={() => setSortBy(sortBy === "newest" ? "oldest" : "newest")}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg bg-bg-card border border-border hover:border-brand/30 transition-colors"
+            >
+              <ArrowUpDown className="h-3.5 w-3.5" />
+              {sortBy === "newest" ? "Newest" : "Oldest"}
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pb-16">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-brand" />
           </div>
         ) : news.length === 0 ? (
-          <div className="text-center py-16">
-            <Newspaper className="h-12 w-12 mx-auto text-text-secondary mb-4" />
+          <div className="text-center py-20">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-bg-card border border-border flex items-center justify-center">
+              <Newspaper className="h-8 w-8 text-text-tertiary" />
+            </div>
             <p className="text-text-secondary">No news available at the moment</p>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-              {paginatedNews.map((item) => (
-                <NewsCard
+          <div ref={contentRef} className="reveal">
+            {/* Hero Article — first article gets magazine treatment */}
+            {heroArticle && (
+              <a
+                href={heroArticle.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackClick(heroArticle.id)}
+                className="group block mb-8 reveal-delay-1"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-0 rounded-xl overflow-hidden border border-border bg-bg-card hover:border-brand/20 transition-colors">
+                  {/* Hero image */}
+                  <div className="relative aspect-[2/1] lg:aspect-auto bg-bg-secondary overflow-hidden">
+                    {heroArticle.image ? (
+                      <img
+                        src={heroArticle.image}
+                        alt={heroArticle.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                      />
+                    ) : (
+                      <div className={cn(
+                        "w-full h-full flex items-center justify-center min-h-[200px]",
+                        heroArticle.isGenfinity
+                          ? "bg-gradient-to-br from-purple-900/80 via-purple-800/60 to-purple-900/80"
+                          : "bg-bg-secondary"
+                      )}>
+                        <Newspaper className="h-16 w-16 text-white/20" />
+                      </div>
+                    )}
+                    {/* Date + Genfinity overlays */}
+                    <div className="absolute top-3 left-3 flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-black/70 rounded-md text-white text-xs backdrop-blur-sm">
+                        <Calendar className="h-3 w-3" />
+                        {formatDate(heroArticle.pubDate)}
+                      </div>
+                      {heroArticle.isGenfinity && (
+                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-[10px] font-medium rounded-md backdrop-blur-sm">
+                          GENFINITY
+                        </span>
+                      )}
+                    </div>
+                    {/* Admin stats */}
+                    {isAdmin && stats[heroArticle.id] && (
+                      <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/80 rounded text-[10px] text-blue-300">
+                          <Eye className="h-2.5 w-2.5" />
+                          {stats[heroArticle.id].views}
+                        </div>
+                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/80 rounded text-[10px] text-green-300">
+                          <MousePointerClick className="h-2.5 w-2.5" />
+                          {stats[heroArticle.id].clicks}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Hero content */}
+                  <div className="p-5 sm:p-6 lg:p-8 flex flex-col justify-center">
+                    {heroArticle.creator && (
+                      <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-text-tertiary mb-3">
+                        {heroArticle.creator}
+                      </p>
+                    )}
+                    <h2 className="text-xl sm:text-2xl lg:text-[28px] font-bold text-text-primary leading-tight mb-3 group-hover:text-brand transition-colors">
+                      {heroArticle.title}
+                    </h2>
+                    <p className="text-sm text-text-secondary line-clamp-3 mb-5 leading-relaxed">
+                      {heroArticle.description}
+                    </p>
+                    <span className="inline-flex items-center gap-2 text-sm text-brand font-medium group-hover:gap-3 transition-all">
+                      Read article <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </a>
+            )}
+
+            {/* Rest of articles — compact row layout */}
+            <div className="space-y-3">
+              {restArticles.map((item, i) => (
+                <NewsRow
                   key={item.id}
                   item={item}
                   formatDate={formatDate}
@@ -290,23 +364,24 @@ export default function NewsPage() {
                   stats={stats[item.id]}
                   onView={trackView}
                   onClick={trackClick}
+                  delay={Math.min(i + 2, 6)}
                 />
               ))}
             </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-1 sm:gap-2">
+              <div className="mt-10 flex items-center justify-center gap-1 sm:gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-md bg-bg-card border border-border hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm rounded-lg bg-bg-card border border-border hover:border-brand/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   <span className="hidden sm:inline">Prev</span>
                 </button>
 
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
                     const showPage =
                       page === 1 ||
@@ -316,7 +391,7 @@ export default function NewsPage() {
                     if (!showPage) {
                       if (page === 2 || page === totalPages - 1) {
                         return (
-                          <span key={page} className="px-1 sm:px-2 text-text-secondary text-xs sm:text-sm">
+                          <span key={page} className="px-2 text-text-tertiary text-sm">
                             ...
                           </span>
                         );
@@ -329,10 +404,10 @@ export default function NewsPage() {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={cn(
-                          "w-8 h-8 sm:w-9 sm:h-9 text-xs sm:text-sm rounded-md border transition-colors",
+                          "w-9 h-9 text-sm rounded-lg border transition-colors font-mono",
                           currentPage === page
-                            ? "bg-purple-500 border-purple-500 text-white"
-                            : "bg-bg-card border-border hover:border-purple-500/50"
+                            ? "bg-brand border-brand text-white"
+                            : "bg-bg-card border-border hover:border-brand/30"
                         )}
                       >
                         {page}
@@ -344,7 +419,7 @@ export default function NewsPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-md bg-bg-card border border-border hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm rounded-lg bg-bg-card border border-border hover:border-brand/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <span className="hidden sm:inline">Next</span>
                   <ChevronRight className="h-4 w-4" />
@@ -352,26 +427,25 @@ export default function NewsPage() {
               </div>
             )}
 
-            {/* Page info */}
             {totalPages > 1 && (
-              <p className="mt-4 text-center text-xs text-text-secondary">
-                Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+              <p className="mt-4 text-center text-xs text-text-tertiary font-mono">
+                {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
                 {Math.min(currentPage * ITEMS_PER_PAGE, filteredNews.length)} of{" "}
-                {filteredNews.length} articles
+                {filteredNews.length}
               </p>
             )}
-          </>
+          </div>
         )}
 
-        {/* Footer credit - minimal */}
-        <div className="mt-10 sm:mt-12 flex justify-center">
+        {/* Footer credit */}
+        <div className="mt-12 flex justify-center">
           <a
             href="https://genfinity.io"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-2 text-xs text-text-secondary/60 hover:text-text-secondary transition-colors"
+            className="group flex items-center gap-2 text-xs text-text-tertiary/60 hover:text-text-secondary transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-500/60 group-hover:bg-purple-500 transition-colors" />
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500/40 group-hover:bg-purple-500 transition-colors" />
             <span>via <span className="font-medium">genfinity.io</span></span>
           </a>
         </div>
@@ -380,13 +454,15 @@ export default function NewsPage() {
   );
 }
 
-function NewsCard({
+/** Compact horizontal row for secondary articles */
+function NewsRow({
   item,
   formatDate,
   isAdmin,
   stats,
   onView,
   onClick,
+  delay,
 }: {
   item: NewsItem;
   formatDate: (date: string) => string;
@@ -394,8 +470,8 @@ function NewsCard({
   stats?: { views: number; clicks: number };
   onView: (id: string) => void;
   onClick: (id: string) => void;
+  delay: number;
 }) {
-  // Track view when card becomes visible
   const cardRef = React.useRef<HTMLAnchorElement>(null);
 
   React.useEffect(() => {
@@ -424,95 +500,75 @@ function NewsCard({
       rel="noopener noreferrer"
       onClick={() => onClick(item.id)}
       className={cn(
-        "group flex flex-col bg-bg-card overflow-hidden transition-all duration-200",
-        "border border-border/50 rounded-xl",
-        item.isGenfinity
-          ? "hover:border-purple-500/30"
-          : "hover:border-accent-primary/30"
+        `reveal-delay-${delay}`,
+        "group flex gap-4 p-3 rounded-xl border border-border bg-bg-card hover:border-brand/20 transition-all duration-200"
       )}
     >
-      {/* Image - 2:1 ratio to match Genfinity images */}
-      <div className="relative aspect-[2/1] bg-bg-secondary overflow-hidden">
+      {/* Thumbnail */}
+      <div className="relative w-24 h-24 sm:w-32 sm:h-24 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
         {item.image ? (
           <img
             src={item.image}
             alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-500"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className={cn(
             "w-full h-full flex items-center justify-center",
             item.isGenfinity
-              ? "bg-gradient-to-br from-purple-900/80 via-purple-800/60 to-purple-900/80"
-              : "bg-gradient-to-br from-accent-primary/20 via-bg-secondary to-accent-primary/10"
+              ? "bg-gradient-to-br from-purple-900/60 to-purple-800/40"
+              : "bg-bg-secondary"
           )}>
-            <div className="flex flex-col items-center gap-2 opacity-60 group-hover:opacity-80 transition-opacity">
-              <Newspaper className="h-10 w-10 sm:h-12 sm:w-12 text-white/40" />
-              <span className="text-[10px] sm:text-xs text-white/40 font-medium tracking-wider uppercase">
-                {item.isGenfinity ? "Genfinity" : "Hedera News"}
-              </span>
-            </div>
+            <Newspaper className="h-6 w-6 text-text-tertiary/40" />
           </div>
         )}
-
-        {/* Date badge */}
-        <div className="absolute top-2 left-2">
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-black/70 rounded text-white text-xs">
-            <Calendar className="h-3 w-3" />
-            <span>{formatDate(item.pubDate)}</span>
-          </div>
-        </div>
-
-        {/* Genfinity Badge */}
         {item.isGenfinity && (
-          <div className="absolute top-2 right-2">
-            <span className="rounded-full inline-block px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[9px] sm:text-[10px] font-medium">
-              <span>GENFINITY</span>
+          <div className="absolute top-1.5 right-1.5">
+            <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 text-[8px] font-medium rounded backdrop-blur-sm">
+              GEN
             </span>
-          </div>
-        )}
-
-        {/* Admin stats overlay */}
-        {isAdmin && stats && (
-          <div className="absolute bottom-2 right-2 flex items-center gap-2">
-            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/80 rounded text-[10px] text-blue-300">
-              <Eye className="h-2.5 w-2.5" />
-              {stats.views}
-            </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/80 rounded text-[10px] text-green-300">
-              <MousePointerClick className="h-2.5 w-2.5" />
-              {stats.clicks}
-            </div>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-3 sm:p-4 flex flex-col border-t border-border">
-        {/* Creator with dot */}
-        {item.creator && (
-          <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-text-secondary/70 mb-1.5">
-            <span className="w-1 h-1 rounded-full bg-accent-primary" />
-            <span className="truncate">{item.creator}</span>
-          </div>
-        )}
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[10px] text-text-tertiary font-mono">
+            {formatDate(item.pubDate)}
+          </span>
+          {item.creator && (
+            <>
+              <span className="w-0.5 h-0.5 rounded-full bg-text-tertiary" />
+              <span className="text-[10px] text-text-tertiary truncate">{item.creator}</span>
+            </>
+          )}
+          {/* Admin stats inline */}
+          {isAdmin && stats && (
+            <>
+              <span className="w-0.5 h-0.5 rounded-full bg-text-tertiary" />
+              <span className="text-[10px] text-blue-400 font-mono flex items-center gap-0.5">
+                <Eye className="h-2.5 w-2.5" />{stats.views}
+              </span>
+              <span className="text-[10px] text-green-400 font-mono flex items-center gap-0.5">
+                <MousePointerClick className="h-2.5 w-2.5" />{stats.clicks}
+              </span>
+            </>
+          )}
+        </div>
 
-        {/* Title */}
-        <h3 className="font-bold text-text-primary mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-accent-primary transition-colors text-sm sm:text-base leading-tight">
+        <h3 className="font-semibold text-text-primary text-sm leading-snug line-clamp-2 group-hover:text-brand transition-colors">
           {item.title}
         </h3>
 
-        {/* Description */}
-        <p className="text-xs sm:text-sm text-text-secondary/80 line-clamp-2 flex-1">
+        <p className="text-xs text-text-secondary/70 line-clamp-1 mt-1 hidden sm:block">
           {item.description}
         </p>
+      </div>
 
-        {/* Read More */}
-        <div className="mt-3 pt-2 border-t border-border">
-          <span className="text-xs text-text-secondary group-hover:text-accent-primary transition-colors flex items-center gap-1">
-            read more <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </span>
-        </div>
+      {/* Arrow */}
+      <div className="hidden sm:flex items-center flex-shrink-0">
+        <ArrowRight className="h-4 w-4 text-text-tertiary group-hover:text-brand group-hover:translate-x-0.5 transition-all" />
       </div>
     </a>
   );

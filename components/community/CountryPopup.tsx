@@ -19,7 +19,7 @@ export function CountryPopup({ countryCode, profiles, onClose }: CountryPopupPro
   return (
     <>
       {/* Desktop: right side panel */}
-      <div className="hidden sm:flex absolute right-4 top-4 bottom-4 w-80 max-w-[calc(100vw-2rem)] z-20 flex-col rounded-xl border border-border bg-bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+      <div className="hidden sm:flex absolute right-4 top-4 bottom-4 w-80 max-w-[calc(100vw-2rem)] z-20 flex-col rounded-lg border border-border bg-bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-secondary/50">
           <div className="flex items-center gap-2">

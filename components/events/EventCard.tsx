@@ -73,28 +73,22 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
     }
   };
 
-  const accentColor = event.isForeverMint
-    ? "purple-500"
-    : isLive
-      ? "green-500"
-      : "accent-primary";
-
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group block rounded-xl overflow-hidden bg-bg-card border border-border/50 hover:border-accent-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-accent-primary/5"
+      className="group block rounded-lg overflow-hidden bg-bg-card border border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-150"
     >
       {/* Image with gradient overlay */}
-      <div className="relative aspect-[16/10] bg-bg-secondary overflow-hidden">
+      <div className="relative aspect-[16/10] bg-secondary overflow-hidden">
         {event.imageUrl ? (
           <img
             src={event.imageUrl}
             alt={event.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-bg-secondary to-bg-card">
-            <Calendar className="h-10 w-10 text-text-secondary/20" />
+          <div className="w-full h-full flex items-center justify-center bg-tertiary">
+            <Calendar className="h-10 w-10 text-tertiary" />
           </div>
         )}
 
@@ -104,17 +98,17 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         {/* Status pill - top right */}
         <div className="absolute top-2.5 right-2.5">
           {event.isForeverMint ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-white tracking-wide">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/90 rounded-full text-[10px] font-bold text-white tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               ALWAYS LIVE
             </span>
           ) : isLive ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-white tracking-wide">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/90 rounded-full text-[10px] font-bold text-white tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               LIVE
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-primary/90 backdrop-blur-sm rounded-full text-[10px] font-bold text-white tracking-wide">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-700 dark:bg-zinc-300 rounded-full text-[10px] font-bold text-white dark:text-zinc-900 tracking-wide">
               UPCOMING
             </span>
           )}
@@ -128,7 +122,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
               {formatDate(event.mintDate)}
             </span>
             {isUpcoming && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 bg-white/15 rounded-full">
+              <span className="flex items-center gap-1 px-1.5 py-0.5 bg-white/15 rounded-full font-mono">
                 <Clock className="h-2.5 w-2.5" />
                 {timeRemaining}
               </span>
@@ -141,22 +135,22 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
       <div className="p-3 sm:p-4 flex flex-col gap-2">
         {/* Host for meetups/hackathons */}
         {isStarsOnly && event.host && (
-          <div className="flex items-center gap-1.5 text-[10px] text-text-secondary/70">
+          <div className="flex items-center gap-1.5 text-[10px] text-tertiary">
             <span className={cn(
               "w-1.5 h-1.5 rounded-full",
-              isMeetup ? "bg-accent-primary" : "bg-violet-500"
+              isMeetup ? "bg-brand" : "bg-violet-500"
             )} />
             <span className="truncate">{event.host}</span>
           </div>
         )}
 
         {/* Title */}
-        <h3 className="font-bold text-text-primary line-clamp-2 group-hover:text-accent-primary transition-colors text-sm sm:text-base leading-snug">
+        <h3 className="font-bold text-primary line-clamp-2 transition-colors duration-150 text-sm sm:text-base leading-snug">
           {event.title}
         </h3>
 
         {/* Meta row: price/location + supply */}
-        <div className="flex items-center gap-2.5 text-xs text-text-secondary">
+        <div className="flex items-center gap-2.5 text-xs text-secondary">
           {isStarsOnly ? (
             <>
               {event.location_type === "IN_PERSON" && event.location ? (
@@ -173,7 +167,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
             </>
           ) : (
             <>
-              <span className="flex items-center gap-1 font-semibold text-text-primary">
+              <span className="flex items-center gap-1 font-semibold text-primary font-mono">
                 {priceInfo.isHbar ? (
                   <HbarIcon className="h-3.5 w-3.5" />
                 ) : (
@@ -182,7 +176,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                 {priceInfo.value}
               </span>
               {event.supply && (
-                <span className="flex items-center gap-1 text-text-secondary">
+                <span className="flex items-center gap-1 text-secondary font-mono">
                   <Box className="h-3 w-3" />
                   {event.supply.toLocaleString()}
                 </span>
@@ -192,7 +186,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         </div>
 
         {/* Footer: voting + actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+        <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center gap-0.5" onClick={(e) => e.preventDefault()}>
             {isStarsOnly ? (
               <>
@@ -200,16 +194,16 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   onClick={() => handleVote("UP")}
                   disabled={!isConnected || isVoting || !canVoteNow}
                   className={cn(
-                    "p-1.5 rounded-md transition-all",
+                    "p-1.5 rounded-md transition-colors duration-150",
                     userVote === "UP"
                       ? "bg-yellow-500/20 text-yellow-500"
-                      : "text-text-secondary hover:text-yellow-500 hover:bg-yellow-500/10",
+                      : "text-secondary hover:text-yellow-500 hover:bg-yellow-500/10",
                     (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <Star className={cn("h-3.5 w-3.5", userVote === "UP" && "fill-yellow-500")} />
                 </button>
-                <span className="text-xs font-bold text-yellow-500 min-w-[24px] text-center">{score}</span>
+                <span className="text-xs font-bold text-yellow-500 min-w-[24px] text-center font-mono">{score}</span>
               </>
             ) : (
               <>
@@ -217,18 +211,18 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   onClick={() => handleVote("UP")}
                   disabled={!isConnected || isVoting || !canVoteNow}
                   className={cn(
-                    "p-1.5 rounded-md transition-all",
+                    "p-1.5 rounded-md transition-colors duration-150",
                     userVote === "UP"
                       ? "bg-green-500/20 text-green-500"
-                      : "text-text-secondary hover:text-green-500 hover:bg-green-500/10",
+                      : "text-secondary hover:text-green-500 hover:bg-green-500/10",
                     (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <ThumbsUp className="h-3.5 w-3.5" />
                 </button>
                 <span className={cn(
-                  "text-xs font-bold min-w-[32px] text-center",
-                  score > 0 ? "text-green-500" : score < 0 ? "text-red-500" : "text-text-secondary"
+                  "text-xs font-bold min-w-[32px] text-center font-mono",
+                  score > 0 ? "text-green-500" : score < 0 ? "text-red-500" : "text-secondary"
                 )}>
                   {score > 0 ? `+${score}` : score}
                 </span>
@@ -236,10 +230,10 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   onClick={() => handleVote("DOWN")}
                   disabled={!isConnected || isVoting || !canVoteNow}
                   className={cn(
-                    "p-1.5 rounded-md transition-all",
+                    "p-1.5 rounded-md transition-colors duration-150",
                     userVote === "DOWN"
                       ? "bg-red-500/20 text-red-500"
-                      : "text-text-secondary hover:text-red-500 hover:bg-red-500/10",
+                      : "text-secondary hover:text-red-500 hover:bg-red-500/10",
                     (!isConnected || isVoting || !canVoteNow) && "opacity-50 cursor-not-allowed"
                   )}
                 >
@@ -268,15 +262,15 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
                   );
                 }}
                 title="Add to Google Calendar"
-                className="p-1.5 ml-0.5 text-text-secondary hover:text-accent-primary transition-colors"
+                className="p-1.5 ml-0.5 text-secondary hover:text-primary transition-colors duration-150"
               >
                 <CalendarPlus className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
 
-          <span className="text-[11px] font-medium text-text-secondary group-hover:text-accent-primary transition-colors flex items-center gap-1">
-            details <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+          <span className="text-[11px] font-medium text-secondary transition-colors duration-150 flex items-center gap-1">
+            details →
           </span>
         </div>
       </div>

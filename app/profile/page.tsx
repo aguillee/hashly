@@ -28,10 +28,10 @@ import {
 } from "lucide-react";
 import { HostedBadges } from "@/components/badges/HostedBadges";
 import { ReferralSection } from "@/components/referral/ReferralSection";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { useReveal } from "@/hooks/useReveal";
 
 interface PointHistoryItem {
   id: string;
@@ -95,6 +95,14 @@ export default function ProfilePage() {
   const [aliasInput, setAliasInput] = React.useState("");
   const [savingAlias, setSavingAlias] = React.useState(false);
   const { setUser } = useWalletStore();
+
+  const headerRef = useReveal();
+  const nftRef = useReveal();
+  const referralRef = useReveal();
+  const hostedRef = useReveal();
+  const eventsRef = useReveal();
+  const statsRef = useReveal();
+  const activityRef = useReveal();
 
   React.useEffect(() => {
     if (!isConnected) {
@@ -212,27 +220,31 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-8">
-        {/* Compact Profile Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center flex-shrink-0">
-              <User className="h-5 w-5 text-white" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-text-primary">My Profile</h1>
+      {/* Header */}
+      <div ref={headerRef} className="reveal pt-6 pb-4 sm:pt-8 sm:pb-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="reveal-delay-1">
+            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+              Your Account
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight mb-3">
+              Profile
+            </h1>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+
+          {/* Wallet + Alias */}
+          <div className="flex items-center gap-2 flex-wrap reveal-delay-2">
             <button
               onClick={copyAddress}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-bg-card border border-border hover:border-accent-primary/50 transition-all text-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
             >
-              <span className="text-text-secondary text-xs sm:text-sm">
+              <span className="text-text-secondary text-xs sm:text-sm font-mono">
                 {user.walletAddress}
               </span>
               {copied ? (
-                <Check className="h-3.5 w-3.5 text-success" />
+                <Check className="h-3.5 w-3.5 text-green-500" />
               ) : (
-                <Copy className="h-3.5 w-3.5 text-text-secondary" />
+                <Copy className="h-3.5 w-3.5 text-text-tertiary" />
               )}
             </button>
             {editingAlias ? (
@@ -243,7 +255,7 @@ export default function ProfilePage() {
                   onChange={(e) => setAliasInput(e.target.value)}
                   placeholder="Enter alias..."
                   maxLength={20}
-                  className="px-2.5 py-1.5 rounded-md bg-bg-card border border-accent-primary/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50 w-32"
+                  className="px-2.5 py-1.5 rounded-lg bg-bg-card border border-brand/30 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 w-32"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === "Enter") saveAlias();
@@ -253,13 +265,13 @@ export default function ProfilePage() {
                 <button
                   onClick={saveAlias}
                   disabled={savingAlias}
-                  className="p-1.5 rounded-md bg-success/20 text-success hover:bg-success/30 transition-colors"
+                  className="p-1.5 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
                 >
                   {savingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                 </button>
                 <button
                   onClick={() => setEditingAlias(false)}
-                  className="p-1.5 rounded-md bg-error/20 text-error hover:bg-error/30 transition-colors"
+                  className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -267,7 +279,7 @@ export default function ProfilePage() {
             ) : (
               <button
                 onClick={startEditAlias}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-bg-card border border-border hover:border-accent-primary/50 transition-all text-sm"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
               >
                 <span className="text-text-secondary text-xs sm:text-sm">
                   {user.alias ? (
@@ -276,192 +288,194 @@ export default function ProfilePage() {
                     "Set alias"
                   )}
                 </span>
-                <Pencil className="h-3 w-3 text-text-secondary" />
+                <Pencil className="h-3 w-3 text-text-tertiary" />
               </button>
             )}
           </div>
-        </div>
-        {/* Points & Streak Card */}
-        <div className="mb-4">
-          <div className="p-4 rounded-lg bg-bg-card border border-border">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              {/* Points */}
-              <div className="text-center md:text-left">
-                <p className="text-sm text-text-secondary font-medium">Total Points</p>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <Zap className="h-8 w-8 text-accent-primary" />
-                  <span className="text-4xl font-bold text-text-primary">
-                    {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
-                  </span>
-                </div>
-                {((user.badgePoints ?? 0) > 0 || (user.referralPoints ?? 0) > 0) && (
-                  <div className="flex items-center justify-center md:justify-start gap-3 mt-1 text-xs text-text-secondary">
-                    <span>{user.points ?? 0} missions</span>
-                    {(user.badgePoints ?? 0) > 0 && <span>+ {user.badgePoints} badges</span>}
-                    {(user.referralPoints ?? 0) > 0 && <span>+ {user.referralPoints} referrals</span>}
-                  </div>
+
+          {/* Points & Streak Bar */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-4 reveal-delay-3">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-bg-card border border-border">
+              <Zap className="h-5 w-5 text-brand" />
+              <span className="text-2xl font-bold text-text-primary font-mono tabular-nums">
+                {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
+              </span>
+              <span className="text-xs text-text-tertiary">pts</span>
+            </div>
+            {((user.badgePoints ?? 0) > 0 || (user.referralPoints ?? 0) > 0) && (
+              <div className="flex items-center gap-2 text-xs text-text-secondary">
+                <span className="font-mono">{user.points ?? 0}</span> missions
+                {(user.badgePoints ?? 0) > 0 && (
+                  <><span className="text-text-tertiary">+</span> <span className="font-mono">{user.badgePoints}</span> badges</>
+                )}
+                {(user.referralPoints ?? 0) > 0 && (
+                  <><span className="text-text-tertiary">+</span> <span className="font-mono">{user.referralPoints}</span> referrals</>
                 )}
               </div>
-
-              {/* Streak */}
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                <div className="w-10 h-10 rounded-md bg-orange-500/20 flex items-center justify-center">
-                  <Flame className="h-5 w-5 text-orange-500" />
-                </div>
-                <div>
-                  <span className="font-semibold text-text-primary">{user.loginStreak} day streak</span>
-                  <p className="text-sm text-text-secondary">Keep logging in daily!</p>
-                </div>
-                {user.loginStreak >= 7 && <Badge variant="purple">On fire!</Badge>}
-              </div>
+            )}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/20 bg-orange-500/5 text-sm">
+              <Flame className="h-3.5 w-3.5 text-orange-500" />
+              <span className="font-bold text-text-primary font-mono">{user.loginStreak}d</span>
+              <span className="text-text-tertiary text-xs">streak</span>
+              {user.loginStreak >= 7 && <Badge variant="purple" size="sm">On fire!</Badge>}
             </div>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-8">
         {/* NFTs Section */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Shield className="h-4 w-4 text-accent-primary" />
-            <h2 className="text-lg font-bold">Detected NFTs</h2>
+        <div ref={nftRef} className="reveal mb-5">
+          <div className="flex items-center gap-2 mb-3 reveal-delay-1">
+            <Shield className="h-4 w-4 text-brand" />
+            <h2 className="text-sm font-bold text-text-primary">Detected NFTs</h2>
           </div>
 
           {loadingNFTs ? (
-            <div className="p-8 rounded-lg bg-bg-card border border-border text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-accent-primary mx-auto mb-2" />
-              <p className="text-text-secondary">Loading NFTs...</p>
+            <div className="p-8 rounded-xl bg-bg-card border border-border text-center reveal-delay-2">
+              <Loader2 className="h-6 w-6 animate-spin text-brand mx-auto mb-2" />
+              <p className="text-text-secondary text-sm">Loading NFTs...</p>
             </div>
           ) : nftData ? (
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Dragons */}
-              <div className="p-5 rounded-lg bg-bg-card border border-border">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Santuario Hedera (Dragons)</h3>
-                  <a
-                    href="https://sentx.io/nft-marketplace/santuario-hedera"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent-primary hover:text-accent-secondary"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+            <div className="reveal-delay-2">
+              <div className="grid md:grid-cols-2 gap-3">
+                {/* Dragons */}
+                <div className="p-4 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-sm text-text-primary">Santuario Hedera (Dragons)</h3>
+                    <a
+                      href="https://sentx.io/nft-marketplace/santuario-hedera"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-text-tertiary hover:text-brand transition-colors"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+
+                  {nftData.stats.totalDragons > 0 ? (
+                    <>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="default" size="sm">{nftData.stats.totalDragons} Dragons</Badge>
+                        <Badge variant="success" size="sm">+{nftData.stats.potentialVotes.dragonVotes} votes/project</Badge>
+                      </div>
+                      <div className="text-xs text-text-tertiary font-mono">
+                        Serials: {nftData.nfts.dragons.slice(0, 10).map(d => `#${d.serialNumber}`).join(", ")}
+                        {nftData.nfts.dragons.length > 10 && ` +${nftData.nfts.dragons.length - 10} more`}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-text-tertiary text-sm">No dragons detected</p>
+                  )}
                 </div>
 
-                {nftData.stats.totalDragons > 0 ? (
-                  <>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="default">{nftData.stats.totalDragons} Dragons</Badge>
-                      <Badge variant="success">+{nftData.stats.potentialVotes.dragonVotes} votes/project</Badge>
-                    </div>
-                    <div className="text-xs text-text-secondary">
-                      Serials: {nftData.nfts.dragons.slice(0, 10).map(d => `#${d.serialNumber}`).join(", ")}
-                      {nftData.nfts.dragons.length > 10 && ` +${nftData.nfts.dragons.length - 10} more`}
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-text-secondary text-sm">No dragons detected</p>
-                )}
-              </div>
+                {/* El Santuario */}
+                <div className="p-4 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-sm text-text-primary">El Santuario</h3>
+                    <a
+                      href="https://sentx.io/nft-marketplace/el-santuario"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-text-tertiary hover:text-brand transition-colors"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
 
-              {/* El Santuario */}
-              <div className="p-5 rounded-lg bg-bg-card border border-border">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">El Santuario</h3>
-                  <a
-                    href="https://sentx.io/nft-marketplace/el-santuario"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent-primary hover:text-accent-secondary"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                  {nftData.stats.hasSantuario ? (
+                    <>
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <Badge variant="default" size="sm">Holder</Badge>
+                        <Badge variant="success" size="sm">+{nftData.stats.potentialVotes.santuarioVotes} votes/project</Badge>
+                        <Badge variant="purple" size="sm">Auto-approve</Badge>
+                      </div>
+                      <div className="text-xs text-text-tertiary font-mono">
+                        Serial: #{nftData.nfts.santuario[0]?.serialNumber}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-text-tertiary text-sm">No El Santuario NFT detected</p>
+                  )}
                 </div>
-
-                {nftData.stats.hasSantuario ? (
-                  <>
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      <Badge variant="default">Holder</Badge>
-                      <Badge variant="success">+{nftData.stats.potentialVotes.santuarioVotes} votes/project</Badge>
-                      <Badge variant="purple">Auto-approve events</Badge>
-                    </div>
-                    <div className="text-xs text-text-secondary">
-                      Serial: #{nftData.nfts.santuario[0]?.serialNumber}
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-text-secondary text-sm">No El Santuario NFT detected</p>
-                )}
               </div>
+
+              {/* Benefits Summary */}
+              {nftData.benefits.extraVotesPerProject > 0 && (
+                <div className="mt-3 p-3 rounded-lg bg-brand/5 border border-brand/10">
+                  <p className="text-sm">
+                    <span className="font-semibold text-brand">Your Benefits:</span>{" "}
+                    <span className="text-text-secondary">
+                      +{nftData.benefits.extraVotesPerProject} extra votes per project
+                      {nftData.benefits.canAutoApproveEvents && " — Events auto-approved"}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="p-8 rounded-lg bg-bg-card border border-border text-center">
-              <p className="text-text-secondary">Failed to load NFT data</p>
-            </div>
-          )}
-
-          {/* Benefits Summary */}
-          {nftData && nftData.benefits.extraVotesPerProject > 0 && (
-            <div className="mt-4 p-4 rounded-md bg-gradient-to-r from-accent-primary/10 to-accent-secondary/10 border border-accent-primary/20">
-              <p className="text-sm">
-                <span className="font-semibold text-accent-primary">Your Benefits:</span>{" "}
-                <span className="text-text-secondary">
-                  +{nftData.benefits.extraVotesPerProject} extra votes per project
-                  {nftData.benefits.canAutoApproveEvents && " • Events auto-approved"}
-                </span>
-              </p>
+            <div className="p-8 rounded-xl bg-bg-card border border-border text-center reveal-delay-2">
+              <p className="text-text-secondary text-sm">Failed to load NFT data</p>
             </div>
           )}
         </div>
 
         {/* Referrals Section */}
-        <div className="mb-4">
-          <ReferralSection />
+        <div ref={referralRef} className="reveal mb-5">
+          <div className="reveal-delay-1">
+            <ReferralSection />
+          </div>
         </div>
 
         {/* Hosted Events Section */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-3">
+        <div ref={hostedRef} className="reveal mb-5">
+          <div className="flex items-center gap-2 mb-3 reveal-delay-1">
             <Mic2 className="h-4 w-4 text-purple-500" />
-            <h2 className="text-lg font-bold">Hosted Events</h2>
+            <h2 className="text-sm font-bold text-text-primary">Hosted Events</h2>
           </div>
-          <HostedBadges />
+          <div className="reveal-delay-2">
+            <HostedBadges />
+          </div>
         </div>
 
         {/* Your Events Section */}
         {stats && stats.createdEvents && stats.createdEvents.length > 0 && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4 text-success" />
-              <h2 className="text-lg font-bold">Your Events</h2>
-              <span className="text-xs text-text-secondary">({stats.createdEvents.length})</span>
+          <div ref={eventsRef} className="reveal mb-5">
+            <div className="flex items-center gap-2 mb-3 reveal-delay-1">
+              <Calendar className="h-4 w-4 text-green-500" />
+              <h2 className="text-sm font-bold text-text-primary">Your Events</h2>
+              <span className="text-[10px] font-mono text-text-tertiary bg-bg-secondary px-1.5 py-0.5 rounded">
+                {stats.createdEvents.length}
+              </span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 reveal-delay-2">
               {stats.createdEvents.map((evt) => (
                 <div
                   key={evt.id}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-bg-card border border-border hover:border-accent-primary/30 transition-all"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all"
                 >
                   {evt.imageUrl && (
                     <img
                       src={evt.imageUrl}
                       alt={evt.title}
-                      className="w-12 h-12 rounded-md object-cover flex-shrink-0"
+                      className="w-11 h-11 rounded-lg object-cover flex-shrink-0"
                     />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-sm text-text-primary truncate">{evt.title}</p>
-                      <Badge variant={evt.isApproved ? "success" : "warning"}>
+                      <Badge variant={evt.isApproved ? "success" : "warning"} size="sm">
                         {evt.isApproved ? "Approved" : "Pending"}
                       </Badge>
-                      <span className="text-[10px] text-text-secondary px-1.5 py-0.5 rounded bg-bg-secondary">
+                      <span className="text-[10px] text-text-tertiary font-mono px-1.5 py-0.5 rounded bg-bg-secondary">
                         {evt.event_type === "MINT_EVENT" ? "Mint" : evt.event_type === "HACKATHON" ? "Hackathon" : "Meetup"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary">
+                    <div className="flex items-center gap-3 mt-1 text-xs text-text-tertiary">
                       {evt.mintDate && (
-                        <span>{new Date(evt.mintDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                        <span className="font-mono">{new Date(evt.mintDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                       )}
-                      <span className="flex items-center gap-0.5">
+                      <span className="flex items-center gap-0.5 font-mono">
                         {evt.event_type === "ECOSYSTEM_MEETUP" || evt.event_type === "HACKATHON" ? (
                           <><Star className="h-3 w-3 text-yellow-400" /> {evt.votesUp}</>
                         ) : (
@@ -473,13 +487,13 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <Link
                       href={`/events/${evt.id}`}
-                      className="p-2 rounded-md bg-bg-secondary hover:bg-border transition-colors text-text-secondary hover:text-text-primary"
+                      className="p-2 rounded-lg bg-bg-secondary hover:bg-border transition-colors text-text-secondary hover:text-text-primary"
                     >
                       <Eye className="h-3.5 w-3.5" />
                     </Link>
                     <Link
                       href={`/events/${evt.id}/edit`}
-                      className="p-2 rounded-md bg-accent-primary/10 hover:bg-accent-primary/20 transition-colors text-accent-primary"
+                      className="p-2 rounded-lg bg-brand/10 hover:bg-brand/20 transition-colors text-brand"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Link>
@@ -492,78 +506,93 @@ export default function ProfilePage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-8 gap-3">
-            <Loader2 className="h-5 w-5 animate-spin text-accent-primary" />
+            <Loader2 className="h-5 w-5 animate-spin text-brand" />
             <p className="text-text-secondary text-sm">Loading profile...</p>
           </div>
         ) : stats ? (
           <>
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-bg-card border border-border text-center hover:border-accent-primary/30 transition-all">
-                <div className="w-8 h-8 rounded-md bg-accent-primary/20 flex items-center justify-center mx-auto mb-2">
-                  <Vote className="h-4 w-4 text-accent-primary" />
-                </div>
-                <p className="text-xl font-bold text-text-primary">{stats.totalVotes}</p>
-                <p className="text-xs text-text-secondary font-medium">Total Votes</p>
+            <div ref={statsRef} className="reveal mb-5">
+              <div className="flex items-center gap-2 mb-3 reveal-delay-1">
+                <TrendingUp className="h-4 w-4 text-text-tertiary" />
+                <h2 className="text-sm font-bold text-text-primary">Stats</h2>
               </div>
-
-              <div className="p-3 rounded-lg bg-bg-card border border-border text-center hover:border-success/30 transition-all">
-                <div className="w-8 h-8 rounded-md bg-success/20 flex items-center justify-center mx-auto mb-2">
-                  <Calendar className="h-4 w-4 text-success" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 reveal-delay-2">
+                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-brand/10 flex items-center justify-center">
+                      <Vote className="h-3.5 w-3.5 text-brand" />
+                    </div>
+                    <span className="text-xs text-text-tertiary">Votes</span>
+                  </div>
+                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">{stats.totalVotes}</p>
                 </div>
-                <p className="text-xl font-bold text-text-primary">{stats.approvedEvents}</p>
-                <p className="text-xs text-text-secondary font-medium">Events Created</p>
-              </div>
 
-              <div className="p-3 rounded-lg bg-bg-card border border-border text-center hover:border-purple-500/30 transition-all">
-                <div className="w-8 h-8 rounded-md bg-purple-500/20 flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp className="h-4 w-4 text-purple-500" />
+                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-green-500/20 transition-all">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <Calendar className="h-3.5 w-3.5 text-green-500" />
+                    </div>
+                    <span className="text-xs text-text-tertiary">Events</span>
+                  </div>
+                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">{stats.approvedEvents}</p>
                 </div>
-                <p className="text-xl font-bold text-text-primary">#{stats.rank}</p>
-                <p className="text-xs text-text-secondary font-medium">Leaderboard Rank</p>
-              </div>
 
-              <div className="p-3 rounded-lg bg-bg-card border border-border text-center hover:border-yellow-500/30 transition-all">
-                <div className="w-8 h-8 rounded-md bg-yellow-500/20 flex items-center justify-center mx-auto mb-2">
-                  <Trophy className="h-4 w-4 text-yellow-500" />
+                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-purple-500/20 transition-all">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                      <TrendingUp className="h-3.5 w-3.5 text-purple-500" />
+                    </div>
+                    <span className="text-xs text-text-tertiary">Rank</span>
+                  </div>
+                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">#{stats.rank}</p>
                 </div>
-                <p className="text-xl font-bold text-text-primary">Top {Math.round((stats.rank / stats.totalUsers) * 100)}%</p>
-                <p className="text-xs text-text-secondary font-medium">of {stats.totalUsers} users</p>
+
+                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-yellow-500/20 transition-all">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                      <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                    </div>
+                    <span className="text-xs text-text-tertiary">Percentile</span>
+                  </div>
+                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">Top {Math.round((stats.rank / stats.totalUsers) * 100)}%</p>
+                  <p className="text-[10px] text-text-tertiary font-mono mt-0.5">of {stats.totalUsers}</p>
+                </div>
               </div>
             </div>
 
             {/* Point History */}
-            <div className="rounded-lg border border-border bg-bg-card overflow-hidden">
-              <div className="px-4 py-3 border-b border-border flex items-center gap-2">
-                <div className="w-8 h-8 rounded-md bg-accent-primary/20 flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-accent-primary" />
-                </div>
-                <h2 className="text-lg font-bold text-text-primary">Recent Activity</h2>
+            <div ref={activityRef} className="reveal">
+              <div className="flex items-center gap-2 mb-3 reveal-delay-1">
+                <Clock className="h-4 w-4 text-text-tertiary" />
+                <h2 className="text-sm font-bold text-text-primary">Recent Activity</h2>
               </div>
-              <div className="p-3">
+              <div className="reveal-delay-2">
                 {stats.pointHistory.length > 0 ? (
                   <div className="space-y-2">
                     {stats.pointHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-bg-secondary/50 border border-border hover:border-accent-primary/30 transition-all"
+                        className="flex items-center justify-between p-3 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all"
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-md bg-bg-card flex items-center justify-center text-accent-primary">
+                          <div className="w-8 h-8 rounded-lg bg-bg-secondary flex items-center justify-center text-text-secondary">
                             {getActionIcon(item.actionType)}
                           </div>
                           <div>
                             <p className="font-medium text-sm text-text-primary">
                               {item.description || item.actionType.replace(/_/g, " ")}
                             </p>
-                            <p className="text-xs text-text-secondary">
+                            <p className="text-[10px] text-text-tertiary font-mono">
                               {formatDate(item.createdAt)}
                             </p>
                           </div>
                         </div>
                         <div className={cn(
-                          "flex items-center gap-1 px-2.5 py-1 rounded-md font-bold text-sm",
-                          item.points > 0 ? "bg-success/10 text-success" : "bg-error/10 text-error"
+                          "flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-sm font-mono",
+                          item.points > 0
+                            ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                            : "bg-red-500/10 text-red-500"
                         )}>
                           <Zap className="h-3.5 w-3.5" />
                           {item.points > 0 ? "+" : ""}{item.points}
@@ -572,8 +601,8 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Clock className="h-6 w-6 text-accent-primary mx-auto mb-2" />
+                  <div className="text-center py-12 rounded-xl border border-border bg-bg-card">
+                    <Clock className="h-6 w-6 text-text-tertiary mx-auto mb-2" />
                     <p className="text-text-secondary text-sm">
                       No activity yet. Start voting and completing missions!
                     </p>
@@ -584,7 +613,7 @@ export default function ProfilePage() {
           </>
         ) : (
           <div className="text-center py-12">
-            <p className="text-text-secondary">Failed to load profile data</p>
+            <p className="text-text-secondary text-sm">Failed to load profile data</p>
           </div>
         )}
       </div>

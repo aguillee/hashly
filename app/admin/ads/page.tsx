@@ -416,7 +416,7 @@ export default function AdminAdsPage() {
                     className={cn(
                       "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                       formType === "EVENT"
-                        ? "bg-accent-primary text-white"
+                        ? "bg-brand text-white"
                         : "bg-bg-card text-text-secondary hover:text-text-primary"
                     )}
                   >
@@ -429,7 +429,7 @@ export default function AdminAdsPage() {
                     className={cn(
                       "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                       formType === "CUSTOM"
-                        ? "bg-accent-primary text-white"
+                        ? "bg-brand text-white"
                         : "bg-bg-card text-text-secondary hover:text-text-primary"
                     )}
                   >
@@ -448,7 +448,7 @@ export default function AdminAdsPage() {
                     value={formEventId}
                     onChange={(e) => setFormEventId(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                    className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
                     <option value="">Choose an event...</option>
                     {events.map((event) => (
@@ -543,7 +543,7 @@ export default function AdminAdsPage() {
         <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
           {loading ? (
             <div className="flex items-center justify-center py-8 sm:py-12">
-              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-accent-primary" />
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-brand" />
             </div>
           ) : ads.length === 0 ? (
             <div className="text-center py-8 sm:py-12">
@@ -620,7 +620,7 @@ export default function AdminAdsPage() {
                             <MousePointerClick className="h-2.5 w-2.5" />
                             {(ad.clicks || 0).toLocaleString()}
                           </span>
-                          <span className="text-accent-primary font-medium">{ctr}%</span>
+                          <span className="text-brand font-medium">{ctr}%</span>
                         </div>
                       </div>
 
@@ -707,13 +707,13 @@ export default function AdminAdsPage() {
                             <MousePointerClick className="h-3 w-3" />
                             {(ad.clicks || 0).toLocaleString()}
                           </span>
-                          <span className="text-accent-primary font-medium">{ctr}% CTR</span>
+                          <span className="text-brand font-medium">{ctr}% CTR</span>
                           {ad.type === "CUSTOM" && ad.linkUrl && (
                             <a
                               href={ad.linkUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-0.5 hover:text-accent-primary"
+                              className="flex items-center gap-0.5 hover:text-brand"
                             >
                               <ExternalLink className="h-3 w-3" />
                               Link
@@ -732,7 +732,7 @@ export default function AdminAdsPage() {
                           onChange={(e) =>
                             handleDurationChange(ad.id, parseInt(e.target.value) || 5)
                           }
-                          className="w-12 text-center rounded border border-border bg-bg-card px-1 py-0.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                          className="w-12 text-center rounded border border-border bg-bg-card px-1 py-0.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                         />
                         <span className="text-xs text-text-secondary">s</span>
                       </div>
@@ -802,7 +802,7 @@ export default function AdminAdsPage() {
                   {editingId === ad.id && (
                     <form
                       onSubmit={handleSaveEdit}
-                      className="mt-2 sm:ml-8 p-3 sm:p-4 rounded-lg border border-accent-primary/30 bg-bg-card space-y-3"
+                      className="mt-2 sm:ml-8 p-3 sm:p-4 rounded-lg border border-brand/20 bg-bg-card space-y-3"
                     >
                       {/* Type selector */}
                       <div className="flex rounded-lg border border-border overflow-hidden w-fit">
@@ -812,7 +812,7 @@ export default function AdminAdsPage() {
                           className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
                             editType === "EVENT"
-                              ? "bg-accent-primary text-white"
+                              ? "bg-brand text-white"
                               : "bg-bg-card text-text-secondary hover:text-text-primary"
                           )}
                         >
@@ -825,7 +825,7 @@ export default function AdminAdsPage() {
                           className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
                             editType === "CUSTOM"
-                              ? "bg-accent-primary text-white"
+                              ? "bg-brand text-white"
                               : "bg-bg-card text-text-secondary hover:text-text-primary"
                           )}
                         >
@@ -841,7 +841,7 @@ export default function AdminAdsPage() {
                             value={editEventId}
                             onChange={(e) => setEditEventId(e.target.value)}
                             required
-                            className="w-full rounded-lg border border-border bg-bg-secondary px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                            className="w-full rounded-lg border border-border bg-bg-secondary px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                           >
                             <option value="">Choose an event...</option>
                             {events.map((event) => (

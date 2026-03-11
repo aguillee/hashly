@@ -50,7 +50,7 @@ function AdSlide({ ad, isActive, onClickTrack }: { ad: HomeAd; isActive: boolean
   const content = (
     <div className="absolute inset-0 group cursor-pointer" onClick={onClickTrack}>
       {/* Image */}
-      <div className="relative h-full bg-gradient-to-br from-accent-primary/20 to-accent-secondary/10">
+      <div className="relative h-full bg-gradient-to-br from-brand/20 to-brand/10">
         {image ? (
           <img
             src={image}
@@ -73,7 +73,7 @@ function AdSlide({ ad, isActive, onClickTrack }: { ad: HomeAd; isActive: boolean
         }}
       >
         {title && (
-          <h4 className="text-sm font-bold text-white line-clamp-2 mb-1 group-hover:text-accent-primary transition-colors">
+          <h4 className="text-sm font-bold text-white line-clamp-2 mb-1 group-hover:text-brand transition-colors">
             {title}
           </h4>
         )}
@@ -144,7 +144,7 @@ export function HomeAdCarousel({ ads }: HomeAdCarouselProps) {
   if (!currentAd) return null;
 
   return (
-    <div className="relative h-full rounded-xl overflow-hidden border border-border/50 bg-bg-card">
+    <div className="relative h-full rounded-lg overflow-hidden border border-[var(--card-border)] bg-bg-card hover:border-[var(--card-border-hover)] transition-all duration-150">
       {/* All slides stacked - crossfade via opacity */}
       {ads.map((ad, i) => (
         <div

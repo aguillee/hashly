@@ -290,7 +290,7 @@ export default function EventDetailPage() {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-accent-primary/15 text-accent-primary border border-accent-primary/20 rounded-full text-xs font-semibold">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-brand-subtle text-brand border border-brand/20 rounded-full text-xs font-semibold">
             UPCOMING
           </span>
         );
@@ -310,7 +310,7 @@ export default function EventDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
@@ -385,7 +385,7 @@ export default function EventDetailPage() {
         {/* Main Content */}
         <div className="md:col-span-2 space-y-4 sm:space-y-6">
           {/* Header Card */}
-          <div className={`bg-bg-card border border-border/50 rounded-xl overflow-hidden`}>
+          <div className={`bg-bg-card border border-border rounded-lg overflow-hidden`}>
             {event.imageUrl && (
               <div className="aspect-video relative overflow-hidden">
                 <img
@@ -445,7 +445,7 @@ export default function EventDetailPage() {
               </div>
 
               <div
-                className="text-text-secondary prose prose-sm prose-invert max-w-none [&>p]:mb-2 sm:[&>p]:mb-3 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4 [&_strong]:text-text-primary [&_a]:text-accent-primary [&_a]:underline text-sm sm:text-base"
+                className="text-text-secondary prose prose-sm prose-invert max-w-none [&>p]:mb-2 sm:[&>p]:mb-3 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:list-decimal [&>ol]:ml-4 [&_strong]:text-text-primary [&_a]:text-brand [&_a]:underline text-sm sm:text-base"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description, { ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'span', 'div'], ALLOWED_ATTR: ['href', 'target', 'rel', 'class'] }) }}
               />
 
@@ -507,7 +507,7 @@ export default function EventDetailPage() {
 
           {/* Mint Phases - only for mint events */}
           {!isMeetup && !isHackathon && event.phases.length > 0 && (
-            <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
+            <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-border">
                 <h3 className="font-bold flex items-center gap-2">
                   <div className="w-8 h-8 rounded bg-purple-500/10 flex items-center justify-center">
@@ -525,12 +525,12 @@ export default function EventDetailPage() {
                       <div
                         key={phase.id}
                         className={cn(
-                          "p-4 rounded-xl border",
+                          "p-4 rounded-lg border",
                           status === "active"
                             ? "bg-success/5 border-green-500/30"
                             : status === "ended"
-                            ? "bg-bg-secondary border-border/50 opacity-60"
-                            : "bg-bg-secondary/50 border-accent-primary/30"
+                            ? "bg-bg-secondary border-border opacity-60"
+                            : "bg-bg-secondary border-border"
                         )}
                       >
                         <div className="flex items-center justify-between mb-2">
@@ -549,7 +549,7 @@ export default function EventDetailPage() {
                           {(() => {
                             const phasePriceInfo = parseMintPrice(phase.price);
                             return (
-                              <span className="text-lg font-bold text-accent-primary flex items-center gap-1">
+                              <span className="text-lg font-bold text-brand flex items-center gap-1">
                                 {phasePriceInfo.isHbar ? (
                                   <HbarIcon className="h-4 w-4" />
                                 ) : (
@@ -595,11 +595,11 @@ export default function EventDetailPage() {
         {/* Sidebar */}
         <div className="space-y-4 sm:space-y-6">
           {/* Event Info - News style */}
-          <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
+          <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="w-10 h-10 rounded bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-accent-primary" />
+                <div className="w-10 h-10 rounded bg-brand-subtle flex items-center justify-center flex-shrink-0">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-brand" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-text-secondary">{event.endDate ? "Start Date" : "Event Date"}</p>
@@ -695,7 +695,7 @@ export default function EventDetailPage() {
           </div>
 
           {/* Voting - News style */}
-          <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
+          <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
             <div className="p-4 sm:p-6">
               <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
                 <div className="w-8 h-8 rounded bg-yellow-500/10 flex items-center justify-center">
@@ -721,8 +721,8 @@ export default function EventDetailPage() {
 
               {/* Connect wallet message */}
               {!isConnected && (
-                <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-md bg-accent-primary/10 border border-accent-primary/30 text-center">
-                  <p className="text-xs sm:text-sm text-accent-primary font-medium">
+                <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-md bg-brand-subtle border border-border text-center">
+                  <p className="text-xs sm:text-sm text-brand font-medium">
                     Connect wallet to {isStarsOnly ? "rate" : "vote"}
                   </p>
                 </div>
@@ -799,7 +799,7 @@ export default function EventDetailPage() {
 
           {/* Attendance Badge - only for meetups */}
           {isMeetup && (
-            <div className="bg-bg-card border border-border/50 rounded-xl overflow-hidden">
+            <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
               <div className="p-4 sm:p-6">
                 <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
                   <div className="w-8 h-8 rounded bg-accent-coral/10 flex items-center justify-center">
@@ -895,7 +895,7 @@ export default function EventDetailPage() {
           {event.canEdit && (
             <Link
               href={`/events/${event.id}/edit`}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/30 text-accent-primary hover:bg-accent-primary/20 transition-colors text-sm font-medium"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-brand-subtle border border-border text-brand hover:bg-bg-secondary transition-colors text-sm font-medium"
             >
               <Pencil className="h-4 w-4" />
               Edit Event

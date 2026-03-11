@@ -53,7 +53,7 @@ export default function CheckinHostPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -89,7 +89,7 @@ export default function CheckinHostPage() {
       </div>
 
       {/* Attendee list */}
-      <div className="rounded-xl border border-border bg-bg-card p-6">
+      <div className="rounded-lg border border-border bg-bg-card p-6">
         <AttendeeList eventId={eventId} />
       </div>
     </div>

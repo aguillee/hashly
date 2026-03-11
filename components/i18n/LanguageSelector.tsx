@@ -35,7 +35,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
     <div ref={dropdownRef} className={cn("relative", className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-md bg-bg-card border border-border hover:border-accent-primary/50 transition-all duration-200"
+        className="flex items-center gap-2 px-3 py-2 rounded-md bg-bg-card border border-border hover:border-text-tertiary transition-all duration-200"
         aria-label="Select language"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -63,7 +63,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
               className={cn(
                 "flex items-center gap-3 w-full px-4 py-3 text-left transition-colors duration-200",
                 loc === locale
-                  ? "bg-accent-primary/10 text-accent-primary"
+                  ? "bg-brand-subtle text-brand"
                   : "text-text-primary hover:bg-bg-secondary"
               )}
             >

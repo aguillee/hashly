@@ -249,7 +249,7 @@ export default function AdminEditEventPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
@@ -269,7 +269,7 @@ export default function AdminEditEventPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-accent-primary" />
+            <Calendar className="h-5 w-5 text-brand" />
             Edit Event
           </CardTitle>
           <p className="text-sm text-text-secondary mt-1">
@@ -320,7 +320,7 @@ export default function AdminEditEventPage() {
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium border border-border bg-bg-secondary text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                className="px-3 py-1.5 rounded-lg text-sm font-medium border border-border bg-bg-secondary text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
               >
                 <option value="UPCOMING">Upcoming</option>
                 <option value="LIVE">Live</option>
@@ -339,7 +339,7 @@ export default function AdminEditEventPage() {
                     className={cn(
                       "flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors",
                       formData.event_type === type
-                        ? "bg-accent-primary text-white"
+                        ? "bg-brand text-white"
                         : "bg-bg-card text-text-secondary hover:text-text-primary"
                     )}
                   >
@@ -367,7 +367,7 @@ export default function AdminEditEventPage() {
                 onChange={handleChange}
                 required
                 rows={4}
-                className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
+                className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 resize-none"
               />
             </div>
 
@@ -400,7 +400,7 @@ export default function AdminEditEventPage() {
                   name="language"
                   value={formData.language}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  className="w-full rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                 >
                   {LANGUAGES.map(lang => (
                     <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -420,7 +420,7 @@ export default function AdminEditEventPage() {
                     className={cn(
                       "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                       formData.location_type === "ONLINE"
-                        ? "bg-accent-primary text-white"
+                        ? "bg-brand text-white"
                         : "bg-bg-card text-text-secondary hover:text-text-primary"
                     )}
                   >
@@ -432,7 +432,7 @@ export default function AdminEditEventPage() {
                     className={cn(
                       "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors",
                       formData.location_type === "IN_PERSON"
-                        ? "bg-accent-primary text-white"
+                        ? "bg-brand text-white"
                         : "bg-bg-card text-text-secondary hover:text-text-primary"
                     )}
                   >
@@ -488,7 +488,7 @@ export default function AdminEditEventPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium flex items-center gap-2">
-                    <LinkIcon className="h-4 w-4 text-accent-primary" />Links
+                    <LinkIcon className="h-4 w-4 text-brand" />Links
                   </label>
                   <Button type="button" variant="outline" size="sm" onClick={addLink} className="gap-1">
                     <Plus className="h-3 w-3" />Add Link

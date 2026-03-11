@@ -39,14 +39,14 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md animate-fade-in"
         onClick={onClose}
       />
       {/* Content */}
       <div
         className={cn(
-          "relative z-10 bg-bg-card border border-border shadow-2xl w-full max-h-[85vh] overflow-y-auto",
-          "rounded-t-xl sm:rounded-xl sm:max-w-sm sm:mx-4",
+          "relative z-10 bg-bg-card border border-white/10 shadow-[0_0_40px_rgba(59,130,246,0.06)] w-full max-h-[85vh] overflow-y-auto",
+          "rounded-t-lg sm:rounded-lg sm:max-w-sm sm:mx-4",
           "animate-slide-up sm:animate-scale-in",
           className
         )}

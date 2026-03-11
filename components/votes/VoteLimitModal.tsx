@@ -43,7 +43,7 @@ export function VoteLimitModal({
 
   const getVoteIcon = (item: VoteHistoryItem) => {
     if (item.type === "event") {
-      return <Calendar className="h-3 w-3 text-accent-primary" />;
+      return <Calendar className="h-3 w-3 text-brand" />;
     } else if (item.type === "collection") {
       return <Layers className="h-3 w-3 text-accent-purple" />;
     } else {
@@ -78,7 +78,7 @@ export function VoteLimitModal({
     <Dialog open={open} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <div className="flex items-center gap-2">
-          <Vote className="h-5 w-5 text-accent-primary" />
+          <Vote className="h-5 w-5 text-brand" />
           Daily Vote Limit
         </div>
       </DialogHeader>
@@ -94,7 +94,7 @@ export function VoteLimitModal({
           </div>
           <div className="w-full bg-bg-card rounded-full h-1.5 overflow-hidden">
             <div
-              className={`h-full transition-all duration-300 ${remaining === 0 ? "bg-text-secondary" : "bg-accent-primary"}`}
+              className={`h-full transition-all duration-300 ${remaining === 0 ? "bg-text-secondary" : "bg-brand"}`}
               style={{ width: `${(remaining / limit) * 100}%` }}
             />
           </div>

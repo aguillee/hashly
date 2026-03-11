@@ -42,8 +42,8 @@ const TYPE_OPTIONS: {
     value: "USER",
     label: "User",
     icon: User,
-    color: "border-border bg-bg-secondary text-text-secondary hover:border-accent-primary/50",
-    activeColor: "border-accent-primary bg-accent-primary/10 text-accent-primary",
+    color: "border-border bg-bg-secondary text-text-secondary hover:border-text-tertiary",
+    activeColor: "border-brand bg-brand-subtle text-brand",
   },
   {
     value: "BUILDER",
@@ -142,13 +142,13 @@ export function JoinMapDialog({
       {/* Dialog */}
       <form
         onSubmit={handleSubmit}
-        className="relative z-10 w-full max-w-md rounded-xl border border-border bg-bg-card shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+        className="relative z-10 w-full max-w-md rounded-lg border border-border bg-bg-card shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-border bg-bg-secondary/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-accent-primary/20 flex items-center justify-center">
-              <Globe className="h-5 w-5 text-accent-primary" />
+            <div className="w-10 h-10 rounded-full bg-brand-subtle flex items-center justify-center">
+              <Globe className="h-5 w-5 text-brand" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-text-primary">
@@ -221,7 +221,7 @@ export function JoinMapDialog({
               onChange={(e) => setDisplayName(e.target.value)}
               maxLength={30}
               placeholder={type === "PROJECT" ? "Project name" : "Your name or alias"}
-              className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+              className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
             />
           </div>
 
@@ -251,7 +251,7 @@ export function JoinMapDialog({
                 className={`w-full pl-8 pr-4 py-2 rounded-lg bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-2 ${
                   showHandleError
                     ? "border-error focus:ring-error/50"
-                    : "border-border focus:ring-accent-primary/50"
+                    : "border-border focus:ring-zinc-400 dark:focus:ring-zinc-600"
                 }`}
               />
             </div>
@@ -277,7 +277,7 @@ export function JoinMapDialog({
               maxLength={160}
               rows={2}
               placeholder={type === "PROJECT" ? "What does your project do?" : "Tell the community about yourself"}
-              className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50 resize-none"
+              className="w-full px-4 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 resize-none"
             />
             <p className="text-xs text-text-secondary mt-1 text-right">
               {bio.length}/160
