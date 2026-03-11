@@ -394,7 +394,10 @@ export async function getReferralStats(
             },
           },
           earnings: {
-            where: { sourceType: { in: ["COMMISSION", "REFERRER_BONUS"] } },
+            where: {
+              sourceType: { in: ["COMMISSION", "REFERRER_BONUS"] },
+              createdAt: { gte: getCurrentSeason().startDate },
+            },
             select: { points: true },
           },
         },
