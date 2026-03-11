@@ -91,7 +91,8 @@ export async function GET(request: NextRequest) {
     const hasLoggedInToday = user.lastLogin && new Date(user.lastLogin) >= startOfDay;
 
     const stats = {
-      totalVotes: seasonVotes,
+      totalVotes: weekEventVotes,
+      seasonVotes,
       totalEvents: seasonApprovedEvents,
       loginStreak: user.loginStreak,
       todayVotes: todayEventVotes,

@@ -219,7 +219,7 @@ export async function awardMissionPoints(
   description: string,
   options?: { permanent?: boolean }
 ): Promise<{ pointsEarned: number; newTotal: number }> {
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const now = new Date();
 
     // Check for existing claim INSIDE transaction (prevents race condition)
@@ -281,14 +281,15 @@ export async function awardMissionPoints(
       },
     });
 
-    // Award 5% referral commission for mission claim (fire-and-forget, outside tx)
-    // We use setTimeout to ensure it runs after the transaction commits
-    setTimeout(() => awardReferralCommission(userId, points, "MISSION_CLAIM"), 0);
-
     return {
       pointsEarned: points,
       newTotal: updatedUser.points,
     };
   });
+
+  // Award 5% referral commission AFTER transaction commits (fire-and-forget)
+  awardReferralCommission(userId, points, "MISSION_CLAIM");
+
+  return result;
 }
 

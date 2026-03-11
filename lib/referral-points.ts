@@ -308,12 +308,23 @@ export async function awardReferralCommission(
           currentReferee &&
           currentReferee.points >= REFERRER_BONUS_THRESHOLD
         ) {
-          await payReferrerBonus(
-            tx,
-            referral.id,
-            referral.referrerId,
-            refereeUserId
-          );
+          // Atomic check: re-read referral to prevent double payment from concurrent requests
+          const freshReferral = await tx.referral.findUnique({
+            where: { id: referral.id },
+            select: { referrerBonusPaid: true, referrerBonusSeasonNumber: true },
+          });
+          const alreadyPaid =
+            freshReferral?.referrerBonusSeasonNumber != null &&
+            freshReferral.referrerBonusSeasonNumber >= currentSeason.number;
+
+          if (!alreadyPaid) {
+            await payReferrerBonus(
+              tx,
+              referral.id,
+              referral.referrerId,
+              refereeUserId
+            );
+          }
         }
       }
     });
