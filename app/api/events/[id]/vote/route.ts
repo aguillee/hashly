@@ -36,24 +36,6 @@ export async function POST(
       );
     }
 
-    // Atomic daily vote limit: reserve a slot before any logic
-    const voteSlot = await reserveVoteSlot(user.walletAddress);
-    if (!voteSlot.reserved) {
-      return NextResponse.json(
-        {
-          error: "Daily vote limit reached",
-          remaining: 0,
-          resetsAt: new Date(Date.UTC(
-            new Date().getUTCFullYear(),
-            new Date().getUTCMonth(),
-            new Date().getUTCDate() + 1,
-            0, 0, 0, 0
-          )).toISOString()
-        },
-        { status: 429 }
-      );
-    }
-
     const { id: eventId } = await params;
 
     // Validate event ID format (CUID)
@@ -97,7 +79,7 @@ export async function POST(
       );
     }
 
-    // Check for existing regular vote (use findFirst inside try to handle race conditions)
+    // Check for existing regular vote BEFORE reserving a slot
     const existingVote = await prisma.vote.findUnique({
       where: {
         userId_eventId: {
@@ -107,12 +89,49 @@ export async function POST(
       },
     });
 
+    // For regular events: if already voted today, reject BEFORE consuming a vote slot
+    const isForeverMint = event.isForeverMint;
+    if (existingVote && !isForeverMint) {
+      const now = new Date();
+      const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+      const votedToday = existingVote.createdAt >= startOfDay;
+
+      if (votedToday && !useNftVotes) {
+        const tomorrow = new Date(startOfDay);
+        tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+        const msRemaining = tomorrow.getTime() - now.getTime();
+        const hoursRemaining = Math.ceil(msRemaining / (1000 * 60 * 60));
+        return NextResponse.json(
+          {
+            error: `You already voted today. Resets at 00:00 UTC (${hoursRemaining}h)`,
+            hoursRemaining,
+          },
+          { status: 429 }
+        );
+      }
+    }
+
+    // NOW reserve a vote slot (only if we know the vote will go through)
+    const voteSlot = await reserveVoteSlot(user.walletAddress);
+    if (!voteSlot.reserved) {
+      return NextResponse.json(
+        {
+          error: "Daily vote limit reached",
+          remaining: 0,
+          resetsAt: new Date(Date.UTC(
+            new Date().getUTCFullYear(),
+            new Date().getUTCMonth(),
+            new Date().getUTCDate() + 1,
+            0, 0, 0, 0
+          )).toISOString()
+        },
+        { status: 429 }
+      );
+    }
+
     let regularVoteWeight = 0;
     let nftVoteWeight = 0;
     let nftVotesUsed: { tokenId: string; serialNumber: number; weight: number }[] = [];
-
-    // Forever mints use permanent voting (like collections) - no 24h cooldown
-    const isForeverMint = event.isForeverMint;
 
     // Handle regular vote
     if (existingVote) {
@@ -174,48 +193,42 @@ export async function POST(
           });
         }
       } else {
-        // Regular event: Check daily cooldown (resets at 00:00 UTC)
-        const now = new Date();
-        const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-        const votedToday = existingVote.createdAt >= startOfDay;
+        // Regular event: already checked same-day above, so this is a new-day re-vote
+        const oldVoteType = existingVote.voteType;
 
-        if (votedToday) {
-          // Can't update regular vote yet, but can still use NFT votes
-          if (!useNftVotes) {
-            const tomorrow = new Date(startOfDay);
-            tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-            const msRemaining = tomorrow.getTime() - now.getTime();
-            const hoursRemaining = Math.ceil(msRemaining / (1000 * 60 * 60));
-            return NextResponse.json(
-              {
-                error: `You already voted today. Resets at 00:00 UTC (${hoursRemaining}h)`,
-                hoursRemaining,
-              },
-              { status: 429 }
-            );
-          }
-        } else {
-          // Update existing regular vote - new day, can vote again
-          const oldVoteType = existingVote.voteType;
-
-          await prisma.vote.update({
+        await prisma.$transaction([
+          prisma.vote.update({
             where: { id: existingVote.id },
             data: {
               voteType: voteType as VoteType,
               createdAt: new Date(),
             },
-          });
+          }),
+          // Award points for re-votes too (same as first vote)
+          prisma.user.update({
+            where: { id: user.id },
+            data: { points: { increment: POINTS_PER_VOTE } },
+          }),
+          prisma.pointHistory.create({
+            data: {
+              userId: user.id,
+              points: POINTS_PER_VOTE,
+              actionType: "VOTE",
+              description: `Voted on event: ${event.title}`,
+            },
+          }),
+        ]);
 
-          // Calculate vote change - every 24h the user can add +1 (UP) or -1 (DOWN)
-          // If changing direction, we also need to undo the previous vote
-          if (voteType === "UP" && oldVoteType === "DOWN") {
-            regularVoteWeight = 2; // Remove old -1, add new +1
-          } else if (voteType === "DOWN" && oldVoteType === "UP") {
-            regularVoteWeight = -2; // Remove old +1, add new -1
-          } else {
-            // Same vote type - just add another vote in that direction
-            regularVoteWeight = voteType === "UP" ? 1 : -1;
-          }
+        // Award 5% referral commission (fire-and-forget)
+        awardReferralCommission(user.id, POINTS_PER_VOTE, "VOTE");
+
+        // Calculate vote change - every 24h the user can add +1 (UP) or -1 (DOWN)
+        if (voteType === "UP" && oldVoteType === "DOWN") {
+          regularVoteWeight = 2;
+        } else if (voteType === "DOWN" && oldVoteType === "UP") {
+          regularVoteWeight = -2;
+        } else {
+          regularVoteWeight = voteType === "UP" ? 1 : -1;
         }
       }
     } else {

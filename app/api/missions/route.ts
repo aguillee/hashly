@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     const currentSeason = getCurrentSeason();
     const seasonStart = currentSeason.startDate;
 
-    // Count votes in parallel — events separate from collections/tokens
+    // Count votes in parallel — use PointHistory for accurate event vote action counts
     const [
       todayEventVotes,
       weekEventVotes,
@@ -57,12 +57,32 @@ export async function GET(request: NextRequest) {
       communityProfile,
       userMissions,
     ] = await Promise.all([
-      // Today — events only (for daily_vote, vote_5_events)
-      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfDay } } }),
-      // Week — events only (for weekly_votes)
-      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfWeek } } }),
+      // Today — event vote actions from PointHistory (counts re-votes too)
+      prisma.pointHistory.count({
+        where: {
+          userId: user.id,
+          actionType: "VOTE",
+          description: { startsWith: "Voted on event:" },
+          createdAt: { gte: startOfDay },
+        },
+      }),
+      // Week — event vote actions from PointHistory
+      prisma.pointHistory.count({
+        where: {
+          userId: user.id,
+          actionType: "VOTE",
+          description: { startsWith: "Voted on event:" },
+          createdAt: { gte: startOfWeek },
+        },
+      }),
       // Season — all types (for first_vote, votes_100, votes_500)
-      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: seasonStart } } }),
+      prisma.pointHistory.count({
+        where: {
+          userId: user.id,
+          actionType: "VOTE",
+          createdAt: { gte: seasonStart },
+        },
+      }),
       prisma.collectionVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
       prisma.tokenVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
       // Approved events this season

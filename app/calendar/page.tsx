@@ -90,7 +90,7 @@ export default function CalendarPage() {
   const [events, setEvents] = React.useState<Event[]>([]);
   const [userVotes, setUserVotes] = React.useState<Record<string, "UP" | "DOWN">>({});
   const [loading, setLoading] = React.useState(true);
-  const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("grid");
+  const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("calendar");
   const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA">("all");
   const [stateFilter, setStateFilter] = React.useState<"all" | "live" | "upcoming">("all");
   const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
