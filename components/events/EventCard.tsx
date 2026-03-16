@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Calendar, CalendarPlus, ThumbsUp, ThumbsDown, Clock, Box, Star, MapPin, Globe, Users } from "lucide-react";
+import { Calendar, CalendarPlus, ThumbsUp, ThumbsDown, Clock, Box, Star, MapPin, Globe, Users, Award } from "lucide-react";
 import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { formatDate, formatTimeRemaining, getVoteScore, parseMintPrice } from "@/lib/utils";
@@ -31,6 +31,7 @@ interface EventCardProps {
     host?: string | null;
     location?: string | null;
     location_type?: string | null;
+    hasBadge?: boolean;
   };
   userVote?: "UP" | "DOWN" | null;
   onVote?: (eventId: string, voteType: "UP" | "DOWN") => void;
@@ -76,7 +77,12 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group block rounded-lg overflow-hidden bg-bg-card border border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-150"
+      className={cn(
+        "group block rounded-lg overflow-hidden bg-bg-card border hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-150",
+        event.hasBadge
+          ? "border-amber-500/40 hover:border-amber-500/60 shadow-[0_0_8px_rgba(245,158,11,0.1)]"
+          : "border-[var(--card-border)] hover:border-[var(--card-border-hover)]"
+      )}
     >
       {/* Image with gradient overlay */}
       <div className="relative aspect-[16/10] bg-secondary overflow-hidden">
@@ -94,6 +100,16 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
 
         {/* Bottom gradient for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+        {/* Badge indicator - top left */}
+        {event.hasBadge && (
+          <div className="absolute top-2.5 left-2.5">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 rounded-full text-[10px] font-bold text-white tracking-wide shadow-lg">
+              <Award className="h-3 w-3" />
+              NFT BADGE
+            </span>
+          </div>
+        )}
 
         {/* Status pill - top right */}
         <div className="absolute top-2.5 right-2.5">

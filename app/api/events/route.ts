@@ -166,6 +166,17 @@ export async function GET(request: NextRequest) {
       prisma.event.count({ where }),
     ]);
 
+    // Get events with attendance badges
+    const eventIds = events.map((e) => e.id);
+    const badgeEvents = await prisma.attendanceBadge.findMany({
+      where: {
+        eventId: { in: eventIds },
+        status: { in: ["TOKEN_CREATED", "MINTED", "DISTRIBUTED"] },
+      },
+      select: { eventId: true },
+    });
+    const badgeEventIds = new Set(badgeEvents.map((b) => b.eventId));
+
     // Get user votes if authenticated
     const user = await getCurrentUser();
     let userVotesData: Record<string, { voteType: "UP" | "DOWN"; canVote: boolean; voteLockedUntil: string | null }> = {};
@@ -208,6 +219,7 @@ export async function GET(request: NextRequest) {
         userVote: userVotesData[e.id]?.voteType || null,
         canVote: userVotesData[e.id]?.canVote ?? true,
         voteLockedUntil: userVotesData[e.id]?.voteLockedUntil || null,
+        hasBadge: badgeEventIds.has(e.id),
       })),
       total,
       hasMore: offset + events.length < total,

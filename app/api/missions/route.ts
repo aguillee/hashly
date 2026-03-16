@@ -141,10 +141,6 @@ export async function GET(request: NextRequest) {
           progress = Math.min(user.loginStreak, def.requirement);
           completed = user.loginStreak >= def.requirement;
           break;
-        case "weekly_votes":
-          progress = Math.min(weekEventVotes, def.requirement);
-          completed = weekEventVotes >= def.requirement;
-          break;
         case "first_vote":
           progress = Math.min(seasonVotes, def.requirement);
           completed = seasonVotes >= def.requirement;
@@ -152,14 +148,6 @@ export async function GET(request: NextRequest) {
         case "first_event":
           progress = Math.min(seasonApprovedEvents, def.requirement);
           completed = seasonApprovedEvents >= def.requirement;
-          break;
-        case "votes_100":
-          progress = Math.min(seasonVotes, def.requirement);
-          completed = seasonVotes >= def.requirement;
-          break;
-        case "votes_500":
-          progress = Math.min(seasonVotes, def.requirement);
-          completed = seasonVotes >= def.requirement;
           break;
         case "season_streak_25":
           progress = Math.min(user.loginStreak, def.requirement);

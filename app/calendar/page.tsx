@@ -48,6 +48,7 @@ interface Event {
   host?: string | null;
   location?: string | null;
   location_type?: string | null;
+  hasBadge?: boolean;
 }
 
 interface UserVote {

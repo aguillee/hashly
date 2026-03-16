@@ -31,6 +31,7 @@ import {
   ThumbsUp,
   Star,
   ExternalLink,
+  Award,
 } from "lucide-react";
 import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
@@ -53,6 +54,7 @@ interface Event {
   host?: string | null;
   location?: string | null;
   location_type?: string | null;
+  hasBadge?: boolean;
 }
 
 interface CalendarViewProps {
@@ -278,7 +280,10 @@ export function CalendarView({ events }: CalendarViewProps) {
                             )}
                             title={event.title}
                           >
-                            <span className="text-text-secondary font-medium">{event.title}</span>
+                            <span className="text-text-secondary font-medium flex items-center gap-0.5">
+                              {event.hasBadge && <Award className="h-2.5 w-2.5 text-amber-400 flex-shrink-0" />}
+                              <span className="truncate">{event.title}</span>
+                            </span>
                           </div>
                         );
                       })}
@@ -391,6 +396,12 @@ export function CalendarView({ events }: CalendarViewProps) {
                             )}>
                               {getEventTypeLabel(event)}
                             </span>
+                            {event.hasBadge && (
+                              <span className="flex items-center gap-1 text-[9px] font-semibold text-amber-400 bg-amber-500/15 px-1.5 py-0.5 rounded">
+                                <Award className="h-2.5 w-2.5" />
+                                BADGE
+                              </span>
+                            )}
                             {event.status === "LIVE" && (
                               <span className="flex items-center gap-1 text-[9px] font-semibold text-green-400">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />

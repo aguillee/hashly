@@ -49,15 +49,6 @@ export const MISSION_DEFINITIONS: MissionDefinition[] = [
     requirement: 7,
     icon: "flame",
   },
-  {
-    id: "weekly_votes",
-    name: "Super Voter",
-    description: "Vote on 20 events this week (events only)",
-    pointsReward: 200,
-    type: "WEEKLY",
-    requirement: 20,
-    icon: "trophy",
-  },
   // ── Season (Achievements) ─────────────────────────────
   {
     id: "first_vote",
@@ -76,24 +67,6 @@ export const MISSION_DEFINITIONS: MissionDefinition[] = [
     type: "ACHIEVEMENT",
     requirement: 1,
     icon: "gift",
-  },
-  {
-    id: "votes_100",
-    name: "Voting Enthusiast",
-    description: "Cast 80 votes total (any type)",
-    pointsReward: 300,
-    type: "ACHIEVEMENT",
-    requirement: 80,
-    icon: "trophy",
-  },
-  {
-    id: "votes_500",
-    name: "Voting Legend",
-    description: "Cast 130 votes total (any type)",
-    pointsReward: 1500,
-    type: "ACHIEVEMENT",
-    requirement: 130,
-    icon: "trophy",
   },
   {
     id: "season_streak_25",

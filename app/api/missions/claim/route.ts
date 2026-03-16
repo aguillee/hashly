@@ -118,20 +118,11 @@ export async function POST(request: NextRequest) {
       case "weekly_streak":
         isCompleted = user.loginStreak >= mission.requirement;
         break;
-      case "weekly_votes":
-        isCompleted = weekEventVotes >= mission.requirement;
-        break;
       case "first_vote":
         isCompleted = seasonVotes >= mission.requirement;
         break;
       case "first_event":
         isCompleted = seasonApprovedEvents >= mission.requirement;
-        break;
-      case "votes_100":
-        isCompleted = seasonVotes >= mission.requirement;
-        break;
-      case "votes_500":
-        isCompleted = seasonVotes >= mission.requirement;
         break;
       case "season_streak_25":
         isCompleted = user.loginStreak >= mission.requirement;
