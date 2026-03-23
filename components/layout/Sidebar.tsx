@@ -17,6 +17,7 @@ import {
   GlobeHemisphereWest,
   Ranking,
   Crosshair,
+  Compass,
   Lightning,
   CheckSquare,
   SidebarSimple,
@@ -38,6 +39,7 @@ const ConnectButton = dynamic(
 
 const navLinks = [
   { href: "/", label: "Home", icon: House },
+  { href: "/onboarding", label: "Get Started", icon: Compass },
   { href: "/news", label: "News", icon: Newspaper },
   { href: "/calendar", label: "Calendar", icon: CalendarDots },
   { href: "/projects", label: "Projects", icon: Rocket },
