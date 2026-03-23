@@ -150,8 +150,8 @@ const STEPS: OnboardingStep[] = [
         logo: "/logos/hashly.png",
       },
       {
-        label: "@HashlyApp on X",
-        href: "https://x.com/HashlyApp",
+        label: "@hashly_h on X",
+        href: "https://x.com/hashly_h",
         description: "Follow us",
         logo: "/logos/x.png",
       },
