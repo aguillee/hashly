@@ -25,7 +25,7 @@ export async function GET(
         id: true,
         name: true,
         slug: true,
-        category: true,
+        categories: true,
         countryCode: true,
         logoUrl: true,
         description: true,
@@ -101,7 +101,7 @@ export async function PUT(
       where: { id },
       data: {
         ...(data.name && { name: data.name.trim() }),
-        ...(data.category && { category: data.category }),
+        ...(data.categories && { categories: data.categories }),
         ...(data.countryCode && { countryCode: data.countryCode }),
         ...(data.logoUrl && { logoUrl: data.logoUrl }),
         ...(data.description && { description: data.description.trim() }),
