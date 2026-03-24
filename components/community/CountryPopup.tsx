@@ -3,6 +3,7 @@
 import { X, MapPin } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
 import { countryByCode } from "@/lib/countries";
+import { CountryFlag } from "@/components/ui/CountryFlag";
 import type { CommunityProfile } from "@/hooks/useCommunityProfiles";
 
 interface CountryPopupProps {
@@ -23,7 +24,7 @@ export function CountryPopup({ countryCode, profiles, onClose }: CountryPopupPro
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-secondary/50">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{country.emoji}</span>
+            <CountryFlag code={countryCode} size="md" />
             <div>
               <h3 className="text-sm font-semibold text-text-primary">
                 {country.name}
@@ -60,7 +61,7 @@ export function CountryPopup({ countryCode, profiles, onClose }: CountryPopupPro
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-border">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{country.emoji}</span>
+            <CountryFlag code={countryCode} size="md" />
             <div>
               <h3 className="text-sm font-semibold text-text-primary">
                 {country.name}

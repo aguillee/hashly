@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     const profiles = await prisma.communityProfile.findMany({
-      where: { isVisible: true },
+      where: { isVisible: true, isApproved: true },
       select: {
         id: true,
         displayName: true,

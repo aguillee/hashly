@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Search } from "lucide-react";
 import { countries } from "@/lib/countries";
+import { CountryFlag } from "@/components/ui/CountryFlag";
 
 interface CountrySelectorProps {
   value: string;
@@ -47,7 +48,7 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
       >
         {selected ? (
           <span>
-            {selected.emoji} {selected.name}
+            <CountryFlag code={selected.code} size="sm" /> {selected.name}
           </span>
         ) : (
           <span className="text-text-secondary">Select a country...</span>
@@ -94,7 +95,7 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
                       : "text-text-primary"
                   }`}
                 >
-                  <span>{country.emoji}</span>
+                  <CountryFlag code={country.code} size="sm" />
                   <span>{country.name}</span>
                 </button>
               ))

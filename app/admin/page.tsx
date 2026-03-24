@@ -20,15 +20,21 @@ import {
   Eye,
   Coins,
   Mic2,
+  Search,
+  Globe,
+  Pencil,
+  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
+import { ImageUpload } from "@/components/ui/ImageUpload";
+import { CountrySelector } from "@/components/community/CountrySelector";
 
 interface PendingEvent {
   id: string;
@@ -65,11 +71,25 @@ interface Admin {
   points: number;
 }
 
+type TabId = "events" | "collections" | "tokens" | "ecosystem" | "admins";
+
+const ECOSYSTEM_CATEGORIES = [
+  "DEFI", "TOOLS", "MARKETPLACE", "DATA", "COMMUNITY",
+  "WALLET", "BRIDGE", "GAMING", "NFT", "EDUCATION",
+  "INFRASTRUCTURE", "OTHER",
+] as const;
+
 export default function AdminPage() {
   const router = useRouter();
   const { user, isConnected } = useWalletStore();
+
+  // Tab state
+  const [activeTab, setActiveTab] = React.useState<TabId>("events");
+
+  // Existing states
   const [pendingEvents, setPendingEvents] = React.useState<PendingEvent[]>([]);
   const [pendingCollections, setPendingCollections] = React.useState<PendingCollection[]>([]);
+  const [pendingHostRequests, setPendingHostRequests] = React.useState(0);
   const [admins, setAdmins] = React.useState<Admin[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [loadingAdmins, setLoadingAdmins] = React.useState(true);
@@ -118,6 +138,21 @@ export default function AdminPage() {
   const [loadingHiddenTokens, setLoadingHiddenTokens] = React.useState(true);
   const [togglingHiddenToken, setTogglingHiddenToken] = React.useState<string | null>(null);
 
+  // Ecosystem states (pending)
+  const [ecosystemProjects, setEcosystemProjects] = React.useState<any[]>([]);
+  const [loadingEcosystem, setLoadingEcosystem] = React.useState(true);
+  const [processingEcosystem, setProcessingEcosystem] = React.useState<string | null>(null);
+
+  // Ecosystem states (all projects)
+  const [allEcosystemProjects, setAllEcosystemProjects] = React.useState<any[]>([]);
+  const [loadingAllEcosystem, setLoadingAllEcosystem] = React.useState(true);
+  const [editingEcosystemId, setEditingEcosystemId] = React.useState<string | null>(null);
+  const [editEcosystemData, setEditEcosystemData] = React.useState<Record<string, any>>({});
+  const [savingEcosystem, setSavingEcosystem] = React.useState(false);
+  const [ecosystemSearch, setEcosystemSearch] = React.useState("");
+  const [ecosystemCategoryFilter, setEcosystemCategoryFilter] = React.useState<string>("all");
+  const [deletingEcosystemId, setDeletingEcosystemId] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     if (!isConnected || !user?.isAdmin) {
       router.push("/");
@@ -129,7 +164,117 @@ export default function AdminPage() {
     fetchAdmins();
     fetchHiddenCollections();
     fetchHiddenTokens();
+    fetchEcosystemProjects();
+    fetchAllEcosystemProjects();
+    fetchPendingHostRequests();
   }, [isConnected, user, router]);
+
+  async function fetchPendingHostRequests() {
+    try {
+      const res = await fetch("/api/admin/host-requests?status=PENDING");
+      if (res.ok) {
+        const data = await res.json();
+        setPendingHostRequests(data.requests?.length || 0);
+      }
+    } catch {}
+  }
+
+  // ========== ECOSYSTEM FUNCTIONS ==========
+
+  async function fetchEcosystemProjects() {
+    try {
+      const res = await fetch("/api/admin/ecosystem?status=pending");
+      if (res.ok) {
+        const data = await res.json();
+        setEcosystemProjects(data.projects || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch ecosystem projects:", error);
+    } finally {
+      setLoadingEcosystem(false);
+    }
+  }
+
+  async function fetchAllEcosystemProjects() {
+    try {
+      const res = await fetch("/api/admin/ecosystem");
+      if (res.ok) {
+        const data = await res.json();
+        setAllEcosystemProjects(data.projects || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch all ecosystem projects:", error);
+    } finally {
+      setLoadingAllEcosystem(false);
+    }
+  }
+
+  async function handleEcosystemAction(id: string, action: "approve" | "delete") {
+    setProcessingEcosystem(id);
+    try {
+      if (action === "approve") {
+        await fetch(`/api/admin/ecosystem/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isApproved: true }),
+        });
+      } else {
+        await fetch(`/api/admin/ecosystem/${id}`, { method: "DELETE" });
+      }
+      setEcosystemProjects((prev) => prev.filter((p) => p.id !== id));
+      fetchAllEcosystemProjects();
+    } catch (error) {
+      console.error(`Failed to ${action} ecosystem project:`, error);
+    } finally {
+      setProcessingEcosystem(null);
+    }
+  }
+
+  async function handleEditEcosystem(id: string, data: Record<string, any>) {
+    setSavingEcosystem(true);
+    try {
+      const res = await fetch(`/api/admin/ecosystem/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        setEditingEcosystemId(null);
+        setEditEcosystemData({});
+        fetchAllEcosystemProjects();
+        fetchEcosystemProjects();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update project");
+      }
+    } catch (error) {
+      console.error("Failed to edit ecosystem project:", error);
+      alert("Failed to update project");
+    } finally {
+      setSavingEcosystem(false);
+    }
+  }
+
+  async function handleDeleteEcosystemProject(id: string) {
+    if (!confirm("Are you sure you want to delete this ecosystem project? This cannot be undone.")) return;
+    setDeletingEcosystemId(id);
+    try {
+      const res = await fetch(`/api/admin/ecosystem/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setAllEcosystemProjects((prev) => prev.filter((p) => p.id !== id));
+        setEcosystemProjects((prev) => prev.filter((p) => p.id !== id));
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete project");
+      }
+    } catch (error) {
+      console.error("Failed to delete ecosystem project:", error);
+    } finally {
+      setDeletingEcosystemId(null);
+    }
+  }
+
+  // ========== COLLECTION FUNCTIONS ==========
 
   async function fetchHiddenCollections() {
     try {
@@ -384,6 +529,8 @@ export default function AdminPage() {
     }
   }
 
+  // ========== EVENT FUNCTIONS ==========
+
   async function fetchPendingEvents() {
     try {
       const response = await fetch("/api/events/pending");
@@ -397,6 +544,27 @@ export default function AdminPage() {
       setLoading(false);
     }
   }
+
+  async function handleAction(eventId: string, action: "approve" | "reject") {
+    setProcessing(eventId);
+    try {
+      const response = await fetch("/api/events/pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, action }),
+      });
+
+      if (response.ok) {
+        setPendingEvents((prev) => prev.filter((e) => e.id !== eventId));
+      }
+    } catch (error) {
+      console.error(`Failed to ${action} event:`, error);
+    } finally {
+      setProcessing(null);
+    }
+  }
+
+  // ========== COLLECTION PENDING FUNCTIONS ==========
 
   async function fetchPendingCollections() {
     try {
@@ -431,6 +599,8 @@ export default function AdminPage() {
     }
   }
 
+  // ========== ADMIN FUNCTIONS ==========
+
   async function fetchAdmins() {
     try {
       const response = await fetch("/api/admin/admins");
@@ -442,25 +612,6 @@ export default function AdminPage() {
       console.error("Failed to fetch admins:", error);
     } finally {
       setLoadingAdmins(false);
-    }
-  }
-
-  async function handleAction(eventId: string, action: "approve" | "reject") {
-    setProcessing(eventId);
-    try {
-      const response = await fetch("/api/events/pending", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, action }),
-      });
-
-      if (response.ok) {
-        setPendingEvents((prev) => prev.filter((e) => e.id !== eventId));
-      }
-    } catch (error) {
-      console.error(`Failed to ${action} event:`, error);
-    } finally {
-      setProcessing(null);
     }
   }
 
@@ -518,6 +669,8 @@ export default function AdminPage() {
     }
   }
 
+  // ========== SYNC FUNCTIONS ==========
+
   async function handleSyncLaunchpads() {
     setSyncingLaunchpads(true);
     setSyncResult(null);
@@ -533,7 +686,6 @@ export default function AdminPage() {
           type: "launchpads",
           message: data.message || `Imported ${data.created} events`,
         });
-        // Refresh pending events
         fetchPendingEvents();
       } else {
         setSyncResult({
@@ -567,7 +719,6 @@ export default function AdminPage() {
           type: "kabila",
           message: data.message || `Kabila: Imported ${data.created} events`,
         });
-        // Refresh pending events
         fetchPendingEvents();
       } else {
         setSyncResult({
@@ -590,7 +741,6 @@ export default function AdminPage() {
     setSyncingCollections(true);
     setSyncResult(null);
     try {
-      // Use Kabila API for full collection sync
       const response = await fetch("/api/admin/sync/collections", {
         method: "POST",
       });
@@ -697,14 +847,45 @@ export default function AdminPage() {
     }
   }
 
+  // ========== ECOSYSTEM FILTERING ==========
+
+  const filteredAllEcosystemProjects = React.useMemo(() => {
+    let filtered = allEcosystemProjects;
+    if (ecosystemSearch) {
+      const q = ecosystemSearch.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.websiteUrl?.toLowerCase().includes(q)
+      );
+    }
+    if (ecosystemCategoryFilter !== "all") {
+      filtered = filtered.filter((p) => (p.categories || []).includes(ecosystemCategoryFilter));
+    }
+    return filtered;
+  }, [allEcosystemProjects, ecosystemSearch, ecosystemCategoryFilter]);
+
+  // ========== GUARDS ==========
+
   if (!isConnected || !user?.isAdmin) {
     return null;
   }
 
+  // ========== TAB DEFINITIONS ==========
+
+  const tabs: { id: TabId; label: string; count?: number; icon: React.ReactNode }[] = [
+    { id: "events", label: "Events", count: pendingEvents.length, icon: <Calendar className="h-4 w-4" /> },
+    { id: "collections", label: "Collections", count: pendingCollections.length, icon: <Layers className="h-4 w-4" /> },
+    { id: "tokens", label: "Tokens", icon: <Coins className="h-4 w-4" /> },
+    { id: "ecosystem", label: "Ecosystem", count: ecosystemProjects.length, icon: <Globe className="h-4 w-4" /> },
+    { id: "admins", label: "Admins", icon: <Users className="h-4 w-4" /> },
+  ];
+
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6">
         <div className="p-3 rounded-md bg-brand-subtle">
           <Shield className="h-8 w-8 text-brand" />
         </div>
@@ -714,32 +895,18 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-yellow-500/10">
-                <Clock className="h-6 w-6 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{pendingEvents.length}</p>
-                <p className="text-sm text-text-secondary">Pending Review</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
+      {/* Quick Links */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Link href="/admin/events">
           <Card hover>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-brand-subtle">
-                  <Calendar className="h-6 w-6 text-brand" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-brand-subtle">
+                  <Calendar className="h-5 w-5 text-brand" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">All Events</p>
-                  <p className="text-xs text-text-secondary">Manage published events</p>
+                  <p className="text-xs text-text-secondary">Manage published</p>
                 </div>
               </div>
             </CardContent>
@@ -748,14 +915,14 @@ export default function AdminPage() {
 
         <Link href="/events/new">
           <Card hover>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-success/10">
-                  <CheckCircle className="h-6 w-6 text-success" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-success/10">
+                  <CheckCircle className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Create Event</p>
-                  <p className="text-xs text-text-secondary">Add new event directly</p>
+                  <p className="text-xs text-text-secondary">Add new event</p>
                 </div>
               </div>
             </CardContent>
@@ -764,14 +931,14 @@ export default function AdminPage() {
 
         <Link href="/admin/ads">
           <Card hover>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-pink-500/10">
-                  <Megaphone className="h-6 w-6 text-pink-500" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-pink-500/10">
+                  <Megaphone className="h-5 w-5 text-pink-500" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Home Ads</p>
-                  <p className="text-xs text-text-secondary">Manage homepage carousel</p>
+                  <p className="text-xs text-text-secondary">Manage carousel</p>
                 </div>
               </div>
             </CardContent>
@@ -780,14 +947,21 @@ export default function AdminPage() {
 
         <Link href="/admin/hosts">
           <Card hover>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-purple-500/10">
-                  <Mic2 className="h-6 w-6 text-purple-500" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-500/10">
+                  <Mic2 className="h-5 w-5 text-purple-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Host Requests</p>
-                  <p className="text-xs text-text-secondary">Approve badge hosts</p>
+                  <p className="text-sm font-medium flex items-center gap-1.5">
+                    Host Requests
+                    {pendingHostRequests > 0 && (
+                      <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full bg-purple-500 text-white">
+                        {pendingHostRequests}
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-text-secondary">Approve hosts</p>
                 </div>
               </div>
             </CardContent>
@@ -795,418 +969,106 @@ export default function AdminPage() {
         </Link>
       </div>
 
-      {/* Sync Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {/* SentX Launchpads */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-purple-500/10">
-                  <Calendar className="h-6 w-6 text-purple-500" />
-                </div>
-                <div>
-                  <p className="font-medium">Sync SentX</p>
-                  <p className="text-xs text-text-secondary">Import from SentX</p>
-                </div>
-              </div>
-              <Button
-                variant="secondary"
-                onClick={handleSyncLaunchpads}
-                loading={syncingLaunchpads}
-                className="gap-2"
-              >
-                <RefreshCw className={syncingLaunchpads ? "animate-spin" : ""} />
-                Sync
-              </Button>
-            </div>
-            {syncResult?.type === "launchpads" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Kabila Launchpads */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-blue-500/10">
-                  <Calendar className="h-6 w-6 text-blue-500" />
-                </div>
-                <div>
-                  <p className="font-medium">Sync Kabila</p>
-                  <p className="text-xs text-text-secondary">Import from Kabila</p>
-                </div>
-              </div>
-              <Button
-                variant="secondary"
-                onClick={handleSyncKabila}
-                loading={syncingKabila}
-                className="gap-2"
-              >
-                <RefreshCw className={syncingKabila ? "animate-spin" : ""} />
-                Sync
-              </Button>
-            </div>
-            {syncResult?.type === "kabila" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Collections Sync */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-green-500/10">
-                  <Layers className="h-6 w-6 text-green-500" />
-                </div>
-                <div>
-                  <p className="font-medium">Sync Collections</p>
-                  <p className="text-xs text-text-secondary">Import ALL from Kabila</p>
-                </div>
-              </div>
-              <Button
-                variant="secondary"
-                onClick={handleSyncCollections}
-                loading={syncingCollections}
-                className="gap-2"
-              >
-                <RefreshCw className={syncingCollections ? "animate-spin" : ""} />
-                Sync
-              </Button>
-            </div>
-            {syncResult?.type === "collections" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Add Collection Manually */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="p-3 rounded-lg bg-cyan-500/10">
-                <Plus className="h-6 w-6 text-cyan-500" />
-              </div>
-              <div>
-                <p className="font-medium">Add Collection</p>
-                <p className="text-xs text-text-secondary">Add by Token ID</p>
-              </div>
-            </div>
-            <form onSubmit={handleAddCollection} className="flex gap-2">
-              <Input
-                placeholder="0.0.XXXXX"
-                value={newCollectionTokenId}
-                onChange={(e) => setNewCollectionTokenId(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit" size="sm" loading={addingCollection}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </form>
-            {syncResult?.type === "add-collection" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Delete Specific Collection */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="p-3 rounded-lg bg-orange-500/10">
-                <Trash2 className="h-6 w-6 text-orange-500" />
-              </div>
-              <div>
-                <p className="font-medium">Delete Collection</p>
-                <p className="text-xs text-text-secondary">Remove a specific collection by Token ID</p>
-              </div>
-            </div>
-            <form
-              onSubmit={handleDeleteSpecificCollection}
-              className="flex gap-2"
+      {/* Tab Bar */}
+      <div className="border-b border-border mb-6">
+        <nav className="-mb-px flex gap-6 overflow-x-auto" aria-label="Admin tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 whitespace-nowrap py-3 px-1 border-b-2 text-sm font-medium transition-colors",
+                activeTab === tab.id
+                  ? "border-brand text-brand"
+                  : "border-transparent text-text-secondary hover:text-text-primary hover:border-border"
+              )}
             >
-              <Input
-                placeholder="Token ID (0.0.XXXXX)"
-                value={deleteCollectionId}
-                onChange={(e) => setDeleteCollectionId(e.target.value)}
-                disabled={deletingCollection}
-              />
-              <Button type="submit" variant="destructive" size="sm" loading={deletingCollection}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </form>
-            {syncResult?.type === "delete-collection" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Hide Collection */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="p-3 rounded-lg bg-gray-500/10">
-                <EyeOff className="h-6 w-6 text-gray-500" />
-              </div>
-              <div>
-                <p className="font-medium">Hide Collection</p>
-                <p className="text-xs text-text-secondary">Exclude from ranking by Token ID</p>
-              </div>
-            </div>
-            <form onSubmit={handleHideCollection} className="flex gap-2">
-              <Input
-                placeholder="Token ID (0.0.XXXXX)"
-                value={hideCollectionId}
-                onChange={(e) => setHideCollectionId(e.target.value)}
-                disabled={hidingCollection}
-              />
-              <Button type="submit" variant="secondary" size="sm" loading={hidingCollection}>
-                <EyeOff className="h-4 w-4" />
-              </Button>
-            </form>
-            {syncResult?.type === "hide-collection" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
+              {tab.icon}
+              {tab.label}
+              {tab.count !== undefined && tab.count > 0 && (
+                <span
+                  className={cn(
+                    "inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium",
+                    activeTab === tab.id
+                      ? "bg-brand/10 text-brand"
+                      : "bg-bg-secondary text-text-tertiary"
+                  )}
+                >
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
       </div>
 
-      {/* Hidden Collections List */}
-      {hiddenCollections.length > 0 && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <EyeOff className="h-5 w-5" />
-              Hidden Collections ({hiddenCollections.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {hiddenCollections.map((collection) => (
-                <div
-                  key={collection.id}
-                  className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg"
-                >
-                  <div className="w-10 h-10 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
-                    {collection.image ? (
-                      <Image
-                        src={collection.image}
-                        alt={collection.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Layers className="h-4 w-4 text-text-secondary" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{collection.name}</p>
-                    <p className="text-xs text-text-secondary truncate">{collection.tokenAddress}</p>
+      {/* ============================== */}
+      {/* EVENTS TAB                     */}
+      {/* ============================== */}
+      {activeTab === "events" && (
+        <div className="space-y-6">
+          {/* Sync cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* SentX Launchpads */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-lg bg-purple-500/10">
+                      <Calendar className="h-6 w-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Sync SentX</p>
+                      <p className="text-xs text-text-secondary">Import from SentX</p>
+                    </div>
                   </div>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleToggleHidden(collection.tokenAddress, true)}
-                    disabled={togglingHidden === collection.tokenAddress}
-                    className="flex-shrink-0"
-                    title="Show collection"
+                    variant="secondary"
+                    onClick={handleSyncLaunchpads}
+                    loading={syncingLaunchpads}
+                    className="gap-2"
                   >
-                    {togglingHidden === collection.tokenAddress ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-success" />
-                    )}
+                    <RefreshCw className={syncingLaunchpads ? "animate-spin" : ""} />
+                    Sync
                   </Button>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                {syncResult?.type === "launchpads" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
 
-      {/* Token Management Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Sync Tokens */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-amber-500/10">
-                  <Coins className="h-6 w-6 text-amber-500" />
-                </div>
-                <div>
-                  <p className="font-medium">Sync Tokens</p>
-                  <p className="text-xs text-text-secondary">Import from Eta Finance</p>
-                </div>
-              </div>
-              <Button
-                variant="secondary"
-                onClick={handleSyncTokens}
-                loading={syncingTokens}
-                className="gap-2"
-              >
-                <RefreshCw className={syncingTokens ? "animate-spin" : ""} />
-                Sync
-              </Button>
-            </div>
-            {syncResult?.type === "sync-tokens" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Add Token Manually */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="p-3 rounded-lg bg-teal-500/10">
-                <Plus className="h-6 w-6 text-teal-500" />
-              </div>
-              <div>
-                <p className="font-medium">Add Token</p>
-                <p className="text-xs text-text-secondary">Add by Token ID</p>
-              </div>
-            </div>
-            <form onSubmit={handleAddToken} className="flex gap-2">
-              <Input
-                placeholder="0.0.XXXXX"
-                value={addTokenId}
-                onChange={(e) => setAddTokenId(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit" size="sm" loading={addingToken}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </form>
-            {syncResult?.type === "add-token" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Hide Token */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="p-3 rounded-lg bg-gray-500/10">
-                <EyeOff className="h-6 w-6 text-gray-500" />
-              </div>
-              <div>
-                <p className="font-medium">Hide Token</p>
-                <p className="text-xs text-text-secondary">Exclude from ranking</p>
-              </div>
-            </div>
-            <form onSubmit={handleHideToken} className="flex gap-2">
-              <Input
-                placeholder="0.0.XXXXX"
-                value={hideTokenId}
-                onChange={(e) => setHideTokenId(e.target.value)}
-                disabled={hidingToken}
-              />
-              <Button type="submit" variant="secondary" size="sm" loading={hidingToken}>
-                <EyeOff className="h-4 w-4" />
-              </Button>
-            </form>
-            {syncResult?.type === "hide-token" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Delete Token */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="p-3 rounded-lg bg-red-500/10">
-                <Trash2 className="h-6 w-6 text-red-500" />
-              </div>
-              <div>
-                <p className="font-medium">Delete Token</p>
-                <p className="text-xs text-text-secondary">Remove by Token ID</p>
-              </div>
-            </div>
-            <form onSubmit={handleDeleteToken} className="flex gap-2">
-              <Input
-                placeholder="0.0.XXXXX"
-                value={deleteTokenId}
-                onChange={(e) => setDeleteTokenId(e.target.value)}
-                disabled={deletingToken}
-              />
-              <Button type="submit" variant="destructive" size="sm" loading={deletingToken}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </form>
-            {syncResult?.type === "delete-token" && (
-              <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Hidden Tokens List */}
-      {hiddenTokens.length > 0 && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Coins className="h-5 w-5" />
-              Hidden Tokens ({hiddenTokens.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {hiddenTokens.map((token) => (
-                <div
-                  key={token.id}
-                  className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg"
-                >
-                  <div className="w-10 h-10 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
-                    {token.icon ? (
-                      <Image
-                        src={token.icon}
-                        alt={token.symbol}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Coins className="h-4 w-4 text-text-secondary" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{token.symbol}</p>
-                    <p className="text-xs text-text-secondary truncate">{token.tokenAddress}</p>
+            {/* Kabila Launchpads */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-lg bg-blue-500/10">
+                      <Calendar className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Sync Kabila</p>
+                      <p className="text-xs text-text-secondary">Import from Kabila</p>
+                    </div>
                   </div>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleToggleHiddenToken(token.tokenAddress, true)}
-                    disabled={togglingHiddenToken === token.tokenAddress}
-                    className="flex-shrink-0"
-                    title="Show token"
+                    variant="secondary"
+                    onClick={handleSyncKabila}
+                    loading={syncingKabila}
+                    className="gap-2"
                   >
-                    {togglingHiddenToken === token.tokenAddress ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-success" />
-                    )}
+                    <RefreshCw className={syncingKabila ? "animate-spin" : ""} />
+                    Sync
                   </Button>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                {syncResult?.type === "kabila" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Pending Events - 2 columns */}
-        <div className="lg:col-span-2">
+          {/* Pending Events */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -1324,9 +1186,193 @@ export default function AdminPage() {
               )}
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* ============================== */}
+      {/* COLLECTIONS TAB                */}
+      {/* ============================== */}
+      {activeTab === "collections" && (
+        <div className="space-y-6">
+          {/* Collection management cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Collections Sync */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-lg bg-green-500/10">
+                      <Layers className="h-6 w-6 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Sync Collections</p>
+                      <p className="text-xs text-text-secondary">Import ALL from Kabila</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={handleSyncCollections}
+                    loading={syncingCollections}
+                    className="gap-2"
+                  >
+                    <RefreshCw className={syncingCollections ? "animate-spin" : ""} />
+                    Sync
+                  </Button>
+                </div>
+                {syncResult?.type === "collections" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Add Collection Manually */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 rounded-lg bg-cyan-500/10">
+                    <Plus className="h-6 w-6 text-cyan-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Add Collection</p>
+                    <p className="text-xs text-text-secondary">Add by Token ID</p>
+                  </div>
+                </div>
+                <form onSubmit={handleAddCollection} className="flex gap-2">
+                  <Input
+                    placeholder="0.0.XXXXX"
+                    value={newCollectionTokenId}
+                    onChange={(e) => setNewCollectionTokenId(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button type="submit" size="sm" loading={addingCollection}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </form>
+                {syncResult?.type === "add-collection" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Delete Specific Collection */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 rounded-lg bg-orange-500/10">
+                    <Trash2 className="h-6 w-6 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Delete Collection</p>
+                    <p className="text-xs text-text-secondary">Remove by Token ID</p>
+                  </div>
+                </div>
+                <form
+                  onSubmit={handleDeleteSpecificCollection}
+                  className="flex gap-2"
+                >
+                  <Input
+                    placeholder="Token ID (0.0.XXXXX)"
+                    value={deleteCollectionId}
+                    onChange={(e) => setDeleteCollectionId(e.target.value)}
+                    disabled={deletingCollection}
+                  />
+                  <Button type="submit" variant="destructive" size="sm" loading={deletingCollection}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </form>
+                {syncResult?.type === "delete-collection" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Hide Collection */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 rounded-lg bg-gray-500/10">
+                    <EyeOff className="h-6 w-6 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Hide Collection</p>
+                    <p className="text-xs text-text-secondary">Exclude from ranking</p>
+                  </div>
+                </div>
+                <form onSubmit={handleHideCollection} className="flex gap-2">
+                  <Input
+                    placeholder="Token ID (0.0.XXXXX)"
+                    value={hideCollectionId}
+                    onChange={(e) => setHideCollectionId(e.target.value)}
+                    disabled={hidingCollection}
+                  />
+                  <Button type="submit" variant="secondary" size="sm" loading={hidingCollection}>
+                    <EyeOff className="h-4 w-4" />
+                  </Button>
+                </form>
+                {syncResult?.type === "hide-collection" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Hidden Collections List */}
+          {hiddenCollections.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <EyeOff className="h-5 w-5" />
+                  Hidden Collections ({hiddenCollections.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {hiddenCollections.map((collection) => (
+                    <div
+                      key={collection.id}
+                      className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg"
+                    >
+                      <div className="w-10 h-10 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                        {collection.image ? (
+                          <Image
+                            src={collection.image}
+                            alt={collection.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Layers className="h-4 w-4 text-text-secondary" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{collection.name}</p>
+                        <p className="text-xs text-text-secondary truncate">{collection.tokenAddress}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleHidden(collection.tokenAddress, true)}
+                        disabled={togglingHidden === collection.tokenAddress}
+                        className="flex-shrink-0"
+                        title="Show collection"
+                      >
+                        {togglingHidden === collection.tokenAddress ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-success" />
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Pending Collections */}
-          <Card className="mt-8">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Layers className="h-5 w-5" />
@@ -1415,9 +1461,565 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         </div>
+      )}
 
-        {/* Admin Management - 1 column */}
-        <div>
+      {/* ============================== */}
+      {/* TOKENS TAB                     */}
+      {/* ============================== */}
+      {activeTab === "tokens" && (
+        <div className="space-y-6">
+          {/* Token management cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Sync Tokens */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-lg bg-amber-500/10">
+                      <Coins className="h-6 w-6 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Sync Tokens</p>
+                      <p className="text-xs text-text-secondary">Import from Eta Finance</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={handleSyncTokens}
+                    loading={syncingTokens}
+                    className="gap-2"
+                  >
+                    <RefreshCw className={syncingTokens ? "animate-spin" : ""} />
+                    Sync
+                  </Button>
+                </div>
+                {syncResult?.type === "sync-tokens" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Add Token Manually */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 rounded-lg bg-teal-500/10">
+                    <Plus className="h-6 w-6 text-teal-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Add Token</p>
+                    <p className="text-xs text-text-secondary">Add by Token ID</p>
+                  </div>
+                </div>
+                <form onSubmit={handleAddToken} className="flex gap-2">
+                  <Input
+                    placeholder="0.0.XXXXX"
+                    value={addTokenId}
+                    onChange={(e) => setAddTokenId(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button type="submit" size="sm" loading={addingToken}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </form>
+                {syncResult?.type === "add-token" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Hide Token */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 rounded-lg bg-gray-500/10">
+                    <EyeOff className="h-6 w-6 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Hide Token</p>
+                    <p className="text-xs text-text-secondary">Exclude from ranking</p>
+                  </div>
+                </div>
+                <form onSubmit={handleHideToken} className="flex gap-2">
+                  <Input
+                    placeholder="0.0.XXXXX"
+                    value={hideTokenId}
+                    onChange={(e) => setHideTokenId(e.target.value)}
+                    disabled={hidingToken}
+                  />
+                  <Button type="submit" variant="secondary" size="sm" loading={hidingToken}>
+                    <EyeOff className="h-4 w-4" />
+                  </Button>
+                </form>
+                {syncResult?.type === "hide-token" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Delete Token */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 rounded-lg bg-red-500/10">
+                    <Trash2 className="h-6 w-6 text-red-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Delete Token</p>
+                    <p className="text-xs text-text-secondary">Remove by Token ID</p>
+                  </div>
+                </div>
+                <form onSubmit={handleDeleteToken} className="flex gap-2">
+                  <Input
+                    placeholder="0.0.XXXXX"
+                    value={deleteTokenId}
+                    onChange={(e) => setDeleteTokenId(e.target.value)}
+                    disabled={deletingToken}
+                  />
+                  <Button type="submit" variant="destructive" size="sm" loading={deletingToken}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </form>
+                {syncResult?.type === "delete-token" && (
+                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Hidden Tokens List */}
+          {hiddenTokens.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Coins className="h-5 w-5" />
+                  Hidden Tokens ({hiddenTokens.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {hiddenTokens.map((token) => (
+                    <div
+                      key={token.id}
+                      className="flex items-center gap-3 p-3 bg-bg-secondary rounded-lg"
+                    >
+                      <div className="w-10 h-10 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                        {token.icon ? (
+                          <Image
+                            src={token.icon}
+                            alt={token.symbol}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Coins className="h-4 w-4 text-text-secondary" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{token.symbol}</p>
+                        <p className="text-xs text-text-secondary truncate">{token.tokenAddress}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleHiddenToken(token.tokenAddress, true)}
+                        disabled={togglingHiddenToken === token.tokenAddress}
+                        className="flex-shrink-0"
+                        title="Show token"
+                      >
+                        {togglingHiddenToken === token.tokenAddress ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-success" />
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* ============================== */}
+      {/* ECOSYSTEM TAB                  */}
+      {/* ============================== */}
+      {activeTab === "ecosystem" && (
+        <div className="space-y-6">
+          {/* Section 1: Pending Applications */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-yellow-500" />
+                Pending Applications ({ecosystemProjects.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingEcosystem ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
+                </div>
+              ) : ecosystemProjects.length === 0 ? (
+                <p className="text-text-secondary text-sm py-4 text-center">No pending projects</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {ecosystemProjects.map((project: any) => (
+                    <div key={project.id} className="p-4 rounded-lg border border-border bg-bg-secondary/30">
+                      <div className="flex items-start gap-3">
+                        {project.logoUrl ? (
+                          <img src={project.logoUrl} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-bg-card flex items-center justify-center flex-shrink-0">
+                            <Globe className="h-5 w-5 text-text-tertiary" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-sm text-text-primary truncate">{project.name}</span>
+                            {(project.categories || []).map((c: string) => <Badge key={c} variant="outline" className="text-[10px] flex-shrink-0">{c}</Badge>)}
+                          </div>
+                          <p className="text-xs text-text-secondary line-clamp-2 mb-2">{project.description}</p>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-text-tertiary">
+                            <span>by {project.submittedBy?.alias || project.submittedBy?.walletAddress}</span>
+                            {project.websiteUrl && (
+                              <a href={project.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-0.5 hover:text-brand">
+                                <ExternalLink className="h-2.5 w-2.5" />
+                                {project.websiteUrl.replace(/https?:\/\//, "").replace(/\/$/, "")}
+                              </a>
+                            )}
+                            <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                        <Button
+                          size="sm"
+                          variant="success"
+                          onClick={() => handleEcosystemAction(project.id, "approve")}
+                          loading={processingEcosystem === project.id}
+                          className="gap-1 text-xs flex-1"
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleEcosystemAction(project.id, "delete")}
+                          loading={processingEcosystem === project.id}
+                          className="gap-1 text-xs flex-1"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Section 2: All Projects */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                All Projects ({allEcosystemProjects.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Search and filter bar */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+                  <Input
+                    placeholder="Search projects..."
+                    value={ecosystemSearch}
+                    onChange={(e) => setEcosystemSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <select
+                  value={ecosystemCategoryFilter}
+                  onChange={(e) => setEcosystemCategoryFilter(e.target.value)}
+                  className="h-10 rounded-lg border border-border bg-bg-card text-text-primary px-3 text-sm"
+                >
+                  <option value="all">All Categories</option>
+                  {ECOSYSTEM_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {loadingAllEcosystem ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
+                </div>
+              ) : filteredAllEcosystemProjects.length === 0 ? (
+                <p className="text-text-secondary text-sm py-4 text-center">No projects found</p>
+              ) : (
+                <div className="space-y-2">
+                  {filteredAllEcosystemProjects.map((project: any) => {
+                    const isEditing = editingEcosystemId === project.id;
+                    return (
+                      <div key={project.id} className="rounded-lg border border-border overflow-hidden">
+                        {/* Row */}
+                        <div className="flex items-center gap-3 p-3 bg-bg-secondary/30">
+                          {project.logoUrl ? (
+                            <img src={project.logoUrl} alt="" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                          ) : (
+                            <div className="w-9 h-9 rounded-lg bg-bg-card flex items-center justify-center flex-shrink-0">
+                              <Globe className="h-4 w-4 text-text-tertiary" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm text-text-primary truncate">{project.name}</span>
+                              {(project.categories || []).map((c: string) => <Badge key={c} variant="outline" className="text-[10px] flex-shrink-0">{c}</Badge>)}
+                              {project.isApproved ? (
+                                <Badge variant="default" className="text-[10px] flex-shrink-0 bg-green-600">Approved</Badge>
+                              ) : (
+                                <Badge variant="secondary" className="text-[10px] flex-shrink-0 bg-yellow-500/20 text-yellow-500">Pending</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-text-tertiary mt-0.5">
+                              {project.countryCode && <span>{project.countryCode}</span>}
+                              {project.websiteUrl && (
+                                <a href={project.websiteUrl} target="_blank" rel="noopener noreferrer" className="hover:text-brand truncate max-w-[200px]">
+                                  {project.websiteUrl.replace(/https?:\/\//, "").replace(/\/$/, "")}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (isEditing) {
+                                  setEditingEcosystemId(null);
+                                  setEditEcosystemData({});
+                                } else {
+                                  setEditingEcosystemId(project.id);
+                                  setEditEcosystemData({
+                                    name: project.name || "",
+                                    categories: project.categories || ["OTHER"],
+                                    countryCode: project.countryCode || "",
+                                    description: project.description || "",
+                                    websiteUrl: project.websiteUrl || "",
+                                    logoUrl: project.logoUrl || "",
+                                    twitterUrl: project.twitterUrl || "",
+                                    discordUrl: project.discordUrl || "",
+                                    telegramUrl: project.telegramUrl || "",
+                                    linkedinUrl: project.linkedinUrl || "",
+                                    contactEmail: project.contactEmail || "",
+                                    isApproved: project.isApproved ?? false,
+                                    isVisible: project.isVisible ?? true,
+                                  });
+                                }
+                              }}
+                              className="gap-1 text-xs"
+                            >
+                              {isEditing ? <ChevronUp className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteEcosystemProject(project.id)}
+                              disabled={deletingEcosystemId === project.id}
+                              className="text-error hover:text-error"
+                            >
+                              {deletingEcosystemId === project.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Expanded Edit Form */}
+                        {isEditing && (
+                          <div className="p-4 border-t border-border bg-bg-card">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Left column */}
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Name</label>
+                                  <Input
+                                    value={editEcosystemData.name || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, name: e.target.value }))}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Categories</label>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {ECOSYSTEM_CATEGORIES.map((cat) => {
+                                      const sel = (editEcosystemData.categories || []).includes(cat);
+                                      return (
+                                        <button
+                                          key={cat}
+                                          type="button"
+                                          onClick={() => setEditEcosystemData((prev) => ({
+                                            ...prev,
+                                            categories: sel
+                                              ? (prev.categories || []).filter((c: string) => c !== cat)
+                                              : [...(prev.categories || []), cat],
+                                          }))}
+                                          className={cn(
+                                            "px-2 py-1 rounded text-[10px] font-medium border transition-all",
+                                            sel ? "bg-brand/10 text-brand border-brand/30" : "bg-bg-secondary text-text-tertiary border-border"
+                                          )}
+                                        >
+                                          {cat}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Country</label>
+                                  <CountrySelector
+                                    value={editEcosystemData.countryCode || ""}
+                                    onChange={(code) => setEditEcosystemData((prev) => ({ ...prev, countryCode: code }))}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Description</label>
+                                  <textarea
+                                    value={editEcosystemData.description || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, description: e.target.value }))}
+                                    rows={3}
+                                    className="w-full rounded-lg border border-border bg-bg-secondary text-text-primary px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand/50"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Logo</label>
+                                  <ImageUpload
+                                    value={editEcosystemData.logoUrl || ""}
+                                    onChange={(url) => setEditEcosystemData((prev) => ({ ...prev, logoUrl: url }))}
+                                    recommendedSize="200x200"
+                                  />
+                                </div>
+                              </div>
+                              {/* Right column */}
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Website URL</label>
+                                  <Input
+                                    value={editEcosystemData.websiteUrl || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, websiteUrl: e.target.value }))}
+                                    placeholder="https://..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Twitter URL</label>
+                                  <Input
+                                    value={editEcosystemData.twitterUrl || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, twitterUrl: e.target.value }))}
+                                    placeholder="https://x.com/..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Discord URL</label>
+                                  <Input
+                                    value={editEcosystemData.discordUrl || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, discordUrl: e.target.value }))}
+                                    placeholder="https://discord.gg/..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Telegram URL</label>
+                                  <Input
+                                    value={editEcosystemData.telegramUrl || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, telegramUrl: e.target.value }))}
+                                    placeholder="https://t.me/..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">LinkedIn URL</label>
+                                  <Input
+                                    value={editEcosystemData.linkedinUrl || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, linkedinUrl: e.target.value }))}
+                                    placeholder="https://linkedin.com/..."
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-text-secondary mb-1 block">Contact Email</label>
+                                  <Input
+                                    value={editEcosystemData.contactEmail || ""}
+                                    onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, contactEmail: e.target.value }))}
+                                    placeholder="email@example.com"
+                                  />
+                                </div>
+
+                                {/* Toggles */}
+                                <div className="flex items-center gap-6 pt-2">
+                                  <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                      type="checkbox"
+                                      checked={editEcosystemData.isApproved ?? false}
+                                      onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, isApproved: e.target.checked }))}
+                                      className="rounded border-border"
+                                    />
+                                    <span className="text-text-secondary">Approved</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 text-sm">
+                                    <input
+                                      type="checkbox"
+                                      checked={editEcosystemData.isVisible ?? true}
+                                      onChange={(e) => setEditEcosystemData((prev) => ({ ...prev, isVisible: e.target.checked }))}
+                                      className="rounded border-border"
+                                    />
+                                    <span className="text-text-secondary">Visible</span>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Save / Cancel */}
+                            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+                              <Button
+                                size="sm"
+                                onClick={() => handleEditEcosystem(project.id, editEcosystemData)}
+                                loading={savingEcosystem}
+                                className="gap-1"
+                              >
+                                <CheckCircle className="h-3.5 w-3.5" />
+                                Save Changes
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditingEcosystemId(null);
+                                  setEditEcosystemData({});
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ============================== */}
+      {/* ADMINS TAB                     */}
+      {/* ============================== */}
+      {activeTab === "admins" && (
+        <div className="max-w-xl">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -1485,7 +2087,7 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      )}
     </div>
   );
 }

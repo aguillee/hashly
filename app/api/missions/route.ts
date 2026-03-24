@@ -5,6 +5,7 @@ import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { MISSION_DEFINITIONS } from "@/lib/missions";
 import { getCurrentSeason } from "@/lib/seasons";
+import { calculateBadgePoints } from "@/lib/badge-points";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
       seasonEventVotes, seasonCollectionVotes, seasonTokenVotes,
       seasonApprovedEvents,
       seasonReferralCount,
-      badgeCount,
+      badgeData,
       communityProfile,
       userMissions,
     ] = await Promise.all([
@@ -89,16 +90,11 @@ export async function GET(request: NextRequest) {
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
       // Activated referrals this season
       prisma.referral.count({ where: { referrerId: user.id, createdAt: { gte: seasonStart } } }),
-      // Badges owned (SENT or CLAIMED) — NFTs persist across seasons
-      prisma.badgeClaim.count({
-        where: {
-          walletAddress,
-          status: { in: ["SENT", "CLAIMED"] },
-        },
-      }),
+      // Badges owned — on-chain verification, current season only
+      calculateBadgePoints(walletAddress, seasonStart, currentSeason.endDate),
       // HashWorld profile
-      prisma.communityProfile.findUnique({
-        where: { userId: user.id },
+      prisma.communityProfile.findFirst({
+        where: { userId: user.id, type: { not: "PROJECT" } },
         select: { id: true },
       }),
       // User missions
@@ -162,12 +158,12 @@ export async function GET(request: NextRequest) {
           completed = seasonReferralCount >= def.requirement;
           break;
         case "badge_1":
-          progress = Math.min(badgeCount, def.requirement);
-          completed = badgeCount >= def.requirement;
+          progress = Math.min(badgeData.badgeCount, def.requirement);
+          completed = badgeData.badgeCount >= def.requirement;
           break;
         case "badge_3":
-          progress = Math.min(badgeCount, def.requirement);
-          completed = badgeCount >= def.requirement;
+          progress = Math.min(badgeData.badgeCount, def.requirement);
+          completed = badgeData.badgeCount >= def.requirement;
           break;
         case "hashworld_profile":
           progress = communityProfile ? 1 : 0;

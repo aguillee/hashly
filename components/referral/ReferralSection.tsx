@@ -7,7 +7,6 @@ import {
   Check,
   Zap,
   Lock,
-  Clock,
   ArrowRight,
   Loader2,
   Gift,
@@ -30,7 +29,6 @@ interface ReferralStatsData {
     alias: string | null;
     theirTotalPoints: number;
     contributedPoints: number;
-    bonusPaid: boolean;
     joinedAt: string;
   }>;
   totalReferralPoints: number;
@@ -153,7 +151,7 @@ export function ReferralSection() {
           </button>
         </div>
         <p className="text-[11px] text-text-secondary">
-          Share this code. You earn <strong className="text-green-500">50 pts</strong> when a referred user reaches 50 mission points, plus <strong className="text-green-500">5%</strong> of all their points.
+          Share this code. You earn <strong className="text-green-500">5%</strong> of all points your referees earn.
         </p>
       </div>
 
@@ -251,12 +249,6 @@ export function ReferralSection() {
                   <span className="font-medium text-text-primary truncate">
                     {referee.alias || formatWallet(referee.walletAddress)}
                   </span>
-                  {!referee.bonusPaid && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded flex-shrink-0">
-                      <Clock className="h-2.5 w-2.5" />
-                      pending
-                    </span>
-                  )}
                 </div>
                 <div className="flex items-center gap-3 text-xs flex-shrink-0 ml-2">
                   <span className="text-text-secondary">

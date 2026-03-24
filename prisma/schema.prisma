@@ -29,7 +29,8 @@ model User {
   referralsMade   Referral[]     @relation("referralsMade")
   referredBy      Referral?      @relation("referredBy")
   seasonSnapshots SeasonSnapshot[]
-  communityProfile CommunityProfile?
+  communityProfiles  CommunityProfile[]
+  ecosystemProjects  EcosystemProject[]
 
   @@map("users")
 }
@@ -435,7 +436,7 @@ enum CommunityProfileType {
 
 model CommunityProfile {
   id            String               @id @default(cuid())
-  userId        String               @unique @map("user_id")
+  userId        String               @map("user_id")
   type          CommunityProfileType @default(USER)
   displayName   String               @map("display_name")
   twitterHandle String?              @map("twitter_handle")
@@ -443,13 +444,62 @@ model CommunityProfile {
   bio           String?
   avatarUrl     String?              @map("avatar_url")
   isVisible     Boolean              @default(true) @map("is_visible")
+  isApproved    Boolean              @default(false) @map("is_approved")
   createdAt     DateTime             @default(now()) @map("created_at")
   updatedAt     DateTime             @updatedAt @map("updated_at")
-  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ecosystemProject EcosystemProject?
 
+  @@index([userId])
   @@index([countryCode])
-  @@index([isVisible])
+  @@index([isVisible, isApproved])
   @@map("community_profiles")
+}
+
+// Ecosystem projects
+enum EcosystemCategory {
+  DEFI
+  TOOLS
+  MARKETPLACE
+  DATA
+  COMMUNITY
+  WALLET
+  BRIDGE
+  GAMING
+  NFT
+  EDUCATION
+  INFRASTRUCTURE
+  OTHER
+}
+
+model EcosystemProject {
+  id                 String             @id @default(cuid())
+  name               String
+  slug               String             @unique
+  categories         EcosystemCategory[]
+  countryCode        String             @map("country_code")
+  logoUrl            String             @map("logo_url")
+  description        String
+  websiteUrl         String             @map("website_url")
+  twitterUrl         String?            @map("twitter_url")
+  discordUrl         String?            @map("discord_url")
+  telegramUrl        String?            @map("telegram_url")
+  linkedinUrl        String?            @map("linkedin_url")
+  contactEmail       String?            @map("contact_email")
+  isApproved         Boolean            @default(false) @map("is_approved")
+  isVisible          Boolean            @default(true) @map("is_visible")
+  submittedById      String             @map("submitted_by_id")
+  communityProfileId String?            @unique @map("community_profile_id")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  submittedBy        User               @relation(fields: [submittedById], references: [id])
+  communityProfile   CommunityProfile?  @relation(fields: [communityProfileId], references: [id])
+
+  @@index([isApproved, isVisible])
+  @@index([categories])
+  @@index([submittedById])
+  @@map("ecosystem_projects")
 }
 
 // Referral system

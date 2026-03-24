@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { awardMissionPoints } from "@/lib/points";
 import { MISSION_DEFINITIONS } from "@/lib/missions";
 import { getCurrentSeason } from "@/lib/seasons";
+import { calculateBadgePoints } from "@/lib/badge-points";
 import { z } from "zod";
 
 const claimSchema = z.object({
@@ -73,31 +74,30 @@ export async function POST(request: NextRequest) {
       seasonEventVotes, seasonCollectionVotes, seasonTokenVotes,
       seasonApprovedEvents,
       seasonReferralCount,
-      badgeCount,
+      badgeData,
       communityProfile,
     ] = await Promise.all([
-      // Today — events only
-      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfDay } } }),
+      // Today — events only (use PointHistory for accuracy)
+      prisma.pointHistory.count({
+        where: { userId: user.id, actionType: "VOTE", description: { startsWith: "Voted on event:" }, createdAt: { gte: startOfDay } },
+      }),
       // Week — events only
-      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: startOfWeek } } }),
+      prisma.pointHistory.count({
+        where: { userId: user.id, actionType: "VOTE", description: { startsWith: "Voted on event:" }, createdAt: { gte: startOfWeek } },
+      }),
       // Season — all types (for achievement missions)
-      prisma.vote.count({ where: { userId: user.id, createdAt: { gte: seasonStart } } }),
+      prisma.pointHistory.count({ where: { userId: user.id, actionType: "VOTE", createdAt: { gte: seasonStart } } }),
       prisma.collectionVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
       prisma.tokenVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
       // Approved events this season
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
       // Activated referrals this season
       prisma.referral.count({ where: { referrerId: user.id, createdAt: { gte: seasonStart } } }),
-      // Badges owned — NFTs persist across seasons
-      prisma.badgeClaim.count({
-        where: {
-          walletAddress,
-          status: { in: ["SENT", "CLAIMED"] },
-        },
-      }),
+      // Badges owned — on-chain verification, current season only
+      calculateBadgePoints(walletAddress, seasonStart, currentSeason.endDate),
       // HashWorld profile
-      prisma.communityProfile.findUnique({
-        where: { userId: user.id },
+      prisma.communityProfile.findFirst({
+        where: { userId: user.id, type: { not: "PROJECT" } },
         select: { id: true },
       }),
     ]);
@@ -134,10 +134,10 @@ export async function POST(request: NextRequest) {
         isCompleted = seasonReferralCount >= mission.requirement;
         break;
       case "badge_1":
-        isCompleted = badgeCount >= mission.requirement;
+        isCompleted = badgeData.badgeCount >= mission.requirement;
         break;
       case "badge_3":
-        isCompleted = badgeCount >= mission.requirement;
+        isCompleted = badgeData.badgeCount >= mission.requirement;
         break;
       case "hashworld_profile":
         isCompleted = !!communityProfile;

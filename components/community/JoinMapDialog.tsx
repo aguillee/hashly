@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Globe, User, Hammer, Building2, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ImageUpload } from "@/components/ui/ImageUpload";
@@ -69,6 +70,7 @@ export function JoinMapDialog({
   initialData,
   isEdit = false,
 }: JoinMapDialogProps) {
+  const router = useRouter();
   const [displayName, setDisplayName] = React.useState(initialData?.displayName || "");
   const [countryCode, setCountryCode] = React.useState(initialData?.countryCode || "");
   const [type, setType] = React.useState<ProfileType>(initialData?.type || "USER");
@@ -197,13 +199,23 @@ export function JoinMapDialog({
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setType(opt.value)}
+                    onClick={() => {
+                      if (opt.value === "PROJECT") {
+                        onClose();
+                        router.push("/ecosystem/apply");
+                        return;
+                      }
+                      setType(opt.value);
+                    }}
                     className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg border text-sm font-medium transition-colors ${
                       isActive ? opt.activeColor : opt.color
                     }`}
                   >
                     <Icon className="h-4 w-4" />
                     {opt.label}
+                    {opt.value === "PROJECT" && (
+                      <span className="text-[9px] opacity-60">Apply →</span>
+                    )}
                   </button>
                 );
               })}

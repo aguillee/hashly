@@ -180,5 +180,14 @@ export function useReferralStats() {
   });
 }
 
+// Ecosystem projects
+export function useEcosystemProjects(category?: string, search?: string) {
+  const params = new URLSearchParams();
+  if (category && category !== "ALL") params.set("category", category);
+  if (search) params.set("search", search);
+  const query = params.toString();
+  return useSWR(`/api/ecosystem${query ? `?${query}` : ""}`, fetcher);
+}
+
 // Export mutate for manual revalidation
 export { mutate } from "swr";

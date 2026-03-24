@@ -10,6 +10,13 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Helper: find user's personal (non-PROJECT) profile
+async function findPersonalProfile(userId: string) {
+  return prisma.communityProfile.findFirst({
+    where: { userId, type: { not: "PROJECT" } },
+  });
+}
+
 // GET /api/community/profile - Get current user's community profile
 export async function GET(request: NextRequest) {
   try {
@@ -21,10 +28,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const profile = await prisma.communityProfile.findUnique({
-      where: { userId: user.id },
-    });
-
+    const profile = await findPersonalProfile(user.id);
     return NextResponse.json({ profile });
   } catch (error) {
     console.error("Failed to fetch community profile:", error);
@@ -46,11 +50,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if profile already exists
-    const existing = await prisma.communityProfile.findUnique({
-      where: { userId: user.id },
-    });
-
+    // Check if personal profile already exists
+    const existing = await findPersonalProfile(user.id);
     if (existing) {
       return NextResponse.json(
         { error: "You already have a community profile. Use PUT to update." },
@@ -81,6 +82,7 @@ export async function POST(request: NextRequest) {
         twitterHandle: validation.data.twitterHandle,
         bio: validation.data.bio || null,
         avatarUrl: body.avatarUrl || null,
+        isApproved: false,
       },
     });
 
@@ -105,10 +107,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const existing = await prisma.communityProfile.findUnique({
-      where: { userId: user.id },
-    });
-
+    const existing = await findPersonalProfile(user.id);
     if (!existing) {
       return NextResponse.json(
         { error: "No community profile found. Use POST to create one." },
@@ -131,7 +130,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const profile = await prisma.communityProfile.update({
-      where: { userId: user.id },
+      where: { id: existing.id },
       data: {
         ...(validation.data.displayName !== undefined && { displayName: validation.data.displayName }),
         ...(validation.data.countryCode !== undefined && { countryCode: validation.data.countryCode }),
@@ -152,7 +151,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE /api/community/profile - Remove from globe (soft delete)
+// DELETE /api/community/profile - Remove from globe
 export async function DELETE(request: NextRequest) {
   try {
     const rateLimitResponse = await checkRateLimit(request, "write");
@@ -163,10 +162,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const existing = await prisma.communityProfile.findUnique({
-      where: { userId: user.id },
-    });
-
+    const existing = await findPersonalProfile(user.id);
     if (!existing) {
       return NextResponse.json(
         { error: "No community profile found" },
@@ -175,7 +171,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await prisma.communityProfile.delete({
-      where: { userId: user.id },
+      where: { id: existing.id },
     });
 
     return NextResponse.json({ success: true });

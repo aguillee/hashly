@@ -249,3 +249,34 @@ export function validateRequest<T>(
     .join(", ");
   return { success: false, error: errorMessage };
 }
+
+// ============================================
+// ECOSYSTEM PROJECT VALIDATIONS
+// ============================================
+
+const ecosystemCategories = [
+  "DEFI", "TOOLS", "MARKETPLACE", "DATA", "COMMUNITY",
+  "WALLET", "BRIDGE", "GAMING", "NFT", "EDUCATION",
+  "INFRASTRUCTURE", "OTHER",
+] as const;
+
+export const createEcosystemProjectSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters").trim(),
+  categories: z.array(z.enum(ecosystemCategories, { error: "Invalid category" })).min(1, "Select at least one category"),
+  countryCode: z.string().length(2, "Country code must be 2 characters"),
+  logoUrl: z.string().url("Invalid logo URL").startsWith("https://", "Logo URL must use HTTPS"),
+  description: z.string().min(20, "Description must be at least 20 characters").max(1000, "Description must be less than 1000 characters").trim(),
+  websiteUrl: z.string().url("Invalid website URL"),
+  twitterUrl: z.string().url("Invalid Twitter URL").optional().or(z.literal("")),
+  discordUrl: z.string().url("Invalid Discord URL").optional().or(z.literal("")),
+  telegramUrl: z.string().url("Invalid Telegram URL").optional().or(z.literal("")),
+  contactEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
+  linkedinUrl: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
+});
+
+export const updateEcosystemProjectSchema = createEcosystemProjectSchema.partial();
+
+export const adminUpdateEcosystemProjectSchema = updateEcosystemProjectSchema.extend({
+  isApproved: z.boolean().optional(),
+  isVisible: z.boolean().optional(),
+});

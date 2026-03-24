@@ -4,9 +4,7 @@ import { getCurrentSeason } from "./seasons";
 const REFERRAL_CODE_LENGTH = 8;
 const REFERRAL_LOCK_DAYS = 60;
 const REFERRAL_SIGNUP_BONUS = 50;
-const REFERRAL_REFERRER_BONUS = 50;
 const REFERRAL_COMMISSION_RATE = 0.05; // 5%
-const REFERRER_BONUS_THRESHOLD = 50; // referee must reach 50 mission points
 
 // Referral-related action types that should NOT generate commission (avoid loops)
 const REFERRAL_ACTION_TYPES = [
@@ -159,10 +157,6 @@ export async function applyReferralCode(
       },
     });
 
-    // Check if referee already has enough mission points for referrer bonus
-    if (referee.points >= REFERRER_BONUS_THRESHOLD) {
-      await payReferrerBonus(tx, referral.id, referrer.id, referee.id);
-    }
   });
 
   return {
@@ -170,60 +164,6 @@ export async function applyReferralCode(
     referrerAlias: referrer.alias,
     pointsEarned: REFERRAL_SIGNUP_BONUS,
   };
-}
-
-/**
- * Pay the 50pt referrer bonus (called when referee reaches threshold)
- */
-async function payReferrerBonus(
-  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
-  referralId: string,
-  referrerId: string,
-  refereeId: string
-) {
-  // Mark as paid for this season
-  const currentSeason = getCurrentSeason();
-  await tx.referral.update({
-    where: { id: referralId },
-    data: {
-      referrerBonusPaid: true,
-      referrerBonusSeasonNumber: currentSeason.number,
-    },
-  });
-
-  // Award points to referrer
-  await tx.user.update({
-    where: { id: referrerId },
-    data: { referralPoints: { increment: REFERRAL_REFERRER_BONUS } },
-  });
-
-  // Get referee info for description
-  const referee = await tx.user.findUnique({
-    where: { id: refereeId },
-    select: { walletAddress: true, alias: true },
-  });
-
-  const refereeName = referee?.alias || referee?.walletAddress || "unknown";
-
-  // Create earning record
-  await tx.referralEarning.create({
-    data: {
-      referralId,
-      points: REFERRAL_REFERRER_BONUS,
-      sourceType: "REFERRER_BONUS",
-      description: `Referrer bonus: ${refereeName} reached ${REFERRER_BONUS_THRESHOLD} points`,
-    },
-  });
-
-  // Create point history for referrer
-  await tx.pointHistory.create({
-    data: {
-      userId: referrerId,
-      points: REFERRAL_REFERRER_BONUS,
-      actionType: "REFERRAL",
-      description: `Referrer bonus: ${refereeName} reached ${REFERRER_BONUS_THRESHOLD} points`,
-    },
-  });
 }
 
 /**
@@ -251,10 +191,8 @@ export async function awardReferralCommission(
       select: {
         id: true,
         referrerId: true,
-        referrerBonusPaid: true,
-        referrerBonusSeasonNumber: true,
         referee: {
-          select: { points: true, walletAddress: true, alias: true },
+          select: { walletAddress: true, alias: true },
         },
       },
     });
@@ -291,42 +229,6 @@ export async function awardReferralCommission(
         },
       });
 
-      // Check and award referrer bonus if not yet paid this season and referee crossed threshold
-      const currentSeason = getCurrentSeason();
-      const bonusPaidThisSeason =
-        referral.referrerBonusSeasonNumber != null &&
-        referral.referrerBonusSeasonNumber >= currentSeason.number;
-
-      if (!bonusPaidThisSeason) {
-        // Re-fetch referee's current mission points (could have just been updated)
-        const currentReferee = await tx.user.findUnique({
-          where: { id: refereeUserId },
-          select: { points: true },
-        });
-
-        if (
-          currentReferee &&
-          currentReferee.points >= REFERRER_BONUS_THRESHOLD
-        ) {
-          // Atomic check: re-read referral to prevent double payment from concurrent requests
-          const freshReferral = await tx.referral.findUnique({
-            where: { id: referral.id },
-            select: { referrerBonusPaid: true, referrerBonusSeasonNumber: true },
-          });
-          const alreadyPaid =
-            freshReferral?.referrerBonusSeasonNumber != null &&
-            freshReferral.referrerBonusSeasonNumber >= currentSeason.number;
-
-          if (!alreadyPaid) {
-            await payReferrerBonus(
-              tx,
-              referral.id,
-              referral.referrerId,
-              refereeUserId
-            );
-          }
-        }
-      }
     });
   } catch (error) {
     // Fire-and-forget: log but don't throw
