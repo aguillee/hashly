@@ -81,6 +81,7 @@ export function JoinMapDialog({
   const [deleting, setDeleting] = React.useState(false);
   const [confirmDelete, setConfirmDelete] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = React.useState(false);
 
   // Reset form when opened with new data
   React.useEffect(() => {
@@ -113,6 +114,13 @@ export function JoinMapDialog({
     e.preventDefault();
     if (!isValid) return;
 
+    // Redirect PROJECT type to ecosystem apply form
+    if (type === "PROJECT" && !isEdit) {
+      router.push("/ecosystem/apply");
+      onClose();
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -125,7 +133,11 @@ export function JoinMapDialog({
         bio: bio.trim() || undefined,
         avatarUrl: avatarUrl || undefined,
       });
-      onClose();
+      if (!isEdit) {
+        setShowSuccess(true);
+      } else {
+        onClose();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {
@@ -141,7 +153,37 @@ export function JoinMapDialog({
         onClick={onClose}
       />
 
+      {/* Success screen after creating profile */}
+      {showSuccess && (
+        <div className="relative z-10 w-full max-w-md rounded-lg border border-border bg-bg-card shadow-2xl overflow-hidden">
+          <div className="p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-brand-subtle flex items-center justify-center mx-auto mb-4">
+              <Globe className="h-8 w-8 text-brand" />
+            </div>
+            <h2 className="text-xl font-bold text-text-primary mb-2">
+              Welcome to HashWorld! 🌍
+            </h2>
+            <p className="text-sm text-text-secondary mb-4">
+              Your profile has been submitted successfully.
+            </p>
+            <div className="px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-6">
+              <p className="text-xs text-amber-400">
+                ⏳ Your profile is now under review. Once approved by our team, you&apos;ll appear on the HashWorld globe for the entire community to see.
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => { setShowSuccess(false); onClose(); }}
+              className="w-full"
+            >
+              Got it!
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Dialog */}
+      {!showSuccess && (
       <form
         onSubmit={handleSubmit}
         className="relative z-10 w-full max-w-md rounded-lg border border-border bg-bg-card shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
@@ -363,6 +405,7 @@ export function JoinMapDialog({
           </div>
         </div>
       </form>
+      )}
     </div>
   );
 }

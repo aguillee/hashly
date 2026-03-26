@@ -335,7 +335,14 @@ export function CommunityGlobe() {
         </div>
 
         {isConnected ? (
-          <div>
+          <div className="flex flex-col items-center sm:items-end gap-2">
+            {myProfile && !myProfile.isApproved && (
+              <div className="px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                <span className="text-xs text-amber-400">
+                  ⏳ Your profile is under review. It will appear on the globe once approved.
+                </span>
+              </div>
+            )}
             {myProfile ? (
               <Button
                 variant="outline"

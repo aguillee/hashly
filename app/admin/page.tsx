@@ -71,7 +71,7 @@ interface Admin {
   points: number;
 }
 
-type TabId = "events" | "collections" | "tokens" | "ecosystem" | "admins";
+type TabId = "events" | "collections" | "tokens" | "ecosystem" | "community" | "admins";
 
 const ECOSYSTEM_CATEGORIES = [
   "DEFI", "TOOLS", "MARKETPLACE", "DATA", "COMMUNITY",
@@ -153,6 +153,12 @@ export default function AdminPage() {
   const [ecosystemCategoryFilter, setEcosystemCategoryFilter] = React.useState<string>("all");
   const [deletingEcosystemId, setDeletingEcosystemId] = React.useState<string | null>(null);
 
+  // Community/HashWorld states
+  const [pendingProfiles, setPendingProfiles] = React.useState<any[]>([]);
+  const [approvedProfiles, setApprovedProfiles] = React.useState<any[]>([]);
+  const [loadingProfiles, setLoadingProfiles] = React.useState(true);
+  const [processingProfile, setProcessingProfile] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     if (!isConnected || !user?.isAdmin) {
       router.push("/");
@@ -167,6 +173,7 @@ export default function AdminPage() {
     fetchEcosystemProjects();
     fetchAllEcosystemProjects();
     fetchPendingHostRequests();
+    fetchCommunityProfiles();
   }, [isConnected, user, router]);
 
   async function fetchPendingHostRequests() {
@@ -177,6 +184,49 @@ export default function AdminPage() {
         setPendingHostRequests(data.requests?.length || 0);
       }
     } catch {}
+  }
+
+  // ========== COMMUNITY/HASHWORLD FUNCTIONS ==========
+
+  async function fetchCommunityProfiles() {
+    try {
+      const [pendingRes, approvedRes] = await Promise.all([
+        fetch("/api/admin/community?status=pending"),
+        fetch("/api/admin/community?status=approved"),
+      ]);
+      if (pendingRes.ok) {
+        const data = await pendingRes.json();
+        setPendingProfiles(data.profiles || []);
+      }
+      if (approvedRes.ok) {
+        const data = await approvedRes.json();
+        setApprovedProfiles(data.profiles || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch community profiles:", error);
+    } finally {
+      setLoadingProfiles(false);
+    }
+  }
+
+  async function handleProfileAction(id: string, action: "approve" | "delete") {
+    setProcessingProfile(id);
+    try {
+      if (action === "approve") {
+        await fetch(`/api/admin/community/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isApproved: true }),
+        });
+      } else {
+        await fetch(`/api/admin/community/${id}`, { method: "DELETE" });
+      }
+      fetchCommunityProfiles();
+    } catch (error) {
+      console.error(`Failed to ${action} profile:`, error);
+    } finally {
+      setProcessingProfile(null);
+    }
   }
 
   // ========== ECOSYSTEM FUNCTIONS ==========
@@ -879,6 +929,7 @@ export default function AdminPage() {
     { id: "collections", label: "Collections", count: pendingCollections.length, icon: <Layers className="h-4 w-4" /> },
     { id: "tokens", label: "Tokens", icon: <Coins className="h-4 w-4" /> },
     { id: "ecosystem", label: "Ecosystem", count: ecosystemProjects.length, icon: <Globe className="h-4 w-4" /> },
+    { id: "community", label: "HashWorld", count: pendingProfiles.length, icon: <Globe className="h-4 w-4" /> },
     { id: "admins", label: "Admins", icon: <Users className="h-4 w-4" /> },
   ];
 
@@ -2008,6 +2059,140 @@ export default function AdminPage() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ============================== */}
+      {/* HASHWORLD / COMMUNITY TAB      */}
+      {/* ============================== */}
+      {activeTab === "community" && (
+        <div className="space-y-6">
+          {/* Pending Profiles */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Pending Profiles ({pendingProfiles.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingProfiles ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
+                </div>
+              ) : pendingProfiles.length === 0 ? (
+                <p className="text-text-secondary text-sm py-4 text-center">No pending profiles</p>
+              ) : (
+                <div className="space-y-3">
+                  {pendingProfiles.map((profile: any) => (
+                    <div key={profile.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-bg-secondary/30">
+                      {profile.avatarUrl ? (
+                        <img src={profile.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-bg-secondary flex items-center justify-center flex-shrink-0">
+                          <Users className="h-4 w-4 text-text-tertiary" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm text-text-primary">{profile.displayName}</span>
+                          <Badge variant="outline" className="text-[10px]">{profile.type}</Badge>
+                          {profile.countryCode && (
+                            <img
+                              src={`https://flagcdn.com/w20/${profile.countryCode.toLowerCase()}.png`}
+                              alt={profile.countryCode}
+                              className="h-3"
+                            />
+                          )}
+                        </div>
+                        <p className="text-xs text-text-secondary truncate">{profile.bio || "No bio"}</p>
+                        <p className="text-[10px] text-text-tertiary mt-0.5">
+                          {profile.user?.walletAddress} · {profile.twitterHandle ? `@${profile.twitterHandle}` : "No X"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Button
+                          size="sm"
+                          variant="success"
+                          onClick={() => handleProfileAction(profile.id, "approve")}
+                          loading={processingProfile === profile.id}
+                          className="gap-1 text-xs"
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleProfileAction(profile.id, "delete")}
+                          loading={processingProfile === profile.id}
+                          className="gap-1 text-xs"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Approved Profiles */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Approved Profiles ({approvedProfiles.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingProfiles ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
+                </div>
+              ) : approvedProfiles.length === 0 ? (
+                <p className="text-text-secondary text-sm py-4 text-center">No approved profiles yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {approvedProfiles.map((profile: any) => (
+                    <div key={profile.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border">
+                      {profile.avatarUrl ? (
+                        <img src={profile.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-bg-secondary flex items-center justify-center flex-shrink-0">
+                          <Users className="h-3.5 w-3.5 text-text-tertiary" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm text-text-primary">{profile.displayName}</span>
+                          <Badge variant="outline" className="text-[10px]">{profile.type}</Badge>
+                          {profile.countryCode && (
+                            <img
+                              src={`https://flagcdn.com/w20/${profile.countryCode.toLowerCase()}.png`}
+                              alt={profile.countryCode}
+                              className="h-3"
+                            />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-text-tertiary">{profile.user?.walletAddress}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleProfileAction(profile.id, "delete")}
+                        loading={processingProfile === profile.id}
+                        className="text-xs"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>

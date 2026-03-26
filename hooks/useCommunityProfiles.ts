@@ -5,11 +5,12 @@ import useSWR from "swr";
 interface CommunityProfile {
   id: string;
   displayName: string;
-  type: "PERSON" | "PROJECT";
+  type: "USER" | "BUILDER" | "PERSON" | "PROJECT";
   twitterHandle: string | null;
   countryCode: string;
   bio: string | null;
   avatarUrl: string | null;
+  isApproved?: boolean;
 }
 
 interface CommunityProfilesResponse {
