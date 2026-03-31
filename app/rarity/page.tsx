@@ -77,20 +77,32 @@ const TOKEN_ID = "0.0.7235629";
 
 export default function RarityPage() {
   const [data, setData] = React.useState<RarityData | null>(null);
+  const [listings, setListings] = React.useState<Record<number, { price: number; currency: string; url: string }>>({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [search, setSearch] = React.useState("");
   const [selectedNft, setSelectedNft] = React.useState<RankedNft | null>(null);
   const [showTraitStats, setShowTraitStats] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState<"rank" | "serial">("rank");
+  const [sortBy, setSortBy] = React.useState<"rank" | "serial" | "price">("rank");
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
+  const [showOnlyListed, setShowOnlyListed] = React.useState(false);
+  const [sortOpen, setSortOpen] = React.useState(false);
+  const sortRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/data/rarity-${TOKEN_ID}.json`);
-        if (!res.ok) throw new Error("Failed to load rarity data");
-        setData(await res.json());
+        const [rarityRes, listingsRes] = await Promise.all([
+          fetch(`/data/rarity-${TOKEN_ID}.json`),
+          fetch("/api/rarity/listings").catch(() => null),
+        ]);
+        if (!rarityRes.ok) throw new Error("Failed to load rarity data");
+        setData(await rarityRes.json());
+        if (listingsRes?.ok) {
+          const l = await listingsRes.json();
+          setListings(l.listings || {});
+        }
       } catch (e) {
         setError(String(e instanceof Error ? e.message : e));
       } finally {
@@ -120,11 +132,22 @@ export default function RarityPage() {
           n.traits.some((t) => t.value.toLowerCase().includes(q))
       );
     }
-    if (sortBy === "serial") {
-      nfts = [...nfts].sort((a, b) => a.serial - b.serial);
+    if (showOnlyListed) {
+      nfts = nfts.filter((n) => listings[n.serial]);
+    }
+    if (sortBy === "rank") {
+      nfts = [...nfts].sort((a, b) => sortDir === "asc" ? a.rank - b.rank : b.rank - a.rank);
+    } else if (sortBy === "serial") {
+      nfts = [...nfts].sort((a, b) => sortDir === "asc" ? a.serial - b.serial : b.serial - a.serial);
+    } else if (sortBy === "price") {
+      nfts = [...nfts].sort((a, b) => {
+        const pa = listings[a.serial]?.price ?? Infinity;
+        const pb = listings[b.serial]?.price ?? Infinity;
+        return sortDir === "asc" ? pa - pb : pb - pa;
+      });
     }
     return nfts;
-  }, [data, search, sortBy]);
+  }, [data, search, sortBy, sortDir, showOnlyListed, listings]);
 
   return (
     <div className="min-h-screen">
@@ -194,30 +217,54 @@ export default function RarityPage() {
 
           {/* Trait stats panel */}
           {showTraitStats && (
-            <div className="mb-6 rounded-xl bg-bg-card border border-border p-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Object.entries(data.traitStats).map(([traitType, stat]) => (
-                <div key={traitType}>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-text-primary">{traitType}</p>
-                    <span className="text-[10px] font-mono text-brand font-bold">{stat.weight}%</span>
-                  </div>
-                  <div className="space-y-1 max-h-40 overflow-y-auto">
-                    {stat.values.map((v) => (
-                      <div key={v.value} className="flex items-center gap-2 text-[11px]">
-                        <span className="text-text-secondary truncate flex-1">{v.value}</span>
-                        <span className="font-mono text-text-tertiary tabular-nums">{v.count}</span>
-                        <div className="w-12 h-1.5 rounded-full bg-bg-secondary overflow-hidden">
-                          <div
-                            className="h-full bg-brand rounded-full"
-                            style={{ width: `${v.pct}%` }}
-                          />
-                        </div>
-                        <span className="font-mono text-text-tertiary tabular-nums w-10 text-right">{v.pct}%</span>
+            <div className="mb-6 rounded-xl bg-bg-card border border-border overflow-hidden">
+              {/* Header */}
+              <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+                <span className="text-xs font-semibold text-text-primary">Trait Distribution</span>
+                <span className="text-[10px] text-text-tertiary font-mono">{data.totalSupply} NFTs · {Object.keys(data.traitStats).length} traits</span>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">
+                {Object.entries(data.traitStats).map(([traitType, stat]) => (
+                  <div key={traitType} className="p-4">
+                    {/* Trait header */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-text-primary">{traitType}</span>
+                        <span className="text-[10px] text-text-tertiary font-mono">{stat.values.length} values</span>
                       </div>
-                    ))}
+                      <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand/10 text-brand">{stat.weight}%</span>
+                    </div>
+                    {/* Values */}
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                      {stat.values.map((v) => {
+                        const rarityColor =
+                          v.pct <= 2 ? "#fbbf24" :
+                          v.pct <= 5 ? "#a78bfa" :
+                          v.pct <= 15 ? "#fb923c" :
+                          v.pct <= 30 ? "#34d399" :
+                          "#555";
+                        return (
+                          <div key={v.value} className="group">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className="text-[11px] text-text-secondary truncate flex-1 mr-2">{v.value}</span>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className="text-[10px] font-mono text-text-tertiary">{v.count}</span>
+                                <span className="text-[10px] font-mono font-semibold tabular-nums w-11 text-right" style={{ color: rarityColor }}>{v.pct}%</span>
+                              </div>
+                            </div>
+                            <div className="w-full h-1 rounded-full bg-bg-secondary overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${Math.max(v.pct, 1)}%`, backgroundColor: rarityColor }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -233,13 +280,50 @@ export default function RarityPage() {
                 className="w-full pl-8 pr-3 py-2 rounded-lg bg-bg-card border border-border text-[12px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-brand/30"
               />
             </div>
-            <button
-              onClick={() => setSortBy(sortBy === "rank" ? "serial" : "rank")}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-bg-card border border-border text-xs text-text-secondary hover:text-brand transition-colors"
-            >
-              <ArrowUpDown className="h-3 w-3" />
-              {sortBy === "rank" ? "By rank" : "By serial"}
-            </button>
+            <div className="flex items-center rounded-lg border border-border overflow-hidden">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as "rank" | "serial" | "price")}
+                className="px-2 py-2 bg-bg-card text-xs text-text-secondary focus:outline-none cursor-pointer appearance-none pr-6"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 6px center" }}
+              >
+                <option value="rank">Rank</option>
+                <option value="serial">Serial</option>
+                {showOnlyListed && <option value="price">Price</option>}
+              </select>
+              <button
+                onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
+                className="px-2 py-2 bg-bg-card text-text-secondary hover:text-brand transition-colors border-l border-border"
+                title={sortDir === "asc" ? "Ascending" : "Descending"}
+              >
+                {sortDir === "asc" ? (
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+                ) : (
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+                )}
+              </button>
+            </div>
+            {/* Filter */}
+            <div className="flex items-center rounded-lg border border-border overflow-hidden text-xs font-medium">
+              <button
+                onClick={() => { setShowOnlyListed(false); if (sortBy === "price") setSortBy("rank"); }}
+                className={cn(
+                  "px-3 py-2 transition-colors",
+                  !showOnlyListed ? "bg-brand/20 text-brand" : "bg-bg-card text-text-secondary hover:text-brand"
+                )}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setShowOnlyListed(true)}
+                className={cn(
+                  "px-3 py-2 transition-colors flex items-center gap-1 border-l border-border",
+                  showOnlyListed ? "bg-emerald-600/20 text-emerald-400" : "bg-bg-card text-text-secondary hover:text-brand"
+                )}
+              >
+                Listed ({Object.keys(listings).length})
+              </button>
+            </div>
             <span className="text-[11px] text-text-tertiary font-mono">{filteredNfts.length} results</span>
           </div>
 
@@ -248,6 +332,7 @@ export default function RarityPage() {
             {filteredNfts.map((nft) => {
               const tier = getRarityTier(nft.rank, data.totalSupply);
               const imgUrl = resolveImage(nft.image);
+              const listing = listings[nft.serial];
 
               return (
                 <button
@@ -270,18 +355,23 @@ export default function RarityPage() {
                       <span className="text-text-tertiary text-[10px] font-mono font-bold">#{nft.serial}</span>
                     </div>
                   )}
-                  {/* Rank badge */}
-                  <div className={cn(
-                    "absolute top-0.5 left-0.5 px-1 py-0.5 rounded text-[8px] font-bold font-mono text-white leading-none flex items-center gap-0.5",
-                    tier.bg
-                  )}>
-                    <Trophy className="h-2 w-2" />
-                    {nft.rank}
-                  </div>
-                  {/* Tier + Serial */}
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent pt-3 pb-0.5 px-1 flex items-end justify-between">
-                    <span className="text-[9px] font-mono text-white/80 font-medium">#{nft.serial}</span>
-                    <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: TIER_COLORS[tier.label] }}>{tier.label}</span>
+                  {/* Listed banner */}
+                  {listing && (
+                    <div className="absolute top-0 inset-x-0 bg-emerald-600/90 text-white text-center py-0.5 text-[8px] font-bold font-mono flex items-center justify-center gap-1">
+                      Listed · {listing.price} <img src="/hbar-logo.png" alt="HBAR" className="h-3 w-3 inline-block rounded-full" />
+                    </div>
+                  )}
+                  {/* Tier + Rank bottom right, Serial top right (below banner if listed) */}
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent pt-4 pb-0.5 px-1">
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-[9px] font-mono text-white/80 font-medium">#{nft.serial}</span>
+                      <div className="flex items-center gap-0.5">
+                        <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: TIER_COLORS[tier.label] }}>{tier.label}</span>
+                        <span className={cn("px-1 py-0.5 rounded text-[7px] font-bold font-mono text-white leading-none flex items-center gap-0.5", tier.bg)}>
+                          <Trophy className="h-1.5 w-1.5" />{nft.rank}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </button>
               );
@@ -348,14 +438,27 @@ export default function RarityPage() {
                 </div>
               </div>
 
-              {/* Score bar */}
+              {/* Score bar + Buy */}
               <div className="flex items-center justify-between px-5 py-3 border-b border-border">
                 <div className="flex items-center gap-2">
                   <Diamond className="h-4 w-4" style={{ color: tierHex }} />
                   <span className="text-base font-bold font-mono text-text-primary tabular-nums">{selectedNft.score}</span>
                   <span className="text-xs text-text-tertiary">rarity score</span>
+                  <span className="text-xs text-text-tertiary font-mono">· {selectedNft.rank} / {data.totalSupply}</span>
                 </div>
-                <span className="text-xs text-text-tertiary font-mono">{selectedNft.rank} / {data.totalSupply}</span>
+                {listings[selectedNft.serial] ? (
+                  <a
+                    href={listings[selectedNft.serial].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors"
+                  >
+                    {listings[selectedNft.serial].price} <img src="/hbar-logo.png" alt="HBAR" className="h-3.5 w-3.5 rounded-full" /> · Buy on SentX
+                  </a>
+                ) : (
+                  <span className="text-[11px] text-text-tertiary">Not listed</span>
+                )}
               </div>
 
               {/* Traits */}
