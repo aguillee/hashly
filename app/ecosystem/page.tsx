@@ -8,6 +8,9 @@ import {
   Globe,
   ExternalLink,
   Loader2,
+  ThumbsUp,
+  ThumbsDown,
+  Trophy,
 } from "lucide-react";
 import { Buildings, LinkedinLogo } from "@phosphor-icons/react";
 import { Input } from "@/components/ui/Input";
@@ -15,8 +18,10 @@ import { Button } from "@/components/ui/Button";
 import { useEcosystemProjects } from "@/lib/swr";
 import { useWalletStore } from "@/store";
 import { useReveal } from "@/hooks/useReveal";
+import { useVoteLimitContext } from "@/contexts/VoteLimitContext";
 import { cn } from "@/lib/utils";
 import { CountryFlag } from "@/components/ui/CountryFlag";
+import { mutate } from "@/lib/swr";
 
 const CATEGORIES = [
   { value: "ALL", label: "All" },
@@ -55,9 +60,13 @@ function getCategoryLabel(cat: string) {
 
 export default function EcosystemPage() {
   const { isConnected } = useWalletStore();
+  const { showLimitReachedModal, refreshVoteLimit } = useVoteLimitContext();
   const [category, setCategory] = React.useState("ALL");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [userVotes, setUserVotes] = React.useState<Record<string, "UP" | "DOWN">>({});
+  const [projectVotes, setProjectVotes] = React.useState<Record<string, number>>({});
+  const [votingProject, setVotingProject] = React.useState<string | null>(null);
 
   const headerRef = useReveal();
   const filtersRef = useReveal();
@@ -70,6 +79,44 @@ export default function EcosystemPage() {
 
   const { data, isLoading } = useEcosystemProjects(category, debouncedSearch);
   const projects = data?.projects || [];
+
+  // Sync user votes from API response
+  React.useEffect(() => {
+    if (data?.userVotes) {
+      setUserVotes(data.userVotes);
+    }
+    if (data?.projects) {
+      const votes: Record<string, number> = {};
+      for (const p of data.projects) {
+        votes[p.id] = p.totalVotes || 0;
+      }
+      setProjectVotes(votes);
+    }
+  }, [data]);
+
+  const handleVote = async (projectId: string, voteType: "UP" | "DOWN") => {
+    if (!isConnected || votingProject) return;
+    setVotingProject(projectId);
+    try {
+      const response = await fetch(`/api/ecosystem/${projectId}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voteType, useNftVotes: true }),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        setUserVotes((prev) => ({ ...prev, [projectId]: voteType }));
+        setProjectVotes((prev) => ({ ...prev, [projectId]: result.totalVotes }));
+        refreshVoteLimit();
+      } else if (response.status === 429) {
+        showLimitReachedModal();
+      }
+    } catch (error) {
+      console.error("Vote failed:", error);
+    } finally {
+      setVotingProject(null);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -213,49 +260,89 @@ export default function EcosystemPage() {
                       </p>
                     </div>
 
-                    {/* Links Footer */}
-                    <div className="px-4 pb-4 flex items-center gap-2">
-                      <a
-                        href={project.websiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-brand transition-colors"
-                      >
-                        <Globe className="h-3 w-3" />
-                        Website
-                        <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
-                      {project.twitterUrl && (
+                    {/* Footer: Links + Votes */}
+                    <div className="px-4 pb-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
                         <a
-                          href={project.twitterUrl}
+                          href={project.websiteUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-brand transition-colors"
                         >
-                          <span className="font-bold text-[11px]">𝕏</span>
+                          <Globe className="h-3 w-3" />
+                          Website
+                          <ExternalLink className="h-2.5 w-2.5" />
                         </a>
-                      )}
-                      {project.discordUrl && (
-                        <a
-                          href={project.discordUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-brand transition-colors"
-                        >
-                          Discord
-                        </a>
-                      )}
-                      {project.linkedinUrl && (
-                        <a
-                          href={project.linkedinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-brand transition-colors"
-                        >
-                          <LinkedinLogo className="h-3 w-3" weight="fill" />
-                          LinkedIn
-                        </a>
-                      )}
+                        {project.twitterUrl && (
+                          <a
+                            href={project.twitterUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-brand transition-colors"
+                          >
+                            <span className="font-bold text-[11px]">𝕏</span>
+                          </a>
+                        )}
+                        {project.discordUrl && (
+                          <a
+                            href={project.discordUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-brand transition-colors"
+                          >
+                            Discord
+                          </a>
+                        )}
+                        {project.linkedinUrl && (
+                          <a
+                            href={project.linkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-brand transition-colors"
+                          >
+                            <LinkedinLogo className="h-3 w-3" weight="fill" />
+                            LinkedIn
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Vote buttons */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="flex items-center gap-1 text-xs font-mono tabular-nums text-text-secondary">
+                          <Trophy className="h-3 w-3 text-yellow-500" />
+                          {projectVotes[project.id] ?? project.totalVotes ?? 0}
+                        </span>
+                        {isConnected && (
+                          <>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleVote(project.id, "UP"); }}
+                              disabled={votingProject === project.id || userVotes[project.id] === "UP"}
+                              className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                userVotes[project.id] === "UP"
+                                  ? "text-green-400 bg-green-500/15 cursor-default"
+                                  : "text-text-tertiary hover:text-green-400 hover:bg-green-500/10",
+                                votingProject === project.id && "opacity-50 animate-pulse pointer-events-none"
+                              )}
+                            >
+                              <ThumbsUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleVote(project.id, "DOWN"); }}
+                              disabled={votingProject === project.id || userVotes[project.id] === "DOWN"}
+                              className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                userVotes[project.id] === "DOWN"
+                                  ? "text-red-400 bg-red-500/15 cursor-default"
+                                  : "text-text-tertiary hover:text-red-400 hover:bg-red-500/10",
+                                votingProject === project.id && "opacity-50 animate-pulse pointer-events-none"
+                              )}
+                            >
+                              <ThumbsDown className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

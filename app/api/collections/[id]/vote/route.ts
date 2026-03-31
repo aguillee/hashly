@@ -144,6 +144,11 @@ export async function POST(
     let voteChange = 0;
     const newWeight = voteType === "UP" ? voteWeight : -voteWeight;
 
+    // Get user for point history logging
+    const dbUser = await prisma.user.findUnique({
+      where: { walletAddress: user.walletAddress },
+    });
+
     if (existingVote) {
       // User is changing their vote - calculate the difference
       const oldWeight = existingVote.voteWeight;
@@ -158,8 +163,20 @@ export async function POST(
           updatedAt: new Date(),
         },
       });
+
+      // Log vote change for history (0 points)
+      if (dbUser) {
+        await prisma.pointHistory.create({
+          data: {
+            userId: dbUser.id,
+            points: 0,
+            actionType: "COLLECTION_VOTE",
+            description: `${voteType === "UP" ? "Upvoted" : "Downvoted"} collection: ${collection.name}`,
+          },
+        });
+      }
     } else {
-      // New vote - give points for first-time vote on this collection
+      // New vote
       voteChange = newWeight;
 
       await prisma.collectionVote.create({
@@ -172,11 +189,7 @@ export async function POST(
         },
       });
 
-      // Award points for voting on a new collection
-      const dbUser = await prisma.user.findUnique({
-        where: { walletAddress: user.walletAddress },
-      });
-
+      // Award points for first vote + log for history
       if (dbUser) {
         await prisma.$transaction([
           prisma.user.update({
@@ -188,12 +201,11 @@ export async function POST(
               userId: dbUser.id,
               points: POINTS_PER_COLLECTION_VOTE,
               actionType: "COLLECTION_VOTE",
-              description: `Voted on collection: ${collection.name}`,
+              description: `${voteType === "UP" ? "Upvoted" : "Downvoted"} collection: ${collection.name}`,
             },
           }),
         ]);
 
-        // Award 5% referral commission (fire-and-forget)
         awardReferralCommission(dbUser.id, POINTS_PER_COLLECTION_VOTE, "COLLECTION_VOTE");
       }
     }

@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
       seasonApprovedEvents,
       seasonReferralCount,
       badgeData,
+      seasonEcosystemVotes,
       communityProfile,
       userMissions,
     ] = await Promise.all([
@@ -84,7 +85,9 @@ export async function GET(request: NextRequest) {
           createdAt: { gte: seasonStart },
         },
       }),
+      // Unique collection votes this season
       prisma.collectionVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      // Unique token votes this season
       prisma.tokenVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
       // Approved events this season
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
@@ -92,6 +95,8 @@ export async function GET(request: NextRequest) {
       prisma.referral.count({ where: { referrerId: user.id, createdAt: { gte: seasonStart } } }),
       // Badges owned — on-chain verification, current season only
       calculateBadgePoints(walletAddress, seasonStart, currentSeason.endDate),
+      // Unique ecosystem project votes this season
+      prisma.ecosystemProjectVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
       // HashWorld profile
       prisma.communityProfile.findFirst({
         where: { userId: user.id, type: { not: "PROJECT" } },
@@ -144,6 +149,22 @@ export async function GET(request: NextRequest) {
         case "first_event":
           progress = Math.min(seasonApprovedEvents, def.requirement);
           completed = seasonApprovedEvents >= def.requirement;
+          break;
+        case "event_creator_5":
+          progress = Math.min(seasonApprovedEvents, def.requirement);
+          completed = seasonApprovedEvents >= def.requirement;
+          break;
+        case "vote_5_collections":
+          progress = Math.min(seasonCollectionVotes, def.requirement);
+          completed = seasonCollectionVotes >= def.requirement;
+          break;
+        case "vote_5_tokens":
+          progress = Math.min(seasonTokenVotes, def.requirement);
+          completed = seasonTokenVotes >= def.requirement;
+          break;
+        case "vote_5_ecosystem":
+          progress = Math.min(seasonEcosystemVotes, def.requirement);
+          completed = seasonEcosystemVotes >= def.requirement;
           break;
         case "season_streak_25":
           progress = Math.min(user.loginStreak, def.requirement);

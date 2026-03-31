@@ -379,10 +379,10 @@ export default function ProjectsPage() {
                 Community Ranked
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
-                Projects
+                Tokens
               </h1>
               <p className="text-sm text-text-secondary mt-1">
-                <span className="font-mono">{totalCollections}</span> NFTs &middot; <span className="font-mono">{totalTokens}</span> Tokens
+                <span className="font-mono">{totalCollections}</span> NFTs &middot; <span className="font-mono">{totalTokens}</span> FTs
               </p>
             </div>
 
@@ -410,7 +410,7 @@ export default function ProjectsPage() {
               )}
               <input
                 type="text"
-                placeholder="Search NFTs or tokens..."
+                placeholder="Search NFTs or FTs..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-bg-card border border-border focus:outline-none focus:border-brand/50 text-text-primary placeholder:text-text-tertiary text-sm transition-colors"
@@ -462,7 +462,7 @@ export default function ProjectsPage() {
                   )}
                 >
                   <Layers className="h-4 w-4" />
-                  <span className="font-medium text-sm">NFT Collection</span>
+                  <span className="font-medium text-sm">NFT</span>
                 </button>
                 <button
                   type="button"
@@ -475,7 +475,7 @@ export default function ProjectsPage() {
                   )}
                 >
                   <Coins className="h-4 w-4" />
-                  <span className="font-medium text-sm">Token</span>
+                  <span className="font-medium text-sm">FT</span>
                 </button>
               </div>
 
@@ -536,7 +536,7 @@ export default function ProjectsPage() {
                     <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
                       <div className="p-4 border-b border-border flex items-center gap-2">
                         <Layers className="h-4 w-4 text-text-secondary" />
-                        <span className="font-semibold text-text-primary text-sm">NFT Collections (<span className="font-mono">{searchResults.length}</span>)</span>
+                        <span className="font-semibold text-text-primary text-sm">NFTs (<span className="font-mono">{searchResults.length}</span>)</span>
                       </div>
                       <div className="p-3 max-h-[50vh] overflow-y-auto space-y-2">
                         {searchResults.map((collection) => (
@@ -549,7 +549,7 @@ export default function ProjectsPage() {
                     <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
                       <div className="p-4 border-b border-border flex items-center gap-2">
                         <Coins className="h-4 w-4 text-text-secondary" />
-                        <span className="font-semibold text-text-primary text-sm">Tokens (<span className="font-mono">{tokenSearchResults.length}</span>)</span>
+                        <span className="font-semibold text-text-primary text-sm">FTs (<span className="font-mono">{tokenSearchResults.length}</span>)</span>
                       </div>
                       <div className="p-3 max-h-[50vh] overflow-y-auto space-y-2">
                         {tokenSearchResults.map((token) => (
@@ -592,11 +592,11 @@ export default function ProjectsPage() {
                   </div>
                 </div>
 
-                {/* Top 30 Tokens */}
+                {/* Top 30 FTs */}
                 <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
                   <div className="p-4 sm:p-5 border-b border-border flex items-center gap-2">
                     <Coins className="h-4 w-4 text-text-secondary" />
-                    <span className="font-semibold text-text-primary text-sm">Top 30 Tokens</span>
+                    <span className="font-semibold text-text-primary text-sm">Top 30 FTs</span>
                   </div>
                   <div className="p-3 max-h-[70vh] overflow-y-auto">
                     {loadingTokens ? (
@@ -718,10 +718,10 @@ function CollectionRow({
           <Trophy className="h-3 w-3 text-text-tertiary" />
           <span className="font-mono font-bold text-text-primary text-xs sm:text-sm">{collection.totalVotes}</span>
         </div>
-        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "UP")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white")}>
+        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "UP")} disabled={isVoting || (hasVoted && voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white cursor-default")}>
           {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className={cn("h-3 w-3", hasVoted && voteIsUp && "fill-current")} />}
         </Button>
-        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "DOWN")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white")}>
+        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "DOWN")} disabled={isVoting || (hasVoted && !voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white cursor-default")}>
           <ThumbsDown className={cn("h-3 w-3", hasVoted && !voteIsUp && "fill-current")} />
         </Button>
         <ShareToXButton
@@ -803,10 +803,10 @@ function TokenRow({
           <Trophy className="h-3 w-3 text-text-tertiary" />
           <span className="font-mono font-bold text-text-primary text-xs sm:text-sm">{token.totalVotes}</span>
         </div>
-        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "UP")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white")}>
+        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "UP")} disabled={isVoting || (hasVoted && voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white cursor-default")}>
           {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className={cn("h-3 w-3", hasVoted && voteIsUp && "fill-current")} />}
         </Button>
-        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "DOWN")} disabled={isVoting} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white")}>
+        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "DOWN")} disabled={isVoting || (hasVoted && !voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white cursor-default")}>
           <ThumbsDown className={cn("h-3 w-3", hasVoted && !voteIsUp && "fill-current")} />
         </Button>
         <ShareToXButton

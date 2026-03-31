@@ -176,7 +176,6 @@ export async function GET(request: NextRequest) {
           data: {
             points: 0,
             referralPoints: 0,
-            loginStreak: 0,
           },
         });
 

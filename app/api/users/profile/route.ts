@@ -22,11 +22,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
+    const walletAddress = payload.walletAddress as string;
+
     const user = await prisma.user.findUnique({
-      where: { walletAddress: payload.walletAddress as string },
+      where: { walletAddress },
       include: {
-        votes: true,
-        events: true,
         pointHistory: {
           orderBy: { createdAt: "desc" },
           take: 20,
@@ -38,39 +38,64 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get user rank
-    const usersAbove = await prisma.user.count({
-      where: {
-        points: {
-          gt: user.points,
-        },
-      },
-    });
-
-    const totalUsers = await prisma.user.count();
-
     const season = getCurrentSeason();
+    const seasonStart = season.startDate;
+
+    // Season-scoped queries in parallel
+    const [
+      seasonVoteActions,
+      seasonApprovedEvents,
+      seasonRank,
+      seasonContributors,
+      createdEvents,
+    ] = await Promise.all([
+      // Total vote actions this season (all types)
+      prisma.pointHistory.count({
+        where: {
+          userId: user.id,
+          actionType: "VOTE",
+          createdAt: { gte: seasonStart },
+        },
+      }),
+      // Approved events this season
+      prisma.event.count({
+        where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } },
+      }),
+      // Season rank — based on totalPoints (points + badgePoints + referralPoints)
+      prisma.user.count({
+        where: {
+          totalPoints: { gt: user.totalPoints },
+        },
+      }),
+      // Total users with any points this season
+      prisma.user.count({
+        where: { totalPoints: { gt: 0 } },
+      }),
+      // All created events (for the events list section)
+      prisma.event.findMany({
+        where: { createdById: user.id },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
 
     const stats = {
-      totalVotes: user.votes.length,
-      totalEvents: user.events.length,
-      approvedEvents: user.events.filter(e => e.isApproved).length,
-      rank: usersAbove + 1,
-      totalUsers,
+      totalVotes: seasonVoteActions,
+      totalEvents: createdEvents.length,
+      approvedEvents: seasonApprovedEvents,
+      rank: seasonRank + 1,
+      totalUsers: seasonContributors,
       pointHistory: user.pointHistory,
-      createdEvents: user.events
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .map(e => ({
-          id: e.id,
-          title: e.title,
-          event_type: e.event_type,
-          status: e.status,
-          isApproved: e.isApproved,
-          mintDate: e.mintDate?.toISOString() || null,
-          votesUp: e.votesUp,
-          votesDown: e.votesDown,
-          imageUrl: e.imageUrl,
-        })),
+      createdEvents: createdEvents.map(e => ({
+        id: e.id,
+        title: e.title,
+        event_type: e.event_type,
+        status: e.status,
+        isApproved: e.isApproved,
+        mintDate: e.mintDate?.toISOString() || null,
+        votesUp: e.votesUp,
+        votesDown: e.votesDown,
+        imageUrl: e.imageUrl,
+      })),
       season: {
         number: season.number,
         name: season.name,

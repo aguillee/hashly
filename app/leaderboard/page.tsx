@@ -234,7 +234,7 @@ export default function LeaderboardPage() {
         ) : userRank ? (
           <div ref={userRef} className="reveal mb-8">
             <div className="rounded-xl overflow-hidden border border-border bg-bg-card reveal-delay-1">
-              {/* Top bar — rank + points */}
+              {/* Top bar — rank + prize + points */}
               <div className="flex items-center gap-4 px-5 py-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-10 h-10 rounded-lg bg-bg-secondary border border-border flex items-center justify-center flex-shrink-0">
@@ -245,6 +245,25 @@ export default function LeaderboardPage() {
                     <p className="text-sm font-bold text-text-primary truncate">{user.walletAddress}</p>
                   </div>
                 </div>
+                {/* Prize indicator */}
+                {(() => {
+                  const tier = getPrizeTier(userRank);
+                  if (!tier) return (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50 border border-border flex-shrink-0">
+                      <Gift className="h-3.5 w-3.5 text-text-tertiary" />
+                      <span className="text-xs text-text-tertiary">Top {PRIZE_CUTOFF} wins a prize</span>
+                    </div>
+                  );
+                  return (
+                    <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20 flex-shrink-0">
+                      <img src={tier.image} alt={tier.name} className="w-8 h-8 rounded-md object-cover ring-1 ring-border" />
+                      <div>
+                        <p className="text-[9px] uppercase tracking-wider text-amber-500 font-medium">Your prize</p>
+                        <p className="text-xs font-bold text-text-primary">{tier.name}</p>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary border border-border flex-shrink-0">
                   <Zap className="h-4 w-4 text-amber-500" />
                   <span className="text-lg font-black text-text-primary font-mono tabular-nums">{(userData?.totalPoints ?? user.points ?? 0).toLocaleString()}</span>

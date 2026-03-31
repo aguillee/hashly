@@ -493,13 +493,34 @@ model EcosystemProject {
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
+  totalVotes         Int                @default(0) @map("total_votes")
+
   submittedBy        User               @relation(fields: [submittedById], references: [id])
   communityProfile   CommunityProfile?  @relation(fields: [communityProfileId], references: [id])
+  votes              EcosystemProjectVote[]
 
   @@index([isApproved, isVisible])
   @@index([categories])
   @@index([submittedById])
   @@map("ecosystem_projects")
+}
+
+model EcosystemProjectVote {
+  id            String           @id @default(cuid())
+  walletAddress String           @map("wallet_address")
+  voteType      String           @default("UP") @map("vote_type")
+  voteWeight    Int              @default(1) @map("vote_weight")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  projectId     String           @map("project_id")
+  nftTokenId    String?          @map("nft_token_id")
+  nftSerials    String?          @map("nft_serials")
+  project       EcosystemProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([walletAddress, projectId])
+  @@index([projectId])
+  @@index([walletAddress])
+  @@map("ecosystem_project_votes")
 }
 
 // Referral system

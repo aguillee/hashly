@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { HostedBadges } from "@/components/badges/HostedBadges";
 import { ReferralSection } from "@/components/referral/ReferralSection";
+import { PortfolioDashboard } from "@/components/profile/PortfolioDashboard";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
@@ -97,11 +98,11 @@ export default function ProfilePage() {
   const { setUser } = useWalletStore();
 
   const headerRef = useReveal();
+  const portfolioRef = useReveal();
   const nftRef = useReveal();
   const referralRef = useReveal();
   const hostedRef = useReveal();
   const eventsRef = useReveal();
-  const statsRef = useReveal();
   const activityRef = useReveal();
 
   React.useEffect(() => {
@@ -222,7 +223,7 @@ export default function ProfilePage() {
     <div className="min-h-screen">
       {/* Header */}
       <div ref={headerRef} className="reveal pt-6 pb-4 sm:pt-8 sm:pb-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="reveal-delay-1">
             <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
               Your Account
@@ -232,99 +233,116 @@ export default function ProfilePage() {
             </h1>
           </div>
 
-          {/* Wallet + Alias */}
-          <div className="flex items-center gap-2 flex-wrap reveal-delay-2">
-            <button
-              onClick={copyAddress}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
-            >
-              <span className="text-text-secondary text-xs sm:text-sm font-mono">
-                {user.walletAddress}
-              </span>
-              {copied ? (
-                <Check className="h-3.5 w-3.5 text-green-500" />
-              ) : (
-                <Copy className="h-3.5 w-3.5 text-text-tertiary" />
-              )}
-            </button>
-            {editingAlias ? (
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="text"
-                  value={aliasInput}
-                  onChange={(e) => setAliasInput(e.target.value)}
-                  placeholder="Enter alias..."
-                  maxLength={20}
-                  className="px-2.5 py-1.5 rounded-lg bg-bg-card border border-brand/30 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 w-32"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") saveAlias();
-                    if (e.key === "Escape") setEditingAlias(false);
-                  }}
-                />
-                <button
-                  onClick={saveAlias}
-                  disabled={savingAlias}
-                  className="p-1.5 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
-                >
-                  {savingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                </button>
-                <button
-                  onClick={() => setEditingAlias(false)}
-                  className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ) : (
+          {/* Wallet + Alias + Stats — single row */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 reveal-delay-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={startEditAlias}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
+                onClick={copyAddress}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
               >
-                <span className="text-text-secondary text-xs sm:text-sm">
-                  {user.alias ? (
-                    <>Alias: <span className="text-text-primary font-medium">{user.alias}</span></>
-                  ) : (
-                    "Set alias"
-                  )}
+                <span className="text-text-secondary text-xs sm:text-sm font-mono">
+                  {user.walletAddress}
                 </span>
-                <Pencil className="h-3 w-3 text-text-tertiary" />
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-green-500" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5 text-text-tertiary" />
+                )}
               </button>
-            )}
-          </div>
-
-          {/* Points & Streak Bar */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-4 reveal-delay-3">
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-bg-card border border-border">
-              <Zap className="h-5 w-5 text-brand" />
-              <span className="text-2xl font-bold text-text-primary font-mono tabular-nums">
-                {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
-              </span>
-              <span className="text-xs text-text-tertiary">pts</span>
+              {editingAlias ? (
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    value={aliasInput}
+                    onChange={(e) => setAliasInput(e.target.value)}
+                    placeholder="Enter alias..."
+                    maxLength={20}
+                    className="px-2.5 py-1.5 rounded-lg bg-bg-card border border-brand/30 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 w-32"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveAlias();
+                      if (e.key === "Escape") setEditingAlias(false);
+                    }}
+                  />
+                  <button
+                    onClick={saveAlias}
+                    disabled={savingAlias}
+                    className="p-1.5 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
+                  >
+                    {savingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                  </button>
+                  <button
+                    onClick={() => setEditingAlias(false)}
+                    className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={startEditAlias}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
+                >
+                  <span className="text-text-secondary text-xs sm:text-sm">
+                    {user.alias ? (
+                      <>Alias: <span className="text-text-primary font-medium">{user.alias}</span></>
+                    ) : (
+                      "Set alias"
+                    )}
+                  </span>
+                  <Pencil className="h-3 w-3 text-text-tertiary" />
+                </button>
+              )}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-bg-card border border-border">
+                <Zap className="h-4 w-4 text-brand" />
+                <span className="text-lg font-bold text-text-primary font-mono tabular-nums">
+                  {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
+                </span>
+                <span className="text-[10px] text-text-tertiary">pts</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/20 bg-orange-500/5 text-sm">
+                <Flame className="h-3.5 w-3.5 text-orange-500" />
+                <span className="font-bold text-text-primary font-mono">{user.loginStreak}d</span>
+                <span className="text-text-tertiary text-xs">streak</span>
+              </div>
             </div>
-            {((user.badgePoints ?? 0) > 0 || (user.referralPoints ?? 0) > 0) && (
-              <div className="flex items-center gap-2 text-xs text-text-secondary">
-                <span className="font-mono">{user.points ?? 0}</span> missions
-                {(user.badgePoints ?? 0) > 0 && (
-                  <><span className="text-text-tertiary">+</span> <span className="font-mono">{user.badgePoints}</span> badges</>
-                )}
-                {(user.referralPoints ?? 0) > 0 && (
-                  <><span className="text-text-tertiary">+</span> <span className="font-mono">{user.referralPoints}</span> referrals</>
-                )}
+
+            {/* Stats inline */}
+            {stats && (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <Vote className="h-3.5 w-3.5 text-brand" />
+                  <span className="text-sm font-bold text-text-primary font-mono tabular-nums">{stats.totalVotes}</span>
+                  <span className="text-[10px] text-text-tertiary">votes</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5 text-green-500" />
+                  <span className="text-sm font-bold text-text-primary font-mono tabular-nums">{stats.approvedEvents}</span>
+                  <span className="text-[10px] text-text-tertiary">events</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-purple-500" />
+                  <span className="text-sm font-bold text-text-primary font-mono tabular-nums">#{stats.rank}</span>
+                  <span className="text-[10px] text-text-tertiary">rank</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                  <span className="text-sm font-bold text-text-primary font-mono tabular-nums">Top {Math.round((stats.rank / stats.totalUsers) * 100)}%</span>
+                  <span className="text-[10px] text-text-tertiary">of {stats.totalUsers}</span>
+                </div>
               </div>
             )}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/20 bg-orange-500/5 text-sm">
-              <Flame className="h-3.5 w-3.5 text-orange-500" />
-              <span className="font-bold text-text-primary font-mono">{user.loginStreak}d</span>
-              <span className="text-text-tertiary text-xs">streak</span>
-              {user.loginStreak >= 7 && <Badge variant="purple" size="sm">On fire!</Badge>}
-            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-8">
-        {/* NFTs Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
+        {/* Wallet Portfolio Dashboard */}
+        <div ref={portfolioRef} className="reveal mb-6 reveal-delay-1">
+          <PortfolioDashboard walletAddress={user.walletAddress} />
+        </div>
+
+        {/* NFTs Section (Voting Power) */}
         <div ref={nftRef} className="reveal mb-5">
           <div className="flex items-center gap-2 mb-3 reveal-delay-1">
             <Shield className="h-4 w-4 text-brand" />
@@ -511,56 +529,6 @@ export default function ProfilePage() {
           </div>
         ) : stats ? (
           <>
-            {/* Stats Grid */}
-            <div ref={statsRef} className="reveal mb-5">
-              <div className="flex items-center gap-2 mb-3 reveal-delay-1">
-                <TrendingUp className="h-4 w-4 text-text-tertiary" />
-                <h2 className="text-sm font-bold text-text-primary">Stats</h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 reveal-delay-2">
-                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-brand/10 flex items-center justify-center">
-                      <Vote className="h-3.5 w-3.5 text-brand" />
-                    </div>
-                    <span className="text-xs text-text-tertiary">Votes</span>
-                  </div>
-                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">{stats.totalVotes}</p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-green-500/20 transition-all">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
-                      <Calendar className="h-3.5 w-3.5 text-green-500" />
-                    </div>
-                    <span className="text-xs text-text-tertiary">Events</span>
-                  </div>
-                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">{stats.approvedEvents}</p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-purple-500/20 transition-all">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <TrendingUp className="h-3.5 w-3.5 text-purple-500" />
-                    </div>
-                    <span className="text-xs text-text-tertiary">Rank</span>
-                  </div>
-                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">#{stats.rank}</p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-bg-card border border-border hover:border-yellow-500/20 transition-all">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                      <Trophy className="h-3.5 w-3.5 text-yellow-500" />
-                    </div>
-                    <span className="text-xs text-text-tertiary">Percentile</span>
-                  </div>
-                  <p className="text-xl font-bold text-text-primary font-mono tabular-nums">Top {Math.round((stats.rank / stats.totalUsers) * 100)}%</p>
-                  <p className="text-[10px] text-text-tertiary font-mono mt-0.5">of {stats.totalUsers}</p>
-                </div>
-              </div>
-            </div>
-
             {/* Point History */}
             <div ref={activityRef} className="reveal">
               <div className="flex items-center gap-2 mb-3 reveal-delay-1">

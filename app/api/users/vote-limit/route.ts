@@ -37,94 +37,51 @@ export async function GET() {
 
     const todayStart = getUTCDayStart();
 
-    // Get today's votes from all sources
-    const [eventVotes, collectionVotes, tokenVotes] = await Promise.all([
-      // Event votes (forever mints) - check createdAt for today
-      prisma.vote.findMany({
-        where: {
-          userId: user.id,
-          createdAt: { gte: todayStart },
-        },
-        include: {
-          event: {
-            select: {
-              id: true,
-              title: true,
-              imageUrl: true,
-              event_type: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      }),
-      // Collection votes - check updatedAt for today (they can be updated)
-      prisma.collectionVote.findMany({
-        where: {
-          walletAddress: user.walletAddress,
-          updatedAt: { gte: todayStart },
-        },
-        include: {
-          collection: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-        orderBy: { updatedAt: "desc" },
-      }),
-      // Token votes - check updatedAt for today
-      prisma.tokenVote.findMany({
-        where: {
-          walletAddress: user.walletAddress,
-          updatedAt: { gte: todayStart },
-        },
-        include: {
-          token: {
-            select: {
-              id: true,
-              name: true,
-              symbol: true,
-              icon: true,
-            },
-          },
-        },
-        orderBy: { updatedAt: "desc" },
-      }),
-    ]);
+    // Get today's vote actions from PointHistory (includes every vote change)
+    const voteActions = await prisma.pointHistory.findMany({
+      where: {
+        userId: user.id,
+        actionType: { in: ["VOTE", "COLLECTION_VOTE", "TOKEN_VOTE"] },
+        createdAt: { gte: todayStart },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        actionType: true,
+        description: true,
+        createdAt: true,
+      },
+    });
 
-    // Combine and format vote history
-    const history = [
-      ...eventVotes.map((v) => ({
-        type: "event" as const,
-        id: v.event.id,
-        name: v.event.title,
-        imageUrl: v.event.imageUrl,
-        eventType: v.event.event_type,
-        voteType: v.voteType,
+    // Parse history from PointHistory descriptions
+    const history = voteActions.map((v) => {
+      const desc = v.description || "";
+      const isUp = desc.startsWith("Upvoted") || desc.startsWith("Voted on");
+      const isDown = desc.startsWith("Downvoted");
+
+      let type: "event" | "collection" | "token" = "event";
+      let name = desc;
+
+      if (v.actionType === "COLLECTION_VOTE") {
+        type = "collection";
+        name = desc.replace(/^(Upvoted|Downvoted|Voted on) (collection|project): /, "");
+      } else if (v.actionType === "TOKEN_VOTE") {
+        type = "token";
+        name = desc.replace(/^(Upvoted|Downvoted|Voted on) token: /, "");
+      } else {
+        type = "event";
+        name = desc.replace(/^(Upvoted|Downvoted|Voted on) event: /, "");
+      }
+
+      return {
+        type,
+        id: "",
+        name,
+        imageUrl: null,
+        voteType: isDown ? "DOWN" : "UP",
         timestamp: v.createdAt.toISOString(),
-      })),
-      ...collectionVotes.map((v) => ({
-        type: "collection" as const,
-        id: v.collection.id,
-        name: v.collection.name,
-        imageUrl: v.collection.image,
-        voteWeight: v.voteWeight,
-        timestamp: v.updatedAt.toISOString(),
-      })),
-      ...tokenVotes.map((v) => ({
-        type: "token" as const,
-        id: v.token.id,
-        name: v.token.name,
-        symbol: v.token.symbol,
-        imageUrl: v.token.icon,
-        voteWeight: v.voteWeight,
-        timestamp: v.updatedAt.toISOString(),
-      })),
-    ]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 5); // Only show last 5 votes
+      };
+    }).slice(0, 5);
 
     return NextResponse.json({
       ...limitInfo,

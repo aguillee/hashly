@@ -141,8 +141,12 @@ export async function POST(
     let voteChange = 0;
     const newWeight = voteType === "UP" ? voteWeight : -voteWeight;
 
+    // Get user for point history logging
+    const dbUser = await prisma.user.findUnique({
+      where: { walletAddress: user.walletAddress },
+    });
+
     if (existingVote) {
-      // User is changing their vote - calculate the difference
       const oldWeight = existingVote.voteWeight;
       voteChange = newWeight - oldWeight;
 
@@ -155,8 +159,19 @@ export async function POST(
           updatedAt: new Date(),
         },
       });
+
+      // Log vote change for history (0 points)
+      if (dbUser) {
+        await prisma.pointHistory.create({
+          data: {
+            userId: dbUser.id,
+            points: 0,
+            actionType: "TOKEN_VOTE",
+            description: `${voteType === "UP" ? "Upvoted" : "Downvoted"} token: ${token.symbol}`,
+          },
+        });
+      }
     } else {
-      // New vote - give points for first-time vote on this token
       voteChange = newWeight;
 
       await prisma.tokenVote.create({
@@ -169,11 +184,7 @@ export async function POST(
         },
       });
 
-      // Award points for voting on a new token
-      const dbUser = await prisma.user.findUnique({
-        where: { walletAddress: user.walletAddress },
-      });
-
+      // Award points for first vote + log for history
       if (dbUser) {
         await prisma.$transaction([
           prisma.user.update({
@@ -185,12 +196,11 @@ export async function POST(
               userId: dbUser.id,
               points: POINTS_PER_TOKEN_VOTE,
               actionType: "TOKEN_VOTE",
-              description: `Voted on token: ${token.symbol}`,
+              description: `${voteType === "UP" ? "Upvoted" : "Downvoted"} token: ${token.symbol}`,
             },
           }),
         ]);
 
-        // Award 5% referral commission (fire-and-forget)
         awardReferralCommission(dbUser.id, POINTS_PER_TOKEN_VOTE, "TOKEN_VOTE");
       }
     }

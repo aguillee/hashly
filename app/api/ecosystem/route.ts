@@ -28,9 +28,11 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    const sortBy = searchParams.get("sortBy");
+
     const projects = await prisma.ecosystemProject.findMany({
       where,
-      orderBy: { name: "asc" },
+      orderBy: sortBy === "votes" ? { totalVotes: "desc" } : { name: "asc" },
       select: {
         id: true,
         name: true,
@@ -44,11 +46,27 @@ export async function GET(request: NextRequest) {
         discordUrl: true,
         telegramUrl: true,
         linkedinUrl: true,
+        totalVotes: true,
         createdAt: true,
       },
     });
 
-    return NextResponse.json({ projects });
+    // Get user votes if authenticated
+    let userVotes: Record<string, string> = {};
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        const votes = await prisma.ecosystemProjectVote.findMany({
+          where: { walletAddress: user.walletAddress },
+          select: { projectId: true, voteType: true },
+        });
+        for (const v of votes) {
+          userVotes[v.projectId] = v.voteType;
+        }
+      }
+    } catch {}
+
+    return NextResponse.json({ projects, userVotes });
   } catch (error) {
     console.error("Failed to fetch ecosystem projects:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
