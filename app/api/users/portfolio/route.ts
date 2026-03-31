@@ -111,9 +111,9 @@ async function fetchAllPages(initialUrl: string, key: string): Promise<any[]> {
   const results: any[] = [];
   let nextLink: string | null = initialUrl;
   while (nextLink) {
-    const res = await fetch(nextLink, { cache: "no-store" });
+    const res: Response = await fetch(nextLink, { cache: "no-store" });
     if (!res.ok) break;
-    const data = await res.json();
+    const data: any = await res.json();
     results.push(...(data[key] || []));
     nextLink = data.links?.next ? `${MIRROR_NODE}${data.links.next}` : null;
   }

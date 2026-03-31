@@ -64,12 +64,12 @@ export async function GET(request: NextRequest) {
       // Season rank — based on totalPoints (points + badgePoints + referralPoints)
       prisma.user.count({
         where: {
-          totalPoints: { gt: user.totalPoints },
+          points: { gt: user.points },
         },
       }),
       // Total users with any points this season
       prisma.user.count({
-        where: { totalPoints: { gt: 0 } },
+        where: { points: { gt: 0 } },
       }),
       // All created events (for the events list section)
       prisma.event.findMany({

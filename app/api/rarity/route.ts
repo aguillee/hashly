@@ -18,9 +18,9 @@ async function fetchAllNfts(tokenId: string): Promise<NftMetadata[]> {
   let next: string | null = `${MIRROR}/api/v1/tokens/${tokenId}/nfts?limit=100&order=asc`;
 
   while (next) {
-    const res = await fetch(next);
+    const res: Response = await fetch(next);
     if (!res.ok) throw new Error(`Mirror Node error: ${res.status}`);
-    const data = await res.json();
+    const data: any = await res.json();
     for (const nft of data.nfts || []) {
       // Skip burned/deleted NFTs
       if (nft.deleted || nft.account_id === "0.0.0" || !nft.account_id) continue;
@@ -157,7 +157,7 @@ function calculateRarity(
 
   // 2. Build weights (default = 1 for all)
   const weights: Record<string, number> = {};
-  for (const traitType of allTraitTypes) {
+  for (const traitType of Array.from(allTraitTypes)) {
     weights[traitType] = traitWeights[traitType] ?? 1;
   }
   const totalWeight = Object.values(weights).reduce((s, w) => s + w, 0) || 1;
@@ -167,7 +167,7 @@ function calculateRarity(
     let score = 0;
     const traitDetails: { trait_type: string; value: string; rarity: number; count: number }[] = [];
 
-    for (const traitType of allTraitTypes) {
+    for (const traitType of Array.from(allTraitTypes)) {
       const attr = nft.attributes.find((a) => a.trait_type === traitType);
       const value = attr ? String(attr.value) : "__none__";
       const count = attr ? (traitCounts[traitType][value] || 0) : 0;
@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
 
   // Parse optional trait weights: ?weight_Background=2&weight_Eyes=3
   const traitWeights: Record<string, number> = {};
-  for (const [key, value] of searchParams.entries()) {
+  for (const [key, value] of Array.from(searchParams.entries())) {
     if (key.startsWith("weight_")) {
       const traitType = key.replace("weight_", "");
       const w = parseFloat(value);
