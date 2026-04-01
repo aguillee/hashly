@@ -66,8 +66,8 @@ export async function addPoints(
     }),
   ]);
 
-  // Award 5% referral commission to referrer (fire-and-forget)
-  awardReferralCommission(userId, points, action);
+  // Award 5% referral commission to referrer
+  await awardReferralCommission(userId, points, action);
 
   return {
     points,
@@ -152,8 +152,8 @@ export async function handleDailyCheckin(userId: string): Promise<{
       }),
     ]);
 
-    // Award 5% referral commission for streak bonus (fire-and-forget)
-    awardReferralCommission(userId, pointsEarned, "STREAK_BONUS");
+    // Award 5% referral commission for streak bonus
+    await awardReferralCommission(userId, pointsEarned, "STREAK_BONUS");
 
     return {
       success: true,
@@ -287,8 +287,8 @@ export async function awardMissionPoints(
     };
   });
 
-  // Award 5% referral commission AFTER transaction commits (fire-and-forget)
-  awardReferralCommission(userId, points, "MISSION_CLAIM");
+  // Award 5% referral commission AFTER transaction commits
+  await awardReferralCommission(userId, points, "MISSION_CLAIM");
 
   return result;
 }
