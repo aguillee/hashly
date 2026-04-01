@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
       seasonReferralCount,
       badgeData,
       communityProfile,
+      seasonEcosystemVotes,
     ] = await Promise.all([
       // Today — events only (use PointHistory for accuracy)
       prisma.pointHistory.count({
@@ -100,6 +101,8 @@ export async function POST(request: NextRequest) {
         where: { userId: user.id, type: { not: "PROJECT" } },
         select: { id: true },
       }),
+      // Unique ecosystem project votes this season
+      prisma.ecosystemProjectVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
     ]);
 
     const seasonVotes = seasonEventVotes + seasonCollectionVotes + seasonTokenVotes;
@@ -141,6 +144,18 @@ export async function POST(request: NextRequest) {
         break;
       case "hashworld_profile":
         isCompleted = !!communityProfile;
+        break;
+      case "vote_5_collections":
+        isCompleted = seasonCollectionVotes >= mission.requirement;
+        break;
+      case "vote_5_tokens":
+        isCompleted = seasonTokenVotes >= mission.requirement;
+        break;
+      case "vote_5_ecosystem":
+        isCompleted = seasonEcosystemVotes >= mission.requirement;
+        break;
+      case "event_creator_5":
+        isCompleted = seasonApprovedEvents >= mission.requirement;
         break;
     }
 
