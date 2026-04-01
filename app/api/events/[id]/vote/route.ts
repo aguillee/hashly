@@ -16,7 +16,8 @@ import { submitEventVoteToHCS } from "@/lib/hcs-votes";
 import { reserveVoteSlot } from "@/lib/vote-limit";
 import { awardReferralCommission } from "@/lib/referral-points";
 
-const POINTS_PER_VOTE = 10;
+// Points awarded per event vote (0 — points come from mission completion only)
+const POINTS_PER_VOTE = 0;
 
 export async function POST(
   request: NextRequest,

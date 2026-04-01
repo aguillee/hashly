@@ -15,7 +15,8 @@ import { submitAssetVoteToHCS } from "@/lib/hcs-votes";
 import { reserveVoteSlot } from "@/lib/vote-limit";
 import { awardReferralCommission } from "@/lib/referral-points";
 
-const POINTS_PER_PROJECT_VOTE = 1;
+// Points awarded for project votes (0 — points come from mission completion only)
+const POINTS_PER_PROJECT_VOTE = 0;
 
 // POST /api/ecosystem/[id]/vote - Vote on an ecosystem project
 // Same mechanics as collection/token votes: permanent, changeable, NFT-weighted

@@ -15,8 +15,8 @@ import { submitAssetVoteToHCS } from "@/lib/hcs-votes";
 import { reserveVoteSlot } from "@/lib/vote-limit";
 import { awardReferralCommission } from "@/lib/referral-points";
 
-// Points awarded for token votes
-const POINTS_PER_TOKEN_VOTE = 1;
+// Points awarded for token votes (0 — points come from mission completion only)
+const POINTS_PER_TOKEN_VOTE = 0;
 
 // POST /api/tokens/[id]/vote - Vote on a token
 export async function POST(

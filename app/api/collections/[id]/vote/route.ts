@@ -15,8 +15,8 @@ import { submitAssetVoteToHCS } from "@/lib/hcs-votes";
 import { reserveVoteSlot } from "@/lib/vote-limit";
 import { awardReferralCommission } from "@/lib/referral-points";
 
-// Points awarded for collection votes
-const POINTS_PER_COLLECTION_VOTE = 1;
+// Points awarded for collection votes (0 — points come from mission completion only)
+const POINTS_PER_COLLECTION_VOTE = 0;
 
 // POST /api/collections/[id]/vote - Vote on a collection
 // Collections have PERMANENT votes (no 24h reset)
