@@ -215,7 +215,7 @@ export async function awardMissionPoints(
   userId: string,
   points: number,
   missionId: string,
-  missionType: "DAILY" | "WEEKLY" | "ACHIEVEMENT",
+  missionType: "DAILY" | "WEEKLY" | "ACHIEVEMENT" | "SEASON",
   description: string,
   options?: { permanent?: boolean }
 ): Promise<{ pointsEarned: number; newTotal: number }> {

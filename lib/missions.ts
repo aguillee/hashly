@@ -3,7 +3,7 @@ export interface MissionDefinition {
   name: string;
   description: string;
   pointsReward: number;
-  type: "DAILY" | "WEEKLY" | "ACHIEVEMENT";
+  type: "DAILY" | "WEEKLY" | "ACHIEVEMENT" | "SEASON";
   requirement: number;
   icon: string;
   /** If true, can only be claimed once ever (not reset per season). */
