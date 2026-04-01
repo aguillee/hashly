@@ -152,11 +152,10 @@ export const MISSION_DEFINITIONS: MissionDefinition[] = [
   {
     id: "hashworld_profile",
     name: "HashWorld Citizen",
-    description: "Create your HashWorld profile and join the globe",
+    description: "Have your HashWorld profile created",
     pointsReward: 1500,
-    type: "ACHIEVEMENT",
+    type: "SEASON",
     requirement: 1,
     icon: "globe",
-    permanent: true,
   },
 ];

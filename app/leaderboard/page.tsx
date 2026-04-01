@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Trophy, Medal, Crown, Zap, TrendingUp, Gift, Clock, Users, Award, Target } from "lucide-react";
+import { Trophy, Medal, Crown, Zap, TrendingUp, Gift, Users, Award, Target, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
@@ -20,38 +20,58 @@ interface LeaderboardEntry {
   totalPoints: number;
 }
 
+/* ── Prize Tiers ─────────────────────────────────────────── */
 const PRIZE_TIERS = [
-  {
-    label: "Top 1-5",
-    maxRank: 5,
-    name: "Santuario Hedera",
-    tokenId: "0.0.7235629",
-    image: "https://kabila-arweave.b-cdn.net/iYYnkwu5x54DbK-mSnK-kGmnxZsvO-yTonRvhBHbB_8",
-    color: "purple",
-  },
-  {
-    label: "Top 6-12",
-    maxRank: 12,
-    name: "HashHogs",
-    tokenId: "0.0.10233551",
-    image: "https://ipfs.io/ipfs/bafybeielr4by7eajkteso4np2qdueuyqdoill7szcd4dnwahfwlthmn6oe/hashhog-_3333.png",
-    color: "yellow",
-  },
-  {
-    label: "Top 13-22",
-    maxRank: 22,
-    name: "Mapache Mafia V2",
-    tokenId: "0.0.10296772",
-    image: "https://gateway.pinata.cloud/ipfs/bafybeigds67rqvsfhorg6cxjszorgp3gxroavaiiuojvqb2zonwm7rfuk4",
-    color: "green",
-  },
+  { name: "Champion", ranks: "1st", rangeStart: 1, rangeEnd: 1, usd: 50, pct: 17.86, winners: 1, Icon: Crown, accent: "amber" as const },
+  { name: "Podium", ranks: "2nd - 3rd", rangeStart: 2, rangeEnd: 3, usd: 35, pct: 12.50, winners: 2, Icon: Medal, accent: "zinc" as const },
+  { name: "Top", ranks: "4th - 8th", rangeStart: 4, rangeEnd: 8, usd: 18, pct: 6.43, winners: 5, Icon: Zap, accent: "brand" as const },
+  { name: "Qualified", ranks: "9th - 15th", rangeStart: 9, rangeEnd: 15, usd: 10, pct: 3.57, winners: 7, Icon: CheckCircle, accent: "brand" as const },
 ];
 
-const PRIZE_CUTOFF = PRIZE_TIERS[PRIZE_TIERS.length - 1].maxRank;
+const PRIZE_CUTOFF = 15;
 
-function getPrizeTier(rank: number) {
-  return PRIZE_TIERS.find((t) => rank <= t.maxRank) || null;
+function getPrize(rank: number) {
+  const tier = PRIZE_TIERS.find((t) => rank >= t.rangeStart && rank <= t.rangeEnd);
+  if (!tier) return null;
+  return { pct: tier.pct, usd: tier.usd, name: tier.name, accent: tier.accent };
 }
+
+function getTierForRank(rank: number) {
+  return PRIZE_TIERS.find((t) => rank >= t.rangeStart && rank <= t.rangeEnd) || null;
+}
+
+/* ── Prize Pool Tokens ───────────────────────────────────── */
+const PRIZE_TOKENS = [
+  { name: "SAUCE", symbol: "SAUCE", amount: "2,400", usd: 50, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.731861.png" },
+  { name: "BONZO", symbol: "BONZO", amount: "1,970", usd: 40, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.8279134.png" },
+  { name: "CANDY", symbol: "CANDY", amount: "25,065", usd: 30, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.4571363.png" },
+  { name: "SENTX", symbol: "SENTX", amount: "68", usd: 20, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.2672057.png" },
+  { name: "HPRIME", symbol: "HPRIME", amount: "86,352", usd: 140, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.10000022.png" },
+];
+
+const TIER_ACCENT = {
+  amber: {
+    border: "border-amber-400/30",
+    bg: "bg-amber-400/5",
+    iconBg: "bg-gradient-to-br from-amber-400 to-yellow-500",
+    text: "text-amber-400",
+    glow: "shadow-[0_0_16px_rgba(251,191,36,0.15)]",
+  },
+  zinc: {
+    border: "border-zinc-400/30",
+    bg: "bg-zinc-400/5",
+    iconBg: "bg-gradient-to-br from-zinc-300 to-zinc-400",
+    text: "text-zinc-300",
+    glow: "shadow-[0_0_16px_rgba(161,161,170,0.15)]",
+  },
+  brand: {
+    border: "border-brand/30",
+    bg: "bg-brand/5",
+    iconBg: "bg-gradient-to-br from-brand to-teal-500",
+    text: "text-brand",
+    glow: "shadow-[0_0_16px_rgba(45,212,191,0.15)]",
+  },
+};
 
 function useCountdown(targetDate: Date | null) {
   const [timeLeft, setTimeLeft] = React.useState(0);
@@ -139,11 +159,11 @@ export default function LeaderboardPage() {
 
   const getRowStyle = (rank: number, isCurrentUser: boolean) => {
     if (isCurrentUser) return "bg-brand/5 border-l-2 border-l-brand";
-    if (rank === 1) return "bg-amber-500/[0.03] border-l-2 border-l-amber-400";
-    if (rank === 2) return "bg-zinc-400/[0.03] border-l-2 border-l-zinc-400";
-    if (rank === 3) return "bg-orange-400/[0.03] border-l-2 border-l-orange-400";
-    if (rank <= PRIZE_CUTOFF) return "border-l-2 border-l-border";
-    return "";
+    const tier = getTierForRank(rank);
+    if (!tier) return "";
+    if (tier.accent === "amber") return "bg-amber-500/[0.03] border-l-2 border-l-amber-400";
+    if (tier.accent === "zinc") return "bg-zinc-400/[0.03] border-l-2 border-l-zinc-400";
+    return "border-l-2 border-l-brand/30";
   };
 
   return (
@@ -189,49 +209,44 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-        {/* Prize Tiers */}
+        {/* Prize Pool Tokens */}
         <div ref={prizesRef} className="reveal mb-8">
-          <div className="p-5 sm:p-6 rounded-xl bg-bg-card border border-border">
-            <div className="flex items-center gap-2 mb-4 reveal-delay-1">
-              <Gift className="h-4 w-4 text-text-tertiary" />
-              <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-text-tertiary">Season Prizes</span>
+          <div className="p-3 sm:p-4 rounded-xl bg-bg-card border border-border">
+            <div className="flex items-center justify-between mb-2 reveal-delay-1">
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-text-tertiary" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-text-tertiary">Season Prize Pool</span>
+              </div>
+              <span className="text-sm font-black font-mono text-brand">$280</span>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3 reveal-delay-2">
-              {PRIZE_TIERS.map((tier) => (
+            <div className="grid grid-cols-5 gap-1.5 reveal-delay-2">
+              {PRIZE_TOKENS.map((token, i) => (
                 <div
-                  key={tier.tokenId}
+                  key={token.symbol}
                   className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg bg-bg-secondary/50 border transition-colors",
-                    tier.color === "purple" && "border-amber-400/20 hover:border-amber-400/40",
-                    tier.color === "yellow" && "border-zinc-400/20 hover:border-zinc-400/40",
-                    tier.color === "green" && "border-orange-400/20 hover:border-orange-400/40",
+                    "flex flex-col items-center text-center py-2 px-1.5 rounded-md border",
+                    i === 0 ? "bg-amber-400/5 border-amber-400/20" : "bg-bg-secondary/50 border-border"
                   )}
                 >
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-border">
-                    <img src={tier.image} alt={tier.name} className="w-full h-full object-cover" />
+                  <div className="w-6 h-6 rounded-full overflow-hidden bg-bg-secondary border border-white/10 mb-1">
+                    <img src={token.icon} alt={token.symbol} className="w-6 h-6 object-cover" />
                   </div>
-                  <div>
-                    <p className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">{tier.label}</p>
-                    <p className="text-sm font-bold text-text-primary">{tier.name}</p>
-                  </div>
+                  <span className="font-bold text-text-primary text-[10px] leading-tight">{token.name}</span>
+                  <span className={cn(
+                    "text-sm font-black font-mono",
+                    i === 0 ? "text-amber-400" : "text-brand"
+                  )}>${token.usd}</span>
                 </div>
               ))}
             </div>
+            <p className="text-[9px] text-text-tertiary mt-1.5 text-center">
+              Based on Season 1 most voted tokens · USD as of March 27, 2025
+            </p>
           </div>
         </div>
 
-        {/* Connect wallet / User rank */}
-        {!user ? (
-          <div ref={userRef} className="reveal mb-8">
-            <div className="p-6 rounded-xl bg-bg-card border border-border text-center reveal-delay-1">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-bg-secondary flex items-center justify-center">
-                <Trophy className="h-6 w-6 text-text-tertiary" />
-              </div>
-              <h3 className="text-base font-bold text-text-primary mb-1">Connect wallet to join</h3>
-              <p className="text-sm text-text-secondary">Connect your wallet to earn points and compete for prizes.</p>
-            </div>
-          </div>
-        ) : userRank ? (
+        {/* User rank */}
+        {user && userRank ? (
           <div ref={userRef} className="reveal mb-8">
             <div className="rounded-xl overflow-hidden border border-border bg-bg-card reveal-delay-1">
               {/* Top bar — rank + prize + points */}
@@ -247,8 +262,8 @@ export default function LeaderboardPage() {
                 </div>
                 {/* Prize indicator */}
                 {(() => {
-                  const tier = getPrizeTier(userRank);
-                  if (!tier) return (
+                  const prize = getPrize(userRank);
+                  if (!prize) return (
                     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-secondary/50 border border-border flex-shrink-0">
                       <Gift className="h-3.5 w-3.5 text-text-tertiary" />
                       <span className="text-xs text-text-tertiary">Top {PRIZE_CUTOFF} wins a prize</span>
@@ -256,10 +271,9 @@ export default function LeaderboardPage() {
                   );
                   return (
                     <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20 flex-shrink-0">
-                      <img src={tier.image} alt={tier.name} className="w-8 h-8 rounded-md object-cover ring-1 ring-border" />
-                      <div>
+                      <div className="text-center">
                         <p className="text-[9px] uppercase tracking-wider text-amber-500 font-medium">Your prize</p>
-                        <p className="text-xs font-bold text-text-primary">{tier.name}</p>
+                        <p className="text-base font-black font-mono text-amber-400">{prize.pct}% · ${prize.usd}</p>
                       </div>
                     </div>
                   );
@@ -324,7 +338,7 @@ export default function LeaderboardPage() {
                 <div className="divide-y divide-border">
                   {leaderboard.map((entry) => {
                     const isCurrentUser = user?.walletAddress === entry.walletAddress;
-                    const inPrizeZone = entry.rank <= PRIZE_CUTOFF;
+                    const prize = getPrize(entry.rank);
 
                     return (
                       <div
@@ -348,16 +362,17 @@ export default function LeaderboardPage() {
                             {isCurrentUser && (
                               <Badge variant="brand" size="sm">You</Badge>
                             )}
-                            {(() => {
-                              const tier = getPrizeTier(entry.rank);
-                              if (!tier) return null;
-                              return (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-bg-secondary text-text-secondary">
-                                  <img src={tier.image} alt="" className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm object-cover" />
-                                  <span className="hidden sm:inline">{tier.name}</span>
-                                </span>
-                              );
-                            })()}
+                            {prize && (
+                              <span className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-black font-mono border",
+                                prize.accent === "amber" ? "bg-amber-400/15 text-amber-400 border-amber-400/30" :
+                                prize.accent === "zinc" ? "bg-zinc-400/15 text-zinc-300 border-zinc-400/30" :
+                                "bg-brand/15 text-brand border-brand/30"
+                              )}>
+                                <Gift className="h-3 w-3" />
+                                {prize.pct}% · ${prize.usd}
+                              </span>
+                            )}
                           </div>
                           {/* Mobile breakdown */}
                           <div className="flex items-center gap-2 mt-1 sm:hidden">
