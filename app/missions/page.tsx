@@ -17,7 +17,10 @@ import {
   Users,
   Award,
   Globe,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
@@ -28,7 +31,7 @@ interface Mission {
   name: string;
   description: string;
   pointsReward: number;
-  type: "DAILY" | "WEEKLY" | "ACHIEVEMENT";
+  type: "DAILY" | "WEEKLY" | "ACHIEVEMENT" | "SEASON";
   requirement: number;
   icon: string;
   progress: number;
@@ -323,6 +326,30 @@ export default function MissionsPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-8">
+        {/* Event creation CTA */}
+        <div className="mb-5 p-4 rounded-xl border border-brand/20 bg-brand/[0.03]">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0">
+              <Calendar className="h-5 w-5 text-brand" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-text-primary text-sm">+100 pts per approved event</span>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Do you know of an upcoming event? Add it and earn points for each one that gets approved.
+              </p>
+            </div>
+            <Link
+              href="/events/new"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand text-white text-xs font-bold hover:bg-teal-600 transition-colors flex-shrink-0"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create event
+            </Link>
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-brand mb-4" />

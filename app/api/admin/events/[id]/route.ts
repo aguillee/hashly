@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { awardReferralCommission } from "@/lib/referral-points";
 import { z } from "zod";
+
+const POINTS_PER_APPROVED_EVENT = 100;
 
 const adminEventUpdateSchema = z.object({
   isApproved: z.boolean().optional(),
@@ -118,10 +121,34 @@ export async function PATCH(
     if (data.prizes !== undefined) updateData.prizes = data.prizes;
     if (data.custom_links !== undefined) updateData.custom_links = data.custom_links;
 
+    // Check if this is an approval (event was not approved before)
+    const existingEvent = data.isApproved === true
+      ? await prisma.event.findUnique({ where: { id }, select: { isApproved: true, createdById: true } })
+      : null;
+
     const event = await prisma.event.update({
       where: { id },
       data: updateData,
     });
+
+    // Award 100 points to event creator when approved for the first time
+    if (data.isApproved === true && existingEvent && !existingEvent.isApproved && existingEvent.createdById) {
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: existingEvent.createdById },
+          data: { points: { increment: POINTS_PER_APPROVED_EVENT } },
+        }),
+        prisma.pointHistory.create({
+          data: {
+            userId: existingEvent.createdById,
+            points: POINTS_PER_APPROVED_EVENT,
+            actionType: "EVENT_APPROVED",
+            description: `Event approved: ${event.title}`,
+          },
+        }),
+      ]);
+      await awardReferralCommission(existingEvent.createdById, POINTS_PER_APPROVED_EVENT, "EVENT_APPROVED");
+    }
 
     return NextResponse.json({ event });
   } catch (error) {
