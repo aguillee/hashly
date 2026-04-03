@@ -8,10 +8,15 @@ import {
   Edit,
   Trash2,
   Eye,
+  EyeOff,
   ArrowLeft,
   CheckCircle,
   XCircle,
   Loader2,
+  ExternalLink,
+  Globe,
+  MapPin,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -25,14 +30,28 @@ import Image from "next/image";
 interface Event {
   id: string;
   title: string;
+  description: string | null;
   mintDate: string;
+  endDate: string | null;
   mintPrice: string;
+  supply: number | null;
   category: string;
   status: "UPCOMING" | "LIVE";
   isApproved: boolean;
+  isForeverMint: boolean;
   votesUp: number;
   votesDown: number;
   imageUrl: string | null;
+  websiteUrl: string | null;
+  twitterUrl: string | null;
+  discordUrl: string | null;
+  event_type: string | null;
+  host: string | null;
+  language: string | null;
+  location: string | null;
+  location_type: string | null;
+  prizes: string | null;
+  custom_links: any;
   createdBy: {
     walletAddress: string;
   };
@@ -47,6 +66,7 @@ export default function AdminEventsPage() {
   const [search, setSearch] = React.useState("");
   const [filter, setFilter] = React.useState<"all" | "approved" | "pending">("all");
   const [deleting, setDeleting] = React.useState<string | null>(null);
+  const [previewId, setPreviewId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!isConnected || !user?.isAdmin) {
@@ -189,81 +209,234 @@ export default function AdminEventsPage() {
               {filteredEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="flex items-center gap-4 p-4 bg-bg-secondary rounded-lg"
+                  className="bg-bg-secondary rounded-lg overflow-hidden"
                 >
-                  {/* Image */}
-                  <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
-                    {event.imageUrl ? (
-                      <Image
-                        src={event.imageUrl}
-                        alt={event.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Calendar className="h-6 w-6 text-text-secondary" />
+                  <div className="flex items-center gap-4 p-4">
+                    {/* Image */}
+                    <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                      {event.imageUrl ? (
+                        <Image
+                          src={event.imageUrl}
+                          alt={event.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Calendar className="h-6 w-6 text-text-secondary" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium truncate">{event.title}</h3>
+                        <Badge variant={event.isApproved ? "success" : "secondary"}>
+                          {event.isApproved ? "Approved" : "Pending"}
+                        </Badge>
+                        <Badge variant="default" className="capitalize">
+                          {event.status.toLowerCase()}
+                        </Badge>
+                        {event.event_type && (
+                          <Badge variant="default" className="text-[10px]">
+                            {event.event_type.replace("_", " ")}
+                          </Badge>
+                        )}
                       </div>
-                    )}
+                      <div className="flex items-center gap-4 text-sm text-text-secondary">
+                        <span>{formatDate(event.mintDate)}</span>
+                        <span>{event.mintPrice}</span>
+                        <span>Score: {event.votesUp - event.votesDown}</span>
+                        <span className="text-text-tertiary text-xs">by {event.createdBy.walletAddress}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPreviewId(previewId === event.id ? null : event.id)}
+                        title={previewId === event.id ? "Hide preview" : "Preview"}
+                      >
+                        {previewId === event.id ? (
+                          <EyeOff className="h-4 w-4 text-brand" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleApproval(event.id, event.isApproved)}
+                        title={event.isApproved ? "Unapprove" : "Approve"}
+                      >
+                        {event.isApproved ? (
+                          <XCircle className="h-4 w-4 text-error" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4 text-success" />
+                        )}
+                      </Button>
+                      <Link href={`/admin/events/${event.id}/edit`}>
+                        <Button variant="ghost" size="sm" title="Edit">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(event.id)}
+                        disabled={deleting === event.id}
+                        title="Delete"
+                        className="text-error hover:text-error"
+                      >
+                        {deleting === event.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium truncate">{event.title}</h3>
-                      <Badge variant={event.isApproved ? "success" : "secondary"}>
-                        {event.isApproved ? "Approved" : "Pending"}
-                      </Badge>
-                      <Badge variant="default" className="capitalize">
-                        {event.status.toLowerCase()}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-text-secondary">
-                      <span>{formatDate(event.mintDate)}</span>
-                      <span>{event.mintPrice}</span>
-                      <span>Score: {event.votesUp - event.votesDown}</span>
-                    </div>
-                  </div>
+                  {/* Expandable Preview */}
+                  {previewId === event.id && (
+                    <div className="border-t border-border px-4 pb-4 pt-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Left: Image + Description */}
+                        <div>
+                          {event.imageUrl && (
+                            <div className="w-full h-48 relative rounded-lg overflow-hidden mb-3">
+                              <Image
+                                src={event.imageUrl}
+                                alt={event.title}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                          {event.description && (
+                            <div>
+                              <h4 className="text-xs font-bold text-text-tertiary uppercase mb-1">Description</h4>
+                              <p className="text-sm text-text-secondary whitespace-pre-wrap">{event.description}</p>
+                            </div>
+                          )}
+                        </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleApproval(event.id, event.isApproved)}
-                      title={event.isApproved ? "Unapprove" : "Approve"}
-                    >
-                      {event.isApproved ? (
-                        <XCircle className="h-4 w-4 text-error" />
-                      ) : (
-                        <CheckCircle className="h-4 w-4 text-success" />
-                      )}
-                    </Button>
-                    <Link href={`/admin/events/${event.id}/edit`}>
-                      <Button variant="ghost" size="sm" title="Edit">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Link href={`/events/${event.id}`}>
-                      <Button variant="ghost" size="sm" title="View">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(event.id)}
-                      disabled={deleting === event.id}
-                      title="Delete"
-                      className="text-error hover:text-error"
-                    >
-                      {deleting === event.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+                        {/* Right: Details */}
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <span className="text-text-tertiary text-xs block">Start Date</span>
+                              <span className="text-text-primary font-medium">{formatDate(event.mintDate)}</span>
+                            </div>
+                            {event.endDate && (
+                              <div>
+                                <span className="text-text-tertiary text-xs block">End Date</span>
+                                <span className="text-text-primary font-medium">{formatDate(event.endDate)}</span>
+                              </div>
+                            )}
+                            <div>
+                              <span className="text-text-tertiary text-xs block">Price</span>
+                              <span className="text-text-primary font-medium">{event.mintPrice || "—"}</span>
+                            </div>
+                            {event.supply && (
+                              <div>
+                                <span className="text-text-tertiary text-xs block">Supply</span>
+                                <span className="text-text-primary font-medium">{event.supply.toLocaleString()}</span>
+                              </div>
+                            )}
+                            {event.category && (
+                              <div>
+                                <span className="text-text-tertiary text-xs block">Category</span>
+                                <span className="text-text-primary font-medium">{event.category}</span>
+                              </div>
+                            )}
+                            {event.host && (
+                              <div>
+                                <span className="text-text-tertiary text-xs block">Host</span>
+                                <span className="text-text-primary font-medium">{event.host}</span>
+                              </div>
+                            )}
+                            {event.language && (
+                              <div>
+                                <span className="text-text-tertiary text-xs block">Language</span>
+                                <span className="text-text-primary font-medium">{event.language}</span>
+                              </div>
+                            )}
+                            {event.location && (
+                              <div>
+                                <span className="text-text-tertiary text-xs block flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" /> Location
+                                </span>
+                                <span className="text-text-primary font-medium">
+                                  {event.location}
+                                  {event.location_type && (
+                                    <span className="text-text-tertiary text-xs ml-1">({event.location_type.replace("_", " ")})</span>
+                                  )}
+                                </span>
+                              </div>
+                            )}
+                            {event.prizes && (
+                              <div className="col-span-2">
+                                <span className="text-text-tertiary text-xs block">Prizes</span>
+                                <span className="text-text-primary font-medium">{event.prizes}</span>
+                              </div>
+                            )}
+                            {event.isForeverMint && (
+                              <div>
+                                <Badge variant="default">Forever Mint</Badge>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Links */}
+                          <div>
+                            <h4 className="text-xs font-bold text-text-tertiary uppercase mb-2">Links</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {event.websiteUrl && (
+                                <a href={event.websiteUrl} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                  <Globe className="h-3 w-3" /> Website
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                              {event.twitterUrl && (
+                                <a href={event.twitterUrl} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                  𝕏 Twitter
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                              {event.discordUrl && (
+                                <a href={event.discordUrl} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                  Discord
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                              {event.custom_links && Array.isArray(event.custom_links) && event.custom_links.map((link: any, i: number) => (
+                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                  {link.label || "Link"}
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              ))}
+                              {!event.websiteUrl && !event.twitterUrl && !event.discordUrl && (
+                                <span className="text-xs text-text-tertiary">No links provided</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Submitted info */}
+                          <div className="text-xs text-text-tertiary pt-1 border-t border-border">
+                            Submitted by <span className="font-mono">{event.createdBy.walletAddress}</span> on {formatDate(event.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

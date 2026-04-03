@@ -24,13 +24,14 @@ import {
   Globe,
   Pencil,
   ChevronUp,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useWalletStore } from "@/store";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatDateTime } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { ImageUpload } from "@/components/ui/ImageUpload";
@@ -41,12 +42,22 @@ interface PendingEvent {
   title: string;
   description: string;
   mintDate: string;
+  endDate: string | null;
   mintPrice: string;
   supply: number | null;
   imageUrl: string | null;
   category: string;
   websiteUrl: string | null;
   twitterUrl: string | null;
+  discordUrl: string | null;
+  event_type: string | null;
+  host: string | null;
+  language: string | null;
+  location: string | null;
+  location_type: string | null;
+  prizes: string | null;
+  custom_links: any;
+  isForeverMint: boolean;
   createdBy: {
     walletAddress: string;
   };
@@ -95,6 +106,7 @@ export default function AdminPage() {
   const [loadingAdmins, setLoadingAdmins] = React.useState(true);
   const [loadingCollections, setLoadingCollections] = React.useState(true);
   const [processing, setProcessing] = React.useState<string | null>(null);
+  const [previewEventId, setPreviewEventId] = React.useState<string | null>(null);
   const [processingCollection, setProcessingCollection] = React.useState<string | null>(null);
   const [newAdminWallet, setNewAdminWallet] = React.useState("");
   const [addingAdmin, setAddingAdmin] = React.useState(false);
@@ -1144,93 +1156,242 @@ export default function AdminPage() {
                   {pendingEvents.map((event) => (
                     <div
                       key={event.id}
-                      className="flex flex-col lg:flex-row gap-4 p-4 bg-bg-secondary rounded-lg"
+                      className="bg-bg-secondary rounded-lg overflow-hidden"
                     >
-                      {/* Image */}
-                      <div className="w-full lg:w-40 h-32 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
-                        {event.imageUrl ? (
-                          <Image
-                            src={event.imageUrl}
-                            alt={event.title}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Calendar className="h-8 w-8 text-text-secondary" />
+                      <div className="flex flex-col lg:flex-row gap-4 p-4">
+                        {/* Image */}
+                        <div className="w-full lg:w-40 h-32 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                          {event.imageUrl ? (
+                            <Image
+                              src={event.imageUrl}
+                              alt={event.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Calendar className="h-8 w-8 text-text-secondary" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <div>
+                              <h3 className="font-semibold text-lg">{event.title}</h3>
+                              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                                <Badge variant="secondary">{event.category}</Badge>
+                                {event.event_type && (
+                                  <Badge variant="default" className="text-[10px]">
+                                    {event.event_type.replace("_", " ")}
+                                  </Badge>
+                                )}
+                                <span>•</span>
+                                <span>{formatDate(event.mintDate)}</span>
+                                <span>•</span>
+                                <span>{event.mintPrice}</span>
+                              </div>
+                            </div>
                           </div>
-                        )}
+
+                          <p className="text-sm text-text-secondary line-clamp-2 mb-3">
+                            {event.description}
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-4 text-xs text-text-secondary">
+                            <span>By: {event.createdBy.walletAddress}</span>
+                            {event.websiteUrl && (
+                              <a
+                                href={event.websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 hover:text-brand"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                Website
+                              </a>
+                            )}
+                            {event.twitterUrl && (
+                              <a
+                                href={event.twitterUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 hover:text-brand"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                Twitter
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex lg:flex-col gap-2 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPreviewEventId(previewEventId === event.id ? null : event.id)}
+                            className={cn("gap-1", previewEventId === event.id && "text-brand")}
+                          >
+                            {previewEventId === event.id ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                            Preview
+                          </Button>
+                          <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() => handleAction(event.id, "approve")}
+                            loading={processing === event.id}
+                            className="flex-1 lg:flex-none gap-1"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                            Approve
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleAction(event.id, "reject")}
+                            loading={processing === event.id}
+                            className="flex-1 lg:flex-none gap-1"
+                          >
+                            <XCircle className="h-4 w-4" />
+                            Reject
+                          </Button>
+                        </div>
                       </div>
 
-                      {/* Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4 mb-2">
-                          <div>
-                            <h3 className="font-semibold text-lg">{event.title}</h3>
-                            <div className="flex items-center gap-2 text-sm text-text-secondary">
-                              <Badge variant="secondary">{event.category}</Badge>
-                              <span>•</span>
-                              <span>{formatDate(event.mintDate)}</span>
-                              <span>•</span>
-                              <span>{event.mintPrice}</span>
+                      {/* Expandable Preview Panel */}
+                      {previewEventId === event.id && (
+                        <div className="border-t border-border px-4 pb-4 pt-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Left: Full image + full description */}
+                            <div>
+                              {event.imageUrl && (
+                                <div className="w-full h-52 relative rounded-lg overflow-hidden mb-3">
+                                  <Image
+                                    src={event.imageUrl}
+                                    alt={event.title}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              )}
+                              <h4 className="text-xs font-bold text-text-tertiary uppercase mb-1">Full Description</h4>
+                              <p className="text-sm text-text-secondary whitespace-pre-wrap">{event.description}</p>
+                            </div>
+
+                            {/* Right: All details */}
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                  <span className="text-text-tertiary text-xs block">Start Date</span>
+                                  <span className="text-text-primary font-medium">{formatDateTime(event.mintDate)}</span>
+                                </div>
+                                {event.endDate && (
+                                  <div>
+                                    <span className="text-text-tertiary text-xs block">End Date</span>
+                                    <span className="text-text-primary font-medium">{formatDateTime(event.endDate)}</span>
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="text-text-tertiary text-xs block">Price</span>
+                                  <span className="text-text-primary font-medium">{event.mintPrice || "—"}</span>
+                                </div>
+                                {event.supply && (
+                                  <div>
+                                    <span className="text-text-tertiary text-xs block">Supply</span>
+                                    <span className="text-text-primary font-medium">{event.supply.toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {event.category && (
+                                  <div>
+                                    <span className="text-text-tertiary text-xs block">Category</span>
+                                    <span className="text-text-primary font-medium">{event.category}</span>
+                                  </div>
+                                )}
+                                {event.host && (
+                                  <div>
+                                    <span className="text-text-tertiary text-xs block">Host</span>
+                                    <span className="text-text-primary font-medium">{event.host}</span>
+                                  </div>
+                                )}
+                                {event.language && (
+                                  <div>
+                                    <span className="text-text-tertiary text-xs block">Language</span>
+                                    <span className="text-text-primary font-medium">{event.language}</span>
+                                  </div>
+                                )}
+                                {event.location && (
+                                  <div>
+                                    <span className="text-text-tertiary text-xs block flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" /> Location
+                                    </span>
+                                    <span className="text-text-primary font-medium">
+                                      {event.location}
+                                      {event.location_type && (
+                                        <span className="text-text-tertiary text-xs ml-1">({event.location_type.replace("_", " ")})</span>
+                                      )}
+                                    </span>
+                                  </div>
+                                )}
+                                {event.prizes && (
+                                  <div className="col-span-2">
+                                    <span className="text-text-tertiary text-xs block">Prizes</span>
+                                    <span className="text-text-primary font-medium">{event.prizes}</span>
+                                  </div>
+                                )}
+                                {event.isForeverMint && (
+                                  <div>
+                                    <Badge variant="default">Forever Mint</Badge>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Links */}
+                              <div>
+                                <h4 className="text-xs font-bold text-text-tertiary uppercase mb-2">Links</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {event.websiteUrl && (
+                                    <a href={event.websiteUrl} target="_blank" rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                      <Globe className="h-3 w-3" /> Website <ExternalLink className="h-2.5 w-2.5" />
+                                    </a>
+                                  )}
+                                  {event.twitterUrl && (
+                                    <a href={event.twitterUrl} target="_blank" rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                      𝕏 Twitter <ExternalLink className="h-2.5 w-2.5" />
+                                    </a>
+                                  )}
+                                  {event.discordUrl && (
+                                    <a href={event.discordUrl} target="_blank" rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                      Discord <ExternalLink className="h-2.5 w-2.5" />
+                                    </a>
+                                  )}
+                                  {event.custom_links && Array.isArray(event.custom_links) && event.custom_links.map((link: any, i: number) => (
+                                    <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-card border border-border text-xs text-text-secondary hover:text-text-primary transition-colors">
+                                      {link.label || "Link"} <ExternalLink className="h-2.5 w-2.5" />
+                                    </a>
+                                  ))}
+                                  {!event.websiteUrl && !event.twitterUrl && !event.discordUrl && (
+                                    <span className="text-xs text-text-tertiary">No links provided</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="text-xs text-text-tertiary pt-1 border-t border-border">
+                                Submitted on {formatDate(event.createdAt)}
+                              </div>
                             </div>
                           </div>
                         </div>
-
-                        <p className="text-sm text-text-secondary line-clamp-2 mb-3">
-                          {event.description}
-                        </p>
-
-                        <div className="flex flex-wrap items-center gap-4 text-xs text-text-secondary">
-                          <span>By: {event.createdBy.walletAddress}</span>
-                          {event.websiteUrl && (
-                            <a
-                              href={event.websiteUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 hover:text-brand"
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                              Website
-                            </a>
-                          )}
-                          {event.twitterUrl && (
-                            <a
-                              href={event.twitterUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 hover:text-brand"
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                              Twitter
-                            </a>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex lg:flex-col gap-2 flex-shrink-0">
-                        <Button
-                          variant="success"
-                          size="sm"
-                          onClick={() => handleAction(event.id, "approve")}
-                          loading={processing === event.id}
-                          className="flex-1 lg:flex-none gap-1"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          Approve
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleAction(event.id, "reject")}
-                          loading={processing === event.id}
-                          className="flex-1 lg:flex-none gap-1"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          Reject
-                        </Button>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
