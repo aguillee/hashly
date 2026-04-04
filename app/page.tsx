@@ -16,6 +16,11 @@ export default function HomePage() {
 
       <hr className="section-divider" />
 
+      {/* Attendance Badges: Horizontal scroll strip */}
+      <BadgesStrip />
+
+      <hr className="section-divider" />
+
       {/* Meetups + Hackathons: Asymmetric side-by-side */}
       <MeetupsHackathonsSection />
 
@@ -23,11 +28,6 @@ export default function HomePage() {
 
       {/* NFT Events: Column cards below meetups/hackathons */}
       <NFTEventsSection />
-
-      <hr className="section-divider" />
-
-      {/* Attendance Badges: Horizontal scroll strip */}
-      <BadgesStrip />
 
       <hr className="section-divider" />
 

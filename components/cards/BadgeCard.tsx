@@ -28,50 +28,59 @@ export function BadgeCard({ event, className }: BadgeCardProps) {
     <Link href={`/events/${event.id}`} className="block group">
       <div
         className={cn(
-          "flex gap-3 p-3 rounded-xl bg-bg-card border border-[var(--card-border)] transition-all duration-150",
-          "hover:border-[var(--card-border-hover)] hover:shadow-elevation-2",
-          "w-[260px] flex-shrink-0",
+          "rounded-xl bg-bg-card border border-[var(--card-border)] overflow-hidden transition-all duration-200",
+          "hover:border-[var(--card-border-hover)] hover:shadow-elevation-1",
           className
         )}
       >
-        {/* Badge image — square with purple glow ring */}
-        <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-purple-500/20 ring-offset-1 ring-offset-bg-card">
+        {/* Image */}
+        <div className="aspect-[16/10] w-full overflow-hidden bg-bg-secondary relative">
           {badgeImage ? (
             <img
               src={badgeImage}
               alt={event.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <div className="w-full h-full bg-bg-secondary flex items-center justify-center">
-              <Award className="h-6 w-6 text-purple-400" />
+            <div className="w-full h-full bg-gradient-to-br from-bg-secondary to-bg-tertiary flex items-center justify-center">
+              <Award className="h-10 w-10 text-purple-400/40" />
             </div>
           )}
+          {/* Badge pill top-left */}
+          <div className="absolute top-2 left-2">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-sm bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <Award className="h-2.5 w-2.5" />
+              Badge
+            </span>
+          </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between">
-          <div>
-            <h4 className="text-sm font-bold text-text-primary line-clamp-1 group-hover:text-purple-400 transition-colors duration-150">
-              {event.title}
-            </h4>
+        <div className="p-3">
+          <div className="flex items-center gap-1 mb-1">
+            <span className="text-[10px] font-medium text-purple-400">Attendance Badge</span>
             {event.host && (
-              <p className="text-[10px] text-text-tertiary truncate mt-0.5">{event.host}</p>
+              <>
+                <span className="text-text-tertiary text-[10px] mx-0.5">&middot;</span>
+                <span className="text-[10px] text-text-tertiary truncate">{event.host}</span>
+              </>
             )}
           </div>
-
-          <div className="flex items-center gap-2 mt-1">
+          <h4 className="text-sm font-bold text-text-primary line-clamp-1 leading-snug group-hover:text-purple-400 transition-colors duration-150">
+            {event.title}
+          </h4>
+          <div className="flex items-center gap-2 mt-1.5">
             {event.mintDate && (
               <span className="text-[10px] text-text-tertiary flex items-center gap-0.5">
                 <Calendar className="h-2.5 w-2.5" />
                 {formatDate(new Date(event.mintDate).toISOString())}
               </span>
             )}
-            {event.badge?.supply !== undefined && (
+            {event.badge?.supply ? (
               <span className="text-[10px] text-purple-400 font-mono font-medium">
                 {event.badge.supply} claimed
               </span>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -81,12 +90,12 @@ export function BadgeCard({ event, className }: BadgeCardProps) {
 
 export function BadgeCardSkeleton() {
   return (
-    <div className="flex gap-3 p-3 rounded-xl bg-bg-card border border-[var(--card-border)] w-[260px] flex-shrink-0">
-      <div className="w-14 h-14 rounded-lg skeleton ring-2 ring-purple-500/10 ring-offset-1" />
-      <div className="flex-1 space-y-2 py-0.5">
-        <div className="h-3.5 w-full skeleton rounded" />
-        <div className="h-2.5 w-2/3 skeleton rounded" />
-        <div className="h-2.5 w-1/2 skeleton rounded" />
+    <div className="rounded-xl bg-bg-card border border-[var(--card-border)] overflow-hidden">
+      <div className="aspect-[16/10] w-full skeleton" />
+      <div className="p-3 space-y-2">
+        <div className="h-2.5 w-1/3 skeleton rounded" />
+        <div className="h-4 w-full skeleton rounded" />
+        <div className="h-3 w-1/2 skeleton rounded" />
       </div>
     </div>
   );

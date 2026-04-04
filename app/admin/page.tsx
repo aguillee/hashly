@@ -99,6 +99,8 @@ export default function AdminPage() {
 
   // Existing states
   const [pendingEvents, setPendingEvents] = React.useState<PendingEvent[]>([]);
+  const [rejectedEvents, setRejectedEvents] = React.useState<(PendingEvent & { rejectedAt: string })[]>([]);
+  const [showRejected, setShowRejected] = React.useState(false);
   const [pendingCollections, setPendingCollections] = React.useState<PendingCollection[]>([]);
   const [pendingHostRequests, setPendingHostRequests] = React.useState(0);
   const [admins, setAdmins] = React.useState<Admin[]>([]);
@@ -178,6 +180,7 @@ export default function AdminPage() {
     }
 
     fetchPendingEvents();
+    fetchRejectedEvents();
     fetchPendingCollections();
     fetchAdmins();
     fetchHiddenCollections();
@@ -607,6 +610,18 @@ export default function AdminPage() {
     }
   }
 
+  async function fetchRejectedEvents() {
+    try {
+      const response = await fetch("/api/events/rejected");
+      if (response.ok) {
+        const data = await response.json();
+        setRejectedEvents(data.events);
+      }
+    } catch (error) {
+      console.error("Failed to fetch rejected events:", error);
+    }
+  }
+
   async function handleAction(eventId: string, action: "approve" | "reject") {
     setProcessing(eventId);
     try {
@@ -618,6 +633,7 @@ export default function AdminPage() {
 
       if (response.ok) {
         setPendingEvents((prev) => prev.filter((e) => e.id !== eventId));
+        if (action === "reject") fetchRejectedEvents();
       }
     } catch (error) {
       console.error(`Failed to ${action} event:`, error);
@@ -1397,6 +1413,73 @@ export default function AdminPage() {
                 </div>
               )}
             </CardContent>
+          </Card>
+
+          {/* Rejected Events */}
+          <Card>
+            <CardHeader>
+              <CardTitle
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => setShowRejected(!showRejected)}
+              >
+                <XCircle className="h-5 w-5 text-error" />
+                Rejected Events ({rejectedEvents.length})
+                <ChevronUp className={cn("h-4 w-4 ml-auto transition-transform", !showRejected && "rotate-180")} />
+              </CardTitle>
+            </CardHeader>
+            {showRejected && (
+              <CardContent>
+                {rejectedEvents.length === 0 ? (
+                  <p className="text-center py-8 text-text-secondary">No rejected events</p>
+                ) : (
+                  <div className="space-y-3">
+                    {rejectedEvents.map((event) => (
+                      <div
+                        key={event.id}
+                        className="flex flex-col lg:flex-row gap-4 p-4 bg-bg-secondary rounded-lg opacity-70"
+                      >
+                        {/* Image */}
+                        <div className="w-full lg:w-32 h-24 relative rounded-lg overflow-hidden bg-bg-card flex-shrink-0">
+                          {event.imageUrl ? (
+                            <Image
+                              src={event.imageUrl}
+                              alt={event.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Calendar className="h-6 w-6 text-text-secondary" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{event.title}</h3>
+                            <Badge variant="destructive" className="text-[10px]">Rejected</Badge>
+                            {event.event_type && (
+                              <Badge variant="default" className="text-[10px]">
+                                {event.event_type.replace("_", " ")}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-text-secondary line-clamp-2 mb-2">
+                            {event.description}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-4 text-xs text-text-secondary">
+                            <span>By: {event.createdBy.walletAddress}</span>
+                            <span>Submitted: {formatDate(event.createdAt)}</span>
+                            <span className="text-error">Rejected: {formatDate(event.rejectedAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            )}
           </Card>
         </div>
       )}

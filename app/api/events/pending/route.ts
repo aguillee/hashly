@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     const events = await prisma.event.findMany({
-      where: { isApproved: false },
+      where: { isApproved: false, rejectedAt: null },
       orderBy: { createdAt: "desc" },
       include: {
         createdBy: {
@@ -95,14 +95,15 @@ export async function POST(request: NextRequest) {
         message: "Event approved",
       });
     } else {
-      // Delete rejected event
-      await prisma.event.delete({
+      // Soft-delete: mark as rejected
+      await prisma.event.update({
         where: { id: eventId },
+        data: { rejectedAt: new Date() },
       });
 
       return NextResponse.json({
         success: true,
-        message: "Event rejected and deleted",
+        message: "Event rejected",
       });
     }
   } catch (error) {

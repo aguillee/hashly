@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Calendar, Clock } from "lucide-react";
 import { Fire, Trophy, Rocket, Lightning, UsersThree, CodeBlock, Star } from "@phosphor-icons/react";
-import { useFeatured } from "@/lib/swr";
+import { useFeatured, useEventsWithBadge } from "@/lib/swr";
 import { useReveal } from "@/hooks/useReveal";
 import { cn, formatDate } from "@/lib/utils";
 
@@ -151,16 +151,20 @@ function ColumnCardSkeleton() {
 
 export function MeetupsHackathonsSection() {
   const { data: featured, isLoading } = useFeatured();
+  const { data: badgeData } = useEventsWithBadge(6);
   const revealRef = useReveal();
+
+  // IDs of events already shown in BadgesStrip — avoid duplicates
+  const badgeEventIds = new Set((badgeData?.events || []).map((e: any) => e.id));
 
   // Collect all items into a single array with type info
   const allItems: Array<{ event: any; label: string; icon: React.ElementType; typeLabel: string; typeIcon: React.ElementType; typeColor: string }> = [];
 
-  // Meetups first
-  if (featured?.topMeetup) {
+  // Meetups first (skip if already in BadgesStrip)
+  if (featured?.topMeetup && !badgeEventIds.has(featured.topMeetup.id)) {
     allItems.push({ event: featured.topMeetup, label: "Most Voted", icon: Fire, typeLabel: "Meetup", typeIcon: UsersThree, typeColor: "text-brand" });
   }
-  if (featured?.nextMeetup && featured.nextMeetup.id !== featured?.topMeetup?.id) {
+  if (featured?.nextMeetup && featured.nextMeetup.id !== featured?.topMeetup?.id && !badgeEventIds.has(featured.nextMeetup.id)) {
     allItems.push({ event: featured.nextMeetup, label: "Next Up", icon: Rocket, typeLabel: "Meetup", typeIcon: UsersThree, typeColor: "text-brand" });
   }
 
