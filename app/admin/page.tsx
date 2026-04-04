@@ -1458,7 +1458,7 @@ export default function AdminPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold">{event.title}</h3>
-                            <Badge variant="destructive" className="text-[10px]">Rejected</Badge>
+                            <Badge variant="error" className="text-[10px]">Rejected</Badge>
                             {event.event_type && (
                               <Badge variant="default" className="text-[10px]">
                                 {event.event_type.replace("_", " ")}
