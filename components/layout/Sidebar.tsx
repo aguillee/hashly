@@ -116,9 +116,9 @@ export function Sidebar() {
         <Image
           src="/logo-navbar.png"
           alt="Hashly"
-          width={32}
-          height={32}
-          className="w-8 h-8 flex-shrink-0"
+          width={40}
+          height={40}
+          className="w-10 h-10 flex-shrink-0"
           priority
         />
         {show && (

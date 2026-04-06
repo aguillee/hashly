@@ -18,7 +18,7 @@ export function MobileHeader() {
         <Menu className="h-5 w-5" />
       </button>
       <Link href="/" className="flex items-center gap-2">
-        <Image src="/logo-navbar.png" alt="Hashly" width={28} height={28} className="w-7 h-7" />
+        <Image src="/logo-navbar.png" alt="Hashly" width={36} height={36} className="w-9 h-9" />
         <span className="font-semibold text-sm text-text-primary">Hashly</span>
       </Link>
       <div className="w-9" /> {/* Spacer for centering */}

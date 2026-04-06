@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Award, Calendar, MapPin, Users } from "lucide-react";
+import { Award, Calendar, MapPin, Star, Users } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { useEventsWithBadge } from "@/lib/swr";
 import { useReveal } from "@/hooks/useReveal";
@@ -32,6 +32,12 @@ function BadgeCardFeatured({ event }: { event: any }) {
               <Award className="h-2.5 w-2.5" />
               Badge
             </span>
+            {event.votesUp > 0 && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+                <Star className="h-2.5 w-2.5 fill-yellow-400" />
+                {event.votesUp}
+              </span>
+            )}
             {event.host && (
               <span className="text-xs text-text-tertiary">{event.host}</span>
             )}
