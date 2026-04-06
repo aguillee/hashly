@@ -122,7 +122,7 @@ export default function AdminPage() {
   const [deleteCollectionId, setDeleteCollectionId] = React.useState("");
   const [deletingCollection, setDeletingCollection] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "collections" | "delete-collection" | "add-collection" | "hide-collection" | "sync-tokens" | "hide-token" | "delete-token" | "add-token";
+    type: "launchpads" | "kabila" | "dreambay" | "collections" | "delete-collection" | "add-collection" | "hide-collection" | "sync-tokens" | "hide-token" | "delete-token" | "add-token";
     message: string;
   } | null>(null);
   const [hideCollectionId, setHideCollectionId] = React.useState("");
