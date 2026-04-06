@@ -85,10 +85,10 @@ export async function GET(request: NextRequest) {
           createdAt: { gte: seasonStart },
         },
       }),
-      // Unique collection votes this season
-      prisma.collectionVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
-      // Unique token votes this season
-      prisma.tokenVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      // Unique collection votes this season (updatedAt — re-votes refresh the timestamp)
+      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
+      // Unique token votes this season (updatedAt — re-votes refresh the timestamp)
+      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
       // Approved events this season
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
       // Activated referrals this season
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       // Badges owned — on-chain verification, current season only
       calculateBadgePoints(walletAddress, seasonStart, currentSeason.endDate),
       // Unique ecosystem project votes this season
-      prisma.ecosystemProjectVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      prisma.ecosystemProjectVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
       // HashWorld profile
       prisma.communityProfile.findFirst({
         where: { userId: user.id, type: { not: "PROJECT" } },

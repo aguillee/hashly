@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
       }),
       // Season — all types (for achievement missions)
       prisma.pointHistory.count({ where: { userId: user.id, actionType: "VOTE", createdAt: { gte: seasonStart } } }),
-      prisma.collectionVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
-      prisma.tokenVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
+      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
       // Approved events this season
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
       // Activated referrals this season
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
         select: { id: true },
       }),
       // Unique ecosystem project votes this season
-      prisma.ecosystemProjectVote.count({ where: { walletAddress, createdAt: { gte: seasonStart } } }),
+      prisma.ecosystemProjectVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
     ]);
 
     const seasonVotes = seasonEventVotes + seasonCollectionVotes + seasonTokenVotes;
