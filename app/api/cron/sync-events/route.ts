@@ -9,6 +9,10 @@ import {
   getKabilaMintDate,
   formatKabilaPrice,
 } from "@/lib/kabila";
+import {
+  fetchDreamBayLaunchpads,
+  getDreamBayMintPrice,
+} from "@/lib/dreambay";
 
 export const maxDuration = 300; // 5 min timeout for Vercel Pro
 
@@ -56,6 +60,7 @@ export async function GET(request: NextRequest) {
     const results = {
       sentx: { created: 0, updated: 0, skipped: 0, errors: 0 },
       kabila: { created: 0, updated: 0, skipped: 0, errors: 0 },
+      dreambay: { created: 0, updated: 0, skipped: 0, errors: 0 },
       cleanup: { updatedToLive: 0, deletedEnded: 0, deletedOld: 0, fixedForeverMints: 0 },
     };
 
@@ -340,12 +345,76 @@ export async function GET(request: NextRequest) {
       console.error("[Cron Sync] Kabila fetch error:", error);
     }
 
+    // ============================================
+    // SYNC FROM DREAMBAY
+    // ============================================
+    try {
+      const launchpads = await fetchDreamBayLaunchpads();
+      console.log(`[Cron Sync] Fetched ${launchpads.length} launchpads from DreamBay`);
+
+      const activeLaunchpads = launchpads.filter((lp) => lp.status === "minting");
+
+      for (const lp of activeLaunchpads) {
+        try {
+          const mintPrice = getDreamBayMintPrice(lp.stages);
+          const description = stripHtml(lp.description) || `DreamBay launchpad: ${lp.name}`;
+          const imageUrl = lp.bannerUrl || (lp.gallery.length > 0 ? lp.gallery[0] : null);
+
+          const result = await prisma.event.upsert({
+            where: {
+              source_externalId: {
+                source: "DREAMBAY",
+                externalId: lp.slug,
+              },
+            },
+            create: {
+              title: lp.name,
+              description,
+              mintDate: null,
+              mintPrice,
+              supply: lp.totalSupply || null,
+              imageUrl,
+              websiteUrl: lp.mintUrl,
+              twitterUrl: lp.socials.twitter || null,
+              discordUrl: lp.socials.discord ? (lp.socials.discord.startsWith("http") ? lp.socials.discord : `https://${lp.socials.discord}`) : null,
+              status: "LIVE",
+              isApproved: true,
+              isForeverMint: false,
+              source: "DREAMBAY",
+              externalId: lp.slug,
+              createdById: adminUser.id,
+            },
+            update: {
+              title: lp.name,
+              description,
+              mintPrice,
+              supply: lp.totalSupply || null,
+              imageUrl,
+              twitterUrl: lp.socials.twitter || null,
+              status: "LIVE",
+            },
+          });
+
+          if (result.createdAt === result.updatedAt) {
+            results.dreambay.created++;
+          } else {
+            results.dreambay.updated++;
+          }
+        } catch (error) {
+          console.error(`[Cron Sync] DreamBay error for ${lp.name}:`, error);
+          results.dreambay.errors++;
+        }
+      }
+    } catch (error) {
+      console.error("[Cron Sync] DreamBay fetch error:", error);
+    }
+
     console.log("[Cron Sync] Completed:", results);
 
     return NextResponse.json({
       success: true,
       ...results,
-      message: `SentX: ${results.sentx.created} created, ${results.sentx.updated} updated. Kabila: ${results.kabila.created} created, ${results.kabila.updated} updated. Cleanup: ${results.cleanup.deletedOld + results.cleanup.deletedEnded} deleted.`,
+      message: `SentX: ${results.sentx.created} created, ${results.sentx.updated} updated. Kabila: ${results.kabila.created} created, ${results.kabila.updated} updated. DreamBay: ${results.dreambay.created} created, ${results.dreambay.updated} updated. Cleanup: ${results.cleanup.deletedOld + results.cleanup.deletedEnded} deleted.`,
     });
   } catch (error) {
     console.error("[Cron Sync] Failed:", error);

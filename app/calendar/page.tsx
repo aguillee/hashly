@@ -43,7 +43,7 @@ interface Event {
   canVote?: boolean;
   voteLockedUntil?: string | null;
   isForeverMint?: boolean;
-  source?: "SENTX" | "KABILA";
+  source?: "SENTX" | "KABILA" | "DREAMBAY";
   event_type?: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
   host?: string | null;
   location?: string | null;
@@ -74,6 +74,7 @@ const sourceFilters = [
   { value: "all", label: "All Sources" },
   { value: "SENTX", label: "SentX" },
   { value: "KABILA", label: "Kabila" },
+  { value: "DREAMBAY", label: "DreamBay" },
 ];
 
 export default function CalendarPage() {
@@ -92,7 +93,7 @@ export default function CalendarPage() {
   const [userVotes, setUserVotes] = React.useState<Record<string, "UP" | "DOWN">>({});
   const [loading, setLoading] = React.useState(true);
   const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("calendar");
-  const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA">("all");
+  const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA" | "DREAMBAY">("all");
   const [stateFilter, setStateFilter] = React.useState<"all" | "live" | "upcoming">("all");
   const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
 

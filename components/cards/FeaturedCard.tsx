@@ -14,6 +14,7 @@ interface FeaturedCardProps {
     mintDate?: string | null;
     status?: string;
     votesUp?: number;
+    votesDown?: number;
     host?: string;
     prizes?: string;
     location?: string;
@@ -120,10 +121,10 @@ export function FeaturedCard({
                 {timeUntil}
               </span>
             )}
-            {event.votesUp !== undefined && (
+            {event.votesUp !== undefined && (event.votesUp - (event.votesDown || 0)) > 0 && (
               <span className="flex items-center gap-1 text-[11px] text-yellow-400 font-bold font-mono">
                 <Star className="h-3 w-3 fill-yellow-400" />
-                {event.votesUp}
+                {event.votesUp - (event.votesDown || 0)}
               </span>
             )}
           </div>

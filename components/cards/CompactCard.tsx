@@ -13,6 +13,7 @@ interface CompactCardProps {
     mintDate?: string | null;
     status?: string;
     votesUp?: number;
+    votesDown?: number;
     host?: string;
   };
   className?: string;
@@ -88,10 +89,10 @@ export function CompactCard({ event, className, href, external }: CompactCardPro
           {timeUntil && (
             <span className="text-[10px] text-text-tertiary font-mono">{timeUntil}</span>
           )}
-          {event.votesUp !== undefined && (
+          {event.votesUp !== undefined && (event.votesUp - (event.votesDown || 0)) > 0 && (
             <span className="text-[10px] font-bold text-yellow-500 font-mono flex items-center gap-0.5 ml-auto">
               <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
-              {event.votesUp}
+              {event.votesUp - (event.votesDown || 0)}
             </span>
           )}
         </div>

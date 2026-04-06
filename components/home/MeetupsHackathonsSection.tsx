@@ -29,6 +29,7 @@ interface ColumnCardProps {
     startDate?: string | null;
     status?: string;
     votesUp?: number;
+    votesDown?: number;
     host?: string;
     prizes?: string | null;
   };
@@ -79,11 +80,11 @@ function EventColumnCard({ event, label, icon: Icon, typeLabel, typeIcon: TypeIc
             </span>
           </div>
           {/* Votes top-right */}
-          {event.votesUp !== undefined && (
+          {event.votesUp !== undefined && (event.votesUp - (event.votesDown || 0)) > 0 && (
             <div className="absolute top-2 right-2">
               <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-bg-primary/60 backdrop-blur-sm text-yellow-500 border border-border/50">
                 <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
-                {event.votesUp}
+                {event.votesUp - (event.votesDown || 0)}
               </span>
             </div>
           )}

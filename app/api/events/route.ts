@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     // "include" or not specified means show all
 
     // Source filter
-    if (source && (source === "SENTX" || source === "KABILA")) {
+    if (source && (source === "SENTX" || source === "KABILA" || source === "DREAMBAY")) {
       where.source = source;
     }
 

@@ -13,6 +13,7 @@ interface BadgeCardProps {
     mintDate?: string | null;
     host?: string;
     votesUp?: number;
+    votesDown?: number;
     badge?: {
       supply?: number;
       imageUrl?: string | null;
@@ -54,11 +55,11 @@ export function BadgeCard({ event, className }: BadgeCardProps) {
             </span>
           </div>
           {/* Community stars top-right */}
-          {event.votesUp != null && event.votesUp > 0 && (
+          {event.votesUp != null && (event.votesUp - (event.votesDown || 0)) > 0 && (
             <div className="absolute top-2 right-2">
               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold font-mono backdrop-blur-sm bg-bg-primary/60 text-yellow-400 border border-yellow-500/30">
                 <Star className="h-2.5 w-2.5 fill-yellow-400" />
-                {event.votesUp}
+                {event.votesUp - (event.votesDown || 0)}
               </span>
             </div>
           )}

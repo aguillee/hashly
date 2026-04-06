@@ -3,8 +3,9 @@
   "configurations": [
     {
       "name": "dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/Users/guillermo/.nvm/versions/node/v22.13.1/bin/node",
+      "env": { "PATH": "/Users/guillermo/.nvm/versions/node/v22.13.1/bin:/usr/bin:/bin" },
+      "runtimeArgs": ["/Users/guillermo/.nvm/versions/node/v22.13.1/bin/npm", "run", "dev"],
       "port": 3000
     }
   ]

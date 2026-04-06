@@ -33,7 +33,7 @@ export function HeroSection() {
           </h1>
 
           <p className="text-sm text-text-secondary max-w-[50ch] reveal-delay-2">
-            Events, NFTs & Community Rankings — powered by on-chain voting
+            Giving visibility to projects building on Hedera — community-driven rankings powered by on-chain voting
           </p>
 
           {/* CTA row */}
