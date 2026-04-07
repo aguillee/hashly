@@ -78,6 +78,7 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: Prisma.EventWhereInput = {
       isApproved: true,
+      mintDate: { not: null },
     };
 
     // Event type filter

@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
           status: { in: ["UPCOMING", "LIVE"] },
           isForeverMint: false,
           event_type: "MINT_EVENT",
+          mintDate: { not: null },
         },
         include: {
           createdBy: {
