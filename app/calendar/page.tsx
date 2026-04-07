@@ -66,6 +66,7 @@ const typeFilters = [
   { value: "all", label: "All Types", icon: Sparkles },
   { value: "mints", label: "Mint Events", icon: Hexagon },
   { value: "forever", label: "Forever Mints", icon: Infinity },
+  { value: "dreamcast", label: "DreamCast", icon: Infinity },
   { value: "meetups", label: "Meetups", icon: Users },
   { value: "hackathons", label: "Hackathons", icon: Code2 },
 ];
@@ -129,6 +130,10 @@ export default function CalendarPage() {
       // Handle type filters
       if (status === "forever") {
         params.append("foreverMints", "only");
+        params.append("excludeSource", "DREAMBAY");
+      } else if (status === "dreamcast") {
+        params.append("foreverMints", "only");
+        params.append("source", "DREAMBAY");
       } else if (status === "mints") {
         params.append("eventType", "MINT_EVENT");
         params.append("foreverMints", "exclude");
@@ -149,7 +154,10 @@ export default function CalendarPage() {
       }
 
       if (searchQuery) params.append("search", searchQuery);
-      if (sourceFilter !== "all") params.append("source", sourceFilter);
+      // Only apply source dropdown if the type filter hasn't already set a source/excludeSource
+      if (sourceFilter !== "all" && status !== "dreamcast" && status !== "forever") {
+        params.append("source", sourceFilter);
+      }
       params.append("sortBy", sortBy);
       params.append("limit", "100");
 

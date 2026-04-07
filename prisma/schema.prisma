@@ -66,6 +66,7 @@ model Event {
   location_type LocationType?
   prizes        String?
   rejectedAt    DateTime?     @map("rejected_at")
+  metadata      Json?
   createdBy     User          @relation(fields: [createdById], references: [id])
   phases        MintPhase[]
   nftVotes      NftVote[]

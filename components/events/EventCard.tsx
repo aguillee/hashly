@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Calendar, CalendarPlus, ThumbsUp, ThumbsDown, Clock, Box, Star, MapPin, Globe, Users, Award } from "lucide-react";
+import { Calendar, CalendarPlus, ThumbsUp, ThumbsDown, Clock, Box, Star, MapPin, Globe, Users, Award, Fish, Infinity } from "lucide-react";
 import { HbarIcon } from "@/components/ui/HbarIcon";
 import { UsdcIcon } from "@/components/ui/UsdcIcon";
 import { formatDate, formatTimeRemaining, getVoteScore, parseMintPrice } from "@/lib/utils";
@@ -10,6 +10,14 @@ import { useWalletStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { ShareToXButton } from "@/components/ui/ShareToXButton";
 import { getGoogleCalendarUrl } from "@/lib/utils";
+
+const TIER_COLORS: Record<string, string> = {
+  kraken: "text-yellow-300 bg-yellow-500/25 border-yellow-500/40",
+  hydra: "text-red-300 bg-red-500/25 border-red-500/40",
+  siren: "text-purple-300 bg-purple-500/25 border-purple-500/40",
+  keeper: "text-blue-300 bg-blue-500/25 border-blue-500/40",
+  smallFry: "text-emerald-300 bg-emerald-500/25 border-emerald-500/40",
+};
 
 interface EventCardProps {
   event: {
@@ -32,6 +40,12 @@ interface EventCardProps {
     location?: string | null;
     location_type?: string | null;
     hasBadge?: boolean;
+    source?: string;
+    metadata?: {
+      dreamcast?: boolean;
+      tiers?: Record<string, number>;
+      badge?: string | null;
+    } | null;
   };
   userVote?: "UP" | "DOWN" | null;
   onVote?: (eventId: string, voteType: "UP" | "DOWN") => void;
@@ -43,6 +57,8 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
 
   const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
   const isHackathon = event.event_type === "HACKATHON";
+  const isDreamCast = event.metadata?.dreamcast === true;
+  const tiers = isDreamCast ? event.metadata?.tiers : null;
   const isStarsOnly = isMeetup || isHackathon;
   const score = isStarsOnly ? event.votesUp : getVoteScore(event.votesUp, event.votesDown);
   const timeRemaining = formatTimeRemaining(event.mintDate);
@@ -114,9 +130,9 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         {/* Status pill - top right */}
         <div className="absolute top-2.5 right-2.5">
           {event.isForeverMint ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/90 rounded-full text-[10px] font-bold text-white tracking-wide">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              ALWAYS LIVE
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white tracking-wide ${isDreamCast ? "bg-pink-500/90" : "bg-purple-500/90"}`}>
+              {isDreamCast ? <Fish className="h-3 w-3" /> : <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+              {isDreamCast ? "DREAMCAST" : "ALWAYS LIVE"}
             </span>
           ) : isLive ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/90 rounded-full text-[10px] font-bold text-white tracking-wide">
@@ -133,15 +149,42 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         {/* Overlaid info on image bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div className="flex items-center gap-2 text-[10px] text-white/80">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {formatDate(event.mintDate)}
-            </span>
-            {isUpcoming && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 bg-white/15 rounded-full font-mono">
-                <Clock className="h-2.5 w-2.5" />
-                {timeRemaining}
-              </span>
+            {event.isForeverMint ? (
+              /* DreamCast: show tiers, Forever Mint: show "Always Live" */
+              isDreamCast && tiers && Object.keys(tiers).length > 0 ? (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {Object.entries(tiers)
+                    .sort(([, a], [, b]) => a - b)
+                    .map(([tier, count]) => {
+                      const style = TIER_COLORS[tier] || "text-pink-300 bg-pink-500/25 border-pink-500/40";
+                      return (
+                        <span key={tier} className={`px-1.5 py-0.5 rounded-full font-medium border ${style}`}>
+                          {tier.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()).trim()} x{count}
+                        </span>
+                      );
+                    })}
+                </div>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <Infinity className="h-3 w-3" />
+                  Always Live
+                </span>
+              )
+            ) : (
+              <>
+                {event.mintDate && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(event.mintDate)}
+                  </span>
+                )}
+                {isUpcoming && (
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 bg-white/15 rounded-full font-mono">
+                    <Clock className="h-2.5 w-2.5" />
+                    {timeRemaining}
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>

@@ -72,14 +72,16 @@ export async function GET(request: NextRequest) {
     const limit = Math.max(1, Math.min(parseInt(searchParams.get("limit") || "20") || 20, 100));
     const offset = Math.max(0, parseInt(searchParams.get("offset") || "0") || 0);
     const source = searchParams.get("source"); // SENTX or KABILA
+    const excludeSource = searchParams.get("excludeSource"); // exclude a specific source
     const foreverMints = searchParams.get("foreverMints"); // "only", "exclude", or "include"
     const eventType = searchParams.get("eventType"); // "MINT_EVENT", "ECOSYSTEM_MEETUP"
 
-    // Build where clause
+    // Build where clause using AND to combine all filters safely
     const where: Prisma.EventWhereInput = {
       isApproved: true,
-      mintDate: { not: null },
     };
+
+    const andConditions: Prisma.EventWhereInput[] = [];
 
     // Event type filter
     if (eventType === "MINT_EVENT" || eventType === "ECOSYSTEM_MEETUP" || eventType === "HACKATHON") {
@@ -91,12 +93,25 @@ export async function GET(request: NextRequest) {
       where.isForeverMint = true;
     } else if (foreverMints === "exclude") {
       where.isForeverMint = false;
+      where.mintDate = { not: null };
+    } else {
+      // "include" or not specified — require mintDate for non-forever-mints
+      andConditions.push({
+        OR: [
+          { isForeverMint: true },
+          { mintDate: { not: null } },
+        ],
+      });
     }
-    // "include" or not specified means show all
 
     // Source filter
     if (source && (source === "SENTX" || source === "KABILA" || source === "DREAMBAY")) {
       where.source = source;
+    }
+
+    // Exclude source filter (only if source wasn't already set)
+    if (!source && excludeSource && (excludeSource === "SENTX" || excludeSource === "KABILA" || excludeSource === "DREAMBAY")) {
+      where.source = { not: excludeSource };
     }
 
     if (status && status !== "all") {
@@ -116,11 +131,19 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Search filter
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
+      andConditions.push({
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    // Apply all AND conditions
+    if (andConditions.length > 0) {
+      where.AND = andConditions;
     }
 
     // Build orderBy
@@ -162,6 +185,7 @@ export async function GET(request: NextRequest) {
           location_type: true,
           custom_links: true,
           prizes: true,
+          metadata: true,
         },
       }),
       prisma.event.count({ where }),

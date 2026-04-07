@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
       external_id: string | null;
       is_forever_mint: boolean;
       created_by_id: string;
+      metadata: any;
     }>>`
       SELECT e.*
       FROM events e
@@ -75,6 +76,7 @@ export async function GET(request: NextRequest) {
       source: mint.source,
       externalId: mint.external_id,
       isForeverMint: mint.is_forever_mint,
+      metadata: mint.metadata || null,
     }));
 
     return NextResponse.json({

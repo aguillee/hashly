@@ -72,7 +72,7 @@ export const useWalletStore = create<WalletState>()(
 
 // Events filter store
 interface EventsFilterState {
-  status: "all" | "mints" | "forever" | "meetups" | "hackathons";
+  status: "all" | "mints" | "forever" | "dreamcast" | "meetups" | "hackathons";
   categories: string[]; // Multiple categories
   sortBy: "date" | "votes" | "newest";
   searchQuery: string;

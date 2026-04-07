@@ -12,6 +12,9 @@ import {
 import {
   fetchDreamBayLaunchpads,
   getDreamBayMintPrice,
+  fetchDreamCastPools,
+  getDreamCastMintPrice,
+  getDreamCastMintUrl,
 } from "@/lib/dreambay";
 
 export const maxDuration = 300; // 5 min timeout for Vercel Pro
@@ -61,6 +64,7 @@ export async function GET(request: NextRequest) {
       sentx: { created: 0, updated: 0, skipped: 0, errors: 0 },
       kabila: { created: 0, updated: 0, skipped: 0, errors: 0 },
       dreambay: { created: 0, updated: 0, skipped: 0, errors: 0 },
+      dreamcast: { created: 0, updated: 0, errors: 0 },
       cleanup: { updatedToLive: 0, deletedEnded: 0, deletedOld: 0, fixedForeverMints: 0 },
     };
 
@@ -353,12 +357,27 @@ export async function GET(request: NextRequest) {
       console.log(`[Cron Sync] Fetched ${launchpads.length} launchpads from DreamBay`);
 
       const activeLaunchpads = launchpads.filter((lp) => lp.status === "minting");
+      const activeSlugs = new Set(activeLaunchpads.map((lp) => lp.slug));
 
       for (const lp of activeLaunchpads) {
         try {
           const mintPrice = getDreamBayMintPrice(lp.stages);
           const description = stripHtml(lp.description) || `DreamBay launchpad: ${lp.name}`;
           const imageUrl = lp.bannerUrl || (lp.gallery.length > 0 ? lp.gallery[0] : null);
+
+          // Parse dates — use launchpad-level dates, fallback to first stage dates
+          const startDateStr = lp.startDate || (lp.stages.length > 0 ? lp.stages[0].startDate : null);
+          const endDateStr = lp.endDate || (lp.stages.length > 0 ? lp.stages[lp.stages.length - 1].endDate : null);
+          const mintDate = startDateStr ? new Date(startDateStr) : null;
+          // If no endDate, default to 7 days after startDate
+          const endDate = endDateStr
+            ? new Date(endDateStr)
+            : mintDate
+              ? new Date(mintDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+              : null;
+
+          // Determine status based on dates
+          const eventStatus = mintDate && mintDate <= now ? "LIVE" : "UPCOMING";
 
           const result = await prisma.event.upsert({
             where: {
@@ -370,14 +389,15 @@ export async function GET(request: NextRequest) {
             create: {
               title: lp.name,
               description,
-              mintDate: null,
+              mintDate,
+              endDate,
               mintPrice,
               supply: lp.totalSupply || null,
               imageUrl,
               websiteUrl: lp.mintUrl,
               twitterUrl: lp.socials.twitter || null,
               discordUrl: lp.socials.discord ? (lp.socials.discord.startsWith("http") ? lp.socials.discord : `https://${lp.socials.discord}`) : null,
-              status: "LIVE",
+              status: eventStatus,
               isApproved: true,
               isForeverMint: false,
               source: "DREAMBAY",
@@ -387,11 +407,13 @@ export async function GET(request: NextRequest) {
             update: {
               title: lp.name,
               description,
+              mintDate,
+              endDate,
               mintPrice,
               supply: lp.totalSupply || null,
               imageUrl,
               twitterUrl: lp.socials.twitter || null,
-              status: "LIVE",
+              status: eventStatus,
             },
           });
 
@@ -405,8 +427,105 @@ export async function GET(request: NextRequest) {
           results.dreambay.errors++;
         }
       }
+
+      // Mark ended DreamBay launchpads for cleanup
+      // If a launchpad is no longer active in the API and has no endDate, schedule deletion in 7 days
+      const existingDreamBayLPs = await prisma.event.findMany({
+        where: {
+          source: "DREAMBAY",
+          isForeverMint: false,
+        },
+        select: { id: true, externalId: true, endDate: true },
+      });
+
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+
+      for (const ev of existingDreamBayLPs) {
+        if (ev.externalId && !activeSlugs.has(ev.externalId) && !ev.endDate) {
+          await prisma.event.update({
+            where: { id: ev.id },
+            data: { endDate: sevenDaysFromNow },
+          });
+          console.log(`[Cron Sync] DreamBay LP "${ev.externalId}" ended — scheduled for deletion in 7 days`);
+        }
+      }
     } catch (error) {
       console.error("[Cron Sync] DreamBay fetch error:", error);
+    }
+
+    // SYNC FROM DREAMBAY - DREAMCAST POOLS (Forever Mints)
+    try {
+      const pools = await fetchDreamCastPools();
+      console.log(`[Cron Sync] Fetched ${pools.length} DreamCast pools`);
+
+      for (const pool of pools) {
+        try {
+          const mintPrice = getDreamCastMintPrice(pool.mint_price);
+          const description = pool.description || `DreamCast pool: ${pool.name}`;
+          const imageUrl = pool.banner || pool.avatar || null;
+
+          // Build metadata with DreamCast-specific info
+          const metadata = {
+            dreamcast: true,
+            badge: pool.badge,
+            buybackEnabled: pool.buyback_enabled,
+            tiers: pool.pool_slots_tiers,
+            stats: pool.stats,
+            previews: (pool.pool_slots_previews || []).slice(0, 10).map((p) => ({
+              image: p.image,
+              tier: p.tier,
+              name: p.name,
+            })),
+          };
+
+          const result = await prisma.event.upsert({
+            where: {
+              source_externalId: {
+                source: "DREAMBAY",
+                externalId: `dreamcast-${pool.slug}`,
+              },
+            },
+            create: {
+              title: pool.name,
+              description,
+              mintDate: null,
+              mintPrice,
+              supply: pool.pool_slots_count || null,
+              imageUrl,
+              websiteUrl: getDreamCastMintUrl(pool.slug),
+              status: "LIVE",
+              isApproved: true,
+              isForeverMint: true,
+              source: "DREAMBAY",
+              externalId: `dreamcast-${pool.slug}`,
+              createdById: adminUser.id,
+              metadata,
+            },
+            update: {
+              title: pool.name,
+              description,
+              mintPrice,
+              supply: pool.pool_slots_count || null,
+              imageUrl,
+              status: "LIVE",
+              isForeverMint: true,
+              metadata,
+            },
+          });
+
+          if (result.createdAt === result.updatedAt) {
+            results.dreamcast.created++;
+          } else {
+            results.dreamcast.updated++;
+          }
+        } catch (error) {
+          console.error(`[Cron Sync] DreamCast error for ${pool.name}:`, error);
+          results.dreamcast.errors++;
+        }
+      }
+    } catch (error) {
+      console.error("[Cron Sync] DreamCast fetch error:", error);
     }
 
     console.log("[Cron Sync] Completed:", results);
@@ -414,7 +533,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       ...results,
-      message: `SentX: ${results.sentx.created} created, ${results.sentx.updated} updated. Kabila: ${results.kabila.created} created, ${results.kabila.updated} updated. DreamBay: ${results.dreambay.created} created, ${results.dreambay.updated} updated. Cleanup: ${results.cleanup.deletedOld + results.cleanup.deletedEnded} deleted.`,
+      message: `SentX: ${results.sentx.created} created, ${results.sentx.updated} updated. Kabila: ${results.kabila.created} created, ${results.kabila.updated} updated. DreamBay: ${results.dreambay.created} created, ${results.dreambay.updated} updated. DreamCast: ${results.dreamcast.created} created, ${results.dreamcast.updated} updated. Cleanup: ${results.cleanup.deletedOld + results.cleanup.deletedEnded} deleted.`,
     });
   } catch (error) {
     console.error("[Cron Sync] Failed:", error);
