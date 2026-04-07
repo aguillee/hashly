@@ -142,7 +142,7 @@ export async function POST(
           data: {
             userId: dbUser.id,
             points: 0,
-            actionType: "COLLECTION_VOTE",
+            actionType: "ECOSYSTEM_VOTE",
             description: `${voteType === "UP" ? "Upvoted" : "Downvoted"} project: ${project.name}`,
           },
         });
@@ -178,7 +178,7 @@ export async function POST(
           }),
         ]);
 
-        awardReferralCommission(dbUser.id, POINTS_PER_PROJECT_VOTE, "COLLECTION_VOTE");
+        awardReferralCommission(dbUser.id, POINTS_PER_PROJECT_VOTE, "ECOSYSTEM_VOTE");
       }
     }
 

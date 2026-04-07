@@ -88,8 +88,16 @@ export async function POST(request: NextRequest) {
       }),
       // Season — all types (for achievement missions)
       prisma.pointHistory.count({ where: { userId: user.id, actionType: "VOTE", createdAt: { gte: seasonStart } } }),
-      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
-      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
+      // Unique collection votes this season (from PointHistory — immune to recalculate cron)
+      prisma.pointHistory.findMany({
+        where: { userId: user.id, actionType: "COLLECTION_VOTE", createdAt: { gte: seasonStart }, description: { contains: "collection:" } },
+        select: { description: true }, distinct: ["description"],
+      }).then(r => r.length),
+      // Unique token votes this season (from PointHistory)
+      prisma.pointHistory.findMany({
+        where: { userId: user.id, actionType: "TOKEN_VOTE", createdAt: { gte: seasonStart } },
+        select: { description: true }, distinct: ["description"],
+      }).then(r => r.length),
       // Approved events this season
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
       // Activated referrals this season
@@ -102,7 +110,14 @@ export async function POST(request: NextRequest) {
         select: { id: true },
       }),
       // Unique ecosystem project votes this season
-      prisma.ecosystemProjectVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
+      // Unique ecosystem project votes this season (from PointHistory)
+      prisma.pointHistory.findMany({
+        where: { userId: user.id, createdAt: { gte: seasonStart }, OR: [
+          { actionType: "ECOSYSTEM_VOTE" },
+          { actionType: "COLLECTION_VOTE", description: { contains: "project:" } },
+        ]},
+        select: { description: true }, distinct: ["description"],
+      }).then(r => r.length),
     ]);
 
     const seasonVotes = seasonEventVotes + seasonCollectionVotes + seasonTokenVotes;

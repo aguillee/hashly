@@ -85,18 +85,30 @@ export async function GET(request: NextRequest) {
           createdAt: { gte: seasonStart },
         },
       }),
-      // Unique collection votes this season (updatedAt — re-votes refresh the timestamp)
-      prisma.collectionVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
-      // Unique token votes this season (updatedAt — re-votes refresh the timestamp)
-      prisma.tokenVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
+      // Unique collection votes this season (from PointHistory — immune to recalculate cron)
+      prisma.pointHistory.findMany({
+        where: { userId: user.id, actionType: "COLLECTION_VOTE", createdAt: { gte: seasonStart }, description: { contains: "collection:" } },
+        select: { description: true }, distinct: ["description"],
+      }).then(r => r.length),
+      // Unique token votes this season (from PointHistory)
+      prisma.pointHistory.findMany({
+        where: { userId: user.id, actionType: "TOKEN_VOTE", createdAt: { gte: seasonStart } },
+        select: { description: true }, distinct: ["description"],
+      }).then(r => r.length),
       // Approved events this season
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
       // Activated referrals this season
       prisma.referral.count({ where: { referrerId: user.id, createdAt: { gte: seasonStart } } }),
       // Badges owned — on-chain verification, current season only
       calculateBadgePoints(walletAddress, seasonStart, currentSeason.endDate),
-      // Unique ecosystem project votes this season
-      prisma.ecosystemProjectVote.count({ where: { walletAddress, updatedAt: { gte: seasonStart } } }),
+      // Unique ecosystem project votes this season (from PointHistory)
+      prisma.pointHistory.findMany({
+        where: { userId: user.id, createdAt: { gte: seasonStart }, OR: [
+          { actionType: "ECOSYSTEM_VOTE" },
+          { actionType: "COLLECTION_VOTE", description: { contains: "project:" } },
+        ]},
+        select: { description: true }, distinct: ["description"],
+      }).then(r => r.length),
       // HashWorld profile
       prisma.communityProfile.findFirst({
         where: { userId: user.id, type: { not: "PROJECT" } },
