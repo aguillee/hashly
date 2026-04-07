@@ -149,42 +149,11 @@ export async function POST(
             },
           });
 
-          // Calculate vote change for regular vote
+          // Calculate vote change for regular vote only (NFT votes handled below)
           if (voteType === "UP" && oldVoteType === "DOWN") {
             regularVoteWeight = 2; // -1 becomes +1
           } else if (voteType === "DOWN" && oldVoteType === "UP") {
             regularVoteWeight = -2; // +1 becomes -1
-          }
-
-          // Also update existing NFT votes for this wallet on this event
-          const existingNftVotes = await prisma.nftVote.findMany({
-            where: {
-              eventId,
-              walletAddress: user.walletAddress,
-            },
-          });
-
-          if (existingNftVotes.length > 0) {
-            // Calculate total NFT weight
-            const totalNftWeight = existingNftVotes.reduce((sum, v) => sum + v.voteWeight, 0);
-
-            // Update all NFT votes to new voteType
-            await prisma.nftVote.updateMany({
-              where: {
-                eventId,
-                walletAddress: user.walletAddress,
-              },
-              data: {
-                voteType: voteType as VoteType,
-              },
-            });
-
-            // NFT vote weight change: totalNftWeight * 2 (because changing direction)
-            if (voteType === "UP") {
-              nftVoteWeight = totalNftWeight * 2; // Was -X, now +X
-            } else {
-              nftVoteWeight = -totalNftWeight * 2; // Was +X, now -X
-            }
           }
         } else {
           // Same vote type on forever mint — update createdAt so it appears in today's history
@@ -275,10 +244,7 @@ export async function POST(
     }
 
     // Handle NFT votes if requested
-    // For Forever Mint: NFT votes work like collections - no cooldown, votes replace (don't accumulate)
-    // For Regular events: NFT votes have 24h cooldown and accumulate
-    if (useNftVotes && !isForeverMint) {
-      // Regular events: NFT votes with daily cooldown (resets 00:00 UTC)
+    if (useNftVotes) {
       const walletNFTs = await getWalletNFTs(user.walletAddress);
       const nftNow = new Date();
       const nftStartOfDay = new Date(Date.UTC(nftNow.getUTCFullYear(), nftNow.getUTCMonth(), nftNow.getUTCDate()));
@@ -297,32 +263,51 @@ export async function POST(
         existingNftVotes.map(v => [`${v.tokenId}-${v.serialNumber}`, v])
       );
 
-      // Process dragon NFTs - can vote again after 24h
+      // Process dragon NFTs
       for (const dragon of walletNFTs.dragons) {
         const key = `${DRAGON_TOKEN_ID}-${dragon.serialNumber}`;
         const existingNftVote = existingVoteMap.get(key);
 
         if (existingNftVote) {
-          // Check if 24h passed since last NFT vote
-          if (existingNftVote.createdAt < nftStartOfDay) {
-            // Update existing NFT vote (reset timestamp, add weight)
-            await prisma.nftVote.update({
-              where: { id: existingNftVote.id },
-              data: {
-                voteType: voteType as VoteType,
-                createdAt: new Date(),
-              },
-            });
-            nftVotesUsed.push({
-              tokenId: DRAGON_TOKEN_ID,
-              serialNumber: dragon.serialNumber,
-              weight: DRAGON_VOTE_WEIGHT,
-            });
-            nftVoteWeight += voteType === "UP" ? DRAGON_VOTE_WEIGHT : -DRAGON_VOTE_WEIGHT;
+          if (isForeverMint) {
+            // Forever mint: update direction if changed, no cooldown
+            if (existingNftVote.voteType !== voteType) {
+              await prisma.nftVote.update({
+                where: { id: existingNftVote.id },
+                data: {
+                  voteType: voteType as VoteType,
+                  createdAt: new Date(),
+                },
+              });
+              // Direction change: weight swings both ways
+              nftVoteWeight += voteType === "UP" ? DRAGON_VOTE_WEIGHT * 2 : -DRAGON_VOTE_WEIGHT * 2;
+              nftVotesUsed.push({
+                tokenId: DRAGON_TOKEN_ID,
+                serialNumber: dragon.serialNumber,
+                weight: DRAGON_VOTE_WEIGHT,
+              });
+            }
+            // Same direction on forever mint: no change needed
+          } else {
+            // Regular event: 24h cooldown
+            if (existingNftVote.createdAt < nftStartOfDay) {
+              await prisma.nftVote.update({
+                where: { id: existingNftVote.id },
+                data: {
+                  voteType: voteType as VoteType,
+                  createdAt: new Date(),
+                },
+              });
+              nftVotesUsed.push({
+                tokenId: DRAGON_TOKEN_ID,
+                serialNumber: dragon.serialNumber,
+                weight: DRAGON_VOTE_WEIGHT,
+              });
+              nftVoteWeight += voteType === "UP" ? DRAGON_VOTE_WEIGHT : -DRAGON_VOTE_WEIGHT;
+            }
           }
-          // If within 24h, skip this NFT
         } else {
-          // Create new NFT vote
+          // Create new NFT vote (works for both forever and regular)
           await prisma.nftVote.create({
             data: {
               tokenId: DRAGON_TOKEN_ID,
@@ -342,28 +327,47 @@ export async function POST(
         }
       }
 
-      // Process El Santuario NFTs - only use first one, gives 5 votes, can vote again after 24h
+      // Process El Santuario NFTs - only use first one, gives 5 votes
       if (walletNFTs.santuario.length > 0) {
         const santuarioNft = walletNFTs.santuario[0];
         const key = `${SANTUARIO_TOKEN_ID}-${santuarioNft.serialNumber}`;
         const existingNftVote = existingVoteMap.get(key);
 
         if (existingNftVote) {
-          // Check if 24h passed since last NFT vote
-          if (existingNftVote.createdAt < nftStartOfDay) {
-            await prisma.nftVote.update({
-              where: { id: existingNftVote.id },
-              data: {
-                voteType: voteType as VoteType,
-                createdAt: new Date(),
-              },
-            });
-            nftVotesUsed.push({
-              tokenId: SANTUARIO_TOKEN_ID,
-              serialNumber: santuarioNft.serialNumber,
-              weight: SANTUARIO_VOTE_WEIGHT,
-            });
-            nftVoteWeight += voteType === "UP" ? SANTUARIO_VOTE_WEIGHT : -SANTUARIO_VOTE_WEIGHT;
+          if (isForeverMint) {
+            // Forever mint: update direction if changed, no cooldown
+            if (existingNftVote.voteType !== voteType) {
+              await prisma.nftVote.update({
+                where: { id: existingNftVote.id },
+                data: {
+                  voteType: voteType as VoteType,
+                  createdAt: new Date(),
+                },
+              });
+              nftVoteWeight += voteType === "UP" ? SANTUARIO_VOTE_WEIGHT * 2 : -SANTUARIO_VOTE_WEIGHT * 2;
+              nftVotesUsed.push({
+                tokenId: SANTUARIO_TOKEN_ID,
+                serialNumber: santuarioNft.serialNumber,
+                weight: SANTUARIO_VOTE_WEIGHT,
+              });
+            }
+          } else {
+            // Regular event: 24h cooldown
+            if (existingNftVote.createdAt < nftStartOfDay) {
+              await prisma.nftVote.update({
+                where: { id: existingNftVote.id },
+                data: {
+                  voteType: voteType as VoteType,
+                  createdAt: new Date(),
+                },
+              });
+              nftVotesUsed.push({
+                tokenId: SANTUARIO_TOKEN_ID,
+                serialNumber: santuarioNft.serialNumber,
+                weight: SANTUARIO_VOTE_WEIGHT,
+              });
+              nftVoteWeight += voteType === "UP" ? SANTUARIO_VOTE_WEIGHT : -SANTUARIO_VOTE_WEIGHT;
+            }
           }
         } else {
           await prisma.nftVote.create({
@@ -385,8 +389,6 @@ export async function POST(
         }
       }
     }
-    // For Forever Mint: NFT votes are already handled above when changing direction (lines 117-146)
-    // They don't accumulate - they just change direction with the regular vote
 
     // Update event vote counts
     // totalVoteChange encodes a "swing": e.g. +2 means going from DOWN(-1) to UP(+1)
