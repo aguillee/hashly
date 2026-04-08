@@ -106,9 +106,6 @@ export function HeroSection() {
                   <p className="text-[10px] text-text-tertiary leading-relaxed">
                     <span className="text-yellow-500 font-medium">+1 vote</span> per Santuario Hedera NFT held
                   </p>
-                  <a href="/rarity" className="text-[10px] text-yellow-500 hover:text-yellow-400 font-medium transition-colors">
-                    View rarity ranks →
-                  </a>
                 </div>
               </div>
 
