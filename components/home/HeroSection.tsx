@@ -72,7 +72,7 @@ export function HeroSection() {
               </p>
               <span className="text-text-tertiary/30">·</span>
               <a
-                href="https://docs.hash-ly.com"
+                href="https://hashly.gitbook.io/hashly-docs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-[10px] text-brand hover:text-brand/80 font-medium transition-colors whitespace-nowrap"
