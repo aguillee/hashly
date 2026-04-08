@@ -38,4 +38,3 @@
 
 * [⛓️ Votación On-Chain (HCS)](technical/hcs-voting.md)
 * [👛 Wallets Compatibles](technical/wallets.md)
-* [📡 Resumen de la API](technical/api-overview.md)
