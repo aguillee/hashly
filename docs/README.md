@@ -36,3 +36,4 @@ Hedera tiene un ecosistema en constante crecimiento, pero **no existía un lugar
 
 **🌐 Web:** [hash-ly.com](https://hash-ly.com)
 **🐦 Twitter/X:** [@hashly\_h](https://x.com/hashly_h)
+**💬 Discord:** [discord.gg/hashly](https://discord.gg/hashly)

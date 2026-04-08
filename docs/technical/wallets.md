@@ -4,7 +4,7 @@ Hashly utiliza **WalletConnect** para la autenticación de wallets. Cualquier wa
 
 ---
 
-## ⭐ Wallets Recomendadas
+## ⭐ Wallet Recomendada
 
 ### 🟣 HashPack
 
@@ -14,21 +14,9 @@ La wallet más popular de Hedera. Disponible como extensión de navegador y app 
 - 📱 Apps para iOS y Android
 - ✅ Soporte completo de tokens de Hedera
 
-### 🔵 Blade Wallet
+### 🔗 Otras Wallets
 
-Una wallet de Hedera fácil de usar con navegador DApp integrado.
-
-- 🌐 Extensión de navegador
-- 📱 App móvil
-- 👶 Interfaz sencilla para principiantes
-
-### 🦊 MetaMask
-
-La wallet crypto más utilizada del mundo. Funciona con Hedera a través del bridge de WalletConnect.
-
-- 🌐 Extensión de navegador
-- 📱 App móvil
-- 🔗 Requiere bridge de WalletConnect para Hedera
+Cualquier wallet compatible con Hedera que soporte **WalletConnect** puede utilizarse con Hashly.
 
 ---
 
