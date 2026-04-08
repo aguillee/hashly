@@ -1,47 +1,56 @@
-# Token & NFT Rankings
+# 📊 Rankings de Tokens & NFTs
 
-Hashly lets the community rank Hedera tokens and NFT collections through on-chain voting.
-
-## Token Rankings
-
-### What's Listed
-Hedera tokens (fungible tokens) are synced from ecosystem sources. Each token listing shows:
-- Token name and symbol
-- Token ID (e.g., `0.0.XXXXX`)
-- Current price and market data
-- Community vote count
-- Up/down vote buttons
-
-### Voting
-- **Permanent votes** — You can change your vote anytime (no cooldown).
-- **NFT-boosted** — Full voting power applies (base + dragons + El Santuario).
-- **On-chain** — Recorded via HCS asset votes.
-- **Counts toward missions** — "Vote on 5 different tokens" mission (100 XP).
+Hashly permite a la comunidad **rankear tokens y colecciones NFT de Hedera** a través de votación on-chain.
 
 ---
 
-## NFT Collection Rankings
+## 🪙 Rankings de Tokens
 
-### What's Listed
-Hedera NFT collections are curated from marketplaces and community submissions. Each listing shows:
-- Collection name and preview images
-- Creator information
-- Floor price and volume
-- Total supply and holder count
-- Community vote count
+### 📋 Qué se Lista
 
-### Voting
-Same mechanics as token voting:
-- Permanent votes with direction changes
-- NFT-boosted voting power
-- On-chain HCS recording
-- Mission progress: "Vote on 5 different NFT collections" (100 XP)
+Los tokens de Hedera (fungible tokens) se sincronizan desde fuentes del ecosistema. Cada listado de token muestra:
+
+- 🏷️ **Nombre y símbolo** del token
+- 🆔 **Token ID** (ej. `0.0.XXXXX`)
+- 💹 **Precio actual** y datos de mercado
+- 🗳️ **Conteo de votos** de la comunidad
+- 👍👎 **Botones de voto** up/down
+
+### 🗳️ Votación
+
+- ♾️ **Votos permanentes** — Puedes cambiar tu voto en cualquier momento (sin cooldown)
+- 🐉 **NFT-boosted** — Tu poder de voto completo aplica (base + dragons + El Santuario)
+- ⛓️ **On-chain** — Registrado vía HCS asset votes
+- 🏅 **Cuenta para misiones** — Misión "Vota en 5 tokens diferentes" (100 XP)
 
 ---
 
-## HCS Vote Format
+## 🎨 Rankings de Colecciones NFT
 
-Votes on tokens and collections are recorded as **asset votes** on the HCS assets topic:
+### 📋 Qué se Lista
+
+Las colecciones NFT de Hedera son curadas desde marketplaces y envíos de la comunidad. Cada listado muestra:
+
+- 🏷️ **Nombre de la colección** e imágenes de preview
+- 👤 **Información del creador**
+- 💰 **Floor price** y volumen
+- 🔢 **Supply total** y cantidad de holders
+- 🗳️ **Conteo de votos** de la comunidad
+
+### 🗳️ Votación
+
+Mismas mecánicas que la votación de tokens:
+
+- ♾️ Votos permanentes con cambios de dirección
+- 🐉 Poder de voto NFT-boosted
+- ⛓️ Registro on-chain vía HCS
+- 🏅 Progreso de misión: "Vota en 5 colecciones NFT diferentes" (100 XP)
+
+---
+
+## ⛓️ Formato de Voto HCS
+
+Los votos en tokens y colecciones se registran como **asset votes** en el topic HCS de assets:
 
 ```json
 {
@@ -60,8 +69,10 @@ Votes on tokens and collections are recorded as **asset votes** on the HCS asset
 }
 ```
 
-This provides full transparency — anyone can see who voted, with how much power, and when.
+> 🔍 Esto proporciona **transparencia total** — cualquiera puede ver quién votó, con cuánto poder, y cuándo.
 
-## Submitting a Token or Collection
+---
 
-Users can submit tokens or NFT collections for community review. Submissions go through admin approval before appearing in rankings.
+## 📝 Enviar un Token o Colección
+
+Los usuarios pueden enviar tokens o colecciones NFT para **revisión de la comunidad**. Los envíos pasan por aprobación de un admin antes de aparecer en los rankings.

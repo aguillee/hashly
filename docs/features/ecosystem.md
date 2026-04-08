@@ -1,63 +1,79 @@
-# Ecosystem Directory
+# 🌐 Directorio del Ecosistema
 
-The Ecosystem page is a curated directory of projects building on Hedera Hashgraph. Projects are community-voted and admin-approved.
+La página de Ecosystem es un **directorio curado de proyectos** construyendo sobre Hedera Hashgraph. Los proyectos son votados por la comunidad y aprobados por admins.
 
-## Categories
+---
 
-Projects are organized by category:
+## 🏷️ Categorías
 
-- **DeFi** — Decentralized finance protocols
-- **Tools** — Developer and user tools
-- **Marketplace** — NFT and token marketplaces
-- **Data** — Analytics and data platforms
-- **Community** — Community-focused projects
-- **Wallet** — Wallet applications
-- **Bridge** — Cross-chain bridges
-- **Gaming** — Blockchain games
-- **NFT** — NFT platforms and collections
-- **Education** — Educational resources
-- **Infrastructure** — Network infrastructure
-- **Other** — Everything else
+Los proyectos están organizados por categoría:
 
-## Browsing Projects
+| Categoría | Descripción |
+|---|---|
+| 💰 **DeFi** | Protocolos de finanzas descentralizadas |
+| 🛠️ **Tools** | Herramientas para desarrolladores y usuarios |
+| 🏪 **Marketplace** | Marketplaces de NFTs y tokens |
+| 📊 **Data** | Plataformas de analytics y datos |
+| 👥 **Community** | Proyectos enfocados en la comunidad |
+| 👛 **Wallet** | Aplicaciones de wallet |
+| 🌉 **Bridge** | Puentes cross-chain |
+| 🎮 **Gaming** | Juegos blockchain |
+| 🎨 **NFT** | Plataformas y colecciones NFT |
+| 📚 **Education** | Recursos educativos |
+| ⚙️ **Infrastructure** | Infraestructura de red |
+| 📦 **Other** | Todo lo demás |
 
-The ecosystem page features:
-- **Category filters** — Click a category to filter projects
-- **Search** — Find projects by name or description
-- **Project cards** — Logo, name, description, category badge, and vote count
-- **Vote buttons** — Upvote or downvote projects with your full voting power
+---
 
-## Voting on Projects
+## 🔍 Explorando Proyectos
 
-Ecosystem project voting uses the same mechanics as forever mints:
-- **Permanent votes** — Change your vote direction anytime
-- **NFT-boosted** — Dragons and El Santuario increase your power
-- **On-chain** — Recorded via HCS
-- **Counts toward missions** — "Vote on 5 ecosystem projects" mission
+La página de ecosistema incluye:
 
-## Applying to List a Project
+- 🏷️ **Filtros por categoría** — Haz clic en una categoría para filtrar proyectos
+- 🔍 **Búsqueda** — Encuentra proyectos por nombre o descripción
+- 🃏 **Tarjetas de proyecto** — Logo, nombre, descripción, badge de categoría y conteo de votos
+- 🗳️ **Botones de voto** — Upvote o downvote proyectos con tu poder de voto completo
 
-Any connected user can submit a project for listing:
+---
 
-1. Go to **Ecosystem > Apply**
-2. Fill in the application form:
-   - **Project name** (required)
-   - **Category** (required)
-   - **Country** (required)
-   - **Logo** (image upload)
-   - **Description** (required)
-   - **Website URL** (required)
-   - **Social links** — Twitter, Discord, Telegram (optional)
-   - **Contact email** (required, never shown publicly)
-3. Submit for review
+## 🗳️ Votación en Proyectos
 
-### Approval Process
+La votación de proyectos del ecosistema usa las **mismas mecánicas que los forever mints**:
 
-- Submitted projects have `pending` status and are not publicly visible.
-- An admin reviews the application.
-- Once approved, the project appears in the directory and on the HashWorld globe.
-- The submitter can edit their project details after approval.
+- ♾️ **Votos permanentes** — Cambia la dirección de tu voto en cualquier momento
+- 🐉 **NFT-boosted** — Los Dragons y El Santuario aumentan tu poder
+- ⛓️ **On-chain** — Registrado vía HCS
+- 🏅 **Cuenta para misiones** — Misión "Vota en 5 proyectos del ecosistema"
 
-## Integration with HashWorld
+---
 
-When an ecosystem project is approved, a **CommunityProfile** is automatically created for it. This means the project appears as a pin on the HashWorld 3D globe, mapped by the country the submitter selected.
+## 📝 Cómo Listar un Proyecto
+
+Cualquier usuario conectado puede enviar un proyecto para ser listado:
+
+### Pasos:
+
+1. Ve a **Ecosystem > Apply**
+2. Llena el formulario de solicitud:
+   - 📛 **Nombre del proyecto** (requerido)
+   - 🏷️ **Categoría** (requerido)
+   - 🌍 **País** (requerido)
+   - 🖼️ **Logo** (carga de imagen)
+   - 📝 **Descripción** (requerido)
+   - 🔗 **URL del website** (requerido)
+   - 📱 **Enlaces sociales** — Twitter, Discord, Telegram (opcional)
+   - 📧 **Email de contacto** (requerido, nunca se muestra públicamente)
+3. ✅ Envía para revisión
+
+### 🔎 Proceso de Aprobación
+
+- 🕐 Los proyectos enviados tienen status `pending` y **no son visibles públicamente**
+- 👨‍💼 Un admin revisa la solicitud
+- ✅ Una vez aprobado, el proyecto aparece en el directorio y en el **globo de HashWorld**
+- ✏️ El usuario que envió el proyecto puede **editar los detalles** después de la aprobación
+
+---
+
+## 🌍 Integración con HashWorld
+
+Cuando un proyecto del ecosistema es aprobado, se crea automáticamente un **CommunityProfile**. Esto significa que el proyecto aparece como un **pin en el globo 3D de HashWorld**, ubicado según el país que seleccionó el usuario que lo envió.

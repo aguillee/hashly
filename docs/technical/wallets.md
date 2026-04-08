@@ -1,38 +1,50 @@
-# Supported Wallets
+# 👛 Wallets Compatibles
 
-Hashly uses WalletConnect for wallet authentication. Any Hedera-compatible wallet that supports WalletConnect can be used.
+Hashly utiliza **WalletConnect** para la autenticación de wallets. Cualquier wallet compatible con Hedera que soporte WalletConnect puede utilizarse.
 
-## Recommended Wallets
+---
 
-### HashPack
-The most popular Hedera wallet. Available as a browser extension and mobile app.
-- Browser extension (Chrome, Brave, Firefox)
-- iOS and Android apps
-- Full Hedera token support
+## ⭐ Wallets Recomendadas
 
-### Blade Wallet
-A user-friendly Hedera wallet with built-in DApp browser.
-- Browser extension
-- Mobile app
-- Simple interface for beginners
+### 🟣 HashPack
 
-### MetaMask
-The most widely used crypto wallet. Works with Hedera via WalletConnect bridge.
-- Browser extension
-- Mobile app
-- Requires WalletConnect bridge for Hedera
+La wallet más popular de Hedera. Disponible como extensión de navegador y app móvil.
 
-## Authentication Flow
+- 🌐 Extensión de navegador (Chrome, Brave, Firefox)
+- 📱 Apps para iOS y Android
+- ✅ Soporte completo de tokens de Hedera
 
-1. Click **Connect** on Hashly.
-2. The WalletConnect modal appears with available wallet options.
-3. Select your wallet and approve the connection.
-4. Sign the authentication message (not a transaction — no fees).
-5. Session is established for 24 hours.
+### 🔵 Blade Wallet
 
-## Important Notes
+Una wallet de Hedera fácil de usar con navegador DApp integrado.
 
-- **No private keys** — Hashly never asks for or stores your private key.
-- **Signature only** — You sign a message to prove wallet ownership. No HBAR is spent.
-- **Session expiry** — Sessions last 24 hours. Reconnect after expiry.
-- **NFT verification** — Your NFT holdings are checked in real-time from the Hedera Mirror Node when you vote.
+- 🌐 Extensión de navegador
+- 📱 App móvil
+- 👶 Interfaz sencilla para principiantes
+
+### 🦊 MetaMask
+
+La wallet crypto más utilizada del mundo. Funciona con Hedera a través del bridge de WalletConnect.
+
+- 🌐 Extensión de navegador
+- 📱 App móvil
+- 🔗 Requiere bridge de WalletConnect para Hedera
+
+---
+
+## 🔄 Flujo de Autenticación
+
+1. 🖱️ Haz clic en **Connect** en Hashly.
+2. 📱 Aparece el modal de WalletConnect con las opciones de wallet disponibles.
+3. ✅ Selecciona tu wallet y aprueba la conexión.
+4. ✍️ Firma el mensaje de autenticación (**no es una transacción** — sin comisiones).
+5. 🔓 La sesión se establece por **24 horas**.
+
+---
+
+## ⚠️ Notas Importantes
+
+- 🔒 **Sin claves privadas** — Hashly **nunca** solicita ni almacena tu clave privada.
+- ✍️ **Solo firma** — Firmas un mensaje para probar la propiedad de tu wallet. No se gasta HBAR.
+- ⏰ **Expiración de sesión** — Las sesiones duran 24 horas. Reconecta después de la expiración.
+- 🎨 **Verificación de NFT** — Tus holdings de NFT se verifican en tiempo real desde el Hedera Mirror Node cuando votas.

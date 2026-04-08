@@ -1,49 +1,59 @@
-# Voting System
+# 🗳️ Sistema de Votación
 
-Hashly's voting system is designed to be transparent, fair, and rewarding for active community members.
+El sistema de votación de Hashly está diseñado para ser **transparente, justo y gratificante** para los miembros activos de la comunidad.
 
-## How Voting Works
+---
 
-### Base Vote
-Every connected wallet gets **1 base vote** per event. You can vote **up** (support) or **down** (oppose) on NFT mint events. Meetups and hackathons only allow upvotes.
+## ⚙️ Cómo Funciona la Votación
 
-### NFT Voting Power
+### 🎯 Voto Base
 
-Holding specific Hedera NFTs boosts your voting power:
+Cada wallet conectada obtiene **1 voto base** por evento. Puedes votar **up** (apoyo) o **down** (oposición) en eventos de mint NFT. Los meetups y hackathons solo permiten upvotes.
 
-| NFT | Token ID | Boost | Details |
+### 🐉 Poder de Voto con NFTs
+
+Tener ciertos NFTs de Hedera **aumenta tu poder de voto**:
+
+| NFT | Token ID | Boost | Detalles |
 |---|---|---|---|
-| Santuario Hedera Dragon | `0.0.7235629` | +1 per NFT | Scales with holdings — 10 dragons = +10 votes |
-| El Santuario | `0.0.9954622` | +5 flat | Only the first NFT counts |
+| 🐉 **Santuario Hedera Dragon** | `0.0.7235629` | +1 por NFT | Escala con tus holdings — 10 dragons = +10 votos |
+| ⚔️ **El Santuario** | `0.0.9954622` | +5 fijo | Solo cuenta el primer NFT |
 
-**Example:** If you hold 3 Dragons and 1 El Santuario, your total voting power is:
-`1 (base) + 3 (dragons) + 5 (El Santuario) = 9 votes`
+> **📌 Ejemplo:** Si tienes 3 Dragons y 1 El Santuario, tu poder de voto total es:
+>
+> `1 (base) + 3 (dragons) + 5 (El Santuario) = 9 votos`
 
-NFT ownership is verified in real-time against the Hedera Mirror Node at the moment you vote.
+La propiedad de NFTs se verifica **en tiempo real** contra el Hedera Mirror Node en el momento de votar.
 
-### Daily Vote Limit
+### 📊 Límite Diario de Votos
 
-You have **5 votes per day** across all event types. The limit resets at midnight UTC. Each vote action (up, down, or direction change) counts as one vote slot.
+Tienes **5 votos por día** en todos los tipos de eventos. El límite se reinicia a **medianoche UTC**. Cada acción de voto (up, down, o cambio de dirección) cuenta como un slot de voto.
 
-### Vote Cooldown
+### ⏰ Cooldown de Votos
 
-- **Regular events**: You can change your vote after the next UTC midnight (24h window).
-- **Forever mints**: You can change your vote direction at any time with no cooldown.
-- **NFT votes on regular events**: 24-hour cooldown per NFT per event.
-- **NFT votes on forever mints**: No cooldown.
+| Tipo | Cooldown |
+|---|---|
+| **Eventos regulares** | Puedes cambiar tu voto después de la próxima medianoche UTC (ventana de 24h) |
+| **Forever mints** | Puedes cambiar la dirección de tu voto en cualquier momento, sin cooldown |
+| **Votos NFT en eventos regulares** | Cooldown de 24h por NFT por evento |
+| **Votos NFT en forever mints** | Sin cooldown |
 
-### Direction Changes
+### 🔄 Cambios de Dirección
 
-If you voted **up** and want to switch to **down**:
-- The system removes your upvote weight and adds it as a downvote.
-- For a vote weight of 9, this means: -9 from upvotes, +9 to downvotes (net swing of 18).
-- Direction changes cost one daily vote slot.
+Si votaste **up** y quieres cambiar a **down**:
 
-## On-Chain Recording
+- El sistema **elimina tu peso de upvote** y lo agrega como downvote
+- Para un peso de voto de 9, esto significa: **-9 de upvotes, +9 de downvotes** (swing neto de 18)
+- Los cambios de dirección **cuestan un slot de voto diario**
 
-Every vote is submitted to the **Hedera Consensus Service (HCS)**, creating an immutable on-chain record.
+---
 
-**HCS Message Format:**
+## ⛓️ Registro On-Chain
+
+Cada voto se envía al **Hedera Consensus Service (HCS)**, creando un registro inmutable on-chain.
+
+**Formato del mensaje HCS:**
+
 ```json
 {
   "type": "event_vote",
@@ -56,28 +66,33 @@ Every vote is submitted to the **Hedera Consensus Service (HCS)**, creating an i
 }
 ```
 
-This means:
-- Every vote is verifiable on-chain
-- No one (including admins) can tamper with vote records
-- The community can independently audit rankings
+Esto significa:
 
-## Voting on Different Content Types
+- ✅ **Cada voto es verificable** on-chain
+- 🔒 **Nadie** (incluyendo admins) puede alterar los registros de votos
+- 🔍 La comunidad puede **auditar los rankings** de forma independiente
 
-Hashly applies the same core voting mechanics across different content:
+---
 
-| Content | Vote Types | Cooldown | HCS Recorded |
+## 📋 Votación por Tipo de Contenido
+
+Hashly aplica las mismas mecánicas de votación en diferentes tipos de contenido:
+
+| Contenido | Tipos de Voto | Cooldown | Registro HCS |
 |---|---|---|---|
-| NFT Mint Events | Up / Down | 24h | Yes |
-| Meetups | Up only | 24h | Yes |
-| Hackathons | Up only | 24h | Yes |
-| Forever Mints | Up / Down | None | Yes |
-| Tokens | Up / Down | None | Yes |
-| NFT Collections | Up / Down | None | Yes |
-| Ecosystem Projects | Up / Down | None | Yes |
+| 🖼️ NFT Mint Events | Up / Down | 24h | ✅ Sí |
+| 🤝 Meetups | Solo Up | 24h | ✅ Sí |
+| 🏗️ Hackathons | Solo Up | 24h | ✅ Sí |
+| ♾️ Forever Mints | Up / Down | Ninguno | ✅ Sí |
+| 🪙 Tokens | Up / Down | Ninguno | ✅ Sí |
+| 🎨 NFT Collections | Up / Down | Ninguno | ✅ Sí |
+| 🌐 Ecosystem Projects | Up / Down | Ninguno | ✅ Sí |
 
-## Tips
+---
 
-- Use your 5 daily votes on events you genuinely support or oppose.
-- Hold Dragon NFTs to maximize your influence.
-- Voting counts toward mission progress (daily and seasonal missions).
-- Check the Dragon NFT [rarity checker](/rarity) to discover rare dragons.
+## 💡 Consejos
+
+- 🎯 Usa tus **5 votos diarios** en eventos que genuinamente apoyes u opongas.
+- 🐉 Haz hold de Dragon NFTs para **maximizar tu influencia**.
+- 🏅 Votar cuenta para el **progreso de misiones** (misiones diarias y de temporada).
+- 🔍 Revisa el [verificador de rareza](/rarity) de Dragon NFTs para descubrir dragons raros.

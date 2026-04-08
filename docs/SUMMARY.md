@@ -1,41 +1,41 @@
-# Table of Contents
+# 📖 Tabla de Contenidos
 
-* [Welcome to Hashly](README.md)
+* [🏠 Bienvenido a Hashly](README.md)
 
-## Getting Started
+## 🚀 Primeros Pasos
 
-* [What is Hashly?](getting-started/what-is-hashly.md)
-* [Connect Your Wallet](getting-started/connect-wallet.md)
-* [Quick Start Guide](getting-started/quick-start.md)
+* [❓ ¿Qué es Hashly?](getting-started/what-is-hashly.md)
+* [🔗 Conecta tu Wallet](getting-started/connect-wallet.md)
+* [⚡ Guía Rápida](getting-started/quick-start.md)
 
-## Core Features
+## ✨ Funciones Principales
 
-* [Events Calendar](features/events-calendar.md)
-* [Voting System](features/voting-system.md)
-* [Forever Mints & DreamCast](features/forever-mints-dreamcast.md)
-* [Ecosystem Directory](features/ecosystem.md)
-* [Token & NFT Rankings](features/token-nft-rankings.md)
-* [NFT Rarity Checker](features/rarity-checker.md)
+* [📅 Calendario de Eventos](features/events-calendar.md)
+* [🗳️ Sistema de Votación](features/voting-system.md)
+* [♾️ Forever Mints y DreamCast](features/forever-mints-dreamcast.md)
+* [🔍 Directorio del Ecosistema](features/ecosystem.md)
+* [📊 Rankings de Tokens y NFTs](features/token-nft-rankings.md)
+* [💎 Consultor de Rareza NFT](features/rarity-checker.md)
 
-## Community
+## 👥 Comunidad
 
-* [HashWorld Globe](community/hashworld.md)
-* [Leaderboard & Seasons](community/leaderboard-seasons.md)
-* [Missions & XP](community/missions.md)
-* [Attendance Badges](community/badges.md)
-* [Referral Program](community/referrals.md)
+* [🌍 Globo HashWorld](community/hashworld.md)
+* [🏆 Leaderboard y Temporadas](community/leaderboard-seasons.md)
+* [⭐ Misiones y XP](community/missions.md)
+* [🎖️ Badges de Asistencia](community/badges.md)
+* [🤝 Programa de Referidos](community/referrals.md)
 
-## News & Updates
+## 📰 Noticias y Actualizaciones
 
-* [Hedera News Feed](news/news-feed.md)
+* [📡 Feed de Noticias Hedera](news/news-feed.md)
 
-## For Event Hosts
+## 🎤 Para Organizadores de Eventos
 
-* [Submit an Event](hosts/submit-event.md)
-* [Attendance Badges for Hosts](hosts/host-badges.md)
+* [📝 Enviar un Evento](hosts/submit-event.md)
+* [🎖️ Badges de Asistencia para Hosts](hosts/host-badges.md)
 
-## Technical
+## 🔧 Técnico
 
-* [On-Chain Voting (HCS)](technical/hcs-voting.md)
-* [Supported Wallets](technical/wallets.md)
-* [API Overview](technical/api-overview.md)
+* [⛓️ Votación On-Chain (HCS)](technical/hcs-voting.md)
+* [👛 Wallets Compatibles](technical/wallets.md)
+* [📡 Resumen de la API](technical/api-overview.md)

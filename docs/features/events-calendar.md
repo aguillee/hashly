@@ -1,78 +1,103 @@
-# Events Calendar
+# 📅 Calendario de Eventos
 
-The Calendar is the heart of Hashly — a unified view of everything happening on Hedera.
+El Calendario es el **corazón de Hashly** — una vista unificada de todo lo que está pasando en Hedera.
 
-## Event Types
+---
 
-### NFT Mints
-New NFT collections launching on Hedera. Each mint event includes:
-- Mint date and end date
-- Mint price (in HBAR)
-- Total supply
-- Project links (website, Twitter, Discord)
-- Community votes (up/down)
+## 🎨 Tipos de Eventos
 
-### Meetups
-Community gatherings organized by Hedera ecosystem projects. Meetups can be:
-- **In-person** — with a physical location
-- **Online** — virtual events
-- **Hybrid** — both online and in-person
+### 🖼️ NFT Mints
 
-Meetups only allow **upvotes** (no downvotes) to encourage positive community engagement.
+Nuevas colecciones NFT lanzándose en Hedera. Cada evento de mint incluye:
 
-### Hackathons
-Build competitions with prize pools. Hackathon listings include:
-- Prize details
-- Registration links
-- Duration and deadlines
+- 📆 **Fecha de mint** y fecha de cierre
+- 💰 **Precio de mint** (en HBAR)
+- 🔢 **Supply total**
+- 🔗 **Enlaces del proyecto** (website, Twitter, Discord)
+- 👍👎 **Votos de la comunidad** (up/down)
 
-Like meetups, hackathons only allow **upvotes**.
+### 🤝 Meetups
 
-### DreamCast Pools
-Fishing-themed NFT mint pools from DreamBay. Each pool has:
-- **Tiers**: Kraken, Hydra, Siren, Keeper, Small Fry — each with different rarity
-- **Stats**: Total catches, total volume
-- **Previews**: Sample NFTs from the pool
-- **Buyback**: Whether the pool supports buyback
+Encuentros comunitarios organizados por proyectos del ecosistema Hedera. Los meetups pueden ser:
 
-DreamCast events are always live (forever mints) and display with pink branding to distinguish them from standard events.
+- 📍 **Presenciales** — con ubicación física
+- 💻 **Online** — eventos virtuales
 
-### Forever Mints
-Events with no end date — they're always live. Forever mints:
-- Show "Always Live" instead of a date
-- Allow vote direction changes at any time (no 24h cooldown)
-- Are separated from time-limited events in filters
+> 💡 Los meetups solo permiten **upvotes** (sin downvotes) para fomentar la participación positiva de la comunidad.
 
-## Calendar Views
+### 🏗️ Hackathons
 
-### Calendar Grid
-Events displayed on a monthly calendar grid. Each day shows event cards with:
-- Event title and image
-- Type badge (NFT, Meetup, Hackathon, DreamCast)
-- Vote count
-- Source indicator
+Competencias de desarrollo con premios. Los listados de hackathons incluyen:
 
-### List View
-Events in a scrollable list, sorted by date. Supports:
-- **Search** — Find events by title or description
-- **Type filter** — NFT, Meetup, Hackathon, DreamCast, Forever
-- **Source filter** — SentX, Kabila, DreamBay, or community-submitted
-- **Date range** — Filter by specific dates
+- 🏆 **Detalles del premio**
+- 📝 **Enlaces de registro**
+- ⏰ **Duración y fechas límite**
 
-## Event Detail Pages
+> 💡 Al igual que los meetups, los hackathons solo permiten **upvotes**.
 
-Click on any event to see full details:
-- Full description with rich text
-- Mint phases (if applicable)
-- Voting buttons with current vote count
-- Social links
-- Previous/next event navigation
-- DreamCast tier breakdown (for DreamCast events)
+### 🐟 DreamCast Pools
 
-## Event Sources
+Pools de mint NFT con temática de pesca de DreamBay. Cada pool tiene:
 
-Hashly aggregates events from multiple sources:
-- **SentX** — Hedera NFT marketplace
-- **Kabila** — Hedera launchpad
-- **DreamBay** — DreamCast fishing pools
-- **Community** — User-submitted events (require admin approval)
+- 🎯 **Tiers**: Kraken, Hydra, Siren, Keeper, Small Fry — cada uno con diferente rareza
+- 📊 **Stats**: Total de capturas, volumen total
+- 🖼️ **Previews**: NFTs de muestra del pool
+- 💸 **Buyback**: Si el pool soporta recompra
+
+> 🎀 Los eventos DreamCast están siempre activos (forever mints) y se muestran con **branding rosa** para distinguirlos de los eventos estándar.
+
+### ♾️ Forever Mints
+
+Eventos **sin fecha de cierre** — están siempre activos. Los forever mints:
+
+- ✅ Muestran **"Always Live"** en lugar de una fecha
+- 🔄 Permiten cambios de dirección de voto en cualquier momento (sin cooldown de 24h)
+- 📂 Están separados de los eventos con tiempo limitado en los filtros
+
+---
+
+## 👁️ Vistas del Calendario
+
+### 📆 Vista de Cuadrícula
+
+Eventos mostrados en una cuadrícula mensual. Cada día muestra tarjetas de eventos con:
+
+- 🏷️ **Título e imagen** del evento
+- 🔖 **Badge de tipo** (NFT, Meetup, Hackathon, DreamCast)
+- 🗳️ **Conteo de votos**
+- 📡 **Indicador de fuente**
+
+### 📋 Vista de Lista
+
+Eventos en una lista desplazable, ordenados por fecha. Soporta:
+
+- 🔍 **Búsqueda** — Encuentra eventos por título o descripción
+- 🏷️ **Filtro por tipo** — NFT, Meetup, Hackathon, DreamCast, Forever
+- 📡 **Filtro por fuente** — SentX, Kabila, DreamBay, o enviados por la comunidad
+- 📆 **Rango de fechas** — Filtra por fechas específicas
+
+---
+
+## 📄 Páginas de Detalle de Eventos
+
+Haz clic en cualquier evento para ver todos los detalles:
+
+- 📝 Descripción completa con texto enriquecido
+- 🔄 Fases de mint (si aplica)
+- 🗳️ Botones de votación con conteo actual
+- 🔗 Enlaces sociales
+- ⬅️➡️ Navegación al evento anterior/siguiente
+- 🐟 Desglose de tiers DreamCast (para eventos DreamCast)
+
+---
+
+## 📡 Fuentes de Eventos
+
+Hashly agrega eventos de múltiples fuentes:
+
+| Fuente | Descripción |
+|---|---|
+| **SentX** | Marketplace NFT de Hedera |
+| **Kabila** | Launchpad de Hedera |
+| **DreamBay** | Fishing pools de DreamCast |
+| **Comunidad** | Eventos enviados por usuarios (requieren aprobación de admin) |

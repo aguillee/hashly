@@ -1,44 +1,61 @@
-# Attendance Badges for Hosts
+# 🎖️ Badges de Asistencia para Hosts
 
-Event hosts can create and distribute NFT attendance badges to prove participation at their events.
+Los hosts de eventos pueden crear y distribuir **badges NFT de asistencia** para demostrar la participación en sus eventos.
 
-## How to Create a Badge
+---
 
-1. Submit a meetup event and get it approved.
-2. Request host permissions from the admin team.
-3. Once approved as a host, create your badge:
-   - **Badge name** — e.g., "Hedera Meetup Madrid - April 2026"
-   - **Description** — What the badge represents
-   - **Image** — Visual design for the badge NFT
-4. The badge NFT token is created on Hedera.
+## 🛠️ Cómo crear un Badge
 
-## Event Day: Check-in
+1. 📅 Envía un evento tipo meetup y consigue que sea aprobado.
+2. 📩 Solicita permisos de host al equipo de administración.
+3. ✅ Una vez aprobado como host, crea tu badge:
 
-### QR Code
-A unique QR code is generated for your event. Display it:
-- On a screen at the venue
-- On a projector
-- Shared in the event chat (for online events)
+| Campo | Ejemplo |
+|---|---|
+| **Nombre del badge** | "Hedera Meetup Madrid - Abril 2026" |
+| **Descripción** | Qué representa el badge |
+| **Imagen** | Diseño visual para el NFT del badge |
 
-### How Check-in Works
-1. Attendees scan the QR code with their phone.
-2. They enter the time-based code displayed alongside the QR.
-3. The check-in is verified and recorded on HCS.
-4. Attendees appear in your check-in list.
+4. 🪙 El token NFT del badge se crea en Hedera.
 
-The check-in code rotates periodically to prevent sharing codes with people who aren't present.
+---
 
-## Distributing Badges
+## 📱 Día del evento: Check-in
 
-After the event:
-1. View your attendee check-in list.
-2. Initiate badge airdrop to all checked-in wallets.
-3. Badges are minted and sent to attendee wallets.
-4. You have up to 3 airdrop attempts before the badge expires.
+### 🔲 Código QR
 
-## Badge Impact
+Se genera un **código QR único** para tu evento. Muéstralo:
 
-Badges matter to your attendees because:
-- They earn **badge points** that count toward the seasonal leaderboard.
-- Badge missions: owning 1 badge = 300 XP, owning 3 badges = 1,000 XP.
-- Badges serve as verifiable proof of attendance, forever on-chain.
+- 🖥️ En una pantalla en el lugar del evento
+- 📽️ En un proyector
+- 💬 Compartido en el chat del evento (para eventos online)
+
+### ⚙️ Cómo funciona el check-in
+
+1. 📷 Los asistentes escanean el código QR con su teléfono.
+2. 🔢 Ingresan el **código basado en tiempo** que se muestra junto al QR.
+3. ✅ El check-in se verifica y se registra en HCS.
+4. 📋 Los asistentes aparecen en tu lista de check-in.
+
+> ⏰ **Nota:** El código de check-in rota periódicamente para evitar que se comparta con personas que no están presentes.
+
+---
+
+## 🎁 Distribución de Badges
+
+Después del evento:
+
+1. 📋 Consulta tu lista de asistentes con check-in.
+2. 🚀 Inicia el airdrop de badges a todas las wallets con check-in.
+3. 🪙 Los badges se mintean y envían a las wallets de los asistentes.
+4. 🔄 Tienes hasta **3 intentos de airdrop** antes de que el badge expire.
+
+---
+
+## 💎 Impacto de los Badges
+
+Los badges son importantes para tus asistentes porque:
+
+- 🏆 Ganan **puntos de badge** que cuentan para el leaderboard de temporada.
+- 🎯 **Misiones de badges:** tener 1 badge = **300 XP**, tener 3 badges = **1,000 XP**.
+- 🔗 Los badges sirven como **prueba verificable de asistencia**, para siempre on-chain.

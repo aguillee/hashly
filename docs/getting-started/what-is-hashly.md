@@ -1,47 +1,55 @@
-# What is Hashly?
+# ❓ ¿Qué es Hashly?
 
-Hashly is a community-driven discovery platform for the Hedera Hashgraph ecosystem. It aggregates NFT mints, meetups, hackathons, DreamCast pools, tokens, and projects into a single hub where users can explore, vote, and rank everything happening on Hedera.
+**Hashly** es una plataforma de descubrimiento impulsada por la comunidad para el ecosistema **Hedera Hashgraph**. Reúne NFT mints, meetups, hackathons, DreamCast pools, tokens y proyectos en un solo hub donde los usuarios pueden **explorar, votar y rankear** todo lo que sucede en Hedera.
 
-## Our Mission
+---
 
-To give visibility to every project and event building on Hedera — with rankings decided transparently by the community through on-chain voting.
+## 🎯 Nuestra Misión
 
-## Key Principles
+> Dar **visibilidad a cada proyecto y evento** que se construye en Hedera — con rankings decididos de forma **transparente** por la comunidad a través de votación on-chain.
 
-### Community-Driven Rankings
+---
 
-Unlike centralized platforms where visibility depends on paid promotion, Hashly rankings are powered by votes from real Hedera wallet holders. Every vote is recorded on the Hedera Consensus Service (HCS), making the process fully transparent and verifiable.
+## 🏛️ Principios Clave
 
-### NFT-Powered Governance
+### 🗳️ Rankings Impulsados por la Comunidad
 
-Holders of specific Hedera NFTs receive boosted voting power:
+A diferencia de plataformas centralizadas donde la visibilidad depende de promoción pagada, los **rankings de Hashly** los generan votos de holders reales de wallets de Hedera. Cada voto queda registrado en **Hedera Consensus Service (HCS)**, haciendo el proceso **totalmente transparente y verificable**.
 
-| NFT Collection | Token ID | Boost |
+### 💎 Gobernanza Potenciada por NFTs
+
+Los holders de NFTs específicos de Hedera reciben **poder de voto aumentado**:
+
+| Colección NFT | Token ID | Boost |
 |---|---|---|
-| Santuario Hedera Dragons | 0.0.7235629 | +1 vote per NFT held |
-| El Santuario | 0.0.9954622 | +5 votes (one-time) |
+| 🐉 Santuario Hedera Dragons | `0.0.7235629` | **+1 voto** por cada NFT |
+| 🏛️ El Santuario | `0.0.9954622` | **+5 votos** (una sola vez) |
 
-This means active community members who hold ecosystem NFTs have a stronger voice in rankings.
+Esto significa que los miembros activos de la comunidad que poseen NFTs del ecosistema tienen **una voz más fuerte** en los rankings.
 
-### Gamified Participation
+### ⭐ Participación Gamificada
 
-Hashly rewards engagement through:
+Hashly recompensa la participación a través de:
 
-- **Daily & weekly missions** that earn XP
-- **Seasonal leaderboards** with real prize pools (SAUCE, BONZO, CANDY, SENTX, HPRIME tokens)
-- **Attendance badges** for real-world meetup participation
-- **Referral bonuses** for growing the community
+- 📋 **Misiones diarias y semanales** que otorgan XP
+- 🏆 **Leaderboards de temporada** con pools de premios que varían cada season
+- 🎖️ **Badges de asistencia** por participar en meetups presenciales
+- 🤝 **Bonos por referidos** por hacer crecer la comunidad
 
-### On-Chain Transparency
+### ⛓️ Transparencia On-Chain
 
-All votes are submitted to Hedera Consensus Service (HCS) topics, creating an immutable record. Anyone can verify vote authenticity by reading the HCS topic messages directly on the Hedera network.
+Todos los votos se envían a topics de **Hedera Consensus Service (HCS)**, creando un registro **inmutable**. Cualquiera puede verificar la autenticidad de los votos leyendo los mensajes del topic HCS directamente en la red de Hedera.
 
-## What Hashly Is Not
+---
 
-- **Not an exchange** — Hashly does not facilitate trading, swaps, or financial transactions.
-- **Not financial advice** — Rankings reflect community sentiment, not investment recommendations.
-- **Not a mint platform** — Events link to the original project's minting site.
+## 🚫 Lo que Hashly NO Es
 
-## Who Built Hashly?
+- **No es un exchange** — Hashly no facilita trading, swaps ni transacciones financieras.
+- **No es asesoría financiera** — Los rankings reflejan el sentimiento de la comunidad, no recomendaciones de inversión.
+- **No es una plataforma de mint** — Los eventos enlazan al sitio de mint del proyecto original.
 
-Hashly is built by a team of Hedera ecosystem enthusiasts who saw the need for a central hub connecting community members with the projects they care about.
+---
+
+## 👥 ¿Quién construyó Hashly?
+
+Hashly fue creado por un equipo de **entusiastas del ecosistema Hedera** que vieron la necesidad de un hub central que conectara a los miembros de la comunidad con los proyectos que les importan. 💜
