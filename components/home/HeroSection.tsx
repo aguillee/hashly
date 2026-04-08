@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, ArrowRight, ExternalLink, Vote, ChevronRight, BookOpen } from "lucide-react";
+import { Plus, ArrowRight, ExternalLink, Vote, ChevronRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { HomeAdCarousel } from "@/components/ads/HomeAdCarousel";
 import { useWalletStore } from "@/store";
@@ -66,9 +66,21 @@ export function HeroSection() {
 
           {/* How It Works — detailed voting explanation */}
           <div className={`bg-bg-card border border-[var(--card-border)] rounded-xl p-4 space-y-3 reveal-delay-4 w-full ${!hasAds ? "text-left" : ""}`}>
-            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-text-tertiary">
-              How Voting Works
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-text-tertiary">
+                How Voting Works
+              </p>
+              <span className="text-text-tertiary/30">·</span>
+              <a
+                href="https://docs.hash-ly.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[10px] text-brand hover:text-brand/80 font-medium transition-colors whitespace-nowrap"
+              >
+                <FileText className="h-3 w-3" />
+                Full Documentation
+              </a>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Base vote */}
@@ -114,19 +126,10 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-border pt-2">
+            <div className="border-t border-border pt-2">
               <p className="text-[10px] text-text-tertiary">
                 All votes are recorded on-chain via HCS (Hedera Consensus Service) for full transparency.
               </p>
-              <a
-                href="https://docs.hash-ly.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[10px] text-brand hover:text-brand/80 font-medium transition-colors whitespace-nowrap ml-3"
-              >
-                <BookOpen className="h-3 w-3" />
-                Docs
-              </a>
             </div>
           </div>
         </div>
