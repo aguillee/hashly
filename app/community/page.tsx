@@ -2,9 +2,16 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 
 export const metadata: Metadata = {
-  title: "HashWorld | Hashly",
+  title: "HashWorld — Map the Hedera Community Worldwide",
   description:
-    "HashWorld: Mapping the Hedera Ecosystem. Discover the Hedera community worldwide, find people and projects, follow them on X.",
+    "HashWorld: an interactive 3D globe mapping the Hedera ecosystem. Discover community members and projects worldwide, connect on X, and pin your location.",
+  alternates: { canonical: "/community" },
+  openGraph: {
+    title: "HashWorld — Hedera Community Globe | Hashly",
+    description:
+      "Interactive 3D globe mapping the Hedera community worldwide. Find people & projects, connect on X.",
+    url: "/community",
+  },
 };
 
 // Dynamic import — react-globe.gl needs WebGL (no SSR)

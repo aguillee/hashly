@@ -68,7 +68,7 @@ function getRarityTier(rank: number, total: number) {
 
 function resolveImage(img: string | null) {
   if (!img) return null;
-  if (img.startsWith("ipfs://")) return `https://nftstorage.link/ipfs/${img.replace("ipfs://", "")}`;
+  if (img.startsWith("ipfs://")) return `https://ipfs.io/ipfs/${img.replace("ipfs://", "")}`;
   if (img.startsWith("ar://")) return `https://arweave.net/${img.replace("ar://", "")}`;
   return img;
 }
@@ -78,6 +78,7 @@ const TOKEN_ID = "0.0.7235629";
 export default function RarityPage() {
   const [data, setData] = React.useState<RarityData | null>(null);
   const [listings, setListings] = React.useState<Record<number, { price: number; currency: string; url: string }>>({});
+  const [tokenInfo, setTokenInfo] = React.useState<{ totalSupply: number; maxSupply: number } | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [search, setSearch] = React.useState("");
@@ -103,6 +104,17 @@ export default function RarityPage() {
           const l = await listingsRes.json();
           setListings(l.listings || {});
         }
+        // Fetch circulating supply from mirror node
+        try {
+          const tokenRes = await fetch(`https://mainnet.mirrornode.hedera.com/api/v1/tokens/${TOKEN_ID}`);
+          if (tokenRes.ok) {
+            const t = await tokenRes.json();
+            setTokenInfo({
+              totalSupply: parseInt(t.total_supply) || 0,
+              maxSupply: parseInt(t.max_supply) || 0,
+            });
+          }
+        } catch { /* ignore */ }
       } catch (e) {
         setError(String(e instanceof Error ? e.message : e));
       } finally {
@@ -200,6 +212,14 @@ export default function RarityPage() {
               Trait breakdown
               <ChevronDown className={cn("h-3 w-3 transition-transform", showTraitStats && "rotate-180")} />
             </button>
+            {tokenInfo && (
+              <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border text-sm">
+                <span className="text-text-tertiary text-xs">Circulating:</span>
+                <span className="font-bold font-mono text-text-primary">{tokenInfo.totalSupply}</span>
+                <span className="text-text-tertiary text-xs">/</span>
+                <span className="font-bold font-mono text-text-primary">{tokenInfo.maxSupply}</span>
+              </div>
+            )}
           </div>
 
           {/* Tier legend */}

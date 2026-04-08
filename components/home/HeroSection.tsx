@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, ArrowRight, ExternalLink, Vote, ChevronRight } from "lucide-react";
+import { Plus, ArrowRight, ExternalLink, Vote, ChevronRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { HomeAdCarousel } from "@/components/ads/HomeAdCarousel";
 import { useWalletStore } from "@/store";
@@ -17,11 +17,11 @@ export function HeroSection() {
   const revealRef = useReveal();
 
   return (
-    <section ref={revealRef} className="reveal px-4 sm:px-6 pt-6 pb-2 sm:pt-8 sm:pb-4">
-      <div className={`grid ${hasAds ? "lg:grid-cols-[1fr_1.2fr]" : "lg:grid-cols-1"} gap-6 lg:gap-10 items-start ${!hasAds ? "max-w-3xl mx-auto text-center" : ""}`}>
+    <section ref={revealRef} className="reveal px-4 sm:px-6 pt-4 pb-1 sm:pt-6 sm:pb-2">
+      <div className={`grid ${hasAds ? "lg:grid-cols-[1fr_1.2fr]" : "lg:grid-cols-1"} gap-4 lg:gap-8 items-stretch ${!hasAds ? "max-w-3xl mx-auto text-center" : ""}`}>
 
         {/* Left: Title + CTA */}
-        <div className={`space-y-5 sm:space-y-6 ${!hasAds ? "flex flex-col items-center" : ""}`}>
+        <div className={`space-y-3 sm:space-y-4 ${!hasAds ? "flex flex-col items-center" : ""}`}>
           {/* Mono label */}
           <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary reveal-delay-1">
             Hedera Ecosystem
@@ -94,6 +94,9 @@ export function HeroSection() {
                   <p className="text-[10px] text-text-tertiary leading-relaxed">
                     <span className="text-yellow-500 font-medium">+1 vote</span> per Santuario Hedera NFT held
                   </p>
+                  <a href="/rarity" className="text-[10px] text-yellow-500 hover:text-yellow-400 font-medium transition-colors">
+                    View rarity ranks →
+                  </a>
                 </div>
               </div>
 
@@ -111,15 +114,26 @@ export function HeroSection() {
               </div>
             </div>
 
-            <p className="text-[10px] text-text-tertiary border-t border-border pt-2">
-              All votes are recorded on-chain via HCS (Hedera Consensus Service) for full transparency.
-            </p>
+            <div className="flex items-center justify-between border-t border-border pt-2">
+              <p className="text-[10px] text-text-tertiary">
+                All votes are recorded on-chain via HCS (Hedera Consensus Service) for full transparency.
+              </p>
+              <a
+                href="https://docs.hash-ly.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[10px] text-brand hover:text-brand/80 font-medium transition-colors whitespace-nowrap ml-3"
+              >
+                <BookOpen className="h-3 w-3" />
+                Docs
+              </a>
+            </div>
           </div>
         </div>
 
         {/* Right: Ad Carousel — only shown when ads exist */}
         {hasAds && (
-          <div className="h-56 sm:h-64 lg:h-[360px] rounded-xl overflow-hidden reveal-delay-2">
+          <div className="h-56 sm:h-64 lg:h-full min-h-[200px] rounded-xl overflow-hidden reveal-delay-2">
             <HomeAdCarousel ads={homeAds} />
           </div>
         )}

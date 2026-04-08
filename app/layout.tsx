@@ -12,6 +12,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { ClientProviders } from "@/components/wallet/ClientProviders";
 import { VoteLimitProvider } from "@/contexts/VoteLimitContext";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 const Sidebar = dynamic(
   () => import("@/components/layout/Sidebar").then((mod) => mod.Sidebar),
@@ -33,20 +34,80 @@ const ParticleBackground = dynamic(
   { ssr: false }
 );
 
+const SITE_URL = "https://hash-ly.com";
+
 export const metadata: Metadata = {
-  title: "Hashly - Discover Hedera",
-  description: "Discover NFT mints, meetups, hackathons, and everything happening on Hedera. Vote, explore, and never miss an event.",
-  keywords: ["hedera", "nft", "mint", "calendar", "crypto", "hashgraph", "hashly", "meetups", "hackathons", "events"],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Hashly — Discover NFT Mints, Events & Projects on Hedera",
+    template: "%s | Hashly",
+  },
+  description:
+    "The Hedera ecosystem hub. Discover upcoming NFT mints, meetups, hackathons, DreamCast pools, token rankings, and community projects — all powered by on-chain voting via HCS.",
+  keywords: [
+    "hedera", "hedera hashgraph", "hbar", "nft mint", "nft calendar",
+    "hedera nft", "hedera events", "hedera meetups", "hedera hackathons",
+    "dreamcast", "hedera ecosystem", "hedera projects", "hedera tokens",
+    "hashly", "crypto events", "web3 calendar", "nft rarity",
+    "hedera community", "on-chain voting", "hcs voting",
+  ],
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: "Hashly",
+    title: "Hashly — Discover NFT Mints, Events & Projects on Hedera",
+    description:
+      "The Hedera ecosystem hub. Discover upcoming NFT mints, meetups, hackathons, DreamCast pools, token rankings, and community projects — all powered by on-chain voting.",
+    images: [
+      {
+        url: "/logohashly.png",
+        width: 1920,
+        height: 1080,
+        alt: "Hashly — Hedera Ecosystem Hub",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@hashly_h",
+    creator: "@hashly_h",
+    title: "Hashly — Discover NFT Mints, Events & Projects on Hedera",
+    description:
+      "The Hedera ecosystem hub. NFT mints, meetups, hackathons, DreamCast pools, token rankings & community projects — powered by on-chain voting.",
+    images: ["/logohashly.png"],
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  other: {
+    "google-site-verification": process.env.GOOGLE_SITE_VERIFICATION || "",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sora.variable} dark`}>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body className="font-sans bg-background text-text-primary antialiased">
+        <JsonLd />
         <ClientProviders>
           <VoteLimitProvider>
             <ParticleBackground />
