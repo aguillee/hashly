@@ -1,58 +1,58 @@
-# 🗳️ Sistema de Votación
+# 🗳️ Voting System
 
-El sistema de votación de Hashly está diseñado para ser **transparente, justo y gratificante** para los miembros activos de la comunidad.
+Hashly's voting system is designed to be **transparent, fair, and rewarding** for active community members.
 
 ---
 
-## ⚙️ Cómo Funciona la Votación
+## ⚙️ How Voting Works
 
-### 🎯 Voto Base
+### 🎯 Base Vote
 
-Cada wallet conectada obtiene **1 voto base** por evento. Puedes votar **up** (apoyo) o **down** (oposición) en eventos de mint NFT. Los meetups y hackathons solo permiten upvotes.
+Each connected wallet gets **1 base vote** per event. You can vote **up** (support) or **down** (opposition) on NFT mint events. Meetups and hackathons only allow upvotes.
 
-### 🐉 Poder de Voto con NFTs
+### 🐉 Voting Power with NFTs
 
-Tener ciertos NFTs de Hedera **aumenta tu poder de voto**:
+Holding certain Hedera NFTs **increases your voting power**:
 
-| NFT | Token ID | Boost | Detalles |
+| NFT | Token ID | Boost | Details |
 |---|---|---|---|
-| 🐉 **Santuario Hedera Dragon** | `0.0.7235629` | +1 por NFT | Escala con tus holdings — 10 dragons = +10 votos |
-| ⚔️ **El Santuario** | `0.0.9954622` | +5 fijo | Solo cuenta el primer NFT |
+| 🐉 **Santuario Hedera Dragon** | `0.0.7235629` | +1 per NFT | Scales with your holdings — 10 dragons = +10 votes |
+| ⚔️ **El Santuario** | `0.0.9954622` | +5 flat | Only the first NFT counts |
 
-> **📌 Ejemplo:** Si tienes 3 Dragons y 1 El Santuario, tu poder de voto total es:
+> **📌 Example:** If you hold 3 Dragons and 1 El Santuario, your total voting power is:
 >
-> `1 (base) + 3 (dragons) + 5 (El Santuario) = 9 votos`
+> `1 (base) + 3 (dragons) + 5 (El Santuario) = 9 votes`
 
-La propiedad de NFTs se verifica **en tiempo real** contra el Hedera Mirror Node en el momento de votar.
+NFT ownership is verified **in real time** against the Hedera Mirror Node at the time of voting.
 
-### 📊 Límite Diario de Votos
+### 📊 Daily Vote Limit
 
-Tienes **5 votos por día** en todos los tipos de eventos. El límite se reinicia a **medianoche UTC**. Cada acción de voto (up, down, o cambio de dirección) cuenta como un slot de voto.
+You have **5 votes per day** across all event types. The limit resets at **midnight UTC**. Each voting action (up, down, or direction change) counts as a vote slot.
 
-### ⏰ Cooldown de Votos
+### ⏰ Vote Cooldown
 
-| Tipo | Cooldown |
+| Type | Cooldown |
 |---|---|
-| **Eventos regulares** | Puedes cambiar tu voto después de la próxima medianoche UTC (ventana de 24h) |
-| **Forever mints** | Puedes cambiar la dirección de tu voto en cualquier momento, sin cooldown |
-| **Votos NFT en eventos regulares** | Cooldown de 24h por NFT por evento |
-| **Votos NFT en forever mints** | Sin cooldown |
+| **Regular events** | You can change your vote after the next midnight UTC (24h window) |
+| **Forever mints** | You can change your vote direction at any time, no cooldown |
+| **NFT votes on regular events** | 24h cooldown per NFT per event |
+| **NFT votes on forever mints** | No cooldown |
 
-### 🔄 Cambios de Dirección
+### 🔄 Direction Changes
 
-Si votaste **up** y quieres cambiar a **down**:
+If you voted **up** and want to switch to **down**:
 
-- El sistema **elimina tu peso de upvote** y lo agrega como downvote
-- Para un peso de voto de 9, esto significa: **-9 de upvotes, +9 de downvotes** (swing neto de 18)
-- Los cambios de dirección **cuestan un slot de voto diario**
+- The system **removes your upvote weight** and adds it as a downvote
+- For a vote weight of 9, this means: **-9 from upvotes, +9 to downvotes** (net swing of 18)
+- Direction changes **cost a daily vote slot**
 
 ---
 
-## ⛓️ Registro On-Chain
+## ⛓️ On-Chain Recording
 
-Cada voto se envía al **Hedera Consensus Service (HCS)**, creando un registro inmutable on-chain.
+Every vote is submitted to the **Hedera Consensus Service (HCS)**, creating an immutable on-chain record.
 
-**Formato del mensaje HCS:**
+**HCS message format:**
 
 ```json
 {
@@ -66,33 +66,33 @@ Cada voto se envía al **Hedera Consensus Service (HCS)**, creando un registro i
 }
 ```
 
-Esto significa:
+This means:
 
-- ✅ **Cada voto es verificable** on-chain
-- 🔒 **Nadie** (incluyendo admins) puede alterar los registros de votos
-- 🔍 La comunidad puede **auditar los rankings** de forma independiente
+- ✅ **Every vote is verifiable** on-chain
+- 🔒 **Nobody** (including admins) can alter vote records
+- 🔍 The community can **audit rankings** independently
 
 ---
 
-## 📋 Votación por Tipo de Contenido
+## 📋 Voting by Content Type
 
-Hashly aplica las mismas mecánicas de votación en diferentes tipos de contenido:
+Hashly applies the same voting mechanics across different content types:
 
-| Contenido | Tipos de Voto | Cooldown | Registro HCS |
+| Content | Vote Types | Cooldown | HCS Record |
 |---|---|---|---|
-| 🖼️ NFT Mint Events | Up / Down | 24h | ✅ Sí |
-| 🤝 Meetups | Solo Up | 24h | ✅ Sí |
-| 🏗️ Hackathons | Solo Up | 24h | ✅ Sí |
-| ♾️ Forever Mints | Up / Down | Ninguno | ✅ Sí |
-| 🪙 Tokens | Up / Down | Ninguno | ✅ Sí |
-| 🎨 NFT Collections | Up / Down | Ninguno | ✅ Sí |
-| 🌐 Ecosystem Projects | Up / Down | Ninguno | ✅ Sí |
+| 🖼️ NFT Mint Events | Up / Down | 24h | ✅ Yes |
+| 🤝 Meetups | Up Only | 24h | ✅ Yes |
+| 🏗️ Hackathons | Up Only | 24h | ✅ Yes |
+| ♾️ Forever Mints | Up / Down | None | ✅ Yes |
+| 🪙 Tokens | Up / Down | None | ✅ Yes |
+| 🎨 NFT Collections | Up / Down | None | ✅ Yes |
+| 🌐 Ecosystem Projects | Up / Down | None | ✅ Yes |
 
 ---
 
-## 💡 Consejos
+## 💡 Tips
 
-- 🎯 Usa tus **5 votos diarios** en eventos que genuinamente apoyes u opongas.
-- 🐉 Haz hold de Dragon NFTs para **maximizar tu influencia**.
-- 🏅 Votar cuenta para el **progreso de misiones** (misiones diarias y de temporada).
-- 🔍 Revisa el [verificador de rareza](/rarity) de Dragon NFTs para descubrir dragons raros.
+- 🎯 Use your **5 daily votes** on events you genuinely support or oppose.
+- 🐉 Hold Dragon NFTs to **maximize your influence**.
+- 🏅 Voting counts toward **mission progress** (daily and seasonal missions).
+- 🔍 Check the Dragon NFT [rarity checker](/rarity) to discover rare dragons.

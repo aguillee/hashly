@@ -1,79 +1,79 @@
-# 🎯 Misiones y XP
+# 🎯 Missions and XP
 
-Las misiones son la **forma principal de ganar XP** en Hashly. Completa tareas, reclama recompensas y escala en el leaderboard de la temporada.
-
----
-
-## 📋 Tipos de Misiones
-
-### 📆 Misiones Diarias
-
-Se reinician cada día a medianoche UTC.
-
-| Misión | Requisito | XP |
-|---|---|---|
-| 🔑 Daily Login | Conectar tu wallet | 5 |
-| 🗳️ Daily Vote | Votar en 1 evento | 10 |
-| 🗳️ Vote on 3 Events | Votar en 3 eventos diferentes | 50 |
-
-### 📅 Misiones Semanales
-
-Se reinician cada domingo a medianoche UTC.
-
-| Misión | Requisito | XP |
-|---|---|---|
-| 🔥 Weekly Streak | Iniciar sesión 7 días consecutivos | 50 |
-
-### 🏅 Logros de Temporada
-
-Se reinician al inicio de cada temporada (día 1 del mes). Se pueden reclamar **una vez por temporada**.
-
-| Misión | Requisito | XP |
-|---|---|---|
-| ✅ First Vote | Emitir cualquier voto | 10 |
-| 📝 First Event | Tener 1 evento aprobado | 100 |
-| 🌟 Event Creator 5 | Tener 5 eventos aprobados | 500 |
-| 🎨 Vote on 5 Collections | Votar en 5 NFT collections diferentes | 100 |
-| 💎 Vote on 5 Tokens | Votar en 5 tokens diferentes | 100 |
-| 🌐 Vote on 5 Ecosystem | Votar en 5 proyectos del ecosistema diferentes | 100 |
-| 🔥 Season Streak 25 | Iniciar sesión 25 días consecutivos | 500 |
-| 👤 Referral x1 | Tener 1 referido activado | 100 |
-| 👥 Referral x3 | Tener 3 referidos activados | 500 |
-| 🏅 Badge x1 | Poseer 1 attendance badge | 300 |
-| 🏆 Badge x3 | Poseer 3 attendance badges | 1,000 |
-
-### ♾️ Misiones Permanentes
-
-Solo se pueden reclamar **una vez en la vida** (no por temporada).
-
-| Misión | Requisito | XP |
-|---|---|---|
-| 🌍 HashWorld Citizen | Crear un perfil en HashWorld | 1,500 |
+Missions are the **main way to earn XP** in Hashly. Complete tasks, claim rewards, and climb the season leaderboard.
 
 ---
 
-## ✋ Cómo Reclamar
+## 📋 Mission Types
 
-1. Ve a la página de **Missions**.
-2. Las misiones muestran una **barra de progreso** y el conteo actual/requerido.
-3. Cuando una misión está completa, el botón **Claim** se activa.
-4. Haz clic en **Claim** para recibir tu XP.
-5. El XP se suma a tu total de temporada y se refleja en el leaderboard.
+### 📆 Daily Missions
 
-> ⚠️ **Importante:** Debes reclamar manualmente las misiones completadas. El XP **no se otorga automáticamente**.
+Reset every day at midnight UTC.
+
+| Mission | Requirement | XP |
+|---|---|---|
+| 🔑 Daily Login | Connect your wallet | 5 |
+| 🗳️ Daily Vote | Vote on 1 event | 10 |
+| 🗳️ Vote on 3 Events | Vote on 3 different events | 50 |
+
+### 📅 Weekly Missions
+
+Reset every Sunday at midnight UTC.
+
+| Mission | Requirement | XP |
+|---|---|---|
+| 🔥 Weekly Streak | Log in 7 consecutive days | 50 |
+
+### 🏅 Season Achievements
+
+Reset at the start of each season (1st of the month). Can be claimed **once per season**.
+
+| Mission | Requirement | XP |
+|---|---|---|
+| ✅ First Vote | Cast any vote | 10 |
+| 📝 First Event | Have 1 approved event | 100 |
+| 🌟 Event Creator 5 | Have 5 approved events | 500 |
+| 🎨 Vote on 5 Collections | Vote on 5 different NFT collections | 100 |
+| 💎 Vote on 5 Tokens | Vote on 5 different tokens | 100 |
+| 🌐 Vote on 5 Ecosystem | Vote on 5 different ecosystem projects | 100 |
+| 🔥 Season Streak 25 | Log in 25 consecutive days | 500 |
+| 👤 Referral x1 | Have 1 activated referral | 100 |
+| 👥 Referral x3 | Have 3 activated referrals | 500 |
+| 🏅 Badge x1 | Own 1 attendance badge | 300 |
+| 🏆 Badge x3 | Own 3 attendance badges | 1,000 |
+
+### ♾️ Permanent Missions
+
+Can only be claimed **once in a lifetime** (not per season).
+
+| Mission | Requirement | XP |
+|---|---|---|
+| 🌍 HashWorld Citizen | Create a HashWorld profile | 1,500 |
 
 ---
 
-## 🤝 Comisión por Referidos
+## ✋ How to Claim
 
-Cuando ganas XP de cualquier misión, tu referente (si usaste un código de referido) recibe una **comisión del 5%** sobre los puntos que ganaste. Esto es automático y **no reduce tu recompensa**.
+1. Go to the **Missions** page.
+2. Missions show a **progress bar** and the current/required count.
+3. When a mission is complete, the **Claim** button becomes active.
+4. Click **Claim** to receive your XP.
+5. The XP is added to your season total and reflected on the leaderboard.
+
+> ⚠️ **Important:** You must manually claim completed missions. XP **is not awarded automatically**.
 
 ---
 
-## 💡 Tips para Maximizar XP
+## 🤝 Referral Commission
 
-- 📆 **Rutina diaria**: Iniciar sesión + votar en 3 eventos = **65 XP/día mínimo**.
-- 🎯 **Diversifica**: Votar en tokens, collections y proyectos del ecosistema tiene misiones separadas.
-- 🔥 **Construye rachas**: La racha de 7 días (50 XP) y la de 25 días (500 XP) premian la constancia.
-- 🏆 **Ganancias únicas**: Perfil en HashWorld (1,500 XP) y aprobar eventos (100-500 XP) son de alto valor.
-- 👥 **Los referidos se acumulan**: Cada referido te da 5% pasivo para siempre + XP por la misión del referido.
+When you earn XP from any mission, your referrer (if you used a referral code) receives a **5% commission** on the points you earned. This is automatic and **does not reduce your reward**.
+
+---
+
+## 💡 Tips to Maximize XP
+
+- 📆 **Daily routine**: Log in + vote on 3 events = **65 XP/day minimum**.
+- 🎯 **Diversify**: Voting on tokens, collections, and ecosystem projects has separate missions.
+- 🔥 **Build streaks**: The 7-day streak (50 XP) and the 25-day streak (500 XP) reward consistency.
+- 🏆 **One-time gains**: HashWorld profile (1,500 XP) and approving events (100-500 XP) are high value.
+- 👥 **Referrals compound**: Each referral gives you 5% passive forever + XP from the referral mission.

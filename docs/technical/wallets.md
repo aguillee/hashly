@@ -1,38 +1,38 @@
-# 👛 Wallets Compatibles
+# 👛 Compatible Wallets
 
-Hashly utiliza **WalletConnect** para la autenticación de wallets. Cualquier wallet compatible con Hedera que soporte WalletConnect puede utilizarse.
+Hashly uses **WalletConnect** for wallet authentication. Any Hedera-compatible wallet that supports WalletConnect can be used.
 
 ---
 
-## ⭐ Wallet Recomendada
+## ⭐ Recommended Wallet
 
 ### 🟣 HashPack
 
-La wallet más popular de Hedera. Disponible como extensión de navegador y app móvil.
+The most popular Hedera wallet. Available as a browser extension and mobile app.
 
-- 🌐 Extensión de navegador (Chrome, Brave, Firefox)
-- 📱 Apps para iOS y Android
-- ✅ Soporte completo de tokens de Hedera
+- 🌐 Browser extension (Chrome, Brave, Firefox)
+- 📱 iOS and Android apps
+- ✅ Full Hedera token support
 
-### 🔗 Otras Wallets
+### 🔗 Other Wallets
 
-Cualquier wallet compatible con Hedera que soporte **WalletConnect** puede utilizarse con Hashly.
-
----
-
-## 🔄 Flujo de Autenticación
-
-1. 🖱️ Haz clic en **Connect** en Hashly.
-2. 📱 Aparece el modal de WalletConnect con las opciones de wallet disponibles.
-3. ✅ Selecciona tu wallet y aprueba la conexión.
-4. ✍️ Firma el mensaje de autenticación (**no es una transacción** — sin comisiones).
-5. 🔓 La sesión se establece por **24 horas**.
+Any Hedera-compatible wallet that supports **WalletConnect** can be used with Hashly.
 
 ---
 
-## ⚠️ Notas Importantes
+## 🔄 Authentication Flow
 
-- 🔒 **Sin claves privadas** — Hashly **nunca** solicita ni almacena tu clave privada.
-- ✍️ **Solo firma** — Firmas un mensaje para probar la propiedad de tu wallet. No se gasta HBAR.
-- ⏰ **Expiración de sesión** — Las sesiones duran 24 horas. Reconecta después de la expiración.
-- 🎨 **Verificación de NFT** — Tus holdings de NFT se verifican en tiempo real desde el Hedera Mirror Node cuando votas.
+1. 🖱️ Click on **Connect** in Hashly.
+2. 📱 The WalletConnect modal appears with the available wallet options.
+3. ✅ Select your wallet and approve the connection.
+4. ✍️ Sign the authentication message (**not a transaction** — no fees).
+5. 🔓 The session is established for **24 hours**.
+
+---
+
+## ⚠️ Important Notes
+
+- 🔒 **No private keys** — Hashly **never** requests or stores your private key.
+- ✍️ **Signature only** — You sign a message to prove wallet ownership. No HBAR is spent.
+- ⏰ **Session expiration** — Sessions last 24 hours. Reconnect after expiration.
+- 🎨 **NFT verification** — Your NFT holdings are verified in real time from the Hedera Mirror Node when you vote.

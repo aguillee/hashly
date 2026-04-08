@@ -1,72 +1,72 @@
-# 🔍 Verificador de Rareza NFT
+# 🔍 NFT Rarity Checker
 
-Hashly incluye una herramienta integrada de **ranking de rareza** para la colección NFT **Santuario Hedera Dragon**.
+Hashly includes a built-in **rarity ranking** tool for the **Santuario Hedera Dragon** NFT collection.
 
 ---
 
-## 📋 Información General
+## 📋 General Information
 
-| Dato | Valor |
+| Data | Value |
 |---|---|
-| 🎨 **Colección** | Santuario Hedera Dragons |
+| 🎨 **Collection** | Santuario Hedera Dragons |
 | 🆔 **Token ID** | `0.0.7235629` |
-| 🔢 **Supply Total** | 1,000 |
-| 📊 **Circulando** | 534 NFTs actualmente en wallets |
-| 🏷️ **Tipos de Traits** | 9 categorías diferentes |
+| 🔢 **Total Supply** | 1,000 |
+| 📊 **Circulating** | 534 NFTs currently in wallets |
+| 🏷️ **Trait Types** | 9 different categories |
 
 ---
 
-## 🏅 Tiers de Rareza
+## 🏅 Rarity Tiers
 
-Los NFTs se rankean según su **puntaje de rareza combinado** en todos los traits:
+NFTs are ranked based on their **combined rarity score** across all traits:
 
-| Tier | Criterio | Color del Badge |
+| Tier | Criteria | Badge Color |
 |---|---|---|
-| 🟢 **Mythic** | Solo Rank #1 | Verde |
-| 🟡 **Legendary** | Top 5% | Amarillo |
-| 🟣 **Epic** | Top 15% | Morado |
-| 🟠 **Rare** | Top 30% | Naranja |
-| 🟩 **Uncommon** | Top 50% | Verde |
-| ⬜ **Common** | Debajo del 50% | Gris |
+| 🟢 **Mythic** | Rank #1 only | Green |
+| 🟡 **Legendary** | Top 5% | Yellow |
+| 🟣 **Epic** | Top 15% | Purple |
+| 🟠 **Rare** | Top 30% | Orange |
+| 🟩 **Uncommon** | Top 50% | Green |
+| ⬜ **Common** | Below 50% | Gray |
 
 ---
 
-## 🧮 Cómo se Calcula la Rareza
+## 🧮 How Rarity is Calculated
 
-1. 📊 **Frecuencia del Trait** — Para cada valor de trait, se cuenta cuántos NFTs lo comparten
-2. 🔢 **Puntaje de Rareza** — `(1 - frecuencia / total) * 100` por trait. Un trait compartido por solo 1 NFT tiene un puntaje de ~99.8%
-3. ⚖️ **Promedio Ponderado** — Cada tipo de trait tiene un peso. "Piel" (skin) tiene un peso personalizado del **15%**; los 8 traits restantes se reparten el **85%** equitativamente (~10.6% cada uno)
-4. 🏆 **Ranking Final** — Los NFTs se ordenan por puntaje ponderado total. **Mayor = más raro**
+1. 📊 **Trait Frequency** — For each trait value, count how many NFTs share it
+2. 🔢 **Rarity Score** — `(1 - frequency / total) * 100` per trait. A trait shared by only 1 NFT has a score of ~99.8%
+3. ⚖️ **Weighted Average** — Each trait type has a weight. "Skin" has a custom weight of **15%**; the remaining 8 traits share the **85%** equally (~10.6% each)
+4. 🏆 **Final Ranking** — NFTs are sorted by total weighted score. **Higher = rarer**
 
-### ⭐ Ranks Especiales
+### ⭐ Special Ranks
 
-Los serials **#1, #652, #653 y #654** son **1-of-1 specials** — siempre mantienen el **Rank #1** independientemente de sus puntajes de traits.
-
----
-
-## ✨ Funcionalidades
-
-- 🔍 **Búsqueda** — Encuentra cualquier dragon por número de serial, nombre o valor de trait
-- 🏅 **Filtro por tier** — Haz clic en Mythic, Legendary, Epic, etc. para filtrar
-- 🏷️ **Filtro por listing** — Muestra solo los NFTs actualmente listados en venta
-- 🔄 **Ordenar** — Por rank (default), número de serial, o precio de listing
-- 📊 **Desglose de Traits** — Panel expandible mostrando todos los tipos de traits, sus pesos y distribuciones de valores
-- 📈 **Supply Circulante** — Visualización en tiempo real del supply circulante vs máximo desde el Hedera Mirror Node
+Serials **#1, #652, #653, and #654** are **1-of-1 specials** — they always hold **Rank #1** regardless of their trait scores.
 
 ---
 
-## 🐉 Vista de Detalle del NFT
+## ✨ Features
 
-Haz clic en cualquier tarjeta de dragon para ver:
-
-- 🖼️ **Imagen a tamaño completo**
-- 🏆 **Rank de rareza** y puntaje
-- 🏷️ Todos los **valores de traits** con porcentajes de rareza individuales
-- 🔢 **Cantidad** de NFTs que comparten cada trait
-- 💰 **Status de listing** y precio (si está listado)
+- 🔍 **Search** — Find any dragon by serial number, name, or trait value
+- 🏅 **Filter by tier** — Click Mythic, Legendary, Epic, etc. to filter
+- 🏷️ **Filter by listing** — Show only NFTs currently listed for sale
+- 🔄 **Sort** — By rank (default), serial number, or listing price
+- 📊 **Trait Breakdown** — Expandable panel showing all trait types, their weights, and value distributions
+- 📈 **Circulating Supply** — Real-time visualization of circulating vs maximum supply from the Hedera Mirror Node
 
 ---
 
-## 💪 Por Qué Importan los Dragons
+## 🐉 NFT Detail View
 
-Los Dragon NFTs no son solo coleccionables en Hashly — cada uno que tengas te da **+1 de poder de voto** en todos los eventos, tokens, colecciones y proyectos del ecosistema. El verificador de rareza te ayuda a descubrir cuáles dragons son los **hallazgos más raros**. 🐉
+Click on any dragon card to see:
+
+- 🖼️ **Full-size image**
+- 🏆 **Rarity rank** and score
+- 🏷️ All **trait values** with individual rarity percentages
+- 🔢 **Count** of NFTs sharing each trait
+- 💰 **Listing status** and price (if listed)
+
+---
+
+## 💪 Why Dragons Matter
+
+Dragon NFTs are not just collectibles in Hashly — each one you hold gives you **+1 voting power** across all events, tokens, collections, and ecosystem projects. The rarity checker helps you discover which dragons are the **rarest finds**. 🐉

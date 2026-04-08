@@ -1,77 +1,77 @@
-# ⚡ Guía Rápida
+# ⚡ Quick Start Guide
 
-Empieza a usar Hashly en **menos de 5 minutos**. 🕐
-
----
-
-## Paso 1: 🔗 Conecta tu Wallet
-
-Haz clic en **Connect** e inicia sesión con tu wallet de Hedera (HashPack, Blade o cualquier wallet compatible con WalletConnect). **Sin correo ni contraseña.**
+Get started with Hashly in **less than 5 minutes**. 🕐
 
 ---
 
-## Paso 2: 📅 Explora el Calendario
+## Step 1: 🔗 Connect Your Wallet
 
-Dirígete a la página **Calendar** para ver todos los eventos próximos:
-
-- 🎨 **NFT Mints** — Nuevas colecciones lanzándose en Hedera
-- 🤝 **Meetups** — Encuentros de la comunidad (online y presenciales)
-- 💻 **Hackathons** — Competencias de desarrollo con premios
-- 🎣 **DreamCast Pools** — Pools de mint temáticas de pesca de DreamBay
-- ♾️ **Forever Mints** — Mints siempre activos sin fecha de fin
-
-Usa los **filtros** para buscar por tipo de evento, rango de fechas o fuente. 🔍
+Click **Connect** and sign in with your Hedera wallet (HashPack, Blade, or any WalletConnect-compatible wallet). **No email or password needed.**
 
 ---
 
-## Paso 3: 🗳️ Emite tu Primer Voto
+## Step 2: 📅 Explore the Calendar
 
-Haz clic en cualquier evento y presiona el botón de **👍 pulgar arriba** o **👎 pulgar abajo**. Tu voto queda registrado on-chain vía HCS.
+Head to the **Calendar** page to see all upcoming events:
 
-**Poder de voto:**
-- Base: **1 voto** por wallet
-- 🐉 Holders de Dragon NFT: **+1** por cada dragon
-- 🏛️ Holders de El Santuario: **+5** de bonus
+- 🎨 **NFT Mints** — New collections launching on Hedera
+- 🤝 **Meetups** — Community gatherings (online and in-person)
+- 💻 **Hackathons** — Development competitions with prizes
+- 🎣 **DreamCast Pools** — DreamBay fishing-themed mint pools
+- ♾️ **Forever Mints** — Always-active mints with no end date
 
-Tienes **5 votos por día** — ¡úsalos sabiamente! 🧠
-
----
-
-## Paso 4: ⭐ Completa una Misión
-
-Ve a la página **Missions**. Encontrarás misiones diarias, semanales y de temporada:
-
-- 📆 **Login Diario** — solo conectarte otorga **5 XP**
-- 🗳️ **Votar en un Evento** — **10 XP** por tu primer voto del día
-- 🔥 **Votar en 3 Eventos** — **50 XP** por más participación
-
-Haz clic en **Claim** en las misiones completadas para cobrar tu XP. 💰
+Use the **filters** to search by event type, date range, or source. 🔍
 
 ---
 
-## Paso 5: 🏆 Revisa el Leaderboard
+## Step 3: 🗳️ Cast Your First Vote
 
-Visita el **Leaderboard** para ver tu posición. Cada temporada tiene su propio **pool de premios** que se anuncia al inicio. 🎉
+Click on any event and press the **👍 thumbs up** or **👎 thumbs down** button. Your vote is recorded on-chain via HCS.
 
-Las temporadas se reinician el **1ro de cada mes**.
+**Voting power:**
+- Base: **1 vote** per wallet
+- 🐉 Dragon NFT holders: **+1** per dragon
+- 🏛️ El Santuario holders: **+5** bonus
 
----
-
-## Paso 6: 🔍 Explora Más
-
-- 🌐 **Ecosystem** — Descubre proyectos de Hedera (DeFi, NFT, herramientas, gaming)
-- 📊 **Tokens & Collections** — Vota por tus tokens y colecciones NFT favoritas de Hedera
-- 🌍 **HashWorld** — Coloca tu pin en el globo 3D de la comunidad
-- 💎 **Rarity** — Consulta los rankings de rareza de Dragon NFTs
-- 📰 **News** — Últimas actualizaciones del ecosistema Hedera
+You have **5 votes per day** — use them wisely! 🧠
 
 ---
 
-## 💡 Tips para Maximizar tu XP
+## Step 4: ⭐ Complete a Mission
 
-1. 🔥 **Entra todos los días** para acumular racha de login.
-2. 🗳️ **Usa tus 5 votos diarios** sin falta.
-3. 📊 **Vota en colecciones, tokens y proyectos** del ecosistema (misiones separadas).
-4. 🤝 **Invita amigos** con tu código de referido (gana **5% de comisión** sobre su XP).
-5. 🌍 **Crea tu perfil en HashWorld** (recompensa única de **1,500 XP**).
-6. 🎖️ **Asiste a meetups** para ganar puntos de badge.
+Go to the **Missions** page. You'll find daily, weekly, and seasonal missions:
+
+- 📆 **Daily Login** — just connecting grants **5 XP**
+- 🗳️ **Vote on an Event** — **10 XP** for your first vote of the day
+- 🔥 **Vote on 3 Events** — **50 XP** for more participation
+
+Click **Claim** on completed missions to collect your XP. 💰
+
+---
+
+## Step 5: 🏆 Check the Leaderboard
+
+Visit the **Leaderboard** to see your position. Each season has its own **prize pool** announced at the start. 🎉
+
+Seasons reset on the **1st of each month**.
+
+---
+
+## Step 6: 🔍 Explore More
+
+- 🌐 **Ecosystem** — Discover Hedera projects (DeFi, NFT, tools, gaming)
+- 📊 **Tokens & Collections** — Vote for your favorite Hedera tokens and NFT collections
+- 🌍 **HashWorld** — Place your pin on the community 3D globe
+- 💎 **Rarity** — Check rarity rankings for Dragon NFTs
+- 📰 **News** — Latest updates from the Hedera ecosystem
+
+---
+
+## 💡 Tips to Maximize Your XP
+
+1. 🔥 **Log in every day** to build your login streak.
+2. 🗳️ **Use your 5 daily votes** without fail.
+3. 📊 **Vote on collections, tokens, and projects** in the ecosystem (separate missions).
+4. 🤝 **Invite friends** with your referral code (earn **5% commission** on their XP).
+5. 🌍 **Create your HashWorld profile** (one-time reward of **1,500 XP**).
+6. 🎖️ **Attend meetups** to earn badge points.

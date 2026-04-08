@@ -1,50 +1,50 @@
 # 🏅 Attendance Badges
 
-Los attendance badges son **NFTs minteados para los asistentes** de meetups y eventos del ecosistema Hedera. Sirven como **prueba de asistencia** y contribuyen a tus puntos en el leaderboard de la temporada.
+Attendance badges are **NFTs minted for attendees** of meetups and events in the Hedera ecosystem. They serve as **proof of attendance** and contribute to your points on the season leaderboard.
 
 ---
 
-## ⚙️ Cómo Funciona
+## ⚙️ How It Works
 
-### 🎟️ Para Asistentes
+### 🎟️ For Attendees
 
-1. **Asiste a un meetup** que tenga un attendance badge habilitado.
-2. **Escanea el código QR** mostrado en el evento (o compartido por el host).
-3. **Haz check-in** — Ingresa el código basado en tiempo del QR para confirmar tu asistencia.
-4. **Recibe tu badge** — El host hace airdrop del NFT del attendance badge a tu wallet.
-5. **Gana badge points** — Poseer badges contribuye a tu puntaje en el leaderboard de la temporada.
+1. **Attend a meetup** that has an attendance badge enabled.
+2. **Scan the QR code** displayed at the event (or shared by the host).
+3. **Check in** — Enter the time-based code from the QR to confirm your attendance.
+4. **Receive your badge** — The host airdrops the attendance badge NFT to your wallet.
+5. **Earn badge points** — Owning badges contributes to your score on the season leaderboard.
 
-### 🔐 Proceso de Check-in
+### 🔐 Check-in Process
 
-El código de check-in es un **código de 12 caracteres basado en tiempo** que cambia periódicamente. Esto asegura que solo las personas **presentes en el evento** puedan hacer check-in. Cada check-in se registra on-chain vía **HCS** para total transparencia.
+The check-in code is a **12-character time-based code** that changes periodically. This ensures that only people **present at the event** can check in. Each check-in is recorded on-chain via **HCS** for full transparency.
 
 ---
 
-## 🎯 Badge Points y Misiones
+## 🎯 Badge Points and Missions
 
-Los attendance badges cuentan para tus puntos de temporada y desbloquean misiones:
+Attendance badges count toward your season points and unlock missions:
 
-| Misión | Requisito | XP |
+| Mission | Requirement | XP |
 |---|---|---|
-| 🏅 Badge x1 | Poseer 1 attendance badge | 300 |
-| 🏆 Badge x3 | Poseer 3 attendance badges | 1,000 |
+| 🏅 Badge x1 | Own 1 attendance badge | 300 |
+| 🏆 Badge x3 | Own 3 attendance badges | 1,000 |
 
-> 🔗 La propiedad de badges se verifica **on-chain** — los badges deben estar en tu wallet conectada para que cuenten.
-
----
-
-## 🔄 Ciclo de Vida del Badge
-
-Los badges pasan por varias etapas:
-
-1. 📝 **Draft** — El host crea el badge (nombre, descripción, imagen).
-2. 🪙 **Token Created** — El token NFT se crea en Hedera.
-3. ⛏️ **Minted** — Los NFTs individuales del badge se mintean.
-4. 📬 **Distributed** — Los badges se envían por airdrop a las wallets de los asistentes.
-5. ⏰ **Expired** — La ventana de distribución se cierra después del deadline (hasta 3 intentos de airdrop).
+> 🔗 Badge ownership is verified **on-chain** — badges must be in your connected wallet to count.
 
 ---
 
-## 🎤 Para Hosts
+## 🔄 Badge Lifecycle
 
-Consulta [Attendance Badges para Hosts](../hosts/host-badges.md) para aprender cómo crear y distribuir badges para tus eventos.
+Badges go through several stages:
+
+1. 📝 **Draft** — The host creates the badge (name, description, image).
+2. 🪙 **Token Created** — The NFT token is created on Hedera.
+3. ⛏️ **Minted** — Individual badge NFTs are minted.
+4. 📬 **Distributed** — Badges are airdropped to attendees' wallets.
+5. ⏰ **Expired** — The distribution window closes after the deadline (up to 3 airdrop attempts).
+
+---
+
+## 🎤 For Hosts
+
+See [Attendance Badges for Hosts](../hosts/host-badges.md) to learn how to create and distribute badges for your events.

@@ -1,48 +1,48 @@
-# 🔗 Conecta tu Wallet
+# 🔗 Connect Your Wallet
 
-Hashly usa **autenticación basada en wallet** — sin contraseñas, sin correos. Demuestras que eres dueño de una wallet de Hedera firmando un mensaje, ¡y listo! ✅
+Hashly uses **wallet-based authentication** — no passwords, no emails. You prove ownership of a Hedera wallet by signing a message, and that's it! ✅
 
 ---
 
-## 👛 Wallets Compatibles
+## 👛 Compatible Wallets
 
-Cualquier wallet compatible con Hedera que soporte **WalletConnect**:
+Any Hedera-compatible wallet that supports **WalletConnect**:
 
-- 💚 **HashPack** — la wallet más popular de Hedera
+- 💚 **HashPack** — the most popular Hedera wallet
 - 🔵 **Blade Wallet**
-- 🦊 **MetaMask** (a través del bridge de WalletConnect)
-- 🔗 Cualquier otra wallet de Hedera compatible con WalletConnect
+- 🦊 **MetaMask** (through the WalletConnect bridge)
+- 🔗 Any other Hedera wallet compatible with WalletConnect
 
 ---
 
-## 📲 Cómo Conectar
+## 📲 How to Connect
 
-1. Haz clic en el botón **Connect** en la barra lateral (desktop) o barra inferior (mobile).
-2. Selecciona tu wallet en el modal de WalletConnect.
-3. Aprueba la conexión en tu app de wallet.
-4. Firma el mensaje de autenticación cuando se te pida — esto demuestra que eres dueño de la wallet **sin compartir tu clave privada**. 🔐
-5. **¡Conectado!** Tu dirección de wallet aparece en la barra lateral.
-
----
-
-## 🆕 ¿Qué Pasa en tu Primer Login?
-
-- ✨ Se crea automáticamente una cuenta de Hashly para tu dirección de wallet.
-- 🎁 Recibes un **código de referido** único para compartir con amigos.
-- 🔥 Comienza tu racha de login diario (se usa para misiones).
-- 🚀 Puedes empezar inmediatamente a votar, explorar y completar misiones.
+1. Click the **Connect** button on the sidebar (desktop) or bottom bar (mobile).
+2. Select your wallet in the WalletConnect modal.
+3. Approve the connection in your wallet app.
+4. Sign the authentication message when prompted — this proves you own the wallet **without sharing your private key**. 🔐
+5. **Connected!** Your wallet address appears in the sidebar.
 
 ---
 
-## 🔐 Seguridad
+## 🆕 What Happens on Your First Login?
 
-- ❌ Hashly **nunca** pide tu clave privada ni tu frase semilla.
-- ✅ La autenticación usa una **firma criptográfica** — solo se firma un mensaje, no una transacción.
-- ⏰ Las sesiones expiran después de **24 horas**. Tendrás que reconectarte.
-- 🍪 Todos los datos de sesión se almacenan en una cookie segura HTTP-only.
+- ✨ A Hashly account is automatically created for your wallet address.
+- 🎁 You receive a unique **referral code** to share with friends.
+- 🔥 Your daily login streak begins (used for missions).
+- 🚀 You can immediately start voting, exploring, and completing missions.
 
 ---
 
-## 🔌 Desconectarse
+## 🔐 Security
 
-Haz clic en tu dirección de wallet en la barra lateral y selecciona **Disconnect**. Tus votos, misiones y XP se conservan — están asociados a tu dirección de wallet, no a la sesión. 💾
+- ❌ Hashly **never** asks for your private key or seed phrase.
+- ✅ Authentication uses a **cryptographic signature** — only a message is signed, not a transaction.
+- ⏰ Sessions expire after **24 hours**. You'll need to reconnect.
+- 🍪 All session data is stored in a secure HTTP-only cookie.
+
+---
+
+## 🔌 Disconnecting
+
+Click your wallet address in the sidebar and select **Disconnect**. Your votes, missions, and XP are preserved — they're linked to your wallet address, not the session. 💾

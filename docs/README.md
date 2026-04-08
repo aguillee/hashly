@@ -1,36 +1,36 @@
-# 🏠 Bienvenido a Hashly
+# 🏠 Welcome to Hashly
 
-> **Tu hub del ecosistema Hedera** — descubre, vota y rankea todo lo que pasa en Hedera Hashgraph. 🌐
+> **Your Hedera ecosystem hub** — discover, vote, and rank everything happening on Hedera Hashgraph. 🌐
 
 ---
 
-## 🎯 ¿Qué puedes hacer en Hashly?
+## 🎯 What Can You Do on Hashly?
 
-| | Función | Descripción |
+| | Feature | Description |
 |---|---|---|
-| 📅 | **Descubrir eventos** | Explora NFT mints, meetups, hackathons, DreamCast pools y forever mints en un calendario unificado. |
-| 🗳️ | **Votar on-chain** | Cada voto queda registrado en Hedera Consensus Service (HCS). ¡Transparencia total! Holders de Dragon o El Santuario obtienen más poder de voto. |
-| 🔍 | **Explorar el ecosistema** | Encuentra y rankea proyectos, tokens y colecciones NFT de Hedera. |
-| ⭐ | **Ganar XP y competir** | Completa misiones diarias y semanales, sube en el leaderboard de temporada y gana premios. |
-| 🌍 | **Mapear la comunidad** | Coloca tu pin en el globo 3D de HashWorld y descubre builders de Hedera en todo el mundo. |
-| 💎 | **Consultar rareza NFT** | Revisa al instante los rankings de rareza de los Dragon NFTs de Santuario Hedera. |
+| 📅 | **Discover events** | Explore NFT mints, meetups, hackathons, DreamCast pools, and forever mints in a unified calendar. |
+| 🗳️ | **Vote on-chain** | Every vote is recorded on Hedera Consensus Service (HCS). Total transparency! Dragon or El Santuario holders get more voting power. |
+| 🔍 | **Explore the ecosystem** | Find and rank Hedera projects, tokens, and NFT collections. |
+| ⭐ | **Earn XP and compete** | Complete daily and weekly missions, climb the seasonal leaderboard, and win prizes. |
+| 🌍 | **Map the community** | Place your pin on the HashWorld 3D globe and discover Hedera builders around the world. |
+| 💎 | **Check NFT rarity** | Instantly view rarity rankings for Santuario Hedera Dragon NFTs. |
 
 ---
 
-## 💡 ¿Por qué Hashly?
+## 💡 Why Hashly?
 
-Hedera tiene un ecosistema en constante crecimiento, pero **no existía un lugar central** para descubrir todo lo que está pasando. Hashly llena ese vacío dándole **visibilidad a proyectos, eventos y creadores** — con rankings decididos por **la comunidad**, no por algoritmos.
+Hedera has a constantly growing ecosystem, but **there was no central place** to discover everything that's happening. Hashly fills that gap by giving **visibility to projects, events, and creators** — with rankings decided by **the community**, not by algorithms.
 
-✅ Todos los votos se graban on-chain vía **HCS**, haciendo de Hashly una de las pocas plataformas donde los rankings comunitarios son **verificables y transparentes**.
+✅ All votes are recorded on-chain via **HCS**, making Hashly one of the few platforms where community rankings are **verifiable and transparent**.
 
 ---
 
-## 🚀 Empieza Aquí
+## 🚀 Get Started
 
-1. 🔗 [Conecta tu wallet de Hedera](getting-started/connect-wallet.md)
-2. 📅 [Explora el calendario de eventos](features/events-calendar.md)
-3. 🗳️ [Emite tu primer voto](features/voting-system.md)
-4. ⭐ [Completa una misión y gana XP](community/missions.md)
+1. 🔗 [Connect your Hedera wallet](getting-started/connect-wallet.md)
+2. 📅 [Explore the events calendar](features/events-calendar.md)
+3. 🗳️ [Cast your first vote](features/voting-system.md)
+4. ⭐ [Complete a mission and earn XP](community/missions.md)
 
 ---
 

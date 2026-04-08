@@ -1,77 +1,77 @@
-# 📅 Enviar un Evento
+# 📅 Submit an Event
 
-Cualquier persona con una wallet conectada puede enviar eventos al calendario de Hashly.
+Anyone with a connected wallet can submit events to the Hashly calendar.
 
 ---
 
-## 🎯 Tipos de eventos que puedes enviar
+## 🎯 Event Types You Can Submit
 
-| Tipo | Descripción |
+| Type | Description |
 |---|---|
-| 🎨 **NFT Mint** | Lanzamiento de una colección NFT |
-| 🤝 **Meetup** | Encuentro de la comunidad (online, presencial o híbrido) |
-| 💻 **Hackathon** | Competencia de desarrollo con premios |
+| 🎨 **NFT Mint** | Launch of an NFT collection |
+| 🤝 **Meetup** | Community gathering (online, in-person, or hybrid) |
+| 💻 **Hackathon** | Development competition with prizes |
 
 ---
 
-## 📝 Cómo enviar un evento
+## 📝 How to Submit an Event
 
-1. **Conecta tu wallet.**
-2. Haz clic en **Submit Event** en la página principal (o navega a Events > New).
-3. Completa los detalles del evento:
+1. **Connect your wallet.**
+2. Click on **Submit Event** on the main page (or navigate to Events > New).
+3. Fill in the event details:
 
-### Campos principales
+### Main Fields
 
-| Campo | Requerido | Notas |
+| Field | Required | Notes |
 |---|---|---|
-| **Título** | ✅ | Nombre del evento |
-| **Tipo de evento** | ✅ | Mint, Meetup o Hackathon |
-| **Descripción** | ✅ | Soporta texto enriquecido |
-| **Fecha de mint / inicio** | ✅ | Requerido para eventos con fecha |
-| **Fecha de fin** | ❌ | Opcional |
-| **Precio de mint** | ❌ | Solo para NFT mints |
-| **Supply** | ❌ | Solo para NFT mints |
-| **Imagen** | ❌ | Subir archivo o URL |
-| **Website URL** | ❌ | Enlace al sitio web |
-| **Twitter URL** | ❌ | Enlace a Twitter/X |
-| **Discord URL** | ❌ | Enlace a Discord |
+| **Title** | ✅ | Event name |
+| **Event type** | ✅ | Mint, Meetup, or Hackathon |
+| **Description** | ✅ | Supports rich text |
+| **Mint / start date** | ✅ | Required for events with a date |
+| **End date** | ❌ | Optional |
+| **Mint price** | ❌ | Only for NFT mints |
+| **Supply** | ❌ | Only for NFT mints |
+| **Image** | ❌ | Upload file or URL |
+| **Website URL** | ❌ | Link to the website |
+| **Twitter URL** | ❌ | Link to Twitter/X |
+| **Discord URL** | ❌ | Link to Discord |
 
-### 🤝 Campos adicionales para Meetups
+### 🤝 Additional Fields for Meetups
 
-- 👤 **Host** — Nombre del organizador
-- 📍 **Ubicación** — Lugar o plataforma
-- 🌍 **Tipo de ubicación** — Presencial, online o híbrido
-- 🗣️ **Idioma**
+- 👤 **Host** — Organizer's name
+- 📍 **Location** — Venue or platform
+- 🌍 **Location type** — In-person, online, or hybrid
+- 🗣️ **Language**
 
-### 💻 Campos adicionales para Hackathons
+### 💻 Additional Fields for Hackathons
 
-- 🏆 **Premios** — Detalles del premio total
-- 🔗 **Enlaces personalizados** — Registro, reglas, etc.
+- 🏆 **Prizes** — Total prize details
+- 🔗 **Custom links** — Registration, rules, etc.
 
-4. **Envía para revisión.**
-
----
-
-## ✅ Proceso de aprobación
-
-- 🔎 Todos los eventos enviados por la comunidad requieren **aprobación del admin** antes de aparecer públicamente.
-- 📅 Los eventos aprobados se muestran en el calendario y pueden recibir votos.
-- ❌ Los eventos rechazados incluyen una razón del admin.
-- ✏️ Puedes editar tu evento y reenviarlo si fue rechazado.
+4. **Submit for review.**
 
 ---
 
-## ⚡ Auto-Aprobación
+## ✅ Approval Process
 
-Los holders de **El Santuario** NFTs pueden tener eventos auto-aprobados como beneficio de comunidad de confianza.
+- 🔎 All community-submitted events require **admin approval** before appearing publicly.
+- 📅 Approved events are displayed on the calendar and can receive votes.
+- ❌ Rejected events include a reason from the admin.
+- ✏️ You can edit your event and resubmit it if it was rejected.
 
 ---
 
-## 🏅 Recompensas de Misiones
+## ⚡ Auto-Approval
 
-Obtener eventos aprobados te da XP:
+**El Santuario** NFT holders can have events auto-approved as a trusted community benefit.
 
-| Misión | Requisito | XP |
+---
+
+## 🏅 Mission Rewards
+
+Getting events approved earns you XP:
+
+| Mission | Requirement | XP |
 |---|---|---|
-| 🥇 Primer Evento | Tener 1 evento aprobado | **100 XP** |
-| 🏆 Creador de Eventos 5 | Tener 5 eventos aprobados | **500 XP** |
+| 🥇 First Event | Have 1 approved event | **100 XP** |
+| 🏆 Event Creator 5 | Have 5 approved events | **500 XP** |

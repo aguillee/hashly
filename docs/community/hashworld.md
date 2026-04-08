@@ -1,64 +1,64 @@
 # 🌍 HashWorld Globe
 
-HashWorld es un **globo 3D interactivo** que mapea la comunidad de Hedera en todo el mundo. Encuentra builders, proyectos y miembros de la comunidad, y **coloca tu pin en el mapa**.
+HashWorld is an **interactive 3D globe** that maps the Hedera community around the world. Find builders, projects, and community members, and **place your pin on the map**.
 
 ---
 
-## ⚙️ Cómo Funciona
+## ⚙️ How It Works
 
-HashWorld muestra a los miembros de la comunidad y proyectos como **pins sobre un globo 3D** renderizado con WebGL. Cada pin representa un perfil aprobado y enlaza a su cuenta de X (Twitter).
+HashWorld displays community members and projects as **pins on a 3D globe** rendered with WebGL. Each pin represents an approved profile and links to their X (Twitter) account.
 
 ---
 
-## 👥 Tipos de Perfil
+## 👥 Profile Types
 
-| Tipo | Descripción |
+| Type | Description |
 |---|---|
-| 🧑 **User** | Miembro individual de la comunidad |
-| 🛠️ **Builder** | Desarrollador o contribuidor técnico |
-| 📦 **Project** | Proyecto del ecosistema (se crea automáticamente al ser aprobado) |
+| 🧑 **User** | Individual community member |
+| 🛠️ **Builder** | Developer or technical contributor |
+| 📦 **Project** | Ecosystem project (automatically created upon approval) |
 
 ---
 
-## 📝 Crear Tu Perfil
+## 📝 Create Your Profile
 
-1. Conecta tu wallet.
-2. Ve a **HashWorld** desde la barra lateral.
-3. Haz clic en **Join the Map**.
-4. Completa tu perfil:
-   - **Display name** (obligatorio)
-   - **Type** — User o Builder
-   - **Country** (obligatorio) — determina la ubicación de tu pin
-   - **Twitter/X handle** (opcional)
-   - **Bio** (opcional)
-   - **Avatar** (subida de imagen)
-5. Envía para revisión.
+1. Connect your wallet.
+2. Go to **HashWorld** from the sidebar.
+3. Click on **Join the Map**.
+4. Complete your profile:
+   - **Display name** (required)
+   - **Type** — User or Builder
+   - **Country** (required) — determines your pin location
+   - **Twitter/X handle** (optional)
+   - **Bio** (optional)
+   - **Avatar** (image upload)
+5. Submit for review.
 
-### ✅ Aprobación
+### ✅ Approval
 
-Los perfiles son revisados por admins antes de aparecer en el globo. Esto previene spam y asegura la calidad de la comunidad.
-
----
-
-## 🎯 Recompensa de Misión
-
-Crear un perfil de HashWorld es una de las misiones de **mayor valor** en Hashly:
-
-> 🏆 **HashWorld Citizen** — **1,500 XP** (única vez, permanente)
-
-Esto la convierte en una de las acciones individuales más rentables que puedes realizar en la plataforma.
+Profiles are reviewed by admins before appearing on the globe. This prevents spam and ensures community quality.
 
 ---
 
-## 📍 Pins de Proyectos
+## 🎯 Mission Reward
 
-Cuando un proyecto del ecosistema es aprobado, automáticamente obtiene un **pin en el globo de HashWorld** basado en el país seleccionado durante la aplicación. Esto significa que el directorio del ecosistema y HashWorld están **interconectados**.
+Creating a HashWorld profile is one of the **highest value** missions in Hashly:
+
+> 🏆 **HashWorld Citizen** — **1,500 XP** (one-time, permanent)
+
+This makes it one of the most rewarding individual actions you can take on the platform.
 
 ---
 
-## 🖱️ Interacción con el Globo
+## 📍 Project Pins
 
-- 🔄 **Rotar** — Haz clic y arrastra para girar el globo.
-- 🔍 **Zoom** — Usa el scroll para acercar/alejar.
-- 📌 **Clic en pins** — Ve los detalles del perfil y enlace a su cuenta de X.
-- 🔎 **Buscar** — Encuentra miembros específicos de la comunidad.
+When an ecosystem project is approved, it automatically gets a **pin on the HashWorld globe** based on the country selected during the application. This means the ecosystem directory and HashWorld are **interconnected**.
+
+---
+
+## 🖱️ Globe Interaction
+
+- 🔄 **Rotate** — Click and drag to spin the globe.
+- 🔍 **Zoom** — Use the scroll wheel to zoom in/out.
+- 📌 **Click on pins** — View profile details and link to their X account.
+- 🔎 **Search** — Find specific community members.

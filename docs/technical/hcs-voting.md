@@ -1,32 +1,32 @@
-# 🗳️ Votaciones On-Chain (HCS)
+# 🗳️ On-Chain Voting (HCS)
 
-Todos los votos en Hashly se registran en el **Hedera Consensus Service (HCS)** para total transparencia e inmutabilidad.
+All votes on Hashly are recorded on the **Hedera Consensus Service (HCS)** for full transparency and immutability.
 
 ---
 
-## 🔍 ¿Qué es HCS?
+## 🔍 What is HCS?
 
-El Hedera Consensus Service es un servicio de registro **descentralizado y verificable**. Los mensajes enviados a un topic de HCS reciben un timestamp de consenso y se almacenan en un log inmutable y ordenado. **Cualquier persona** puede leer estos mensajes para verificar los datos de forma independiente.
+The Hedera Consensus Service is a **decentralized and verifiable** logging service. Messages sent to an HCS topic receive a consensus timestamp and are stored in an immutable, ordered log. **Anyone** can read these messages to verify data independently.
 
 ---
 
 ## 📋 HCS Topics
 
-Hashly utiliza topics de HCS dedicados para diferentes tipos de votos:
+Hashly uses dedicated HCS topics for different vote types:
 
-| Propósito | Topic ID (Mainnet) |
+| Purpose | Topic ID (Mainnet) |
 |---|---|
-| 🗳️ Votos de Eventos | `0.0.10279947` |
-| 💰 Votos de Assets (Tokens/Colecciones) | `0.0.10279948` |
-| 📍 Check-ins de Asistencia | `0.0.10300837` |
+| 🗳️ Event Votes | `0.0.10279947` |
+| 💰 Asset Votes (Tokens/Collections) | `0.0.10279948` |
+| 📍 Attendance Check-ins | `0.0.10300837` |
 
 ---
 
-## 📦 Formatos de Mensajes
+## 📦 Message Formats
 
-### 🗳️ Votos de Eventos
+### 🗳️ Event Votes
 
-Se registran cuando un usuario vota en un NFT mint, meetup o hackathon:
+Recorded when a user votes on an NFT mint, meetup, or hackathon:
 
 ```json
 {
@@ -40,9 +40,9 @@ Se registran cuando un usuario vota en un NFT mint, meetup o hackathon:
 }
 ```
 
-### 💰 Votos de Assets
+### 💰 Asset Votes
 
-Se registran cuando un usuario vota en un token, colección NFT o proyecto del ecosistema:
+Recorded when a user votes on a token, NFT collection, or ecosystem project:
 
 ```json
 {
@@ -61,9 +61,9 @@ Se registran cuando un usuario vota en un token, colección NFT o proyecto del e
 }
 ```
 
-### 📍 Check-ins de Asistencia
+### 📍 Attendance Check-ins
 
-Se registran cuando un usuario hace check-in en un evento:
+Recorded when a user checks in at an event:
 
 ```json
 {
@@ -77,19 +77,19 @@ Se registran cuando un usuario hace check-in en un evento:
 
 ---
 
-## 🔎 Verificar votos
+## 🔎 Verify Votes
 
-Cualquier persona puede verificar los mensajes de HCS usando:
+Anyone can verify HCS messages using:
 
-- 🌐 **Hedera Mirror Node API** — Consulta los mensajes del topic en:
+- 🌐 **Hedera Mirror Node API** — Query the topic messages at:
   `https://mainnet.mirrornode.hedera.com/api/v1/topics/{topicId}/messages`
-- 🔍 **HashScan** — Visualiza mensajes del topic en [hashscan.io](https://hashscan.io)
-- 🛠️ **Exploradores de terceros** — Cualquier explorador de bloques de Hedera que soporte HCS topics
+- 🔍 **HashScan** — View topic messages on [hashscan.io](https://hashscan.io)
+- 🛠️ **Third-party explorers** — Any Hedera block explorer that supports HCS topics
 
 ---
 
 ## 🔐 Submit Key
 
-Todos los mensajes de HCS se envían a través de un **submit key controlado** (`0.0.10279885`). Esto asegura que solo el backend de Hashly pueda escribir en los topics, **previniendo spam** mientras se mantiene la transparencia de lectura.
+All HCS messages are sent through a **controlled submit key** (`0.0.10279885`). This ensures that only the Hashly backend can write to the topics, **preventing spam** while maintaining read transparency.
 
-> ⚠️ Los topics **no tienen admin key**, lo que los hace inmutables — una vez creados, la configuración del topic no puede cambiarse y los mensajes no pueden eliminarse.
+> ⚠️ The topics **have no admin key**, making them immutable — once created, the topic configuration cannot be changed and messages cannot be deleted.

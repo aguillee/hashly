@@ -1,66 +1,66 @@
-# 🏆 Leaderboard y Temporadas
+# 🏆 Leaderboard and Seasons
 
-Hashly ejecuta **temporadas competitivas mensuales** donde los miembros más activos de la comunidad ganan **premios reales en tokens**.
+Hashly runs **monthly competitive seasons** where the most active community members earn **real token prizes**.
 
 ---
 
-## 🔄 Cómo Funcionan las Temporadas
+## 🔄 How Seasons Work
 
-### 📅 Duración
+### 📅 Duration
 
-- Cada temporada va del **1 al último día del mes**.
-- A medianoche UTC del día 1, la temporada anterior termina y comienza una nueva.
-- **Todos los puntos se reinician a cero** al inicio de cada temporada.
+- Each season runs from the **1st to the last day of the month**.
+- At midnight UTC on the 1st, the previous season ends and a new one begins.
+- **All points reset to zero** at the start of each season.
 
-### 📊 Fuentes de Puntos
+### 📊 Point Sources
 
-Tus puntos de temporada provienen de **tres categorías**:
+Your season points come from **three categories**:
 
-| Fuente | Icono | Descripción |
+| Source | Icon | Description |
 |---|---|---|
-| 🎯 **Mission Points** | Target | XP ganado al completar misiones |
-| 🏅 **Badge Points** | Award | Puntos por asistir a eventos y poseer attendance badges |
-| 👥 **Referral Points** | Users | 5% de comisión sobre las ganancias de tus referidos |
+| 🎯 **Mission Points** | Target | XP earned by completing missions |
+| 🏅 **Badge Points** | Award | Points for attending events and owning attendance badges |
+| 👥 **Referral Points** | Users | 5% commission on your referrals' earnings |
 
-> 💡 **Puntos Totales = Mission Points + Badge Points + Referral Points**
+> 💡 **Total Points = Mission Points + Badge Points + Referral Points**
 
-### 🔁 Reinicio de Temporada
+### 🔁 Season Reset
 
-Cuando inicia una nueva temporada:
+When a new season starts:
 
-1. Se guarda un **snapshot** del leaderboard final (preservando el ranking de todos).
-2. Todos los puntos de usuario se reinician a **0**.
-3. Los contadores de misiones se reinician (excepto misiones permanentes/únicas).
-4. ¡El ciclo comienza de nuevo!
+1. A **snapshot** of the final leaderboard is saved (preserving everyone's ranking).
+2. All user points reset to **0**.
+3. Mission counters reset (except permanent/one-time missions).
+4. The cycle begins again!
 
 ---
 
 ## 📋 Leaderboard
 
-El leaderboard muestra a **todos los usuarios rankeados** por puntos totales de la temporada, con un desglose de cada fuente de puntos.
+The leaderboard shows **all users ranked** by total season points, with a breakdown of each point source.
 
-### ✨ Características
+### ✨ Features
 
-- ⏱️ **Cuenta regresiva en vivo** — Timer mostrando cuándo termina la temporada actual.
-- 📍 **Tu ranking** — Tu posición está resaltada con un acento de color.
-- 📊 **Desglose de puntos** — Ve exactamente cómo se ganaron los puntos (misiones, badges, referrals).
-- 🏅 **Indicadores de premio** — Los primeros 15 puestos muestran el porcentaje del premio y valor estimado.
-
----
-
-## 💰 Pool de Premios
-
-Cada temporada puede tener **premios diferentes**. El pool de premios, los tokens incluidos y la distribución se anuncian al inicio de cada season.
-
-> 🔔 Consulta el **Leaderboard** en la app para ver los detalles de la temporada actual y los premios disponibles.
+- ⏱️ **Live countdown** — Timer showing when the current season ends.
+- 📍 **Your ranking** — Your position is highlighted with a color accent.
+- 📊 **Point breakdown** — See exactly how points were earned (missions, badges, referrals).
+- 🏅 **Prize indicators** — The top 15 positions show the prize percentage and estimated value.
 
 ---
 
-## 💡 Tips Estratégicos
+## 💰 Prize Pool
 
-1. 📆 **Inicia sesión a diario** — La misión de racha semanal (7 días consecutivos) vale 50 XP.
-2. 🗳️ **Usa tus 5 votos diarios** — Las misiones de votación se acumulan rápido.
-3. 🎯 **Diversifica votos** — Hay misiones separadas para eventos, tokens, collections y proyectos del ecosistema.
-4. 🌍 **Crea un perfil en HashWorld** — Bonus único de 1,500 XP.
-5. 👥 **Refiere amigos** — 5% de comisión pasiva sobre todo lo que ganen.
-6. 🎟️ **Asiste a meetups** — Los badge points se acumulan durante la temporada.
+Each season can have **different prizes**. The prize pool, included tokens, and distribution are announced at the start of each season.
+
+> 🔔 Check the **Leaderboard** in the app to see the current season details and available prizes.
+
+---
+
+## 💡 Strategic Tips
+
+1. 📆 **Log in daily** — The weekly streak mission (7 consecutive days) is worth 50 XP.
+2. 🗳️ **Use your 5 daily votes** — Voting missions stack up fast.
+3. 🎯 **Diversify votes** — There are separate missions for events, tokens, collections, and ecosystem projects.
+4. 🌍 **Create a HashWorld profile** — One-time bonus of 1,500 XP.
+5. 👥 **Refer friends** — 5% passive commission on everything they earn.
+6. 🎟️ **Attend meetups** — Badge points accumulate throughout the season.

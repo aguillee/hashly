@@ -1,36 +1,36 @@
-# 📰 Feed de Noticias de Hedera
+# 📰 Hedera News Feed
 
-Mantente al día con las **últimas noticias del ecosistema Hedera**, agregadas en un solo lugar.
-
----
-
-## 🌐 Fuentes
-
-Los artículos se agregan desde **Genfinity**, un agregador de noticias crypto que cubre actualizaciones del ecosistema Hedera Hashgraph.
+Stay up to date with the **latest news from the Hedera ecosystem**, aggregated in one place.
 
 ---
 
-## ✨ Funcionalidades
+## 🌐 Sources
 
-- 🔍 **Búsqueda** — Encuentra artículos por título o contenido.
-- 🔄 **Ordenamiento** — Más recientes primero o más antiguos primero.
-- 📄 **Paginación** — Navega por todos los artículos (25 por página).
-- 🔃 **Actualizar** — Obtén los últimos artículos manualmente.
-- 🕐 **Última actualización** — Consulta cuándo se refrescó el feed por última vez.
+Articles are aggregated from **Genfinity**, a crypto news aggregator covering Hedera Hashgraph ecosystem updates.
 
 ---
 
-## 📋 ¿Qué se cubre?
+## ✨ Features
 
-- 🏛️ Actualizaciones del protocolo y propuestas de gobernanza
-- 💰 Lanzamientos e integraciones DeFi
-- 🎨 Drops de NFT y noticias de marketplaces
-- 🤝 Anuncios de partnerships
-- 🎉 Destacados de la comunidad y eventos
-- 🛠️ Actualizaciones de herramientas para desarrolladores
+- 🔍 **Search** — Find articles by title or content.
+- 🔄 **Sorting** — Newest first or oldest first.
+- 📄 **Pagination** — Browse all articles (25 per page).
+- 🔃 **Refresh** — Get the latest articles manually.
+- 🕐 **Last updated** — Check when the feed was last refreshed.
 
 ---
 
-## 📖 Leer artículos
+## 📋 What's Covered?
 
-Haz clic en cualquier tarjeta de artículo para leer el contenido completo en la **fuente original**. Hashly proporciona una vista previa (título, descripción, imagen, fecha de publicación) y enlaza al contenido completo.
+- 🏛️ Protocol updates and governance proposals
+- 💰 DeFi launches and integrations
+- 🎨 NFT drops and marketplace news
+- 🤝 Partnership announcements
+- 🎉 Community highlights and events
+- 🛠️ Developer tooling updates
+
+---
+
+## 📖 Read Articles
+
+Click on any article card to read the full content on the **original source**. Hashly provides a preview (title, description, image, publication date) and links to the full content.

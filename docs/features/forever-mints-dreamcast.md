@@ -2,72 +2,72 @@
 
 ## ♾️ Forever Mints
 
-Los Forever Mints son eventos **sin fecha de cierre** — están siempre activos y abiertos para mintear.
+Forever Mints are events **with no closing date** — they are always active and open for minting.
 
-### 🔄 Diferencias con Eventos Regulares
+### 🔄 Differences from Regular Events
 
-| Característica | Evento Regular | Forever Mint |
+| Feature | Regular Event | Forever Mint |
 |---|---|---|
-| ⏰ **Duración** | Fecha de inicio y fin | Siempre activo |
-| 📆 **Visualización de fecha** | Muestra fechas específicas | Muestra "Always Live" |
-| 🔄 **Cooldown de voto** | 24h entre cambios | Cambio en cualquier momento |
-| 🐉 **Cooldown voto NFT** | 24h por NFT | Sin cooldown |
-| 📂 **Listado** | Cuadrícula por fecha | Pestaña dedicada "Forever" |
+| ⏰ **Duration** | Start and end date | Always active |
+| 📆 **Date display** | Shows specific dates | Shows "Always Live" |
+| 🔄 **Vote cooldown** | 24h between changes | Change at any time |
+| 🐉 **NFT vote cooldown** | 24h per NFT | No cooldown |
+| 📂 **Listing** | Grid by date | Dedicated "Forever" tab |
 
-### 🗳️ Votación en Forever Mints
+### 🗳️ Voting on Forever Mints
 
-Como los forever mints son permanentes, las **reglas de votación son más flexibles**:
+Since forever mints are permanent, the **voting rules are more flexible**:
 
-- 🔄 Puedes **cambiar la dirección de tu voto en cualquier momento** (sin esperar a medianoche UTC)
-- 💪 Tu **poder de voto completo** aplica (base + NFT boosts)
-- 📊 Los votos **aún cuentan** para tu límite diario de 5 votos
-- ⛓️ Todos los votos se registran en **HCS** igual que los eventos regulares
+- 🔄 You can **change your vote direction at any time** (no waiting until midnight UTC)
+- 💪 Your **full voting power** applies (base + NFT boosts)
+- 📊 Votes **still count** toward your daily limit of 5 votes
+- ⛓️ All votes are recorded on **HCS** just like regular events
 
-### 🔍 Filtros
+### 🔍 Filters
 
-En el Calendario, usa el filtro **Forever** para ver solo forever mints (excluyendo DreamCast). Usa el filtro **DreamCast** para ver solo los pools de DreamCast.
+In the Calendar, use the **Forever** filter to see only forever mints (excluding DreamCast). Use the **DreamCast** filter to see only DreamCast pools.
 
 ---
 
 ## 🐟 DreamCast Pools
 
-DreamCast es una experiencia de **mint de NFTs con temática de pesca** de DreamBay. Cada pool contiene NFTs organizados por tiers con diferentes niveles de rareza.
+DreamCast is a **fishing-themed NFT minting experience** from DreamBay. Each pool contains NFTs organized by tiers with different rarity levels.
 
-### 🎯 Sistema de Tiers
+### 🎯 Tier System
 
-Cada pool de DreamCast tiene **5 tiers**, del más raro al más común:
+Each DreamCast pool has **5 tiers**, from rarest to most common:
 
-| Tier | Rareza | Color |
+| Tier | Rarity | Color |
 |---|---|---|
-| 🦑 **Kraken** | Ultra raro | 🟡 Amarillo |
-| 🐉 **Hydra** | Muy raro | 🔴 Rojo |
-| 🧜 **Siren** | Raro | 🟣 Morado |
-| 🐠 **Keeper** | Poco común | 🔵 Azul |
-| 🐟 **Small Fry** | Común | 🟢 Esmeralda |
+| 🦑 **Kraken** | Ultra rare | 🟡 Yellow |
+| 🐉 **Hydra** | Very rare | 🔴 Red |
+| 🧜 **Siren** | Rare | 🟣 Purple |
+| 🐠 **Keeper** | Uncommon | 🔵 Blue |
+| 🐟 **Small Fry** | Common | 🟢 Emerald |
 
-### 📊 Información del Pool
+### 📊 Pool Information
 
-Cada pool de DreamCast muestra:
+Each DreamCast pool displays:
 
-- 🎯 **Desglose por tier** — Cuántos NFTs existen en cada tier
-- 📈 **Stats** — Total de capturas (mints) y volumen total (HBAR gastado)
-- 🖼️ **Preview NFTs** — Imágenes de muestra del pool
-- 💰 **Precio de mint** — Costo por "cast" (intento de mint)
-- 💸 **Buyback** — Si el pool soporta recompra de NFTs
+- 🎯 **Tier breakdown** — How many NFTs exist in each tier
+- 📈 **Stats** — Total catches (mints) and total volume (HBAR spent)
+- 🖼️ **Preview NFTs** — Sample images from the pool
+- 💰 **Mint price** — Cost per "cast" (mint attempt)
+- 💸 **Buyback** — Whether the pool supports NFT buyback
 
-### 🎀 Branding Visual
+### 🎀 Visual Branding
 
-Los eventos DreamCast son **visualmente distintos** de los forever mints regulares:
+DreamCast events are **visually distinct** from regular forever mints:
 
-- 🎀 **Branding rosa** (borde, badges, botones) vs morado para forever mints estándar
-- 🐟 **Ícono de pez** con badge "DREAMCAST"
-- 🎣 Botón **"Cast Now"** en lugar de "Mint Now"
-- 🏷️ **Tier pills** mostrando todos los nombres de tier con sus colores asociados
+- 🎀 **Pink branding** (border, badges, buttons) vs purple for standard forever mints
+- 🐟 **Fish icon** with "DREAMCAST" badge
+- 🎣 **"Cast Now"** button instead of "Mint Now"
+- 🏷️ **Tier pills** showing all tier names with their associated colors
 
-### 📡 Fuente de Datos
+### 📡 Data Source
 
-Los pools de DreamCast se sincronizan automáticamente desde la **API de DreamBay**:
+DreamCast pools are automatically synced from the **DreamBay API**:
 
-- 🔄 Los pools activos se importan diariamente
-- 💾 La metadata (tiers, stats, previews) se almacena junto al evento
-- 🚫 Los pools de prueba se filtran automáticamente
+- 🔄 Active pools are imported daily
+- 💾 Metadata (tiers, stats, previews) is stored alongside the event
+- 🚫 Test pools are automatically filtered out

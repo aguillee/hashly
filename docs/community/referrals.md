@@ -1,40 +1,40 @@
-# 👥 Programa de Referidos
+# 👥 Referral Program
 
-Haz crecer la comunidad de Hashly y **gana XP pasivo** a través del sistema de referidos.
-
----
-
-## ⚙️ Cómo Funciona
-
-1. 🔑 **Encuentra tu código de referido** — Se genera automáticamente al crear tu cuenta. Revísalo en tu página de perfil.
-2. 📤 **Compártelo** — Envía tu código a amigos o compártelo en redes sociales.
-3. ✅ **Ellos lo aplican** — Los nuevos usuarios ingresan tu código de referido al unirse.
-4. 💰 **Ganas comisión** — Recibe el **5% de todo el XP** que tus referidos ganen, **para siempre**.
+Grow the Hashly community and **earn passive XP** through the referral system.
 
 ---
 
-## 📊 Detalles de la Comisión
+## ⚙️ How It Works
 
-- 💵 **Tasa**: 5% de cada premio de XP que tus referidos ganen.
-- 🎯 **Alcance**: Aplica a reclamos de misiones, badge points y todas las demás fuentes de XP.
-- ♾️ **Duración**: Permanente — mientras estén activos, tú ganas.
-- ✨ **Impacto en el referido**: Tu comisión **no reduce su recompensa**. Ellos reciben el 100%, tú recibes un 5% extra.
+1. 🔑 **Find your referral code** — It is automatically generated when you create your account. Check it on your profile page.
+2. 📤 **Share it** — Send your code to friends or share it on social media.
+3. ✅ **They apply it** — New users enter your referral code when joining.
+4. 💰 **You earn commission** — Receive **5% of all XP** your referrals earn, **forever**.
 
 ---
 
-## 🎯 Misiones de Referidos
+## 📊 Commission Details
 
-| Misión | Requisito | XP |
+- 💵 **Rate**: 5% of every XP reward your referrals earn.
+- 🎯 **Scope**: Applies to mission claims, badge points, and all other XP sources.
+- ♾️ **Duration**: Permanent — as long as they are active, you earn.
+- ✨ **Impact on the referral**: Your commission **does not reduce their reward**. They receive 100%, you receive an extra 5%.
+
+---
+
+## 🎯 Referral Missions
+
+| Mission | Requirement | XP |
 |---|---|---|
-| 👤 Referral x1 | 1 referido activado | 100 |
-| 👥 Referral x3 | 3 referidos activados | 500 |
+| 👤 Referral x1 | 1 activated referral | 100 |
+| 👥 Referral x3 | 3 activated referrals | 500 |
 
-> 📅 Estas son **misiones de temporada** — puedes reclamarlas una vez por temporada.
+> 📅 These are **season missions** — you can claim them once per season.
 
 ---
 
-## 💡 Estrategia
+## 💡 Strategy
 
-- 📢 Comparte tu código en **canales de la comunidad de Hedera**.
-- 🎯 Refiere **usuarios activos** — cuanto más participen, más ganas tú.
-- 🚀 Combinado con misiones diarias, los referidos crean un **motor de XP compuesto** que crece con el tiempo.
+- 📢 Share your code in **Hedera community channels**.
+- 🎯 Refer **active users** — the more they participate, the more you earn.
+- 🚀 Combined with daily missions, referrals create a **compounding XP engine** that grows over time.
