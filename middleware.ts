@@ -24,6 +24,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Block /rarity — flagged by Google Safe Browsing
+  if (request.nextUrl.pathname.startsWith("/rarity")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   const response = NextResponse.next();
 
   // Security headers
