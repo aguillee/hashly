@@ -24,12 +24,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Block /rarity in production — flagged by Google Safe Browsing
-  if (request.nextUrl.pathname.startsWith("/rarity") && process.env.NODE_ENV === "production") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  const response = NextResponse.next();
+const response = NextResponse.next();
 
   // Security headers
   // X-Frame-Options removed to allow wallet DApp browsers (HashPack/Kabila WebViews)

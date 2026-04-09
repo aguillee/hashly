@@ -15,7 +15,6 @@
 * [♾️ Forever Mints y DreamCast](features/forever-mints-dreamcast.md)
 * [🔍 Directorio del Ecosistema](features/ecosystem.md)
 * [📊 Rankings de Tokens y NFTs](features/token-nft-rankings.md)
-* [💎 Consultor de Rareza NFT](features/rarity-checker.md)
 
 ## 👥 Comunidad
 
