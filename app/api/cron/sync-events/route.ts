@@ -88,23 +88,25 @@ export async function GET(request: NextRequest) {
     });
     results.cleanup.updatedToLive = updatedToLive.count;
 
-    // 2. Delete events whose endDate has passed
-    const deletedEnded = await prisma.event.deleteMany({
+    // 2. Mark events whose endDate has passed as ENDED (keep in DB for history)
+    const endedByDate = await prisma.event.updateMany({
       where: {
         isForeverMint: false,
+        status: { not: "ENDED" },
         endDate: {
           not: null,
           lt: now,
         },
       },
+      data: { status: "ENDED" },
     });
-    results.cleanup.deletedEnded = deletedEnded.count;
+    results.cleanup.deletedEnded = endedByDate.count;
 
-    // 3. Delete LIVE mint events older than 7 days (only MINT_EVENT, not meetups/hackathons)
+    // 3. Mark LIVE mint events older than 7 days as ENDED (only MINT_EVENT, not meetups/hackathons)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const deletedOld = await prisma.event.deleteMany({
+    const endedOld = await prisma.event.updateMany({
       where: {
         status: "LIVE",
         isForeverMint: false,
@@ -114,8 +116,9 @@ export async function GET(request: NextRequest) {
           lt: sevenDaysAgo,
         },
       },
+      data: { status: "ENDED" },
     });
-    results.cleanup.deletedOld = deletedOld.count;
+    results.cleanup.deletedOld = endedOld.count;
 
     // 4. Ensure ALL Forever Mints are LIVE
     const fixedForeverMints = await prisma.event.updateMany({
@@ -127,7 +130,7 @@ export async function GET(request: NextRequest) {
     });
     results.cleanup.fixedForeverMints = fixedForeverMints.count;
 
-    console.log(`[Cron Sync] Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${deletedEnded.count} ended deleted, ${deletedOld.count} old LIVE deleted`);
+    console.log(`[Cron Sync] Cleanup: ${updatedToLive.count} UPCOMING→LIVE, ${endedByDate.count} ended, ${endedOld.count} old LIVE→ENDED`);
 
     // ============================================
     // SYNC FROM SENTX

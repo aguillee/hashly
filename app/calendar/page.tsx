@@ -93,9 +93,9 @@ export default function CalendarPage() {
   const [events, setEvents] = React.useState<Event[]>([]);
   const [userVotes, setUserVotes] = React.useState<Record<string, "UP" | "DOWN">>({});
   const [loading, setLoading] = React.useState(true);
-  const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("calendar");
+  const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("grid");
   const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA" | "DREAMBAY">("all");
-  const [stateFilter, setStateFilter] = React.useState<"all" | "live" | "upcoming">("all");
+  const [stateFilter, setStateFilter] = React.useState<"all" | "live" | "upcoming">("upcoming");
   const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
 
   const headerRef = useReveal();
@@ -142,8 +142,10 @@ export default function CalendarPage() {
       } else if (status === "hackathons") {
         params.append("eventType", "HACKATHON");
       } else {
-        // "all" types - exclude forever mints from default view
-        params.append("foreverMints", "exclude");
+        // "all" types - exclude forever mints from default view, unless a specific source is selected
+        if (sourceFilter === "all") {
+          params.append("foreverMints", "exclude");
+        }
       }
 
       // Handle state filters

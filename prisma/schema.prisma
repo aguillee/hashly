@@ -215,6 +215,7 @@ model CollectionVote {
 enum EventStatus {
   UPCOMING
   LIVE
+  ENDED
 }
 
 enum DataSource {

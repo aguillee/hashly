@@ -29,15 +29,17 @@ async function maybeUpdateEventStatuses() {
       },
       data: { status: "LIVE" },
     }),
-    // Delete events whose endDate has passed
-    prisma.event.deleteMany({
+    // Mark events whose endDate has passed as ENDED (keep in DB for history)
+    prisma.event.updateMany({
       where: {
         isForeverMint: false,
+        status: { not: "ENDED" },
         endDate: { not: null, lt: currentDate },
       },
+      data: { status: "ENDED" },
     }),
-    // Delete LIVE mint events older than 7 days
-    prisma.event.deleteMany({
+    // Mark LIVE mint events older than 7 days as ENDED (keep in DB for history)
+    prisma.event.updateMany({
       where: {
         status: "LIVE",
         isForeverMint: false,
@@ -48,6 +50,7 @@ async function maybeUpdateEventStatuses() {
           lt: new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000),
         },
       },
+      data: { status: "ENDED" },
     }),
   ]);
 }
@@ -115,12 +118,15 @@ export async function GET(request: NextRequest) {
     }
 
     if (status && status !== "all") {
-      const validStatuses = ["UPCOMING", "LIVE"];
+      const validStatuses = ["UPCOMING", "LIVE", "ENDED"];
       const upper = status.toUpperCase();
       if (!validStatuses.includes(upper)) {
         return NextResponse.json({ error: "Invalid status" }, { status: 400 });
       }
       where.status = upper as EventStatus;
+    } else {
+      // By default, exclude ENDED events from listings
+      where.status = { not: "ENDED" };
     }
 
     // Support multiple categories

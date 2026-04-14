@@ -326,6 +326,63 @@ export function useHederaTransactions() {
     ((process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() || "mainnet") as "mainnet" | "testnet");
 
   /**
+   * Recovery: if SDK hangs after signing, query Kiloscribe API for the most recent
+   * inscription by this wallet to retrieve the jobId.
+   */
+  async function recoverJobFromKiloscribe(
+    walletAddress: string,
+    fileName: string
+  ): Promise<{ _id: string; tx_id: string; status: string } | null> {
+    try {
+      // Search by holder (wallet) — Kiloscribe stores the holderId
+      const res = await fetch(
+        `${KILOSCRIBE_BASE_URL}/inscriptions/retrieve-inscription?holderId=${encodeURIComponent(walletAddress)}&network=${HEDERA_NETWORK}`,
+        { cache: "no-store" }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        // Could be a single object or array — handle both
+        const items = Array.isArray(data) ? data : data?.inscriptions || [data];
+        // Find the most recent pending inscription matching our file
+        const match = items.find(
+          (item: any) =>
+            item &&
+            item.status === "pending" &&
+            (item.name?.includes(fileName) || true) // fallback: any recent pending
+        );
+        if (match && (match.tx_id || match._id)) return match;
+      }
+
+      // Fallback: check by wallet account on mirror node for most recent Kiloscribe tx
+      // and then query Kiloscribe with that tx_id
+      const mirrorRes = await fetch(
+        `https://mainnet.mirrornode.hedera.com/api/v1/transactions?account.id=${walletAddress}&limit=5&order=desc`,
+        { cache: "no-store" }
+      );
+      if (mirrorRes.ok) {
+        const mirrorData = await mirrorRes.json();
+        for (const tx of mirrorData.transactions || []) {
+          const txId = tx.transaction_id;
+          if (!txId) continue;
+          const kiloRes = await fetch(
+            `${KILOSCRIBE_BASE_URL}/inscriptions/retrieve-inscription?id=${encodeURIComponent(txId)}`,
+            { cache: "no-store" }
+          );
+          if (kiloRes.ok) {
+            const kiloData = await kiloRes.json();
+            if (kiloData && kiloData.tx_id && kiloData.status) {
+              return kiloData;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error("[Hashinals] Recovery failed:", err);
+    }
+    return null;
+  }
+
+  /**
    * Inscribe a file on-chain using HCS-1 via Kiloscribe SDK (non-blocking).
    * Returns immediately after user signs — caller polls for completion.
    */
@@ -362,18 +419,54 @@ export function useHederaTransactions() {
 
         onProgress?.("Sign the transaction in your wallet...");
 
-        const response = await inscribeWithSigner(input, signer as any, {
+        // Race the SDK call against a timeout — the SDK sometimes hangs after signing
+        const SDK_TIMEOUT_MS = 90_000; // 90 seconds after user signs
+
+        const sdkPromise = inscribeWithSigner(input, signer as any, {
           mode: "file",
           network: HEDERA_NETWORK,
           apiKey: KILOSCRIBE_API_KEY,
           baseURL: KILOSCRIBE_BASE_URL,
           connectionMode: "http" as any,
-          waitForConfirmation: false, // Non-blocking: return after signing
+          waitForConfirmation: false,
         });
 
-        const result = response.result as any;
-        const transactionId = result?.transactionId || result?.jobId || "";
-        const jobId = result?.jobId || transactionId;
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("SDK_TIMEOUT")), SDK_TIMEOUT_MS)
+        );
+
+        let transactionId = "";
+        let jobId = "";
+
+        try {
+          const response = await Promise.race([sdkPromise, timeoutPromise]);
+          const result = (response as any).result as any;
+          transactionId = result?.transactionId || result?.jobId || "";
+          jobId = result?.jobId || transactionId;
+        } catch (sdkErr: any) {
+          if (sdkErr?.message === "SDK_TIMEOUT") {
+            // SDK hung after signing — try to recover the jobId from Kiloscribe API
+            onProgress?.("Recovering inscription from Kiloscribe...");
+            console.warn("[Hashinals] SDK timed out, attempting to recover job from Kiloscribe API...");
+
+            // Poll Kiloscribe for recent inscriptions by this wallet
+            const walletAddress = signer.getAccountId?.()?.toString() || "";
+            const recovered = await recoverJobFromKiloscribe(walletAddress, fileName);
+
+            if (recovered) {
+              transactionId = recovered.tx_id || recovered._id || "";
+              jobId = recovered.tx_id || recovered._id || "";
+              console.log("[Hashinals] Recovered job:", jobId);
+            } else {
+              throw new Error(
+                "Inscription was signed but the SDK didn't return a job ID. " +
+                "Check your recent Hedera transactions — the inscription may still be processing on Kiloscribe."
+              );
+            }
+          } else {
+            throw sdkErr;
+          }
+        }
 
         if (!jobId) {
           throw new Error("Inscription failed — no job ID returned");
