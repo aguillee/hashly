@@ -12,7 +12,6 @@
 
 * [📅 Calendario de Eventos](features/events-calendar.md)
 * [🗳️ Sistema de Votación](features/voting-system.md)
-* [♾️ Forever Mints y DreamCast](features/forever-mints-dreamcast.md)
 * [🔍 Directorio del Ecosistema](features/ecosystem.md)
 * [📊 Rankings de Tokens y NFTs](features/token-nft-rankings.md)
 

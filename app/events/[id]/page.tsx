@@ -30,10 +30,6 @@ import {
   Check,
   CalendarPlus,
   Pencil,
-  Fish,
-  Sparkles,
-  Zap,
-  TrendingUp,
   Infinity,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
@@ -103,22 +99,6 @@ interface EventDetail {
   prevEvent?: AdjacentEvent | null;
   nextEvent?: AdjacentEvent | null;
   source?: string;
-  metadata?: {
-    dreamcast?: boolean;
-    badge?: string | null;
-    buybackEnabled?: boolean;
-    tiers?: Record<string, number>;
-    stats?: {
-      totalCatches: number;
-      totalVolume: string;
-      buybackVolume?: string;
-      keeperCatches?: number;
-      krakenCatches?: number;
-      totalBuybacks?: number;
-      smallFryCatches?: number;
-    };
-    previews?: { image: string | null; tier: string; name?: string }[];
-  } | null;
 }
 
 export default function EventDetailPage() {
@@ -351,7 +331,6 @@ export default function EventDetailPage() {
   }
 
   const score = Math.max(0, event.votesUp) - Math.max(0, event.votesDown);
-  const isDreamCast = event.metadata?.dreamcast === true;
   const isMeetup = event.event_type === "ECOSYSTEM_MEETUP";
   const isHackathon = event.event_type === "HACKATHON";
   const isStarsOnly = isMeetup || isHackathon; // Stars-only voting for meetups and hackathons
@@ -419,9 +398,9 @@ export default function EventDetailPage() {
                 {/* Date badge - top left */}
                 <div className="absolute top-3 left-3">
                   {event.isForeverMint ? (
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-bold rounded ${isDreamCast ? "bg-pink-500/90 text-white" : "bg-purple-500/90 text-white"}`}>
-                      {isDreamCast ? <Fish className="h-3 w-3" /> : <Infinity className="h-3 w-3" />}
-                      {isDreamCast ? "DreamCast" : "Always Live"}
+                    <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-bold rounded bg-purple-500/90 text-white">
+                      <Infinity className="h-3 w-3" />
+                      Always Live
                     </span>
                   ) : event.mintDate ? (
                     <span className="px-2 py-1 text-[10px] sm:text-xs bg-text-primary/90 text-bg-primary rounded">
@@ -462,9 +441,9 @@ export default function EventDetailPage() {
                 {!event.imageUrl && (
                   <div className="flex items-center gap-2">
                     {event.isForeverMint ? (
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-bold rounded ${isDreamCast ? "bg-pink-500/90 text-white" : "bg-purple-500/90 text-white"}`}>
-                        {isDreamCast ? <Fish className="h-3 w-3" /> : <Infinity className="h-3 w-3" />}
-                        {isDreamCast ? "DreamCast" : "Always Live"}
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-bold rounded bg-purple-500/90 text-white">
+                        <Infinity className="h-3 w-3" />
+                        Always Live
                       </span>
                     ) : event.mintDate ? (
                       <span className="px-2 py-1 text-[10px] sm:text-xs bg-bg-secondary text-text-primary rounded">
@@ -636,18 +615,14 @@ export default function EventDetailPage() {
           <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
               {event.isForeverMint ? (
-                /* Forever Mint / DreamCast: Always Live */
+                /* Forever Mint: Always Live */
                 <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className={`w-10 h-10 rounded flex items-center justify-center flex-shrink-0 ${isDreamCast ? "bg-pink-500/10" : "bg-purple-500/10"}`}>
-                    {isDreamCast ? (
-                      <Fish className="h-4 w-4 sm:h-5 sm:w-5 text-pink-400" />
-                    ) : (
-                      <Infinity className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
-                    )}
+                  <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0 bg-purple-500/10">
+                    <Infinity className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-text-secondary">Availability</p>
-                    <p className={`font-bold text-base sm:text-lg ${isDreamCast ? "text-pink-400" : "text-purple-400"}`}>
+                    <p className="font-bold text-base sm:text-lg text-purple-400">
                       Always Live
                     </p>
                   </div>
@@ -1023,11 +998,6 @@ export default function EventDetailPage() {
         </div>
       </div>
 
-      {/* DreamCast Pool Details - Full width */}
-      {isDreamCast && event.metadata && (
-        <DreamCastDetails metadata={event.metadata} />
-      )}
-
       {/* Host Request Modal */}
       {isMeetup && (
         <RequestHostModal
@@ -1042,148 +1012,3 @@ export default function EventDetailPage() {
   );
 }
 
-// ─── DreamCast Details Component ───
-
-const TIER_STYLES: Record<string, { color: string; bg: string; border: string; text: string }> = {
-  kraken: { color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30", text: "Kraken" },
-  hydra: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", text: "Hydra" },
-  siren: { color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/30", text: "Siren" },
-  keeper: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30", text: "Keeper" },
-  smallFry: { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "Small Fry" },
-};
-
-const DEFAULT_TIER = { color: "text-pink-400", bg: "bg-pink-500/10", border: "border-pink-500/30", text: "" };
-
-function getTierStyle(tier: string) {
-  return TIER_STYLES[tier] || { ...DEFAULT_TIER, text: tier.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase()).trim() };
-}
-
-function DreamCastDetails({ metadata }: { metadata: NonNullable<EventDetail["metadata"]> }) {
-  const tiers = metadata.tiers || {};
-  const stats = metadata.stats;
-  const previews = metadata.previews || [];
-  const totalSlots = Object.values(tiers).reduce((sum, count) => sum + count, 0);
-
-  const hasTiers = Object.keys(tiers).length > 0;
-  const hasStats = stats && stats.totalCatches > 0;
-  const hasPreviews = previews.length > 0;
-
-  return (
-    <div className="bg-bg-card border border-pink-500/20 rounded-lg overflow-hidden mt-4 sm:mt-6">
-      <div className="p-4 sm:p-5 border-b border-border flex items-center gap-2">
-        <div className="w-8 h-8 rounded bg-pink-500/10 flex items-center justify-center">
-          <Fish className="h-4 w-4 text-pink-400" />
-        </div>
-        <h3 className="font-bold">DreamCast Pool</h3>
-        {metadata.badge === "official" && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20 text-xs font-semibold">
-            <Sparkles className="h-3 w-3" />
-            Official
-          </span>
-        )}
-      </div>
-
-      {/* Horizontal layout on desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
-        {/* Tier Distribution */}
-        {hasTiers && (
-          <div className="p-4 sm:p-5">
-            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Pool Tiers</h4>
-            <div className="space-y-2.5">
-              {Object.entries(tiers)
-                .sort(([, a], [, b]) => a - b)
-                .map(([tier, count]) => {
-                  const style = getTierStyle(tier);
-                  const percentage = totalSlots > 0 ? (count / totalSlots) * 100 : 0;
-                  return (
-                    <div key={tier} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className={`font-medium ${style.color}`}>{style.text || tier}</span>
-                        <span className="text-text-secondary text-xs">
-                          {count} <span className="text-text-secondary/50">({percentage.toFixed(1)}%)</span>
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full bg-bg-secondary overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${style.bg} border ${style.border}`}
-                          style={{ width: `${Math.max(percentage, 3)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-            <p className="text-[10px] text-text-secondary mt-2.5">{totalSlots} total slots</p>
-          </div>
-        )}
-
-        {/* Stats */}
-        {hasStats && (
-          <div className="p-4 sm:p-5">
-            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Pool Stats</h4>
-            <div className="space-y-3">
-              <div className="p-3 rounded-lg bg-bg-secondary border border-border">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Zap className="h-3.5 w-3.5 text-pink-400" />
-                  <span className="text-xs text-text-secondary">Total Catches</span>
-                </div>
-                <p className="text-xl font-bold text-text-primary">{stats.totalCatches.toLocaleString()}</p>
-              </div>
-              {stats.totalVolume && parseInt(stats.totalVolume) > 0 && (
-                <div className="p-3 rounded-lg bg-bg-secondary border border-border">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <TrendingUp className="h-3.5 w-3.5 text-pink-400" />
-                    <span className="text-xs text-text-secondary">Total Volume</span>
-                  </div>
-                  <p className="text-xl font-bold text-text-primary">
-                    {(parseInt(stats.totalVolume) / 100_000_000).toLocaleString()} <span className="text-sm text-text-secondary">HBAR</span>
-                  </p>
-                </div>
-              )}
-              {metadata.buybackEnabled && stats.totalBuybacks !== undefined && stats.totalBuybacks > 0 && (
-                <div className="p-3 rounded-lg bg-bg-secondary border border-border">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="text-xs text-text-secondary">Buybacks</span>
-                  </div>
-                  <p className="text-xl font-bold text-text-primary">{stats.totalBuybacks}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* NFT Previews */}
-        {hasPreviews && (
-          <div className="p-4 sm:p-5">
-            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Pool Previews</h4>
-            <div className="grid grid-cols-3 gap-2">
-              {previews.map((preview, i) => {
-                const style = getTierStyle(preview.tier);
-                return (
-                  <div key={i} className={`rounded-lg overflow-hidden border ${style.border} bg-bg-secondary`}>
-                    {preview.image ? (
-                      <img
-                        src={preview.image}
-                        alt={preview.name || `${preview.tier} #${i + 1}`}
-                        className="w-full aspect-square object-cover"
-                      />
-                    ) : (
-                      <div className="w-full aspect-square flex items-center justify-center bg-bg-secondary">
-                        <Fish className={`h-6 w-6 ${style.color}`} />
-                      </div>
-                    )}
-                    <div className="p-1.5">
-                      <p className="text-[10px] font-medium text-text-primary truncate">{preview.name || preview.tier}</p>
-                      <span className={`text-[9px] ${style.color} font-medium`}>{style.text || preview.tier}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}

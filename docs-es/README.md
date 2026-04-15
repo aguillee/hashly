@@ -8,7 +8,7 @@
 
 | | Función | Descripción |
 |---|---|---|
-| 📅 | **Descubrir eventos** | Explora NFT mints, meetups, hackathons, DreamCast pools y forever mints en un calendario unificado. |
+| 📅 | **Descubrir eventos** | Explora NFT mints, meetups, hackathons y forever mints en un calendario unificado. |
 | 🗳️ | **Votar on-chain** | Cada voto queda registrado en Hedera Consensus Service (HCS). ¡Transparencia total! Holders de Dragon o El Santuario obtienen más poder de voto. |
 | 🔍 | **Explorar el ecosistema** | Encuentra y rankea proyectos, tokens y colecciones NFT de Hedera. |
 | ⭐ | **Ganar XP y competir** | Completa misiones diarias y semanales, sube en el leaderboard de temporada y gana premios. |

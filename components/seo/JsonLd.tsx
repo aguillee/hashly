@@ -7,7 +7,7 @@ const organizationSchema = {
   url: SITE_URL,
   logo: `${SITE_URL}/logohashly.png`,
   description:
-    "The Hedera ecosystem hub — discover NFT mints, meetups, hackathons, DreamCast pools, token rankings, and community projects powered by on-chain voting.",
+    "The Hedera ecosystem hub — discover NFT mints, meetups, hackathons, token rankings, and community projects powered by on-chain voting.",
   sameAs: ["https://x.com/hashly_h", "https://discord.gg/hashly"],
 };
 

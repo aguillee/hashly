@@ -17,7 +17,6 @@ Dirígete a la página **Calendar** para ver todos los eventos próximos:
 - 🎨 **NFT Mints** — Nuevas colecciones lanzándose en Hedera
 - 🤝 **Meetups** — Encuentros de la comunidad (online y presenciales)
 - 💻 **Hackathons** — Competencias de desarrollo con premios
-- 🎣 **DreamCast Pools** — Pools de mint temáticas de pesca de DreamBay
 - ♾️ **Forever Mints** — Mints siempre activos sin fecha de fin
 
 Usa los **filtros** para buscar por tipo de evento, rango de fechas o fuente. 🔍

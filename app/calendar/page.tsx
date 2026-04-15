@@ -43,7 +43,7 @@ interface Event {
   canVote?: boolean;
   voteLockedUntil?: string | null;
   isForeverMint?: boolean;
-  source?: "SENTX" | "KABILA" | "DREAMBAY";
+  source?: "SENTX" | "KABILA";
   event_type?: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
   host?: string | null;
   location?: string | null;
@@ -66,7 +66,6 @@ const typeFilters = [
   { value: "all", label: "All Types", icon: Sparkles },
   { value: "mints", label: "Mint Events", icon: Hexagon },
   { value: "forever", label: "Forever Mints", icon: Infinity },
-  { value: "dreamcast", label: "DreamCast", icon: Infinity },
   { value: "meetups", label: "Meetups", icon: Users },
   { value: "hackathons", label: "Hackathons", icon: Code2 },
 ];
@@ -75,7 +74,6 @@ const sourceFilters = [
   { value: "all", label: "All Sources" },
   { value: "SENTX", label: "SentX" },
   { value: "KABILA", label: "Kabila" },
-  { value: "DREAMBAY", label: "DreamBay" },
 ];
 
 export default function CalendarPage() {
@@ -94,7 +92,7 @@ export default function CalendarPage() {
   const [userVotes, setUserVotes] = React.useState<Record<string, "UP" | "DOWN">>({});
   const [loading, setLoading] = React.useState(true);
   const [viewMode, setViewMode] = React.useState<"grid" | "calendar">("grid");
-  const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA" | "DREAMBAY">("all");
+  const [sourceFilter, setSourceFilter] = React.useState<"all" | "SENTX" | "KABILA">("all");
   const [stateFilter, setStateFilter] = React.useState<"all" | "live" | "upcoming">("upcoming");
   const [foreverMintsOnly, setForeverMintsOnly] = React.useState(false);
 
@@ -130,10 +128,6 @@ export default function CalendarPage() {
       // Handle type filters
       if (status === "forever") {
         params.append("foreverMints", "only");
-        params.append("excludeSource", "DREAMBAY");
-      } else if (status === "dreamcast") {
-        params.append("foreverMints", "only");
-        params.append("source", "DREAMBAY");
       } else if (status === "mints") {
         params.append("eventType", "MINT_EVENT");
         params.append("foreverMints", "exclude");
@@ -142,10 +136,8 @@ export default function CalendarPage() {
       } else if (status === "hackathons") {
         params.append("eventType", "HACKATHON");
       } else {
-        // "all" types - exclude forever mints from default view, unless a specific source is selected
-        if (sourceFilter === "all") {
-          params.append("foreverMints", "exclude");
-        }
+        // "all" types - exclude forever mints from default view
+        params.append("foreverMints", "exclude");
       }
 
       // Handle state filters
@@ -156,8 +148,8 @@ export default function CalendarPage() {
       }
 
       if (searchQuery) params.append("search", searchQuery);
-      // Only apply source dropdown if the type filter hasn't already set a source/excludeSource
-      if (sourceFilter !== "all" && status !== "dreamcast" && status !== "forever") {
+      // Only apply source dropdown if the type filter hasn't already set a source
+      if (sourceFilter !== "all" && status !== "forever") {
         params.append("source", sourceFilter);
       }
       params.append("sortBy", sortBy);

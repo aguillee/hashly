@@ -35,17 +35,6 @@ Competencias de desarrollo con premios. Los listados de hackathons incluyen:
 
 > 💡 Al igual que los meetups, los hackathons solo permiten **upvotes**.
 
-### 🐟 DreamCast Pools
-
-Pools de mint NFT con temática de pesca de DreamBay. Cada pool tiene:
-
-- 🎯 **Tiers**: Kraken, Hydra, Siren, Keeper, Small Fry — cada uno con diferente rareza
-- 📊 **Stats**: Total de capturas, volumen total
-- 🖼️ **Previews**: NFTs de muestra del pool
-- 💸 **Buyback**: Si el pool soporta recompra
-
-> 🎀 Los eventos DreamCast están siempre activos (forever mints) y se muestran con **branding rosa** para distinguirlos de los eventos estándar.
-
 ### ♾️ Forever Mints
 
 Eventos **sin fecha de cierre** — están siempre activos. Los forever mints:
@@ -63,7 +52,7 @@ Eventos **sin fecha de cierre** — están siempre activos. Los forever mints:
 Eventos mostrados en una cuadrícula mensual. Cada día muestra tarjetas de eventos con:
 
 - 🏷️ **Título e imagen** del evento
-- 🔖 **Badge de tipo** (NFT, Meetup, Hackathon, DreamCast)
+- 🔖 **Badge de tipo** (NFT, Meetup, Hackathon)
 - 🗳️ **Conteo de votos**
 - 📡 **Indicador de fuente**
 
@@ -72,8 +61,8 @@ Eventos mostrados en una cuadrícula mensual. Cada día muestra tarjetas de even
 Eventos en una lista desplazable, ordenados por fecha. Soporta:
 
 - 🔍 **Búsqueda** — Encuentra eventos por título o descripción
-- 🏷️ **Filtro por tipo** — NFT, Meetup, Hackathon, DreamCast, Forever
-- 📡 **Filtro por fuente** — SentX, Kabila, DreamBay, o enviados por la comunidad
+- 🏷️ **Filtro por tipo** — NFT, Meetup, Hackathon, Forever
+- 📡 **Filtro por fuente** — SentX, Kabila, o enviados por la comunidad
 - 📆 **Rango de fechas** — Filtra por fechas específicas
 
 ---
@@ -87,7 +76,6 @@ Haz clic en cualquier evento para ver todos los detalles:
 - 🗳️ Botones de votación con conteo actual
 - 🔗 Enlaces sociales
 - ⬅️➡️ Navegación al evento anterior/siguiente
-- 🐟 Desglose de tiers DreamCast (para eventos DreamCast)
 
 ---
 
@@ -99,5 +87,4 @@ Hashly agrega eventos de múltiples fuentes:
 |---|---|
 | **SentX** | Marketplace NFT de Hedera |
 | **Kabila** | Launchpad de Hedera |
-| **DreamBay** | Fishing pools de DreamCast |
 | **Comunidad** | Eventos enviados por usuarios (requieren aprobación de admin) |

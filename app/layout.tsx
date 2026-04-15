@@ -43,11 +43,11 @@ export const metadata: Metadata = {
     template: "%s | Hashly",
   },
   description:
-    "The Hedera ecosystem hub. Discover upcoming NFT mints, meetups, hackathons, DreamCast pools, token rankings, and community projects — all powered by on-chain voting via HCS.",
+    "The Hedera ecosystem hub. Discover upcoming NFT mints, meetups, hackathons, token rankings, and community projects — all powered by on-chain voting via HCS.",
   keywords: [
     "hedera", "hedera hashgraph", "hbar", "nft mint", "nft calendar",
     "hedera nft", "hedera events", "hedera meetups", "hedera hackathons",
-    "dreamcast", "hedera ecosystem", "hedera projects", "hedera tokens",
+    "hedera ecosystem", "hedera projects", "hedera tokens",
     "hashly", "crypto events", "web3 calendar", "nft rarity",
     "hedera community", "on-chain voting", "hcs voting",
   ],
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     siteName: "Hashly",
     title: "Hashly — Discover NFT Mints, Events & Projects on Hedera",
     description:
-      "The Hedera ecosystem hub. Discover upcoming NFT mints, meetups, hackathons, DreamCast pools, token rankings, and community projects — all powered by on-chain voting.",
+      "The Hedera ecosystem hub. Discover upcoming NFT mints, meetups, hackathons, token rankings, and community projects — all powered by on-chain voting.",
     images: [
       {
         url: "/logohashly.png",
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     creator: "@hashly_h",
     title: "Hashly — Discover NFT Mints, Events & Projects on Hedera",
     description:
-      "The Hedera ecosystem hub. NFT mints, meetups, hackathons, DreamCast pools, token rankings & community projects — powered by on-chain voting.",
+      "The Hedera ecosystem hub. NFT mints, meetups, hackathons, token rankings & community projects — powered by on-chain voting.",
     images: ["/logohashly.png"],
   },
   alternates: {

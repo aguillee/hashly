@@ -35,17 +35,6 @@ Development competitions with prizes. Hackathon listings include:
 
 > 💡 Like meetups, hackathons only allow **upvotes**.
 
-### 🐟 DreamCast Pools
-
-Fishing-themed NFT mint pools from DreamBay. Each pool has:
-
-- 🎯 **Tiers**: Kraken, Hydra, Siren, Keeper, Small Fry — each with different rarity
-- 📊 **Stats**: Total catches, total volume
-- 🖼️ **Previews**: Sample NFTs from the pool
-- 💸 **Buyback**: Whether the pool supports buyback
-
-> 🎀 DreamCast events are always active (forever mints) and are displayed with **pink branding** to distinguish them from standard events.
-
 ### ♾️ Forever Mints
 
 Events **with no closing date** — they are always active. Forever mints:
@@ -63,7 +52,7 @@ Events **with no closing date** — they are always active. Forever mints:
 Events displayed in a monthly grid. Each day shows event cards with:
 
 - 🏷️ **Title and image** of the event
-- 🔖 **Type badge** (NFT, Meetup, Hackathon, DreamCast)
+- 🔖 **Type badge** (NFT, Meetup, Hackathon)
 - 🗳️ **Vote count**
 - 📡 **Source indicator**
 
@@ -72,8 +61,8 @@ Events displayed in a monthly grid. Each day shows event cards with:
 Events in a scrollable list, sorted by date. Supports:
 
 - 🔍 **Search** — Find events by title or description
-- 🏷️ **Filter by type** — NFT, Meetup, Hackathon, DreamCast, Forever
-- 📡 **Filter by source** — SentX, Kabila, DreamBay, or community-submitted
+- 🏷️ **Filter by type** — NFT, Meetup, Hackathon, Forever
+- 📡 **Filter by source** — SentX, Kabila, or community-submitted
 - 📆 **Date range** — Filter by specific dates
 
 ---
@@ -87,7 +76,6 @@ Click on any event to see all the details:
 - 🗳️ Voting buttons with current count
 - 🔗 Social links
 - ⬅️➡️ Navigation to previous/next event
-- 🐟 DreamCast tier breakdown (for DreamCast events)
 
 ---
 
@@ -99,5 +87,4 @@ Hashly aggregates events from multiple sources:
 |---|---|
 | **SentX** | Hedera NFT marketplace |
 | **Kabila** | Hedera launchpad |
-| **DreamBay** | DreamCast fishing pools |
 | **Community** | User-submitted events (require admin approval) |

@@ -1,6 +1,6 @@
 # ❓ ¿Qué es Hashly?
 
-**Hashly** es una plataforma de descubrimiento impulsada por la comunidad para el ecosistema **Hedera Hashgraph**. Reúne NFT mints, meetups, hackathons, DreamCast pools, tokens y proyectos en un solo hub donde los usuarios pueden **explorar, votar y rankear** todo lo que sucede en Hedera.
+**Hashly** es una plataforma de descubrimiento impulsada por la comunidad para el ecosistema **Hedera Hashgraph**. Reúne NFT mints, meetups, hackathons, tokens y proyectos en un solo hub donde los usuarios pueden **explorar, votar y rankear** todo lo que sucede en Hedera.
 
 ---
 

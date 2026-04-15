@@ -115,14 +115,13 @@ export default function AdminPage() {
   const [removingAdmin, setRemovingAdmin] = React.useState<string | null>(null);
   const [syncingLaunchpads, setSyncingLaunchpads] = React.useState(false);
   const [syncingKabila, setSyncingKabila] = React.useState(false);
-  const [syncingDreamBay, setSyncingDreamBay] = React.useState(false);
   const [syncingCollections, setSyncingCollections] = React.useState(false);
   const [addingCollection, setAddingCollection] = React.useState(false);
   const [newCollectionTokenId, setNewCollectionTokenId] = React.useState("");
   const [deleteCollectionId, setDeleteCollectionId] = React.useState("");
   const [deletingCollection, setDeletingCollection] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<{
-    type: "launchpads" | "kabila" | "dreambay" | "collections" | "delete-collection" | "add-collection" | "hide-collection" | "sync-tokens" | "hide-token" | "delete-token" | "add-token";
+    type: "launchpads" | "kabila" | "collections" | "delete-collection" | "add-collection" | "hide-collection" | "sync-tokens" | "hide-token" | "delete-token" | "add-token";
     message: string;
   } | null>(null);
   const [hideCollectionId, setHideCollectionId] = React.useState("");
@@ -816,39 +815,6 @@ export default function AdminPage() {
     }
   }
 
-  async function handleSyncDreamBay() {
-    setSyncingDreamBay(true);
-    setSyncResult(null);
-    try {
-      const response = await fetch("/api/admin/sync/dreambay", {
-        method: "POST",
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSyncResult({
-          type: "dreambay",
-          message: data.message || `DreamBay: Imported ${data.created} events`,
-        });
-        fetchPendingEvents();
-      } else {
-        setSyncResult({
-          type: "dreambay",
-          message: data.error || "DreamBay sync failed",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to sync DreamBay launchpads:", error);
-      setSyncResult({
-        type: "dreambay",
-        message: "Failed to sync DreamBay launchpads",
-      });
-    } finally {
-      setSyncingDreamBay(false);
-    }
-  }
-
   async function handleSyncCollections() {
     setSyncingCollections(true);
     setSyncResult(null);
@@ -1180,34 +1146,6 @@ export default function AdminPage() {
               </CardContent>
             </Card>
 
-            {/* DreamBay Launchpads */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-lg bg-purple-500/10">
-                      <Calendar className="h-6 w-6 text-purple-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Sync DreamBay</p>
-                      <p className="text-xs text-text-secondary">Import from DreamBay</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    onClick={handleSyncDreamBay}
-                    loading={syncingDreamBay}
-                    className="gap-2"
-                  >
-                    <RefreshCw className={syncingDreamBay ? "animate-spin" : ""} />
-                    Sync
-                  </Button>
-                </div>
-                {syncResult?.type === "dreambay" && (
-                  <p className="mt-3 text-sm text-text-secondary">{syncResult.message}</p>
-                )}
-              </CardContent>
-            </Card>
           </div>
 
           {/* Pending Events */}

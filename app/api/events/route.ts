@@ -108,12 +108,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Source filter
-    if (source && (source === "SENTX" || source === "KABILA" || source === "DREAMBAY")) {
+    if (source && (source === "SENTX" || source === "KABILA")) {
       where.source = source;
     }
 
     // Exclude source filter (only if source wasn't already set)
-    if (!source && excludeSource && (excludeSource === "SENTX" || excludeSource === "KABILA" || excludeSource === "DREAMBAY")) {
+    if (!source && excludeSource && (excludeSource === "SENTX" || excludeSource === "KABILA")) {
       where.source = { not: excludeSource };
     }
 

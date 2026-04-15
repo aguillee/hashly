@@ -65,17 +65,11 @@ interface CalendarViewProps {
 const EVENT_COLORS = {
   mint: { dot: "bg-teal-500", bar: "bg-teal-500/15 border-l-teal-500", badge: "bg-teal-500/15 text-teal-400", text: "text-teal-400" },
   forever: { dot: "bg-purple-500", bar: "bg-purple-500/15 border-l-purple-500", badge: "bg-purple-500/15 text-purple-400", text: "text-purple-400" },
-  dreamcast: { dot: "bg-pink-500", bar: "bg-pink-500/15 border-l-pink-500", badge: "bg-pink-500/15 text-pink-400", text: "text-pink-400" },
   meetup: { dot: "bg-sky-500", bar: "bg-sky-500/15 border-l-sky-500", badge: "bg-sky-500/15 text-sky-400", text: "text-sky-400" },
   hackathon: { dot: "bg-amber-500", bar: "bg-amber-500/15 border-l-amber-500", badge: "bg-amber-500/15 text-amber-400", text: "text-amber-400" },
 } as const;
 
-function isDreamCast(event: Event) {
-  return event.isForeverMint && event.source === "DREAMBAY";
-}
-
 function getEventStyle(event: Event) {
-  if (isDreamCast(event)) return EVENT_COLORS.dreamcast;
   if (event.isForeverMint) return EVENT_COLORS.forever;
   if (event.event_type === "ECOSYSTEM_MEETUP") return EVENT_COLORS.meetup;
   if (event.event_type === "HACKATHON") return EVENT_COLORS.hackathon;
@@ -85,7 +79,6 @@ function getEventStyle(event: Event) {
 function getEventTypeLabel(event: Event) {
   if (event.event_type === "ECOSYSTEM_MEETUP") return "Meetup";
   if (event.event_type === "HACKATHON") return "Hackathon";
-  if (isDreamCast(event)) return "DreamCast";
   if (event.isForeverMint) return "Forever Mint";
   return "Mint";
 }
@@ -190,10 +183,10 @@ export function CalendarView({ events }: CalendarViewProps) {
 
         {/* Legend */}
         <div className="flex items-center gap-4 px-4 sm:px-5 pb-3 text-[10px] sm:text-xs text-text-tertiary">
-          {(["mint", "forever", "dreamcast", "meetup", "hackathon"] as const).map((type) => (
+          {(["mint", "forever", "meetup", "hackathon"] as const).map((type) => (
             <span key={type} className="flex items-center gap-1.5">
               <span className={cn("w-2 h-2 rounded-full", EVENT_COLORS[type].dot)} />
-              {type === "mint" ? "Mint" : type === "forever" ? "Forever" : type === "dreamcast" ? "DreamCast" : type === "meetup" ? "Meetup" : "Hackathon"}
+              {type === "mint" ? "Mint" : type === "forever" ? "Forever" : type === "meetup" ? "Meetup" : "Hackathon"}
             </span>
           ))}
         </div>
