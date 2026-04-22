@@ -108,33 +108,33 @@ export function Sidebar() {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      {/* Logo */}
+      {/* Logo — more breathing room (Arc style) */}
       <Link
         href="/"
-        className="flex items-center gap-3 px-4 h-14 flex-shrink-0"
+        className="flex items-center gap-3 px-3 h-16 flex-shrink-0 group"
       >
         <Image
           src="/logo-navbar.png"
           alt="Hashly"
           width={40}
           height={40}
-          className="w-10 h-10 flex-shrink-0"
+          className="w-9 h-9 flex-shrink-0 transition-transform duration-300 group-hover:scale-105"
           priority
         />
         {show && (
           <div className="flex flex-col overflow-hidden">
-            <span className="font-semibold text-sm leading-none text-text-primary whitespace-nowrap">
+            <span className="font-semibold text-[15px] leading-tight text-text-primary whitespace-nowrap tracking-tight">
               Hashly
             </span>
-            <span className="text-[9px] text-text-tertiary font-medium tracking-widest uppercase whitespace-nowrap">
+            <span className="text-[10px] text-text-tertiary font-medium tracking-[0.14em] uppercase whitespace-nowrap mt-0.5">
               Discover Hedera
             </span>
           </div>
         )}
       </Link>
 
-      {/* Nav Links */}
-      <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto scrollbar-hide">
+      {/* Nav Links — Arc style: softer active state, inner tint, spring hover */}
+      <nav className="flex-1 px-2 py-1 space-y-0.5 overflow-y-auto scrollbar-hide">
         {navLinks.map((link) => {
           const Icon = link.icon;
           const active = isActive(link.href);
@@ -143,24 +143,25 @@ export function Sidebar() {
               key={link.href}
               href={link.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group relative",
+                "flex items-center gap-3 px-2.5 py-2 rounded-[10px] text-[13px] font-medium group relative",
+                "transition-[color,background-color,box-shadow] duration-150 ease-out",
                 active
-                  ? "bg-brand-subtle text-text-primary"
-                  : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                  ? "bg-brand/[0.08] text-text-primary shadow-[inset_0_1px_0_rgba(58,204,184,0.1)]"
+                  : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70"
               )}
             >
               {active && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand rounded-r-full" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand rounded-r-full shadow-[0_0_8px_rgba(58,204,184,0.4)]" />
               )}
               <Icon
                 className={cn(
-                  "h-[18px] w-[18px] flex-shrink-0",
-                  active ? "text-brand" : ""
+                  "h-[18px] w-[18px] flex-shrink-0 transition-colors",
+                  active ? "text-brand" : "group-hover:text-text-primary"
                 )}
                 weight={active ? "fill" : "regular"}
               />
               {show && (
-                <span className="truncate">{link.label}</span>
+                <span className="truncate tracking-tight">{link.label}</span>
               )}
             </Link>
           );
@@ -169,28 +170,29 @@ export function Sidebar() {
         {/* Admin link */}
         {user?.isAdmin && (
           <>
-            <div className="my-2 mx-3 h-px bg-border" />
+            <div className="my-2 mx-3 h-px bg-[var(--border-subtle)]" />
             <Link
               href="/admin"
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 relative",
+                "flex items-center gap-3 px-2.5 py-2 rounded-[10px] text-[13px] font-medium relative",
+                "transition-[color,background-color,box-shadow] duration-150 ease-out",
                 pathname.startsWith("/admin")
-                  ? "bg-brand-subtle text-text-primary"
-                  : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                  ? "bg-brand/[0.08] text-text-primary shadow-[inset_0_1px_0_rgba(58,204,184,0.1)]"
+                  : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70"
               )}
             >
               {pathname.startsWith("/admin") && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand rounded-r-full" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand rounded-r-full shadow-[0_0_8px_rgba(58,204,184,0.4)]" />
               )}
               <Shield className="h-[18px] w-[18px] flex-shrink-0" />
-              {show && <span>Admin</span>}
+              {show && <span className="tracking-tight">Admin</span>}
             </Link>
           </>
         )}
       </nav>
 
       {/* ─── Bottom section ─── */}
-      <div className="border-t border-border">
+      <div className="border-t border-[var(--border-subtle)]">
         {/* User stats — only when connected */}
         {user && (
           <div className={cn("px-2 pt-3 pb-2", show ? "space-y-1.5" : "space-y-1.5")}>
@@ -301,11 +303,13 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar — Arc-style: merges with content background, hairline right border */}
       <aside
         className={cn(
-          "hidden md:flex flex-col flex-shrink-0 h-screen sticky top-0 bg-bg-card border-r border-border z-40 transition-[width] duration-200 ease-out overflow-hidden",
-          isExpanded ? "w-60" : "w-14"
+          "hidden md:flex flex-col flex-shrink-0 h-screen sticky top-0 z-40 overflow-hidden",
+          "bg-[var(--bg-primary)] border-r border-[var(--border-subtle)]",
+          "transition-[width] duration-[250ms] ease-[cubic-bezier(0.25,1,0.5,1)]",
+          isExpanded ? "w-[232px]" : "w-14"
         )}
       >
         {sidebarContent}
@@ -315,17 +319,18 @@ export function Sidebar() {
       {isMobileOpen && (
         <>
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+            className="fixed inset-0 bg-[#05070A]/65 backdrop-blur-[6px] z-40 md:hidden animate-fade-in"
             onClick={closeMobile}
           />
           <aside
-            className="fixed inset-y-0 left-0 w-72 bg-bg-card border-r border-border z-50 md:hidden"
-            style={{ animation: "slideInLeft 0.2s ease-out" }}
+            className="fixed inset-y-0 left-0 w-72 bg-bg-card border-r border-[var(--border-subtle)] z-50 md:hidden shadow-[8px_0_32px_rgba(0,0,0,0.4)]"
+            style={{ animation: "slideInLeft 0.25s cubic-bezier(0.25, 1, 0.5, 1)" }}
           >
             {/* Close button */}
             <button
               onClick={closeMobile}
-              className="absolute top-3 right-3 p-1.5 rounded-md text-text-tertiary hover:text-text-primary hover:bg-bg-secondary transition-colors z-10"
+              aria-label="Close menu"
+              className="absolute top-3 right-3 p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-bg-secondary transition-colors z-10 active:scale-95"
             >
               <X className="h-4 w-4" />
             </button>

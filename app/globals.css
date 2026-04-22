@@ -301,34 +301,34 @@ a:focus-visible,
    ANIMATIONS
    ═══════════════════════════════════════════════════════════ */
 
-/* Fade in */
+/* Fade in — soft ease-out */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn var(--duration-slow) var(--ease-out-quart);
 }
 
-/* Scale in (Dialog) */
+/* Scale in (Dialog desktop) — spring settle for weight */
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.25s ease-out;
+  animation: scaleIn var(--duration-base) var(--ease-spring);
 }
 
-/* Slide up for mobile modals */
+/* Slide up for mobile modals — spring finish */
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(100%); }
+  from { opacity: 0; transform: translateY(8%); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-slide-up {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp var(--duration-slow) var(--ease-spring);
 }
 
 /* Float animation */
