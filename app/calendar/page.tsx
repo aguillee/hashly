@@ -15,7 +15,6 @@ import {
   Infinity,
   Users,
   Code2,
-  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -242,24 +241,25 @@ export default function CalendarPage() {
         <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 reveal-delay-1">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-text-tertiary font-medium mb-2">
                 Hedera Events
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+              <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1]">
                 Event Calendar
               </h1>
             </div>
-            <div className="flex items-center gap-3 reveal-delay-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+            <div className="flex items-center gap-2.5 reveal-delay-2">
+              <div className="flex items-center gap-2 px-3 h-9 rounded-[10px] border border-[var(--card-border)] bg-bg-card text-sm">
                 <Calendar className="h-3.5 w-3.5 text-brand" />
-                <span className="font-bold text-text-primary font-mono tabular-nums">{events.length}</span>
-                <span className="text-text-tertiary text-xs">events</span>
+                <span className="font-semibold text-text-primary tabular-nums">{events.length}</span>
+                <span className="text-text-tertiary text-[11px] font-medium uppercase tracking-wider">events</span>
               </div>
               {isConnected && (
                 <Link href="/events/new">
-                  <Button className="gap-2 text-sm">
+                  <Button className="gap-1.5">
                     <Plus className="h-4 w-4" />
-                    Submit Event
+                    <span className="hidden sm:inline">Submit Event</span>
+                    <span className="sm:hidden">Submit</span>
                   </Button>
                 </Link>
               )}
@@ -267,41 +267,42 @@ export default function CalendarPage() {
           </div>
 
           {/* Search + View Toggle */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 reveal-delay-3">
+          <div className="flex flex-col sm:flex-row gap-3 reveal-delay-3">
             <div className="flex-1">
               <Input
-                placeholder="Search events..."
+                placeholder="Search events…"
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
                 icon={<Search className="h-4 w-4" />}
-                className="rounded-lg"
               />
             </div>
 
-            {/* View Mode Toggle */}
-            <div className="flex rounded-lg border border-border overflow-hidden w-full sm:w-auto">
+            {/* Segmented view toggle — Arc style */}
+            <div className="inline-flex h-10 p-1 rounded-[10px] border border-[var(--card-border)] bg-bg-card w-full sm:w-auto">
               <button
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors duration-150",
+                  "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 rounded-[7px] text-sm font-medium",
+                  "transition-[background-color,color,box-shadow] duration-200 ease-out",
                   viewMode === "grid"
-                    ? "bg-brand/10 text-brand border-r border-border"
-                    : "bg-bg-card text-text-secondary hover:text-text-primary border-r border-border"
+                    ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                    : "text-text-secondary hover:text-text-primary"
                 )}
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="h-[15px] w-[15px]" />
                 Grid
               </button>
               <button
                 onClick={() => setViewMode("calendar")}
                 className={cn(
-                  "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors duration-150",
+                  "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 rounded-[7px] text-sm font-medium",
+                  "transition-[background-color,color,box-shadow] duration-200 ease-out",
                   viewMode === "calendar"
-                    ? "bg-brand/10 text-brand"
-                    : "bg-bg-card text-text-secondary hover:text-text-primary"
+                    ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                    : "text-text-secondary hover:text-text-primary"
                 )}
               >
-                <CalendarDays className="h-4 w-4" />
+                <CalendarDays className="h-[15px] w-[15px]" />
                 Calendar
               </button>
             </div>
@@ -310,24 +311,26 @@ export default function CalendarPage() {
       </div>
 
       <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 pb-8">
-        {/* Filters */}
-        <div ref={filtersRef} className="reveal mb-4 sm:mb-6">
-          <div className="p-2.5 sm:p-3 bg-bg-card border border-border rounded-xl overflow-x-auto scrollbar-hide reveal-delay-1">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-max pr-4">
+        {/* Filters — segmented pill control, Arc-style */}
+        <div ref={filtersRef} className="reveal mb-5 sm:mb-7">
+          <div className="p-2 sm:p-2 bg-bg-card/60 backdrop-blur-sm border border-[var(--card-border)] rounded-[12px] overflow-x-auto scrollbar-hide reveal-delay-1">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-max pr-3">
               {/* State */}
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">State</span>
+              <div className="flex items-center gap-0.5 pl-1">
+                <span className="text-[10px] text-text-tertiary uppercase tracking-[0.14em] font-medium mr-1.5">State</span>
                 {stateFilters.map((filter) => {
                   const Icon = filter.icon;
+                  const active = stateFilter === filter.value;
                   return (
                     <button
                       key={filter.value}
                       onClick={() => setStateFilter(filter.value as "all" | "live" | "upcoming")}
                       className={cn(
-                        "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
-                        stateFilter === filter.value
-                          ? "bg-brand/10 text-brand"
-                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                        "flex items-center gap-1.5 px-2.5 h-7 rounded-[7px] text-[11px] font-medium whitespace-nowrap",
+                        "transition-[background-color,color,box-shadow] duration-200 ease-out active:scale-[0.97]",
+                        active
+                          ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70"
                       )}
                     >
                       <Icon className="h-3 w-3" />
@@ -337,22 +340,24 @@ export default function CalendarPage() {
                 })}
               </div>
 
-              <div className="w-px h-5 bg-border" />
+              <div className="w-px h-5 bg-[var(--border-subtle)]" />
 
               {/* Type */}
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">Type</span>
+              <div className="flex items-center gap-0.5">
+                <span className="text-[10px] text-text-tertiary uppercase tracking-[0.14em] font-medium mr-1.5">Type</span>
                 {typeFilters.map((filter) => {
                   const Icon = filter.icon;
+                  const active = status === filter.value;
                   return (
                     <button
                       key={filter.value}
                       onClick={() => setStatus(filter.value as "all" | "mints" | "forever" | "meetups" | "hackathons")}
                       className={cn(
-                        "flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
-                        status === filter.value
-                          ? "bg-brand/10 text-brand"
-                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                        "flex items-center gap-1.5 px-2.5 h-7 rounded-[7px] text-[11px] font-medium whitespace-nowrap",
+                        "transition-[background-color,color,box-shadow] duration-200 ease-out active:scale-[0.97]",
+                        active
+                          ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70"
                       )}
                     >
                       <Icon className="h-3 w-3" />
@@ -362,50 +367,58 @@ export default function CalendarPage() {
                 })}
               </div>
 
-              <div className="w-px h-5 bg-border" />
+              <div className="w-px h-5 bg-[var(--border-subtle)]" />
 
               {/* Source */}
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">Source</span>
-                {sourceFilters.map((filter) => (
-                  <button
-                    key={filter.value}
-                    onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
-                    className={cn(
-                      "px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
-                      sourceFilter === filter.value
-                        ? "bg-brand/10 text-brand"
-                        : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
-                    )}
-                  >
-                    {filter.label === "All Sources" ? "All" : filter.label}
-                  </button>
-                ))}
+              <div className="flex items-center gap-0.5">
+                <span className="text-[10px] text-text-tertiary uppercase tracking-[0.14em] font-medium mr-1.5">Source</span>
+                {sourceFilters.map((filter) => {
+                  const active = sourceFilter === filter.value;
+                  return (
+                    <button
+                      key={filter.value}
+                      onClick={() => setSourceFilter(filter.value as "all" | "SENTX" | "KABILA")}
+                      className={cn(
+                        "px-2.5 h-7 rounded-[7px] text-[11px] font-medium whitespace-nowrap",
+                        "transition-[background-color,color,box-shadow] duration-200 ease-out active:scale-[0.97]",
+                        active
+                          ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70"
+                      )}
+                    >
+                      {filter.label === "All Sources" ? "All" : filter.label}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="w-px h-5 bg-border" />
+              <div className="w-px h-5 bg-[var(--border-subtle)]" />
 
               {/* Sort */}
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] sm:text-xs text-text-tertiary uppercase tracking-wider font-mono mr-0.5">Sort</span>
+              <div className="flex items-center gap-0.5 pr-1">
+                <span className="text-[10px] text-text-tertiary uppercase tracking-[0.14em] font-medium mr-1.5">Sort</span>
                 {[
                   { value: "date", label: "Date" },
                   { value: "votes", label: "Votes" },
                   { value: "newest", label: "New" },
-                ].map((sort) => (
-                  <button
-                    key={sort.value}
-                    onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
-                    className={cn(
-                      "px-2 py-1 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all duration-150 whitespace-nowrap",
-                      sortBy === sort.value
-                        ? "bg-brand/10 text-brand"
-                        : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
-                    )}
-                  >
-                    {sort.label}
-                  </button>
-                ))}
+                ].map((sort) => {
+                  const active = sortBy === sort.value;
+                  return (
+                    <button
+                      key={sort.value}
+                      onClick={() => setSortBy(sort.value as "date" | "votes" | "newest")}
+                      className={cn(
+                        "px-2.5 h-7 rounded-[7px] text-[11px] font-medium whitespace-nowrap",
+                        "transition-[background-color,color,box-shadow] duration-200 ease-out active:scale-[0.97]",
+                        active
+                          ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70"
+                      )}
+                    >
+                      {sort.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -414,13 +427,27 @@ export default function CalendarPage() {
         {/* Events Listing */}
         <div ref={contentRef} className="reveal">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 reveal-delay-1">
-              <Loader2 className="h-8 w-8 animate-spin text-brand mb-4" />
-              <p className="text-text-secondary text-sm">Loading events...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 reveal-delay-1">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-[12px] border border-[var(--card-border)] bg-bg-card overflow-hidden"
+                >
+                  <div className="aspect-[16/10] bg-bg-secondary/60 animate-pulse" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 w-3/4 bg-bg-secondary/60 animate-pulse rounded-md" />
+                    <div className="h-3 w-1/2 bg-bg-secondary/40 animate-pulse rounded-md" />
+                    <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-subtle)]">
+                      <div className="h-6 w-14 bg-bg-secondary/50 animate-pulse rounded-md" />
+                      <div className="h-6 w-10 bg-bg-secondary/40 animate-pulse rounded-md" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : events.length === 0 ? (
             <div className="text-center py-20 reveal-delay-1">
-              <div className="w-16 h-16 rounded-xl bg-bg-secondary border border-border flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-[12px] bg-bg-secondary border border-[var(--card-border)] flex items-center justify-center mx-auto mb-4">
                 <Calendar className="h-8 w-8 text-text-tertiary" />
               </div>
               <h3 className="text-lg font-bold text-text-primary mb-2">

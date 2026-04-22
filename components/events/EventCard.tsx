@@ -79,9 +79,11 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
     <Link
       href={`/events/${event.id}`}
       className={cn(
-        "group block rounded-lg overflow-hidden bg-bg-card border hover:-translate-y-0.5 hover:shadow-card-hover transition-all duration-150",
+        "group block rounded-[12px] overflow-hidden bg-bg-card border",
+        "transition-[border-color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.25,1,0.5,1)]",
+        "hover:-translate-y-0.5 hover:shadow-[var(--card-hover-shadow)]",
         event.hasBadge
-          ? "border-amber-500/40 hover:border-amber-500/60 shadow-[0_0_8px_rgba(245,158,11,0.1)]"
+          ? "border-amber-500/40 hover:border-amber-500/60 shadow-[0_0_12px_rgba(245,158,11,0.08)]"
           : "border-[var(--card-border)] hover:border-[var(--card-border-hover)]"
       )}
     >
@@ -105,7 +107,7 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         {/* Badge indicator - top left */}
         {event.hasBadge && (
           <div className="absolute top-2.5 left-2.5">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 rounded-full text-[10px] font-bold text-white tracking-wide shadow-lg">
+            <span className="inline-flex items-center gap-1 px-2 h-[22px] bg-amber-500/95 rounded-[6px] text-[10px] font-semibold text-[#2a1a00] tracking-[0.02em] shadow-[0_2px_8px_rgba(245,158,11,0.3)]">
               <Award className="h-3 w-3" />
               NFT BADGE
             </span>
@@ -115,17 +117,17 @@ export function EventCard({ event, userVote, onVote }: EventCardProps) {
         {/* Status pill - top right */}
         <div className="absolute top-2.5 right-2.5">
           {event.isForeverMint ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white tracking-wide bg-purple-500/90">
+            <span className="inline-flex items-center gap-1.5 px-2 h-[22px] rounded-[6px] text-[10px] font-semibold text-white tracking-[0.02em] bg-accent-coral/95 shadow-[0_2px_8px_rgba(185,133,250,0.3)]">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               ALWAYS LIVE
             </span>
           ) : isLive ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/90 rounded-full text-[10px] font-bold text-white tracking-wide">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2 h-[22px] bg-success/95 rounded-[6px] text-[10px] font-semibold text-[#05241a] tracking-[0.02em] shadow-[0_2px_8px_rgba(52,211,153,0.3)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#05241a] animate-pulse" />
               LIVE
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-700 dark:bg-zinc-300 rounded-full text-[10px] font-bold text-white dark:text-zinc-900 tracking-wide">
+            <span className="inline-flex items-center gap-1 px-2 h-[22px] bg-black/40 backdrop-blur-sm border border-white/15 rounded-[6px] text-[10px] font-semibold text-white tracking-[0.02em]">
               UPCOMING
             </span>
           )}
