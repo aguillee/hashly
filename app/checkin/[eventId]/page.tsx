@@ -42,27 +42,38 @@ export default function CheckinHostPage() {
 
   if (!isConnected) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-text-secondary text-lg">
-          Please connect your wallet to access the check-in panel.
-        </p>
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-[14px] bg-bg-secondary border border-[var(--card-border)] flex items-center justify-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-text-tertiary" />
+          </div>
+          <p className="text-text-primary text-base font-medium mb-1">Wallet not connected</p>
+          <p className="text-text-secondary text-sm">
+            Please connect your wallet to access the check-in panel.
+          </p>
+        </div>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
+        <div className="h-10 w-64 mx-auto rounded-[8px] bg-bg-card border border-[var(--card-border)] animate-pulse mb-3" />
+        <div className="h-5 w-48 mx-auto rounded-[6px] bg-bg-card/60 animate-pulse mb-10" />
+        <div className="w-72 h-72 mx-auto rounded-[16px] bg-bg-card border border-[var(--card-border)] animate-pulse" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <p className="text-red-400 text-lg mb-2">{error}</p>
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-[14px] bg-error/10 border border-error/20 flex items-center justify-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-error" />
+          </div>
+          <p className="text-error text-base font-medium mb-1">{error}</p>
           <p className="text-text-tertiary text-sm">
             Only the event creator or admins can access this page.
           </p>
@@ -74,12 +85,15 @@ export default function CheckinHostPage() {
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-          Event Check-in
+      <div className="text-center mb-8 sm:mb-10">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-text-tertiary font-medium mb-2">
+          Attendance check-in
+        </p>
+        <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1] mb-2">
+          Scan to join
         </h1>
         {eventTitle && (
-          <p className="text-text-secondary text-lg">{eventTitle}</p>
+          <p className="text-text-secondary text-base">{eventTitle}</p>
         )}
       </div>
 
@@ -89,7 +103,7 @@ export default function CheckinHostPage() {
       </div>
 
       {/* Attendee list */}
-      <div className="rounded-lg border border-border bg-bg-card p-6">
+      <div className="rounded-[14px] border border-[var(--card-border)] bg-bg-card p-5 sm:p-6">
         <AttendeeList eventId={eventId} />
       </div>
     </div>
