@@ -10,8 +10,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+        // Sora as both sans and mono — numbers use tabular figures via
+        // font-variant-numeric for alignment (set globally in globals.css).
+        sans: ["var(--font-sora)", "system-ui", "sans-serif"],
+        mono: ["var(--font-sora)", "system-ui", "sans-serif"],
       },
       colors: {
         background: "var(--bg-primary)",

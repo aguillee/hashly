@@ -24,13 +24,23 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 pr-8 shadow-md transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  [
+    "group pointer-events-auto relative flex w-full items-center justify-between gap-3 overflow-hidden",
+    "rounded-[12px] border px-4 py-3 pr-8",
+    "shadow-[0_12px_32px_rgba(0,0,0,0.45),0_2px_8px_rgba(0,0,0,0.25)]",
+    "backdrop-blur-md",
+    "transition-all",
+    "data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
+    "data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out",
+    "data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full",
+    "data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "border-border bg-bg-card text-text-primary",
-        success: "border-success/50 bg-success/10 text-success",
-        error: "border-error/50 bg-error/10 text-error",
+        default: "border-[var(--card-border)] bg-[rgba(var(--bg-card-rgb),0.92)] text-text-primary",
+        success: "border-success/30 bg-[rgba(var(--bg-card-rgb),0.92)] text-success",
+        error: "border-error/30 bg-[rgba(var(--bg-card-rgb),0.92)] text-error",
       },
     },
     defaultVariants: {

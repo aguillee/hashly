@@ -36,17 +36,23 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-      {/* Backdrop */}
+    <div
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* Backdrop — softer, warmer dark, blur + faint brand tint */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-md animate-fade-in"
+        className="absolute inset-0 bg-[#05070A]/70 backdrop-blur-[6px] animate-fade-in"
         onClick={onClose}
       />
-      {/* Content */}
+      {/* Content — larger radius on desktop, spring slide-up on mobile */}
       <div
         className={cn(
-          "relative z-10 bg-bg-card border border-white/10 shadow-[0_0_40px_rgba(59,130,246,0.06)] w-full max-h-[85vh] overflow-y-auto",
-          "rounded-t-lg sm:rounded-lg sm:max-w-sm sm:mx-4",
+          "relative z-10 w-full max-h-[85vh] overflow-y-auto",
+          "bg-bg-card border border-[var(--card-border)]",
+          "shadow-[0_24px_60px_rgba(0,0,0,0.55),0_0_0_1px_rgba(58,204,184,0.06)]",
+          "rounded-t-2xl sm:rounded-[16px] sm:max-w-md sm:mx-4",
           "animate-slide-up sm:animate-scale-in",
           className
         )}
@@ -64,14 +70,15 @@ interface DialogHeaderProps {
 
 export function DialogHeader({ children, onClose }: DialogHeaderProps) {
   return (
-    <div className="flex items-center justify-between p-4 border-b border-border">
-      <h2 className="text-lg font-semibold text-text-primary">{children}</h2>
+    <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)]">
+      <h2 className="text-[15px] font-semibold text-text-primary tracking-tight">{children}</h2>
       {onClose && (
         <button
           onClick={onClose}
-          className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors"
+          aria-label="Close dialog"
+          className="p-1.5 -mr-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors duration-150 active:scale-95"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4" />
         </button>
       )}
     </div>
@@ -84,7 +91,7 @@ interface DialogBodyProps {
 }
 
 export function DialogBody({ children, className }: DialogBodyProps) {
-  return <div className={cn("p-4", className)}>{children}</div>;
+  return <div className={cn("px-5 py-4", className)}>{children}</div>;
 }
 
 interface DialogFooterProps {
@@ -94,7 +101,7 @@ interface DialogFooterProps {
 
 export function DialogFooter({ children, className }: DialogFooterProps) {
   return (
-    <div className={cn("flex justify-end gap-2 p-4 border-t border-border", className)}>
+    <div className={cn("flex justify-end gap-2 px-5 py-4 border-t border-[var(--border-subtle)]", className)}>
       {children}
     </div>
   );

@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { Sora } from "next/font/google";
+
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-sora",
+  display: "swap",
+});
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -97,7 +103,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} dark`}>
+    <html lang="en" className={`${sora.variable} dark`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>

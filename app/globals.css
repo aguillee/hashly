@@ -137,11 +137,10 @@
 
 html {
   scroll-behavior: smooth;
-  /* Arc-style optical rendering — sharper hinting, no weird sub-pixel smear */
+  /* Arc-style optical rendering — sharper hinting, no sub-pixel smear */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "cv11", "ss01", "ss03";
 }
 
 html,

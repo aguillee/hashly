@@ -1,6 +1,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+// Arc-flavored card:
+// - ONE strategy: subtle border only (no shadow at rest). Shadow only appears on hover.
+// - 12px radius (was 8). Feels less "form input".
+// - Hover picks up a teal-tinted border glow + lift, mirroring Arc's card affordance.
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { hover?: boolean; glow?: boolean }
@@ -8,8 +12,11 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border border-[var(--card-border)] bg-bg-card text-text-primary transition-all duration-150",
-      hover && "cursor-pointer hover:border-[var(--card-border-hover)] hover:-translate-y-0.5 hover:shadow-card-hover",
+      "rounded-[12px] border border-[var(--card-border)] bg-bg-card text-text-primary",
+      "transition-[border-color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.25,1,0.5,1)]",
+      hover &&
+        "cursor-pointer hover:-translate-y-0.5 hover:border-[var(--card-border-hover)] hover:shadow-[var(--card-hover-shadow)]",
+      glow && "shadow-[var(--glow-brand)]",
       className
     )}
     {...props}
