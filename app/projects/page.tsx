@@ -375,10 +375,10 @@ export default function ProjectsPage() {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 reveal-delay-1">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+              <p className="text-[10px] uppercase tracking-[0.16em] font-medium text-text-tertiary mb-2">
                 Community Ranked
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+              <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1]">
                 Tokens
               </h1>
               <p className="text-sm text-text-secondary mt-1">

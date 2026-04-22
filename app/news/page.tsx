@@ -192,10 +192,10 @@ export default function NewsPage() {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
             <div className="reveal-delay-1">
-              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+              <p className="text-[10px] uppercase tracking-[0.16em] font-medium text-text-tertiary mb-2">
                 Hedera Ecosystem
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+              <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1]">
                 News
               </h1>
               <p className="text-sm text-text-secondary mt-1">
@@ -270,7 +270,7 @@ export default function NewsPage() {
           </div>
         ) : news.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-bg-card border border-border flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-[12px] bg-bg-card border border-[var(--card-border)] flex items-center justify-center">
               <Newspaper className="h-8 w-8 text-text-tertiary" />
             </div>
             <p className="text-text-secondary">No news available at the moment</p>
@@ -501,7 +501,7 @@ function NewsRow({
       onClick={() => onClick(item.id)}
       className={cn(
         `reveal-delay-${delay}`,
-        "group flex gap-4 p-3 rounded-xl border border-border bg-bg-card hover:border-brand/20 transition-all duration-200"
+        "group flex gap-4 p-3 rounded-xl border border-border bg-bg-card hover:border-brand/40 transition-colors duration-200 duration-200"
       )}
     >
       {/* Thumbnail */}

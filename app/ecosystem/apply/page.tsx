@@ -125,10 +125,10 @@ export default function EcosystemApplyPage() {
             Back
           </button>
           <div className="reveal-delay-2">
-            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+            <p className="text-[10px] uppercase tracking-[0.16em] font-medium text-text-tertiary mb-2">
               Ecosystem
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+            <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1]">
               Apply Your Project
             </h1>
             <p className="text-sm text-text-secondary mt-2">
@@ -218,7 +218,7 @@ export default function EcosystemApplyPage() {
               required
               minLength={20}
               maxLength={1000}
-              className="w-full rounded-lg border border-border bg-bg-card px-3 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+              className="w-full rounded-[10px] border border-[var(--card-border)] bg-bg-card px-3 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-brand resize-none"
             />
             <p className="text-[10px] text-text-tertiary mt-1 text-right">
               {formData.description.length} / 1000

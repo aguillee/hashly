@@ -281,10 +281,10 @@ export default function MissionsPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between mb-4 reveal-delay-1">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+              <p className="text-[10px] uppercase tracking-[0.16em] font-medium text-text-tertiary mb-2">
                 Earn Points
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+              <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1]">
                 Missions
               </h1>
             </div>
@@ -297,24 +297,24 @@ export default function MissionsPage() {
 
           {/* Stats bar */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap reveal-delay-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] border border-[var(--card-border)] bg-bg-card text-sm">
               <Flame className="h-3.5 w-3.5 text-orange-500" />
               <span className="font-bold text-text-primary font-mono">{user.loginStreak}d</span>
               <span className="text-text-tertiary text-xs">streak</span>
             </div>
             {stats && (
               <>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] border border-[var(--card-border)] bg-bg-card text-sm">
                   <Vote className="h-3.5 w-3.5 text-text-tertiary" />
                   <span className="font-bold text-text-primary font-mono">{stats.totalVotes}</span>
                   <span className="text-text-tertiary text-xs">votes</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] border border-[var(--card-border)] bg-bg-card text-sm">
                   <Calendar className="h-3.5 w-3.5 text-text-tertiary" />
                   <span className="font-bold text-text-primary font-mono">{stats.totalEvents}</span>
                   <span className="text-text-tertiary text-xs">events</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-bg-card text-sm">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] border border-[var(--card-border)] bg-bg-card text-sm">
                   <Target className="h-3.5 w-3.5 text-text-tertiary" />
                   <span className="font-bold text-text-primary font-mono">{stats.todayVotes}</span>
                   <span className="text-text-tertiary text-xs">today</span>
