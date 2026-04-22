@@ -7,79 +7,126 @@
    Inspired by Finlytic / space UI
    ═══════════════════════════════════════════════════════════ */
 
-/* Light mode (default) */
+/* ═══════════════════════════════════════════════════════════
+   Shared tokens — geometry, radius, motion
+   Same in light and dark so components don't need to branch
+   ═══════════════════════════════════════════════════════════ */
 :root {
-  --bg-primary: #F8FAFC;
-  --bg-secondary: #F1F5F9;
-  --bg-tertiary: #E2E8F0;
+  /* Radius scale — tight on inner controls, soft on containers */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+
+  /* Motion tokens — all transitions should pick one of these */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+
+  /* Focus ring — reused everywhere */
+  --ring: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--brand);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Light mode — reserved ciudadano
+   Warmer off-white base, lower saturation on accents
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --bg-primary: #FAFAF7;
+  --bg-secondary: #F4F3EE;
+  --bg-tertiary: #E9E7DF;
   --bg-card: #FFFFFF;
-  --accent-primary: #14B8A6;
-  --accent-secondary: #06B6D4;
-  --accent-coral: #A855F7;
-  --accent-glow: rgba(20, 184, 166, 0.15);
-  /* --brand alias for components using text-brand / bg-brand */
-  --brand: #14B8A6;
-  --brand-subtle: rgba(20, 184, 166, 0.08);
-  --text-primary: #0F172A;
-  --text-secondary: #64748B;
-  --text-tertiary: #94A3B8;
-  --border: #E2E8F0;
-  --border-subtle: #F1F5F9;
+  --accent-primary: #10A395;
+  --accent-secondary: #0EA5B7;
+  --accent-coral: #9D5CF5;
+  --accent-glow: rgba(16, 163, 149, 0.15);
+  --brand: #10A395;
+  --brand-subtle: rgba(16, 163, 149, 0.08);
+  --text-primary: #0F1720;
+  --text-secondary: #5A6673;
+  --text-tertiary: #8A95A2;
+  --border: #E9E7DF;
+  --border-subtle: #F4F3EE;
   --success: #10B981;
   --error: #EF4444;
   --warning: #F59E0B;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --shadow-glow: 0 0 20px rgba(20, 184, 166, 0.15);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.12);
-  --card-border: rgba(0, 0, 0, 0.06);
-  --card-border-hover: rgba(0, 0, 0, 0.12);
-  --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --glow-brand: 0 0 20px rgba(20, 184, 166, 0.15);
-  --glow-gold: 0 0 16px rgba(251, 191, 36, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(15, 23, 32, 0.08);
+  /* Tinted shadows carry the brand hue — no pure-black drop shadows */
+  --shadow-glow: 0 0 24px rgba(16, 163, 149, 0.18);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 32, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 32, 0.05), 0 1px 3px rgba(15, 23, 32, 0.03);
+  --shadow-lg: 0 10px 28px rgba(15, 23, 32, 0.08), 0 2px 6px rgba(15, 23, 32, 0.04);
+  --shadow-xl: 0 18px 44px rgba(15, 23, 32, 0.12), 0 4px 10px rgba(15, 23, 32, 0.05);
+  --card-border: rgba(15, 23, 32, 0.06);
+  --card-border-hover: rgba(15, 23, 32, 0.12);
+  --card-hover-shadow: 0 10px 30px rgba(15, 23, 32, 0.08);
+  --glow-brand: 0 0 24px rgba(16, 163, 149, 0.18);
+  --glow-gold: 0 0 16px rgba(251, 191, 36, 0.18);
   --glow-silver: 0 0 16px rgba(148, 163, 184, 0.1);
-  --glow-bronze: 0 0 16px rgba(251, 146, 60, 0.15);
+  --glow-bronze: 0 0 16px rgba(251, 146, 60, 0.18);
   --bg-card-rgb: 255, 255, 255;
 }
 
-/* Dark mode — The PRIMARY mode, space aesthetic */
+/* ═══════════════════════════════════════════════════════════
+   Dark mode — PRIMARY
+   Arc-inspired: warm-tinted charcoal (not pure navy), soft teal accents,
+   tinted shadows that carry the brand hue instead of pure black.
+   ═══════════════════════════════════════════════════════════ */
 .dark {
-  --bg-primary: #030712;
-  --bg-secondary: #0F1629;
-  --bg-tertiary: #1E293B;
-  --bg-card: #0F172A;
-  --accent-primary: #2DD4BF;
-  --accent-secondary: #22D3EE;
-  --accent-coral: #C084FC;
-  --accent-glow: rgba(45, 212, 191, 0.2);
-  --brand: #2DD4BF;
-  --brand-subtle: rgba(45, 212, 191, 0.12);
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --text-tertiary: #475569;
-  --border: rgba(148, 163, 184, 0.06);
-  --border-subtle: rgba(148, 163, 184, 0.03);
+  /* Backgrounds — slightly warmer than pure #030712, gives the "cozy dark" feel */
+  --bg-primary: #0A0B10;
+  --bg-secondary: #12141B;
+  --bg-tertiary: #1B1E28;
+  --bg-card: #14171F;
+
+  /* Accents — brand teal desaturated from 77% to ~62% saturation.
+     Less screaming AI-green, more confident */
+  --accent-primary: #3ACCB8;
+  --accent-secondary: #22C8DB;
+  --accent-coral: #B985FA;
+  --accent-glow: rgba(58, 204, 184, 0.18);
+  --brand: #3ACCB8;
+  --brand-subtle: rgba(58, 204, 184, 0.10);
+
+  /* Text — slightly warmer neutrals (off-white vs pure slate) */
+  --text-primary: #EDEEF0;
+  --text-secondary: #9AA1AD;
+  --text-tertiary: #575C68;
+
+  /* Borders — hairline, barely visible (Arc-like) */
+  --border: rgba(237, 238, 240, 0.06);
+  --border-subtle: rgba(237, 238, 240, 0.03);
+
   --success: #34D399;
   --error: #FB7185;
   --warning: #FBBF24;
-  --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-border: rgba(148, 163, 184, 0.08);
-  --shadow-glow: 0 0 30px rgba(45, 212, 191, 0.15);
+
+  --glass-bg: rgba(20, 23, 31, 0.68);
+  --glass-border: rgba(237, 238, 240, 0.08);
+
+  /* Tinted shadows — teal-tinted on the glow variant, deep on the elevation ones */
+  --shadow-glow: 0 0 32px rgba(58, 204, 184, 0.18);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.5);
-  --card-border: rgba(255, 255, 255, 0.06);
-  --card-border-hover: rgba(255, 255, 255, 0.12);
-  --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --glow-brand: 0 0 20px rgba(45, 212, 191, 0.2);
-  --glow-gold: 0 0 16px rgba(251, 191, 36, 0.2);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.55), 0 6px 12px rgba(0, 0, 0, 0.3);
+
+  --card-border: rgba(237, 238, 240, 0.06);
+  --card-border-hover: rgba(58, 204, 184, 0.22);
+  --card-hover-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(58, 204, 184, 0.12);
+
+  --glow-brand: 0 0 24px rgba(58, 204, 184, 0.22);
+  --glow-gold: 0 0 18px rgba(251, 191, 36, 0.22);
   --glow-silver: 0 0 16px rgba(161, 161, 170, 0.15);
-  --glow-bronze: 0 0 16px rgba(251, 146, 60, 0.2);
-  --bg-card-rgb: 15, 23, 42;
+  --glow-bronze: 0 0 16px rgba(251, 146, 60, 0.22);
+
+  --bg-card-rgb: 20, 23, 31;
 }
 
 * {
@@ -90,6 +137,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* Arc-style optical rendering — sharper hinting, no weird sub-pixel smear */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01", "ss03";
 }
 
 html,
@@ -98,6 +150,33 @@ body {
   overflow-x: hidden;
   background: var(--bg-primary);
   color: var(--text-primary);
+  /* Slightly tighter default tracking for the new font */
+  letter-spacing: -0.003em;
+}
+
+/* Headlines: more presence. Tighter tracking + reduced leading + balance wrap */
+h1, h2, h3 {
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+h4, h5, h6 {
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* Long-form body text should wrap prettily and have breathing room */
+p {
+  text-wrap: pretty;
+}
+
+/* All numbers in the UI use tabular figures so they don't jitter on updates */
+.font-mono,
+[class*="tabular"],
+button,
+input,
+select,
+textarea {
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -126,14 +205,25 @@ a {
 
 /* ═══ Selection ═══ */
 ::selection {
-  background: var(--accent-primary);
-  color: white;
+  background: var(--brand-subtle);
+  color: var(--text-primary);
 }
 
-/* ═══ Focus ═══ */
+/* ═══ Focus — Arc-style double ring (bg + brand) ═══ */
 :focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+  transition: box-shadow var(--duration-fast) var(--ease-out-quart);
+}
+
+/* Buttons and inputs that already have their own box-shadow keep focus via outline */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
+  box-shadow: none;
 }
 
 /* ═══════════════════════════════════════════════════════════
