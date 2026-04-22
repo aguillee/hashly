@@ -381,9 +381,19 @@ export default function ProjectsPage() {
               <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1]">
                 Tokens
               </h1>
-              <p className="text-sm text-text-secondary mt-1">
-                <span className="font-mono">{totalCollections}</span> NFTs &middot; <span className="font-mono">{totalTokens}</span> FTs
-              </p>
+              {/* Stat pills — consistent with /profile header */}
+              <div className="flex items-center gap-2 mt-3">
+                <span className="inline-flex items-center gap-1.5 px-2.5 h-7 rounded-[8px] bg-brand/8 border border-brand/20 text-[11px]">
+                  <Layers className="h-3 w-3 text-brand" />
+                  <span className="font-semibold text-text-primary tabular-nums">{totalCollections}</span>
+                  <span className="text-text-tertiary uppercase tracking-wider text-[10px] font-medium">NFTs</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 h-7 rounded-[8px] bg-accent-coral/8 border border-accent-coral/20 text-[11px]">
+                  <Coins className="h-3 w-3 text-accent-coral" />
+                  <span className="font-semibold text-text-primary tabular-nums">{totalTokens}</span>
+                  <span className="text-text-tertiary uppercase tracking-wider text-[10px] font-medium">FTs</span>
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -391,10 +401,10 @@ export default function ProjectsPage() {
                 <button
                   onClick={() => fetchCollections(true)}
                   disabled={syncing}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bg-card border border-border hover:border-brand/30 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 h-9 text-[13px] font-medium rounded-[10px] bg-bg-card border border-[var(--card-border)] hover:border-brand/40 text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 active:scale-[0.97]"
                 >
                   <RefreshCw className={cn("h-3.5 w-3.5", syncing && "animate-spin")} />
-                  {syncing ? "Syncing..." : "Sync"}
+                  {syncing ? "Syncing…" : "Sync"}
                 </button>
               )}
             </div>
@@ -404,28 +414,36 @@ export default function ProjectsPage() {
           <div className="flex gap-2 sm:gap-3 reveal-delay-2">
             <div className="relative flex-1">
               {searchLoading || loadingTokens ? (
-                <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary animate-spin" />
+                <Loader2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary animate-spin" />
               ) : (
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
               )}
               <input
                 type="text"
-                placeholder="Search NFTs or FTs..."
+                placeholder="Search NFTs or FTs…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-bg-card border border-border focus:outline-none focus:border-brand/50 text-text-primary placeholder:text-text-tertiary text-sm transition-colors"
+                className={cn(
+                  "w-full h-10 pl-10 pr-10 rounded-[10px] bg-bg-card",
+                  "border border-[var(--card-border)]",
+                  "shadow-[0_1px_0_rgba(255,255,255,0.02)_inset]",
+                  "text-text-primary placeholder:text-text-tertiary text-sm",
+                  "transition-[border-color,box-shadow] duration-150 ease-out",
+                  "focus:outline-none focus:border-brand/60 focus:shadow-[0_0_0_3px_rgba(58,204,184,0.18),0_1px_0_rgba(255,255,255,0.02)_inset]"
+                )}
               />
               {search && (
                 <button
                   onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors active:scale-95"
+                  aria-label="Clear search"
                 >
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
             {isConnected && (
-              <Button onClick={() => setShowAddModal(true)} className="gap-2 whitespace-nowrap">
+              <Button onClick={() => setShowAddModal(true)} className="gap-1.5 whitespace-nowrap">
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Project</span>
                 <span className="sm:hidden">Add</span>
@@ -438,44 +456,50 @@ export default function ProjectsPage() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pb-16">
         {/* Add Project Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-bg-card border border-border rounded-xl p-6 w-full max-w-md mx-4 shadow-elevation-3">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-text-primary">Add Project</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#05070A]/70 backdrop-blur-[6px] animate-fade-in" onClick={() => setShowAddModal(false)}>
+            <div
+              className="bg-bg-card border border-[var(--card-border)] rounded-[16px] p-6 w-full max-w-md mx-4 shadow-[0_24px_60px_rgba(0,0,0,0.55),0_0_0_1px_rgba(58,204,184,0.06)] animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-[15px] font-semibold text-text-primary tracking-tight">Add Project</h2>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="text-text-secondary hover:text-text-primary transition-colors"
+                  aria-label="Close"
+                  className="p-1.5 -mr-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors active:scale-95"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="flex gap-2 mb-4">
+              <div className="inline-flex h-10 p-1 rounded-[10px] border border-[var(--card-border)] bg-bg-secondary/40 w-full mb-5">
                 <button
                   type="button"
                   onClick={() => setProjectType("nft")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border transition-colors",
+                    "flex-1 flex items-center justify-center gap-2 rounded-[7px] text-sm font-medium",
+                    "transition-[background-color,color,box-shadow] duration-200 ease-out",
                     projectType === "nft"
-                      ? "border-brand bg-brand/5 text-text-primary"
-                      : "border-border hover:bg-bg-secondary text-text-secondary"
+                      ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                      : "text-text-secondary hover:text-text-primary"
                   )}
                 >
                   <Layers className="h-4 w-4" />
-                  <span className="font-medium text-sm">NFT</span>
+                  NFT
                 </button>
                 <button
                   type="button"
                   onClick={() => setProjectType("token")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border transition-colors",
+                    "flex-1 flex items-center justify-center gap-2 rounded-[7px] text-sm font-medium",
+                    "transition-[background-color,color,box-shadow] duration-200 ease-out",
                     projectType === "token"
-                      ? "border-brand bg-brand/5 text-text-primary"
-                      : "border-border hover:bg-bg-secondary text-text-secondary"
+                      ? "bg-brand/12 text-brand shadow-[inset_0_1px_0_rgba(58,204,184,0.12)]"
+                      : "text-text-secondary hover:text-text-primary"
                   )}
                 >
                   <Coins className="h-4 w-4" />
-                  <span className="font-medium text-sm">FT</span>
+                  FT
                 </button>
               </div>
 
@@ -533,8 +557,8 @@ export default function ProjectsPage() {
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {searchResults.length > 0 && (
-                    <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
-                      <div className="p-4 border-b border-border flex items-center gap-2">
+                    <div className="rounded-[14px] border border-[var(--card-border)] bg-bg-card overflow-hidden">
+                      <div className="p-4 border-b border-[var(--border-subtle)] flex items-center gap-2">
                         <Layers className="h-4 w-4 text-text-secondary" />
                         <span className="font-semibold text-text-primary text-sm">NFTs (<span className="font-mono">{searchResults.length}</span>)</span>
                       </div>
@@ -546,8 +570,8 @@ export default function ProjectsPage() {
                     </div>
                   )}
                   {tokenSearchResults.length > 0 && (
-                    <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
-                      <div className="p-4 border-b border-border flex items-center gap-2">
+                    <div className="rounded-[14px] border border-[var(--card-border)] bg-bg-card overflow-hidden">
+                      <div className="p-4 border-b border-[var(--border-subtle)] flex items-center gap-2">
                         <Coins className="h-4 w-4 text-text-secondary" />
                         <span className="font-semibold text-text-primary text-sm">FTs (<span className="font-mono">{tokenSearchResults.length}</span>)</span>
                       </div>
@@ -566,10 +590,15 @@ export default function ProjectsPage() {
               {/* Main Grid: NFTs left + Tokens right */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 reveal-delay-1">
                 {/* Top 30 NFTs */}
-                <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
-                  <div className="p-4 sm:p-5 border-b border-border flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-amber-500" />
-                    <span className="font-semibold text-text-primary text-sm">Top 30 NFTs</span>
+                <div className="rounded-[14px] border border-[var(--card-border)] bg-bg-card overflow-hidden">
+                  <div className="px-5 h-14 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-[8px] bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                        <Trophy className="h-3.5 w-3.5 text-amber-400" />
+                      </div>
+                      <span className="font-semibold text-text-primary text-[14px] tracking-tight">Top 30 NFTs</span>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-text-tertiary font-medium">ranked</span>
                   </div>
                   <div className="p-3 max-h-[70vh] overflow-y-auto">
                     {topCollections.length === 0 ? (
@@ -593,15 +622,22 @@ export default function ProjectsPage() {
                 </div>
 
                 {/* Top 30 FTs */}
-                <div className="rounded-xl border border-border bg-bg-card overflow-hidden">
-                  <div className="p-4 sm:p-5 border-b border-border flex items-center gap-2">
-                    <Coins className="h-4 w-4 text-text-secondary" />
-                    <span className="font-semibold text-text-primary text-sm">Top 30 FTs</span>
+                <div className="rounded-[14px] border border-[var(--card-border)] bg-bg-card overflow-hidden">
+                  <div className="px-5 h-14 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-[8px] bg-accent-coral/10 border border-accent-coral/20 flex items-center justify-center">
+                        <Coins className="h-3.5 w-3.5 text-accent-coral" />
+                      </div>
+                      <span className="font-semibold text-text-primary text-[14px] tracking-tight">Top 30 FTs</span>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-text-tertiary font-medium">ranked</span>
                   </div>
                   <div className="p-3 max-h-[70vh] overflow-y-auto">
                     {loadingTokens ? (
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
+                      <div className="space-y-2">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="h-14 rounded-[10px] bg-bg-secondary/40 border border-[var(--border-subtle)] animate-pulse" />
+                        ))}
                       </div>
                     ) : topTokens.length === 0 ? (
                       <div className="text-center py-12">
@@ -681,14 +717,15 @@ function CollectionRow({
 
   return (
     <div className={cn(
-      "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-colors duration-150",
+      "flex items-center gap-3 px-3 h-14 rounded-[10px] border transition-[border-color,background-color] duration-200",
+      "hover:bg-bg-secondary/40",
       getRankStyle(collection.rank),
-      hasVoted && voteIsUp && "border-l-2 !border-l-green-500/50",
-      hasVoted && !voteIsUp && "border-l-2 !border-l-red-500/50"
+      hasVoted && voteIsUp && "!border-l-[3px] !border-l-success",
+      hasVoted && !voteIsUp && "!border-l-[3px] !border-l-error"
     )}>
       {getRankIcon(collection.rank)}
 
-      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0">
+      <div className="w-9 h-9 rounded-[8px] overflow-hidden bg-bg-secondary flex-shrink-0 ring-1 ring-[var(--card-border)]">
         {collection.image ? (
           <img src={collection.image} alt={collection.name} className="w-full h-full object-cover" />
         ) : (
@@ -701,33 +738,33 @@ function CollectionRow({
           href={`https://sentx.io/nft-marketplace/${collection.tokenAddress}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-text-primary text-sm truncate hover:text-brand flex items-center gap-1 transition-colors"
+          className="font-medium text-text-primary text-[13px] truncate hover:text-brand inline-flex items-center gap-1 transition-colors tracking-tight"
         >
           <span className="truncate">{collection.name}</span>
-          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+          <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-60" />
         </a>
-        <div className="flex items-center gap-2 sm:gap-3 text-xs text-text-tertiary">
-          <span className="hidden sm:inline font-mono">{collection.tokenAddress}</span>
-          <span className="flex items-center gap-1"><Users className="h-3 w-3" /><span className="font-mono">{collection.owners.toLocaleString()}</span></span>
-          <span className="flex items-center gap-1"><Layers className="h-3 w-3" /><span className="font-mono">{collection.supply.toLocaleString()}</span></span>
+        <div className="flex items-center gap-2.5 text-[11px] text-text-tertiary mt-0.5">
+          <span className="hidden sm:inline tabular-nums">{collection.tokenAddress}</span>
+          <span className="flex items-center gap-1"><Users className="h-3 w-3" /><span className="tabular-nums">{collection.owners.toLocaleString()}</span></span>
+          <span className="flex items-center gap-1"><Layers className="h-3 w-3" /><span className="tabular-nums">{collection.supply.toLocaleString()}</span></span>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-bg-secondary">
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="flex items-center gap-1 px-2 h-7 rounded-[7px] bg-bg-secondary border border-[var(--border-subtle)]">
           <Trophy className="h-3 w-3 text-text-tertiary" />
-          <span className="font-mono font-bold text-text-primary text-xs sm:text-sm">{collection.totalVotes}</span>
+          <span className="font-semibold text-text-primary text-[12px] tabular-nums">{collection.totalVotes}</span>
         </div>
-        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "UP")} disabled={isVoting || (hasVoted && voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white cursor-default")}>
+        <Button variant={hasVoted && voteIsUp ? "success" : "ghost"} size="sm" onClick={() => onVote(collection.id, "UP")} disabled={isVoting || (hasVoted && voteIsUp)} className={cn("h-7 w-7 p-0", hasVoted && voteIsUp && "cursor-default")}>
           {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className={cn("h-3 w-3", hasVoted && voteIsUp && "fill-current")} />}
         </Button>
-        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(collection.id, "DOWN")} disabled={isVoting || (hasVoted && !voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white cursor-default")}>
+        <Button variant={hasVoted && !voteIsUp ? "destructive" : "ghost"} size="sm" onClick={() => onVote(collection.id, "DOWN")} disabled={isVoting || (hasVoted && !voteIsUp)} className={cn("h-7 w-7 p-0", hasVoted && !voteIsUp && "cursor-default")}>
           <ThumbsDown className={cn("h-3 w-3", hasVoted && !voteIsUp && "fill-current")} />
         </Button>
         <ShareToXButton
           shareText={`I just voted for ${collection.name} on @hashly_h\n\nJoin and vote for your favorite collections!`}
           shareUrl="https://hash-ly.com/projects"
-          className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
+          className="h-7 w-7 p-0 flex items-center justify-center"
         />
       </div>
     </div>
@@ -754,14 +791,15 @@ function TokenRow({
 
   return (
     <div className={cn(
-      "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-colors duration-150",
+      "flex items-center gap-3 px-3 h-14 rounded-[10px] border transition-[border-color,background-color] duration-200",
+      "hover:bg-bg-secondary/40",
       getRankStyle(token.rank),
-      hasVoted && voteIsUp && "border-l-2 !border-l-green-500/50",
-      hasVoted && !voteIsUp && "border-l-2 !border-l-red-500/50"
+      hasVoted && voteIsUp && "!border-l-[3px] !border-l-success",
+      hasVoted && !voteIsUp && "!border-l-[3px] !border-l-error"
     )}>
       {getRankIcon(token.rank)}
 
-      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-bg-secondary flex-shrink-0">
+      <div className="w-9 h-9 rounded-full overflow-hidden bg-bg-secondary flex-shrink-0 ring-1 ring-[var(--card-border)]">
         {token.icon ? (
           <img src={token.icon} alt={token.symbol} className="w-full h-full object-cover" />
         ) : (
@@ -770,49 +808,49 @@ function TokenRow({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-text-primary text-sm flex items-center gap-1.5">
-          <span className="font-bold">{token.symbol}</span>
-          <span className="text-text-tertiary text-xs hidden sm:inline">({token.name})</span>
+        <div className="text-text-primary text-[13px] flex items-center gap-1.5 tracking-tight">
+          <span className="font-semibold">{token.symbol}</span>
+          <span className="text-text-tertiary text-[11px] hidden sm:inline truncate">{token.name}</span>
           {token.marketCap && token.marketCap > 0 && (
-            <span className="text-xs text-text-secondary font-mono ml-1">
-              MC: ${token.marketCap >= 1000000
-                ? `${(token.marketCap / 1000000).toFixed(1)}M`
-                : token.marketCap >= 1000
-                  ? `${(token.marketCap / 1000).toFixed(0)}K`
+            <span className="text-[10px] text-text-secondary tabular-nums ml-1 px-1.5 h-[18px] inline-flex items-center rounded-[4px] bg-bg-secondary border border-[var(--border-subtle)]">
+              ${token.marketCap >= 1_000_000
+                ? `${(token.marketCap / 1_000_000).toFixed(1)}M`
+                : token.marketCap >= 1_000
+                  ? `${(token.marketCap / 1_000).toFixed(0)}K`
                   : token.marketCap.toFixed(0)}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 text-xs text-text-tertiary">
-          <span className="font-mono">{token.tokenAddress}</span>
+        <div className="flex items-center gap-2 text-[11px] text-text-tertiary mt-0.5">
+          <span className="tabular-nums truncate">{token.tokenAddress}</span>
           <a
             href={`https://www.saucerswap.finance/swap/HBAR/${token.tokenAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-bg-secondary text-text-secondary hover:text-text-primary transition-colors"
+            className="inline-flex items-center gap-1 px-1.5 h-[18px] rounded-[4px] bg-brand/8 border border-brand/20 text-brand hover:bg-brand/12 transition-colors flex-shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <ArrowLeftRight className="h-3 w-3" />
-            <span className="hidden sm:inline">Swap</span>
+            <ArrowLeftRight className="h-2.5 w-2.5" />
+            <span className="hidden sm:inline font-medium">Swap</span>
           </a>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-        <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg bg-bg-secondary">
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="flex items-center gap-1 px-2 h-7 rounded-[7px] bg-bg-secondary border border-[var(--border-subtle)]">
           <Trophy className="h-3 w-3 text-text-tertiary" />
-          <span className="font-mono font-bold text-text-primary text-xs sm:text-sm">{token.totalVotes}</span>
+          <span className="font-semibold text-text-primary text-[12px] tabular-nums">{token.totalVotes}</span>
         </div>
-        <Button variant={hasVoted && voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "UP")} disabled={isVoting || (hasVoted && voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && voteIsUp && "bg-green-500 hover:bg-green-600 text-white cursor-default")}>
+        <Button variant={hasVoted && voteIsUp ? "success" : "ghost"} size="sm" onClick={() => onVote(token.id, "UP")} disabled={isVoting || (hasVoted && voteIsUp)} className={cn("h-7 w-7 p-0", hasVoted && voteIsUp && "cursor-default")}>
           {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ThumbsUp className={cn("h-3 w-3", hasVoted && voteIsUp && "fill-current")} />}
         </Button>
-        <Button variant={hasVoted && !voteIsUp ? "default" : "ghost"} size="sm" onClick={() => onVote(token.id, "DOWN")} disabled={isVoting || (hasVoted && !voteIsUp)} className={cn("h-7 w-7 sm:h-8 sm:w-8 p-0", hasVoted && !voteIsUp && "bg-red-500 hover:bg-red-600 text-white cursor-default")}>
+        <Button variant={hasVoted && !voteIsUp ? "destructive" : "ghost"} size="sm" onClick={() => onVote(token.id, "DOWN")} disabled={isVoting || (hasVoted && !voteIsUp)} className={cn("h-7 w-7 p-0", hasVoted && !voteIsUp && "cursor-default")}>
           <ThumbsDown className={cn("h-3 w-3", hasVoted && !voteIsUp && "fill-current")} />
         </Button>
         <ShareToXButton
           shareText={`I just voted for $${token.symbol} on @hashly_h\n\nJoin and vote for your favorite tokens!`}
           shareUrl="https://hash-ly.com/projects"
-          className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex items-center justify-center"
+          className="h-7 w-7 p-0 flex items-center justify-center"
         />
       </div>
     </div>
