@@ -87,6 +87,19 @@ export async function POST(
       );
     }
 
+    // Reject the host's own wallet — Hedera fails the whole airdrop with
+    // ACCOUNT_REPEATED_IN_ACCOUNT_AMOUNTS if sender and receiver are the same account.
+    claims = claims.filter((c) => c.walletAddress !== badge.hostWallet);
+    if (claims.length === 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Cannot register your own wallet as an attendee (Hedera rejects self-transfers)",
+        },
+        { status: 400 }
+      );
+    }
+
     // Check for existing claims
     const existingClaims = await prisma.badgeClaim.findMany({
       where: {

@@ -239,10 +239,27 @@ export function useHederaTransactions() {
       try {
         const signer = getSigner();
         const senderId = AccountId.fromString(walletAddress!);
+        const senderStr = senderId.toString();
         const token = TokenId.fromString(params.tokenId);
 
         const successful: AirdropNFTResult["successful"] = [];
         const failed: AirdropNFTResult["failed"] = [];
+
+        // Filter out self-transfers: Hedera rejects the whole batch with
+        // ACCOUNT_REPEATED_IN_ACCOUNT_AMOUNTS if the sender appears as a recipient.
+        // The host already owns their own serial — just skip it.
+        const recipients = params.recipients.filter(
+          (r) => r.wallet !== senderStr
+        );
+        for (const r of params.recipients) {
+          if (r.wallet === senderStr) {
+            successful.push({
+              wallet: r.wallet,
+              serialNumber: r.serialNumber,
+              transactionId: "self-transfer-skipped",
+            });
+          }
+        }
 
         // Batch NFT transfers: up to 10 per TransferTransaction
         // Only pre-checked associated wallets should be passed here,
@@ -250,8 +267,8 @@ export function useHederaTransactions() {
         // Note: Using TransferTransaction because HashPack does not support
         // TokenAirdropTransaction via WalletConnect ("Unsupported Transaction Type")
         const BATCH_SIZE = 10;
-        for (let i = 0; i < params.recipients.length; i += BATCH_SIZE) {
-          const batch = params.recipients.slice(i, i + BATCH_SIZE);
+        for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+          const batch = recipients.slice(i, i + BATCH_SIZE);
 
           try {
             const tx = new TransferTransaction()
@@ -304,7 +321,7 @@ export function useHederaTransactions() {
           }
 
           // Delay between batches
-          if (i + BATCH_SIZE < params.recipients.length) {
+          if (i + BATCH_SIZE < recipients.length) {
             await new Promise((r) => setTimeout(r, 1000));
           }
         }

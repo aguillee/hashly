@@ -163,6 +163,12 @@ export default function BadgeDetailPage() {
   const [checkingAssociations, setCheckingAssociations] = React.useState(false);
   const [associationsChecked, setAssociationsChecked] = React.useState(false);
 
+  // Synchronous locks to prevent double-submit (React state updates are async,
+  // so the disabled prop on the button has a small window where fast double-clicks slip through)
+  const airdropLock = React.useRef(false);
+  const mintLock = React.useRef(false);
+  const createTokenLock = React.useRef(false);
+
   const badgeId = params.id as string;
 
   // Inscription polling hook
@@ -434,45 +440,53 @@ export default function BadgeDetailPage() {
   };
 
   const createToken = async () => {
-    if (!isReady) {
-      setActionMessage({ type: "error", text: "Wallet not connected" });
-      return;
-    }
+    // Synchronous double-submit guard
+    if (createTokenLock.current) return;
+    createTokenLock.current = true;
 
-    setActionMessage(null);
     try {
-      const result = await createNFTToken({
-        name: badgeName,
-        symbol: "HASHLY",
-        memo: description || undefined,
-      });
-
-      const res = await fetch(`/api/badges/${badgeId}/register-token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tokenId: result.tokenId,
-          transactionId: result.transactionId,
-          description: description || undefined,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to register token");
+      if (!isReady) {
+        setActionMessage({ type: "error", text: "Wallet not connected" });
+        return;
       }
 
-      setActionMessage({ type: "success", text: `Token created! ID: ${result.tokenId}` });
-      await loadBadge();
-    } catch (err) {
-      if (isUserRejection(err)) {
-        setActionMessage({ type: "warning", text: "Transaction rejected. You can try again when ready." });
-      } else {
-        setActionMessage({
-          type: "error",
-          text: err instanceof Error ? err.message : "Failed to create token",
+      setActionMessage(null);
+      try {
+        const result = await createNFTToken({
+          name: badgeName,
+          symbol: "HASHLY",
+          memo: description || undefined,
         });
+
+        const res = await fetch(`/api/badges/${badgeId}/register-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tokenId: result.tokenId,
+            transactionId: result.transactionId,
+            description: description || undefined,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Failed to register token");
+        }
+
+        setActionMessage({ type: "success", text: `Token created! ID: ${result.tokenId}` });
+        await loadBadge();
+      } catch (err) {
+        if (isUserRejection(err)) {
+          setActionMessage({ type: "warning", text: "Transaction rejected. You can try again when ready." });
+        } else {
+          setActionMessage({
+            type: "error",
+            text: err instanceof Error ? err.message : "Failed to create token",
+          });
+        }
       }
+    } finally {
+      createTokenLock.current = false;
     }
   };
 
@@ -489,14 +503,30 @@ export default function BadgeDetailPage() {
     const wallets = Array.from(new Set(rawWallets));
     const batchDuplicates = rawWallets.length - wallets.length;
 
+    // Prevent adding the host's own wallet — Hedera rejects NFT transfers where
+    // sender and receiver are the same account (ACCOUNT_REPEATED_IN_ACCOUNT_AMOUNTS).
+    const hostWallet = badge?.hostWallet;
+    const selfIncluded = hostWallet ? wallets.includes(hostWallet) : false;
+    const cleanedWallets = hostWallet
+      ? wallets.filter((w) => w !== hostWallet)
+      : wallets;
+
     if (wallets.length === 0) {
       setActionMessage({ type: "error", text: "No valid wallet addresses found" });
       return;
     }
 
+    if (cleanedWallets.length === 0 && selfIncluded) {
+      setActionMessage({
+        type: "error",
+        text: "You can't add your own wallet as an attendee — Hedera rejects self-transfers.",
+      });
+      return;
+    }
+
     const existingSet = new Set(addedWallets);
-    const newWallets = wallets.filter((w) => !existingSet.has(w));
-    const duplicateCount = (wallets.length - newWallets.length) + batchDuplicates;
+    const newWallets = cleanedWallets.filter((w) => !existingSet.has(w));
+    const duplicateCount = (cleanedWallets.length - newWallets.length) + batchDuplicates;
 
     if (newWallets.length === 0) {
       setActionMessage({ type: "warning", text: "All wallets already in the list" });
@@ -546,10 +576,16 @@ export default function BadgeDetailPage() {
     if (duplicateCount > 0) {
       msg += ` (${duplicateCount} duplicate${duplicateCount === 1 ? "" : "s"} removed)`;
     }
+    if (selfIncluded) {
+      msg += ` · skipped your own wallet (can't self-transfer)`;
+    }
     if (invalidWallets.length > 0) {
       msg += ` · ${invalidWallets.length} invalid: ${invalidWallets.join(", ")}`;
     }
-    setActionMessage({ type: invalidWallets.length > 0 ? "warning" : "success", text: msg });
+    setActionMessage({
+      type: invalidWallets.length > 0 || selfIncluded ? "warning" : "success",
+      text: msg,
+    });
   };
 
   // Remove a wallet from the list
@@ -599,63 +635,71 @@ export default function BadgeDetailPage() {
   };
 
   const handleMintNFTs = async () => {
-    if (!isReady || !badge?.tokenId) {
-      setActionMessage({ type: "error", text: "Wallet not connected or token not created" });
-      return;
-    }
+    // Synchronous double-submit guard
+    if (mintLock.current) return;
+    mintLock.current = true;
 
-    if (!badge.metadataTopicId && !badge.metadataCid) {
-      setActionMessage({ type: "error", text: "Badge metadata not inscribed on Hedera yet" });
-      return;
-    }
-
-    if (addedWallets.length === 0) {
-      setActionMessage({ type: "error", text: "Add wallets first" });
-      return;
-    }
-
-    setActionMessage(null);
-    setShowMintConfirm(false);
     try {
-      // Use Hashinals URI (hcs://1/topicId) or legacy IPFS CID
-      const metadataUri = badge.metadataTopicId
-        ? `hcs://1/${badge.metadataTopicId}`
-        : badge.metadataCid!;
-      const metadata = addedWallets.map(() => metadataUri);
-
-      const result = await mintNFTs({
-        tokenId: badge.tokenId,
-        metadata,
-      });
-
-      const res = await fetch(`/api/badges/${badgeId}/register-claims`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wallets: addedWallets,
-          serialNumbers: result.serialNumbers,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to save claims");
+      if (!isReady || !badge?.tokenId) {
+        setActionMessage({ type: "error", text: "Wallet not connected or token not created" });
+        return;
       }
 
-      setActionMessage({
-        type: "success",
-        text: `Minted ${result.serialNumbers.length} NFTs! You can now continue to the airdrop step.`,
-      });
-      setHasMinted(true);
-      await loadBadge();
-    } catch (err) {
-      if (isUserRejection(err)) {
-        setActionMessage({ type: "warning", text: "Transaction rejected. You can try again when ready." });
-      } else {
-        setActionMessage({
-          type: "error",
-          text: err instanceof Error ? err.message : "Failed to mint",
+      if (!badge.metadataTopicId && !badge.metadataCid) {
+        setActionMessage({ type: "error", text: "Badge metadata not inscribed on Hedera yet" });
+        return;
+      }
+
+      if (addedWallets.length === 0) {
+        setActionMessage({ type: "error", text: "Add wallets first" });
+        return;
+      }
+
+      setActionMessage(null);
+      setShowMintConfirm(false);
+      try {
+        // Use Hashinals URI (hcs://1/topicId) or legacy IPFS CID
+        const metadataUri = badge.metadataTopicId
+          ? `hcs://1/${badge.metadataTopicId}`
+          : badge.metadataCid!;
+        const metadata = addedWallets.map(() => metadataUri);
+
+        const result = await mintNFTs({
+          tokenId: badge.tokenId,
+          metadata,
         });
+
+        const res = await fetch(`/api/badges/${badgeId}/register-claims`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            wallets: addedWallets,
+            serialNumbers: result.serialNumbers,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to save claims");
+        }
+
+        setActionMessage({
+          type: "success",
+          text: `Minted ${result.serialNumbers.length} NFTs! You can now continue to the airdrop step.`,
+        });
+        setHasMinted(true);
+        await loadBadge();
+      } catch (err) {
+        if (isUserRejection(err)) {
+          setActionMessage({ type: "warning", text: "Transaction rejected. You can try again when ready." });
+        } else {
+          setActionMessage({
+            type: "error",
+            text: err instanceof Error ? err.message : "Failed to mint",
+          });
+        }
       }
+    } finally {
+      mintLock.current = false;
     }
   };
 
@@ -704,92 +748,101 @@ export default function BadgeDetailPage() {
   // BATCH AIRDROP (only to associated wallets)
   // ==========================================
   const handleBatchAirdrop = async () => {
-    if (!isReady || !badge?.tokenId) {
-      setActionMessage({ type: "error", text: "Wallet not connected" });
-      return;
-    }
+    // Synchronous double-submit guard — protects against fast double clicks where
+    // `isExecuting` hasn't propagated yet.
+    if (airdropLock.current) return;
+    airdropLock.current = true;
 
-    if (!associationsChecked) {
-      setActionMessage({ type: "error", text: "Check associations first" });
-      return;
-    }
-
-    if (badge.airdropAttempts >= 3) {
-      setActionMessage({ type: "error", text: "Maximum 3 attempts reached" });
-      return;
-    }
-
-    // Filter: only PENDING/FAILED claims where wallet is associated
-    const eligibleClaims = badge.claims.filter(
-      (c) =>
-        (c.status === "PENDING" || c.status === "FAILED") &&
-        associations.get(c.walletAddress) === true
-    );
-
-    if (eligibleClaims.length === 0) {
-      setActionMessage({
-        type: "error",
-        text: "No wallets with token associated to send to",
-      });
-      return;
-    }
-
-    setActionMessage(null);
     try {
-      const recipients = eligibleClaims.map((claim) => ({
-        wallet: claim.walletAddress,
-        serialNumber: claim.serialNumber,
-      }));
-
-      const result = await airdropNFTs({
-        tokenId: badge.tokenId,
-        recipients,
-      });
-
-      // Update claims in backend (also increments airdropAttempts)
-      const res = await fetch(`/api/badges/${badgeId}/update-claims`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          successful: result.successful,
-          failed: result.failed,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to update claims");
+      if (!isReady || !badge?.tokenId) {
+        setActionMessage({ type: "error", text: "Wallet not connected" });
+        return;
       }
 
-      const updateData = await res.json();
-
-      let msg = `Sent ${result.successful.length} NFTs!`;
-      if (result.failed.length > 0) {
-        msg += ` ${result.failed.length} failed.`;
+      if (!associationsChecked) {
+        setActionMessage({ type: "error", text: "Check associations first" });
+        return;
       }
-      msg += ` (Attempt ${updateData.attemptsUsed}/3)`;
 
-      setActionMessage({
-        type: result.failed.length > 0 ? "error" : "success",
-        text: msg,
-      });
+      if (badge.airdropAttempts >= 3) {
+        setActionMessage({ type: "error", text: "Maximum 3 attempts reached" });
+        return;
+      }
 
-      // Reset association check to force re-check before next attempt
-      setAssociationsChecked(false);
-      setAssociations(new Map());
+      // Filter: only PENDING/FAILED claims where wallet is associated
+      const eligibleClaims = badge.claims.filter(
+        (c) =>
+          (c.status === "PENDING" || c.status === "FAILED") &&
+          associations.get(c.walletAddress) === true
+      );
 
-      await loadBadge();
-    } catch (err) {
-      if (isUserRejection(err)) {
-        setActionMessage({
-          type: "warning",
-          text: "Transaction rejected. You can try again — this attempt was not counted.",
-        });
-      } else {
+      if (eligibleClaims.length === 0) {
         setActionMessage({
           type: "error",
-          text: err instanceof Error ? err.message : "Failed to airdrop",
+          text: "No wallets with token associated to send to",
         });
+        return;
       }
+
+      setActionMessage(null);
+      try {
+        const recipients = eligibleClaims.map((claim) => ({
+          wallet: claim.walletAddress,
+          serialNumber: claim.serialNumber,
+        }));
+
+        const result = await airdropNFTs({
+          tokenId: badge.tokenId,
+          recipients,
+        });
+
+        // Update claims in backend (also increments airdropAttempts)
+        const res = await fetch(`/api/badges/${badgeId}/update-claims`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            successful: result.successful,
+            failed: result.failed,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to update claims");
+        }
+
+        const updateData = await res.json();
+
+        let msg = `Sent ${result.successful.length} NFTs!`;
+        if (result.failed.length > 0) {
+          msg += ` ${result.failed.length} failed.`;
+        }
+        msg += ` (Attempt ${updateData.attemptsUsed}/3)`;
+
+        setActionMessage({
+          type: result.failed.length > 0 ? "error" : "success",
+          text: msg,
+        });
+
+        // Reset association check to force re-check before next attempt
+        setAssociationsChecked(false);
+        setAssociations(new Map());
+
+        await loadBadge();
+      } catch (err) {
+        if (isUserRejection(err)) {
+          setActionMessage({
+            type: "warning",
+            text: "Transaction rejected. You can try again — this attempt was not counted.",
+          });
+        } else {
+          setActionMessage({
+            type: "error",
+            text: err instanceof Error ? err.message : "Failed to airdrop",
+          });
+        }
+      }
+    } finally {
+      airdropLock.current = false;
     }
   };
 
