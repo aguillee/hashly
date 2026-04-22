@@ -15,10 +15,10 @@ import {
   PublicKey,
   NftId,
 } from "@hashgraph/sdk";
-import {
-  inscribeWithSigner,
-  type InscriptionInput,
-} from "@hashgraphonline/standards-sdk";
+// NOTE: @hashgraphonline/standards-sdk is ~1MB — we dynamic-import it inside
+// inscribeFileOnChain() so it only hits the wire when the host actually runs
+// an inscription (typically once per badge), not on every page load.
+import type { InscriptionInput } from "@hashgraphonline/standards-sdk";
 import { buildHIP412Metadata } from "@/lib/hashinals";
 
 const MIRROR_NODE = process.env.NEXT_PUBLIC_HEDERA_NETWORK?.trim() === "testnet"
@@ -438,6 +438,9 @@ export function useHederaTransactions() {
 
         // Race the SDK call against a timeout — the SDK sometimes hangs after signing
         const SDK_TIMEOUT_MS = 90_000; // 90 seconds after user signs
+
+        // Dynamic import — keeps ~1MB out of the initial bundle.
+        const { inscribeWithSigner } = await import("@hashgraphonline/standards-sdk");
 
         const sdkPromise = inscribeWithSigner(input, signer as any, {
           mode: "file",
