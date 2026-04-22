@@ -524,16 +524,19 @@ export default function EventDetailPage() {
 
           {/* Mint Phases - only for mint events */}
           {!isMeetup && !isHackathon && event.phases.length > 0 && (
-            <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
-              <div className="p-4 sm:p-6 border-b border-border">
-                <h3 className="font-bold flex items-center gap-2">
-                  <div className="w-8 h-8 rounded bg-purple-500/10 flex items-center justify-center">
-                    <Layers className="h-4 w-4 text-purple-500" />
+            <div className="bg-bg-card border border-[var(--card-border)] rounded-[14px] overflow-hidden">
+              <div className="px-5 sm:px-6 h-14 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-[8px] bg-accent-coral/10 border border-accent-coral/20 flex items-center justify-center">
+                    <Layers className="h-3.5 w-3.5 text-accent-coral" />
                   </div>
-                  Mint Phases
-                </h3>
+                  <h3 className="font-semibold text-[14px] text-text-primary tracking-tight">Mint Phases</h3>
+                </div>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-text-tertiary font-medium tabular-nums">
+                  {event.phases.length} phase{event.phases.length !== 1 ? "s" : ""}
+                </span>
               </div>
-              <div className="p-4 sm:p-6 space-y-4">
+              <div className="p-4 sm:p-5 space-y-3">
                 {event.phases
                   .sort((a, b) => a.order - b.order)
                   .map((phase, index) => {
@@ -542,62 +545,67 @@ export default function EventDetailPage() {
                       <div
                         key={phase.id}
                         className={cn(
-                          "p-4 rounded-lg border",
+                          "p-4 rounded-[12px] border transition-colors",
                           status === "active"
-                            ? "bg-success/5 border-green-500/30"
+                            ? "bg-success/[0.06] border-success/30 shadow-[inset_0_1px_0_rgba(52,211,153,0.08)]"
                             : status === "ended"
-                            ? "bg-bg-secondary border-border opacity-60"
-                            : "bg-bg-secondary border-border"
+                            ? "bg-bg-secondary/40 border-[var(--border-subtle)] opacity-55"
+                            : "bg-bg-secondary/40 border-[var(--border-subtle)]"
                         )}
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">{phase.name}</span>
+                        <div className="flex items-center justify-between mb-3 gap-2">
+                          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                            <span className="font-semibold text-[14px] text-text-primary tracking-tight">{phase.name}</span>
                             {phase.isWhitelist && (
-                              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-purple-500/20 text-purple-400 rounded">WL</span>
+                              <span className="inline-flex items-center px-1.5 h-[18px] text-[10px] font-semibold bg-accent-coral/12 text-accent-coral border border-accent-coral/25 rounded-[4px]">WL</span>
                             )}
                             {status === "active" && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/15 text-green-400 border border-green-500/20 rounded-full text-[10px] font-semibold">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                              <span className="inline-flex items-center gap-1 px-2 h-[20px] bg-success/12 text-success border border-success/25 rounded-[5px] text-[10px] font-semibold">
+                                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                                 ACTIVE
+                              </span>
+                            )}
+                            {status === "ended" && (
+                              <span className="inline-flex items-center px-2 h-[20px] bg-bg-secondary text-text-tertiary border border-[var(--border-subtle)] rounded-[5px] text-[10px] font-semibold uppercase tracking-wider">
+                                Ended
                               </span>
                             )}
                           </div>
                           {(() => {
                             const phasePriceInfo = parseMintPrice(phase.price);
                             return (
-                              <span className="text-lg font-bold text-brand flex items-center gap-1">
+                              <span className="inline-flex items-center gap-1 px-2.5 h-[28px] rounded-[8px] bg-brand/8 border border-brand/20 text-brand text-[14px] font-semibold tabular-nums">
                                 {phasePriceInfo.isHbar ? (
-                                  <HbarIcon className="h-4 w-4" />
+                                  <HbarIcon className="h-3.5 w-3.5" />
                                 ) : (
-                                  <UsdcIcon className="h-4 w-4" />
+                                  <UsdcIcon className="h-3.5 w-3.5" />
                                 )}
                                 {phasePriceInfo.value}
                               </span>
                             );
                           })()}
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                           <div>
-                            <p className="text-text-secondary text-xs">Starts</p>
-                            <p className="font-medium text-sm">{formatShortDate(phase.startDate)}</p>
+                            <p className="text-text-tertiary text-[10px] uppercase tracking-wider font-medium mb-0.5">Starts</p>
+                            <p className="font-medium text-[13px] text-text-primary tabular-nums">{formatShortDate(phase.startDate)}</p>
                           </div>
                           {phase.endDate && (
                             <div>
-                              <p className="text-text-secondary text-xs">Ends</p>
-                              <p className="font-medium text-sm">{formatShortDate(phase.endDate)}</p>
+                              <p className="text-text-tertiary text-[10px] uppercase tracking-wider font-medium mb-0.5">Ends</p>
+                              <p className="font-medium text-[13px] text-text-primary tabular-nums">{formatShortDate(phase.endDate)}</p>
                             </div>
                           )}
                           {phase.supply && (
                             <div>
-                              <p className="text-text-secondary text-xs">Supply</p>
-                              <p className="font-medium text-sm">{phase.supply.toLocaleString()}</p>
+                              <p className="text-text-tertiary text-[10px] uppercase tracking-wider font-medium mb-0.5">Supply</p>
+                              <p className="font-medium text-[13px] text-text-primary tabular-nums">{phase.supply.toLocaleString()}</p>
                             </div>
                           )}
                           {phase.maxPerWallet && (
                             <div>
-                              <p className="text-text-secondary text-xs">Max/Wallet</p>
-                              <p className="font-medium text-sm">{phase.maxPerWallet}</p>
+                              <p className="text-text-tertiary text-[10px] uppercase tracking-wider font-medium mb-0.5">Max/Wallet</p>
+                              <p className="font-medium text-[13px] text-text-primary tabular-nums">{phase.maxPerWallet}</p>
                             </div>
                           )}
                         </div>
@@ -734,45 +742,56 @@ export default function EventDetailPage() {
             </div>
           </div>
 
-          {/* Voting - News style */}
-          <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
-            <div className="p-4 sm:p-6">
-              <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
-                <div className="w-8 h-8 rounded bg-yellow-500/10 flex items-center justify-center">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                </div>
+          {/* Voting */}
+          <div className="bg-bg-card border border-[var(--card-border)] rounded-[14px] overflow-hidden">
+            <div className="px-5 sm:px-6 h-14 border-b border-[var(--border-subtle)] flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-[8px] bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
+                <Star className="h-3.5 w-3.5 text-amber-400" />
+              </div>
+              <h3 className="font-semibold text-[14px] text-text-primary tracking-tight">
                 {isStarsOnly ? "Community Rating" : "Community Score"}
               </h3>
-              <div className="text-center mb-3 sm:mb-4">
+            </div>
+
+            <div className="p-5 sm:p-6">
+              <div className="text-center mb-5">
                 {isStarsOnly ? (
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Star className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 fill-yellow-400" />
-                    <span className="text-3xl sm:text-4xl font-bold text-yellow-400">{event.votesUp}</span>
+                  <div className="inline-flex items-center justify-center gap-2 px-4 h-14 rounded-[14px] bg-amber-400/8 border border-amber-400/25">
+                    <Star className="h-7 w-7 text-amber-400 fill-amber-400" />
+                    <span className="text-[36px] font-semibold text-amber-400 tabular-nums tracking-tight leading-none">
+                      {event.votesUp}
+                    </span>
                   </div>
                 ) : (
-                  <span className={cn(
-                    "text-3xl sm:text-4xl font-bold",
-                    score > 0 ? "text-success" : score < 0 ? "text-error" : "text-text-secondary"
+                  <div className={cn(
+                    "inline-flex items-center justify-center px-5 h-14 rounded-[14px] border tabular-nums",
+                    score > 0
+                      ? "bg-success/8 border-success/25 text-success"
+                      : score < 0
+                      ? "bg-error/8 border-error/25 text-error"
+                      : "bg-bg-secondary border-[var(--card-border)] text-text-secondary"
                   )}>
-                    {score > 0 ? "+" : ""}{score}
-                  </span>
+                    <span className="text-[36px] font-semibold tracking-tight leading-none">
+                      {score > 0 ? "+" : ""}{score}
+                    </span>
+                  </div>
                 )}
               </div>
 
               {/* Connect wallet message */}
               {!isConnected && (
-                <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-md bg-brand-subtle border border-border text-center">
-                  <p className="text-xs sm:text-sm text-brand font-medium">
+                <div className="mb-4 px-3 py-2.5 rounded-[10px] bg-brand/8 border border-brand/20 text-center">
+                  <p className="text-[12px] text-brand font-medium">
                     Connect wallet to {isStarsOnly ? "rate" : "vote"}
                   </p>
                 </div>
               )}
 
-              {/* Vote locked message - only show if connected */}
+              {/* Vote locked message */}
               {isConnected && event.userVote && !event.canVote && voteCountdown && (
-                <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-md bg-orange-500/10 border border-orange-500/30 text-center">
-                  <p className="text-xs sm:text-sm text-orange-500 font-medium">
-                    {isStarsOnly ? "Rate" : "Vote"} again in {voteCountdown}
+                <div className="mb-4 px-3 py-2.5 rounded-[10px] bg-warning/8 border border-warning/25 text-center">
+                  <p className="text-[12px] text-warning font-medium">
+                    {isStarsOnly ? "Rate" : "Vote"} again in <span className="tabular-nums">{voteCountdown}</span>
                   </p>
                 </div>
               )}
@@ -784,53 +803,51 @@ export default function EventDetailPage() {
                     onClick={() => handleVote("UP")}
                     disabled={voting || !isConnected || !event.canVote}
                     className={cn(
-                      "w-full flex items-center justify-center gap-2",
-                      event.userVote === "UP" && !event.canVote
-                        ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                        : "hover:border-yellow-500/50",
+                      "w-full gap-2",
+                      event.userVote === "UP" && !event.canVote && "!bg-amber-400 hover:!bg-amber-400 !text-[#2a1a00] !shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_8px_20px_-8px_rgba(251,191,36,0.55)]",
                       (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
                     )}
                   >
-                    <Star className={cn("h-4 w-4", event.userVote === "UP" && !event.canVote && "fill-white")} />
+                    <Star className={cn("h-4 w-4", event.userVote === "UP" && !event.canVote && "fill-current")} />
                     {event.userVote === "UP" && !event.canVote ? "Starred" : "Give a Star"}
                   </Button>
                   {event.userVote === "UP" && (
-                    <p className="text-center text-sm text-text-secondary mt-2">
+                    <p className="text-center text-[12px] text-text-secondary mt-2.5">
                       {event.canVote ? "You can star again" : "You starred this event ⭐"}
                     </p>
                   )}
                 </>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <Button
-                    variant={event.userVote === "UP" && !event.canVote ? "default" : "secondary"}
+                    variant={event.userVote === "UP" && !event.canVote ? "success" : "secondary"}
                     onClick={() => handleVote("UP")}
                     disabled={voting || !isConnected || !event.canVote}
                     className={cn(
-                      "flex items-center gap-2",
+                      "gap-2",
                       (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
                     )}
                   >
-                    <ThumbsUp className="h-4 w-4" />
-                    {Math.max(0, event.votesUp)}
+                    <ThumbsUp className={cn("h-4 w-4", event.userVote === "UP" && !event.canVote && "fill-current")} />
+                    <span className="tabular-nums">{Math.max(0, event.votesUp)}</span>
                   </Button>
                   <Button
-                    variant={event.userVote === "DOWN" && !event.canVote ? "default" : "secondary"}
+                    variant={event.userVote === "DOWN" && !event.canVote ? "destructive" : "secondary"}
                     onClick={() => handleVote("DOWN")}
                     disabled={voting || !isConnected || !event.canVote}
                     className={cn(
-                      "flex items-center gap-2",
+                      "gap-2",
                       (!isConnected || !event.canVote) && "opacity-50 cursor-not-allowed"
                     )}
                   >
-                    <ThumbsDown className="h-4 w-4" />
-                    {Math.max(0, event.votesDown)}
+                    <ThumbsDown className={cn("h-4 w-4", event.userVote === "DOWN" && !event.canVote && "fill-current")} />
+                    <span className="tabular-nums">{Math.max(0, event.votesDown)}</span>
                   </Button>
                 </div>
               )}
 
               {isConnected && event.userVote && !isStarsOnly && (
-                <p className="text-xs text-text-secondary text-center mt-3">
+                <p className="text-[12px] text-text-secondary text-center mt-3">
                   {event.canVote ? "You can vote again" : `You voted ${event.userVote === "UP" ? "👍" : "👎"}`}
                 </p>
               )}
@@ -839,52 +856,52 @@ export default function EventDetailPage() {
 
           {/* Attendance Badge - only for meetups */}
           {isMeetup && (
-            <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
-              <div className="p-4 sm:p-6">
-                <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base flex items-center gap-2">
-                  <div className="w-8 h-8 rounded bg-accent-coral/10 flex items-center justify-center">
-                    <Award className="h-4 w-4 text-accent-coral" />
-                  </div>
-                  Attendance Badge
-                </h3>
+            <div className="bg-bg-card border border-[var(--card-border)] rounded-[14px] overflow-hidden">
+              <div className="px-5 sm:px-6 h-14 border-b border-[var(--border-subtle)] flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-[8px] bg-accent-coral/10 border border-accent-coral/20 flex items-center justify-center">
+                  <Award className="h-3.5 w-3.5 text-accent-coral" />
+                </div>
+                <h3 className="font-semibold text-[14px] text-text-primary tracking-tight">Attendance Badge</h3>
+              </div>
 
+              <div className="p-5 sm:p-6">
                 {badgeStatusData?.badge ? (
                   <div className="space-y-3">
                     {badgeStatusData.badge.status === "DISTRIBUTED" ? (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20">
+                      <div className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-success/8 border border-success/25">
                         <Check className="h-4 w-4 text-success" />
-                        <span className="text-sm text-success font-medium">
-                          Badge distributed ({badgeStatusData.badge.supply} claimed)
+                        <span className="text-[13px] text-success font-medium">
+                          Badge distributed (<span className="tabular-nums">{badgeStatusData.badge.supply}</span> claimed)
                         </span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-accent-coral/10 border border-accent-coral/20">
+                      <div className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-accent-coral/8 border border-accent-coral/25">
                         <Mic2 className="h-4 w-4 text-accent-coral" />
-                        <span className="text-sm text-accent-coral font-medium">
+                        <span className="text-[13px] text-accent-coral font-medium">
                           Badge in progress
                         </span>
                       </div>
                     )}
                     {badgeStatusData.badge.tokenId && (
-                      <p className="text-xs text-text-secondary">
-                        Token ID: <span className="">{badgeStatusData.badge.tokenId}</span>
+                      <p className="text-[11px] text-text-tertiary">
+                        Token ID: <span className="tabular-nums text-text-secondary">{badgeStatusData.badge.tokenId}</span>
                       </p>
                     )}
                   </div>
                 ) : badgeStatusData?.hostRequest ? (
                   <div className="space-y-2">
                     <div className={cn(
-                      "flex items-center gap-2 p-3 rounded-lg border",
+                      "flex items-center gap-2 px-3 py-2.5 rounded-[10px] border",
                       badgeStatusData.hostRequest.status === "PENDING"
-                        ? "bg-yellow-500/10 border-yellow-500/20"
+                        ? "bg-warning/8 border-warning/25"
                         : badgeStatusData.hostRequest.status === "APPROVED"
-                          ? "bg-success/10 border-success/20"
-                          : "bg-error/10 border-error/20"
+                          ? "bg-success/8 border-success/25"
+                          : "bg-error/8 border-error/25"
                     )}>
                       <span className={cn(
-                        "text-sm font-medium",
+                        "text-[13px] font-medium",
                         badgeStatusData.hostRequest.status === "PENDING"
-                          ? "text-yellow-500"
+                          ? "text-warning"
                           : badgeStatusData.hostRequest.status === "APPROVED"
                             ? "text-success"
                             : "text-error"
@@ -935,7 +952,7 @@ export default function EventDetailPage() {
           {event.canEdit && (
             <Link
               href={`/events/${event.id}/edit`}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-brand-subtle border border-border text-brand hover:bg-bg-secondary transition-colors text-sm font-medium"
+              className="inline-flex items-center justify-center gap-2 w-full h-10 rounded-[10px] bg-brand/8 border border-brand/25 text-brand hover:bg-brand/12 hover:border-brand/40 transition-colors text-[13px] font-medium active:scale-[0.98]"
             >
               <Pencil className="h-4 w-4" />
               Edit Event
@@ -993,8 +1010,8 @@ export default function EventDetailPage() {
           </div>
 
           {/* Submitted By */}
-          <p className="text-[10px] sm:text-xs text-text-secondary text-center truncate px-2">
-            Submitted by {event.createdBy.walletAddress}
+          <p className="text-[10px] text-text-tertiary text-center truncate px-2 tabular-nums">
+            Submitted by <span className="text-text-secondary">{event.createdBy.walletAddress}</span>
           </p>
         </div>
       </div>
