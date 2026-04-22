@@ -225,10 +225,10 @@ export default function ProfilePage() {
       <div ref={headerRef} className="reveal pt-6 pb-4 sm:pt-8 sm:pb-6">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="reveal-delay-1">
-            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-tertiary mb-2">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-text-tertiary font-medium mb-2">
               Your Account
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight mb-3">
+            <h1 className="text-[28px] sm:text-[34px] font-semibold text-text-primary tracking-[-0.02em] leading-[1.1] mb-4">
               Profile
             </h1>
           </div>
@@ -238,26 +238,26 @@ export default function ProfilePage() {
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={copyAddress}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
+                className="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-bg-card border border-[var(--card-border)] hover:border-brand/40 transition-colors text-sm active:scale-[0.97]"
               >
-                <span className="text-text-secondary text-xs sm:text-sm font-mono">
+                <span className="text-text-secondary text-xs sm:text-sm tabular-nums">
                   {user.walletAddress}
                 </span>
                 {copied ? (
-                  <Check className="h-3.5 w-3.5 text-green-500" />
+                  <Check className="h-3.5 w-3.5 text-success" />
                 ) : (
                   <Copy className="h-3.5 w-3.5 text-text-tertiary" />
                 )}
               </button>
               {editingAlias ? (
-                <div className="flex items-center gap-1.5">
+                <div className="inline-flex items-center gap-1">
                   <input
                     type="text"
                     value={aliasInput}
                     onChange={(e) => setAliasInput(e.target.value)}
-                    placeholder="Enter alias..."
+                    placeholder="Enter alias…"
                     maxLength={20}
-                    className="px-2.5 py-1.5 rounded-lg bg-bg-card border border-brand/30 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 w-32"
+                    className="px-3 h-9 rounded-[10px] bg-bg-card border border-brand/40 text-text-primary text-sm focus:outline-none focus:shadow-[0_0_0_3px_rgba(58,204,184,0.18)] w-36 transition-shadow"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === "Enter") saveAlias();
@@ -267,13 +267,15 @@ export default function ProfilePage() {
                   <button
                     onClick={saveAlias}
                     disabled={savingAlias}
-                    className="p-1.5 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
+                    className="w-9 h-9 inline-flex items-center justify-center rounded-[10px] bg-success/10 text-success hover:bg-success/20 transition-colors active:scale-[0.95]"
+                    aria-label="Save alias"
                   >
                     {savingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                   </button>
                   <button
                     onClick={() => setEditingAlias(false)}
-                    className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                    className="w-9 h-9 inline-flex items-center justify-center rounded-[10px] bg-error/10 text-error hover:bg-error/20 transition-colors active:scale-[0.95]"
+                    aria-label="Cancel"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -281,7 +283,7 @@ export default function ProfilePage() {
               ) : (
                 <button
                   onClick={startEditAlias}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-card border border-border hover:border-brand/20 transition-all text-sm"
+                  className="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-bg-card border border-[var(--card-border)] hover:border-brand/40 transition-colors text-sm active:scale-[0.97]"
                 >
                   <span className="text-text-secondary text-xs sm:text-sm">
                     {user.alias ? (
@@ -293,17 +295,19 @@ export default function ProfilePage() {
                   <Pencil className="h-3 w-3 text-text-tertiary" />
                 </button>
               )}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-bg-card border border-border">
+              {/* Points pill — brand fill */}
+              <div className="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-brand/8 border border-brand/20">
                 <Zap className="h-4 w-4 text-brand" />
-                <span className="text-lg font-bold text-text-primary font-mono tabular-nums">
+                <span className="text-base font-semibold text-text-primary tabular-nums">
                   {(user.totalPoints ?? user.points ?? 0).toLocaleString()}
                 </span>
-                <span className="text-[10px] text-text-tertiary">pts</span>
+                <span className="text-[10px] text-text-tertiary uppercase tracking-wider font-medium">pts</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/20 bg-orange-500/5 text-sm">
-                <Flame className="h-3.5 w-3.5 text-orange-500" />
-                <span className="font-bold text-text-primary font-mono">{user.loginStreak}d</span>
-                <span className="text-text-tertiary text-xs">streak</span>
+              {/* Streak pill — warm amber fill */}
+              <div className="inline-flex items-center gap-1.5 px-3 h-9 rounded-[10px] border border-warning/25 bg-warning/8 text-sm">
+                <Flame className="h-3.5 w-3.5 text-warning" />
+                <span className="font-semibold text-text-primary tabular-nums">{user.loginStreak}d</span>
+                <span className="text-text-tertiary text-[10px] uppercase tracking-wider font-medium">streak</span>
               </div>
             </div>
 
@@ -350,7 +354,7 @@ export default function ProfilePage() {
           </div>
 
           {loadingNFTs ? (
-            <div className="p-8 rounded-xl bg-bg-card border border-border text-center reveal-delay-2">
+            <div className="p-8 rounded-[12px] bg-bg-card border border-[var(--card-border)] text-center reveal-delay-2">
               <Loader2 className="h-6 w-6 animate-spin text-brand mx-auto mb-2" />
               <p className="text-text-secondary text-sm">Loading NFTs...</p>
             </div>
@@ -358,7 +362,7 @@ export default function ProfilePage() {
             <div className="reveal-delay-2">
               <div className="grid md:grid-cols-2 gap-3">
                 {/* Dragons */}
-                <div className="p-4 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all">
+                <div className="p-4 rounded-[12px] bg-bg-card border border-[var(--card-border)] hover:border-brand/40 transition-colors duration-200">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-sm text-text-primary">Santuario Hedera (Dragons)</h3>
                     <a
@@ -388,7 +392,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* El Santuario */}
-                <div className="p-4 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all">
+                <div className="p-4 rounded-[12px] bg-bg-card border border-[var(--card-border)] hover:border-brand/40 transition-colors duration-200">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-sm text-text-primary">El Santuario</h3>
                     <a
@@ -432,7 +436,7 @@ export default function ProfilePage() {
               )}
             </div>
           ) : (
-            <div className="p-8 rounded-xl bg-bg-card border border-border text-center reveal-delay-2">
+            <div className="p-8 rounded-[12px] bg-bg-card border border-[var(--card-border)] text-center reveal-delay-2">
               <p className="text-text-secondary text-sm">Failed to load NFT data</p>
             </div>
           )}
@@ -470,7 +474,7 @@ export default function ProfilePage() {
               {stats.createdEvents.map((evt) => (
                 <div
                   key={evt.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all"
+                  className="flex items-center gap-3 p-3 rounded-[12px] bg-bg-card border border-[var(--card-border)] hover:border-brand/40 transition-colors duration-200"
                 >
                   {evt.imageUrl && (
                     <img
@@ -523,9 +527,13 @@ export default function ProfilePage() {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-8 gap-3">
-            <Loader2 className="h-5 w-5 animate-spin text-brand" />
-            <p className="text-text-secondary text-sm">Loading profile...</p>
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-14 rounded-[12px] bg-bg-card border border-[var(--card-border)] animate-pulse"
+              />
+            ))}
           </div>
         ) : stats ? (
           <>
@@ -541,7 +549,7 @@ export default function ProfilePage() {
                     {stats.pointHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between p-3 rounded-xl bg-bg-card border border-border hover:border-brand/20 transition-all"
+                        className="flex items-center justify-between p-3 rounded-[12px] bg-bg-card border border-[var(--card-border)] hover:border-brand/40 transition-colors duration-200"
                       >
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-lg bg-bg-secondary flex items-center justify-center text-text-secondary">
