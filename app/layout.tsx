@@ -14,6 +14,7 @@ import "./globals.css";
 import { ClientProviders } from "@/components/wallet/ClientProviders";
 import { VoteLimitProvider } from "@/contexts/VoteLimitContext";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { AmbientBackground } from "@/components/effects/AmbientBackground";
 
 const Sidebar = dynamic(
   () => import("@/components/layout/Sidebar").then((mod) => mod.Sidebar),
@@ -27,11 +28,6 @@ const MobileHeader = dynamic(
 
 const Toaster = dynamic(
   () => import("@/components/ui/Toaster").then((mod) => mod.Toaster),
-  { ssr: false }
-);
-
-const ParticleBackground = dynamic(
-  () => import("@/components/effects/ParticleBackground").then((mod) => mod.ParticleBackground),
   { ssr: false }
 );
 
@@ -109,9 +105,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans bg-background text-text-primary antialiased">
         <JsonLd />
+        <AmbientBackground />
         <ClientProviders>
           <VoteLimitProvider>
-            <ParticleBackground />
             <div className="flex h-screen relative z-[1]">
               <Sidebar />
               <main className="flex-1 overflow-y-auto overflow-x-hidden">

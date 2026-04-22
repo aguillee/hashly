@@ -338,44 +338,45 @@ export default function EventDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-      {/* Navigation */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
+      {/* Navigation — ghost style, Arc flavor */}
+      <div className="flex items-center justify-between mb-5 sm:mb-7">
         <Link
           href="/calendar"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card border border-border transition-colors"
+          className="inline-flex items-center gap-1.5 px-2.5 h-8 rounded-[9px] text-[13px] font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70 transition-colors active:scale-[0.97]"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Calendar
         </Link>
 
-        {/* Prev / Next */}
-        <div className="flex items-center gap-1.5">
+        {/* Prev / Next — segmented nav */}
+        <div className="inline-flex p-0.5 rounded-[10px] border border-[var(--card-border)] bg-bg-card">
           {event.prevEvent ? (
             <Link
               href={`/events/${event.prevEvent.id}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card border border-border transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 h-7 rounded-[7px] text-[13px] font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70 transition-colors active:scale-[0.97]"
               title={event.prevEvent.title}
             >
               <ChevronLeft className="h-3.5 w-3.5" />
               Prev
             </Link>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary/30 border border-border/30 cursor-not-allowed select-none">
+            <span className="inline-flex items-center gap-1.5 px-2.5 h-7 rounded-[7px] text-[13px] font-medium text-text-tertiary/50 cursor-not-allowed select-none">
               <ChevronLeft className="h-3.5 w-3.5" />
               Prev
             </span>
           )}
+          <div className="w-px bg-[var(--border-subtle)] my-1" />
           {event.nextEvent ? (
             <Link
               href={`/events/${event.nextEvent.id}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card border border-border transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 h-7 rounded-[7px] text-[13px] font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary/70 transition-colors active:scale-[0.97]"
               title={event.nextEvent.title}
             >
               Next
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-text-secondary/30 border border-border/30 cursor-not-allowed select-none">
+            <span className="inline-flex items-center gap-1.5 px-2.5 h-7 rounded-[7px] text-[13px] font-medium text-text-tertiary/50 cursor-not-allowed select-none">
               Next
               <ChevronRight className="h-3.5 w-3.5" />
             </span>
@@ -386,8 +387,8 @@ export default function EventDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Content */}
         <div className="md:col-span-2 space-y-4 sm:space-y-6">
-          {/* Header Card */}
-          <div className={`bg-bg-card border border-border rounded-lg overflow-hidden`}>
+          {/* Header Card — 12px radius, hairline border */}
+          <div className="bg-bg-card border border-[var(--card-border)] rounded-[12px] overflow-hidden">
             {event.imageUrl && (
               <div className="aspect-video relative overflow-hidden">
                 <img
@@ -398,12 +399,12 @@ export default function EventDetailPage() {
                 {/* Date badge - top left */}
                 <div className="absolute top-3 left-3">
                   {event.isForeverMint ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-bold rounded bg-purple-500/90 text-white">
+                    <span className="inline-flex items-center gap-1.5 px-2 h-[24px] text-[11px] font-semibold rounded-[6px] bg-accent-coral/95 text-white shadow-[0_2px_8px_rgba(185,133,250,0.3)]">
                       <Infinity className="h-3 w-3" />
                       Always Live
                     </span>
                   ) : event.mintDate ? (
-                    <span className="px-2 py-1 text-[10px] sm:text-xs bg-text-primary/90 text-bg-primary rounded">
+                    <span className="inline-flex items-center px-2 h-[24px] text-[11px] font-semibold rounded-[6px] bg-black/45 backdrop-blur-md border border-white/15 text-white tracking-tight">
                       {new Date(event.mintDate).toLocaleDateString("en-US", {
                         timeZone: "UTC",
                         weekday: "short",
@@ -425,13 +426,13 @@ export default function EventDetailPage() {
                 </div>
               </div>
             )}
-            <div className={`p-4 sm:p-6 ${event.imageUrl ? "" : "pt-4 sm:pt-6"}`}>
-              <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold">{event.title}</h1>
+            <div className={`p-5 sm:p-7 ${event.imageUrl ? "" : "pt-5 sm:pt-7"}`}>
+              <div className="flex items-start justify-between gap-3 sm:gap-4 mb-4 sm:mb-5">
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-2xl sm:text-[28px] font-semibold tracking-[-0.02em] leading-[1.15]">{event.title}</h1>
                   {hasBadgeToken && (
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-coral/15 border border-accent-coral/30 text-accent-coral text-[10px] sm:text-xs font-semibold">
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="inline-flex items-center gap-1 px-2 h-[22px] rounded-[6px] bg-accent-coral/12 border border-accent-coral/30 text-accent-coral text-[11px] font-semibold">
                         <Award className="h-3 w-3" />
                         Attendance Badge NFT
                       </span>
@@ -439,14 +440,14 @@ export default function EventDetailPage() {
                   )}
                 </div>
                 {!event.imageUrl && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {event.isForeverMint ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-bold rounded bg-purple-500/90 text-white">
+                      <span className="inline-flex items-center gap-1.5 px-2 h-[24px] text-[11px] font-semibold rounded-[6px] bg-accent-coral/95 text-white">
                         <Infinity className="h-3 w-3" />
                         Always Live
                       </span>
                     ) : event.mintDate ? (
-                      <span className="px-2 py-1 text-[10px] sm:text-xs bg-bg-secondary text-text-primary rounded">
+                      <span className="inline-flex items-center px-2 h-[24px] text-[11px] font-semibold bg-bg-secondary text-text-primary rounded-[6px]">
                         {new Date(event.mintDate).toLocaleDateString("en-US", {
                           timeZone: "UTC",
                           weekday: "short",
@@ -466,13 +467,13 @@ export default function EventDetailPage() {
               />
 
               {/* Links */}
-              <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
+              <div className="flex flex-wrap gap-2 mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-[var(--border-subtle)]">
                 {event.websiteUrl && (
                   <a
                     href={event.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-bg-secondary border border-[var(--card-border)] hover:border-brand/40 hover:text-brand transition-[color,border-color] duration-200 text-[13px] font-medium active:scale-[0.97]"
                   >
                     <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Website
@@ -484,7 +485,7 @@ export default function EventDetailPage() {
                     href={event.twitterUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-bg-secondary border border-[var(--card-border)] hover:border-brand/40 hover:text-brand transition-[color,border-color] duration-200 text-[13px] font-medium active:scale-[0.97]"
                   >
                     <Twitter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Twitter
@@ -496,7 +497,7 @@ export default function EventDetailPage() {
                     href={event.discordUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-bg-secondary border border-[var(--card-border)] hover:border-brand/40 hover:text-brand transition-[color,border-color] duration-200 text-[13px] font-medium active:scale-[0.97]"
                   >
                     <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Discord
@@ -510,7 +511,7 @@ export default function EventDetailPage() {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md bg-bg-secondary hover:bg-border transition-colors text-xs sm:text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-3 h-9 rounded-[10px] bg-bg-secondary border border-[var(--card-border)] hover:border-brand/40 hover:text-brand transition-[color,border-color] duration-200 text-[13px] font-medium active:scale-[0.97]"
                   >
                     <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {link.name}
@@ -611,14 +612,14 @@ export default function EventDetailPage() {
 
         {/* Sidebar */}
         <div className="space-y-4 sm:space-y-6">
-          {/* Event Info - News style */}
-          <div className="bg-bg-card border border-border rounded-lg overflow-hidden">
-            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+          {/* Event Info */}
+          <div className="bg-bg-card border border-[var(--card-border)] rounded-[12px] overflow-hidden">
+            <div className="p-5 sm:p-6 space-y-4 sm:space-y-5">
               {event.isForeverMint ? (
                 /* Forever Mint: Always Live */
                 <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0 bg-purple-500/10">
-                    <Infinity className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
+                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 bg-accent-coral/10 border border-accent-coral/20">
+                    <Infinity className="h-4 w-4 sm:h-5 sm:w-5 text-accent-coral" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-text-secondary">Availability</p>
