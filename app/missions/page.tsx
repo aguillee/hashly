@@ -363,7 +363,7 @@ export default function MissionsPage() {
                 <span className="font-semibold text-text-primary text-sm">+100 pts per approved Ecosystem project</span>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Building on Hedera? Submit your project to the Ecosystem and earn points when it gets approved.
+                Know a Hedera project? Add it to the Ecosystem and earn points for each one that gets approved — your own or someone else's.
               </p>
             </div>
             <Link
