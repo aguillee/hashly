@@ -48,6 +48,7 @@ interface CreatedEvent {
   event_type: "MINT_EVENT" | "ECOSYSTEM_MEETUP" | "HACKATHON";
   status: "UPCOMING" | "LIVE";
   isApproved: boolean;
+  rejectedAt: string | null;
   mintDate: string | null;
   votesUp: number;
   votesDown: number;
@@ -486,8 +487,21 @@ export default function ProfilePage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-sm text-text-primary truncate">{evt.title}</p>
-                      <Badge variant={evt.isApproved ? "success" : "warning"} size="sm">
-                        {evt.isApproved ? "Approved" : "Pending"}
+                      <Badge
+                        variant={
+                          evt.rejectedAt
+                            ? "error"
+                            : evt.isApproved
+                            ? "success"
+                            : "warning"
+                        }
+                        size="sm"
+                      >
+                        {evt.rejectedAt
+                          ? "Rejected"
+                          : evt.isApproved
+                          ? "Approved"
+                          : "Pending"}
                       </Badge>
                       <span className="text-[10px] text-text-tertiary font-mono px-1.5 py-0.5 rounded bg-bg-secondary">
                         {evt.event_type === "MINT_EVENT" ? "Mint" : evt.event_type === "HACKATHON" ? "Hackathon" : "Meetup"}

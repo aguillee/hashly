@@ -17,6 +17,7 @@ import {
   Users,
   Award,
   Globe,
+  Building2,
   Plus,
   ArrowRight,
 } from "lucide-react";
@@ -132,6 +133,7 @@ export default function MissionsPage() {
       users: <Users className="h-5 w-5" />,
       badge: <Award className="h-5 w-5" />,
       globe: <Globe className="h-5 w-5" />,
+      buildings: <Building2 className="h-5 w-5" />,
     };
     return icons[iconName] || <Sparkles className="h-5 w-5" />;
   };

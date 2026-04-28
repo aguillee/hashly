@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
       // Season-scoped counts (for achievement missions)
       seasonEventVotes, seasonCollectionVotes, seasonTokenVotes,
       seasonApprovedEvents,
+      seasonApprovedEcosystemProjects,
       seasonReferralCount,
       badgeData,
       seasonEcosystemVotes,
@@ -97,6 +98,15 @@ export async function GET(request: NextRequest) {
       }).then(r => r.length),
       // Approved events this season
       prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
+      // Approved ecosystem projects this season — counted via PointHistory so it follows the
+      // same season scoping as everything else and survives backfills.
+      prisma.pointHistory.count({
+        where: {
+          userId: user.id,
+          actionType: "ECOSYSTEM_PROJECT_APPROVED",
+          createdAt: { gte: seasonStart },
+        },
+      }),
       // Activated referrals this season
       prisma.referral.count({ where: { referrerId: user.id, createdAt: { gte: seasonStart } } }),
       // Badges owned — on-chain verification, current season only
@@ -165,6 +175,10 @@ export async function GET(request: NextRequest) {
         case "event_creator_5":
           progress = Math.min(seasonApprovedEvents, def.requirement);
           completed = seasonApprovedEvents >= def.requirement;
+          break;
+        case "ecosystem_project_approved":
+          progress = Math.min(seasonApprovedEcosystemProjects, def.requirement);
+          completed = seasonApprovedEcosystemProjects >= def.requirement;
           break;
         case "vote_5_collections":
           progress = Math.min(seasonCollectionVotes, def.requirement);

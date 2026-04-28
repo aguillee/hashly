@@ -91,6 +91,7 @@ export async function GET(request: NextRequest) {
         event_type: e.event_type,
         status: e.status,
         isApproved: e.isApproved,
+        rejectedAt: e.rejectedAt?.toISOString() || null,
         mintDate: e.mintDate?.toISOString() || null,
         votesUp: e.votesUp,
         votesDown: e.votesDown,

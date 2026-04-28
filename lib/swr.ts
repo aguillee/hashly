@@ -153,7 +153,9 @@ export function useVoteLimit() {
 
 // Events with attendance badges
 export function useEventsWithBadge(limit = 10) {
-  return useSWR(`/api/events/with-badge?limit=${limit}`, fetcher, {
+  // upcoming=true ensures past meetups (where mintDate < now and there's no
+  // future endDate) are filtered out on the home page.
+  return useSWR(`/api/events/with-badge?limit=${limit}&upcoming=true`, fetcher, {
     revalidateOnFocus: true,
     refreshInterval: 300000, // Auto-refresh every 5 min
   });

@@ -3,6 +3,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { validateRequest, adminUpdateEcosystemProjectSchema } from "@/lib/validations";
+import { POINTS } from "@/lib/points";
+import { awardReferralCommission } from "@/lib/referral-points";
 
 export const dynamic = "force-dynamic";
 
@@ -34,11 +36,15 @@ export async function PATCH(
 
     const data = validation.data;
 
-    // Approval transition: false → true → create CommunityProfile
+    // Approval transition: false → true → create CommunityProfile + award points to submitter.
+    // Idempotent by virtue of the `!project.isApproved` guard — re-approving an already-approved
+    // project is a no-op for both the profile creation and the points award.
     if (data.isApproved === true && !project.isApproved) {
       const twitterHandle = project.twitterUrl
         ? project.twitterUrl.replace(/https?:\/\/(x\.com|twitter\.com)\//i, "").replace(/\/$/, "").replace("@", "")
         : null;
+
+      const pointsAwarded = POINTS.ECOSYSTEM_PROJECT_APPROVED;
 
       const [profile] = await prisma.$transaction([
         prisma.communityProfile.create({
@@ -54,6 +60,18 @@ export async function PATCH(
             isApproved: true,
           },
         }),
+        prisma.user.update({
+          where: { id: project.submittedById },
+          data: { points: { increment: pointsAwarded } },
+        }),
+        prisma.pointHistory.create({
+          data: {
+            userId: project.submittedById,
+            points: pointsAwarded,
+            actionType: "ECOSYSTEM_PROJECT_APPROVED",
+            description: `Ecosystem project approved: ${project.name}`,
+          },
+        }),
       ]);
 
       await prisma.ecosystemProject.update({
@@ -65,7 +83,14 @@ export async function PATCH(
         },
       });
 
-      return NextResponse.json({ success: true, approved: true });
+      // Referral commission lives outside the main transaction (same pattern as event approval).
+      try {
+        await awardReferralCommission(project.submittedById, pointsAwarded, "ECOSYSTEM_PROJECT_APPROVED");
+      } catch (err) {
+        console.error("[admin/ecosystem] referral commission failed (non-fatal):", err);
+      }
+
+      return NextResponse.json({ success: true, approved: true, pointsAwarded });
     }
 
     // Rejection: true → false → remove CommunityProfile

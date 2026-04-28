@@ -78,6 +78,15 @@ export const MISSION_DEFINITIONS: MissionDefinition[] = [
     icon: "gift",
   },
   {
+    id: "ecosystem_project_approved",
+    name: "Ecosystem Builder",
+    description: "Get an Ecosystem project approved this season",
+    pointsReward: 100,
+    type: "ACHIEVEMENT",
+    requirement: 1,
+    icon: "buildings",
+  },
+  {
     id: "vote_5_collections",
     name: "NFT Explorer",
     description: "Vote on 5 different NFT collections this season",
