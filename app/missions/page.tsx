@@ -329,7 +329,7 @@ export default function MissionsPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-8">
         {/* Event creation CTA */}
-        <div className="mb-5 p-4 rounded-xl border border-brand/20 bg-brand/[0.03]">
+        <div className="mb-3 p-4 rounded-xl border border-brand/20 bg-brand/[0.03]">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0">
               <Calendar className="h-5 w-5 text-brand" />
@@ -348,6 +348,30 @@ export default function MissionsPage() {
             >
               <Plus className="h-3.5 w-3.5" />
               Create event
+            </Link>
+          </div>
+        </div>
+
+        {/* Ecosystem project CTA */}
+        <div className="mb-5 p-4 rounded-xl border border-accent-coral/25 bg-accent-coral/[0.04]">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-accent-coral/10 flex items-center justify-center flex-shrink-0">
+              <Building2 className="h-5 w-5 text-accent-coral" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-text-primary text-sm">+100 pts per approved Ecosystem project</span>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Building on Hedera? Submit your project to the Ecosystem and earn points when it gets approved.
+              </p>
+            </div>
+            <Link
+              href="/ecosystem/apply"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-accent-coral text-white text-xs font-bold hover:brightness-110 transition-[filter] flex-shrink-0"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add project
             </Link>
           </div>
         </div>
