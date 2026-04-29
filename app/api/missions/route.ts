@@ -96,8 +96,17 @@ export async function GET(request: NextRequest) {
         where: { userId: user.id, actionType: "TOKEN_VOTE", createdAt: { gte: seasonStart } },
         select: { description: true }, distinct: ["description"],
       }).then(r => r.length),
-      // Approved events this season
-      prisma.event.count({ where: { createdById: user.id, isApproved: true, createdAt: { gte: seasonStart } } }),
+      // Approved events this season — counted via PointHistory so the rule is
+      // "approved within the current season" (regardless of when the event was
+      // submitted) and survives hard-deletes (the points stay even if the
+      // event row is later removed by an admin).
+      prisma.pointHistory.count({
+        where: {
+          userId: user.id,
+          actionType: "EVENT_APPROVED",
+          createdAt: { gte: seasonStart },
+        },
+      }),
       // Approved ecosystem projects this season — counted via PointHistory so it follows the
       // same season scoping as everything else and survives backfills.
       prisma.pointHistory.count({
