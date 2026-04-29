@@ -30,9 +30,16 @@ export async function GET(request: NextRequest) {
 
     const sortBy = searchParams.get("sortBy");
 
+    // Default order: highest community votes first. Falling back to name on
+    // ties keeps the listing stable when many projects sit at 0 votes.
+    let orderBy: any;
+    if (sortBy === "newest") orderBy = { createdAt: "desc" };
+    else if (sortBy === "name") orderBy = { name: "asc" };
+    else orderBy = [{ totalVotes: "desc" }, { name: "asc" }];
+
     const projects = await prisma.ecosystemProject.findMany({
       where,
-      orderBy: sortBy === "votes" ? { totalVotes: "desc" } : { name: "asc" },
+      orderBy,
       select: {
         id: true,
         name: true,

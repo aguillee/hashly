@@ -247,9 +247,14 @@ export default function EcosystemPage() {
                             <CountryFlag code={project.countryCode} size="xs" />
                           )}
                         </div>
-                        <h3 className="font-semibold text-sm text-text-primary truncate group-hover:text-brand transition-colors">
+                        <a
+                          href={project.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-sm text-text-primary truncate hover:text-brand transition-colors block"
+                        >
                           {project.name}
-                        </h3>
+                        </a>
                       </div>
                     </div>
 
