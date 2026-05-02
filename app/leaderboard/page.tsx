@@ -21,14 +21,19 @@ interface LeaderboardEntry {
 }
 
 /* ── Prize Tiers ─────────────────────────────────────────── */
+// Season 03 — 100 USDC total, top 7 contributors paid out:
+//   1st          = $30
+//   2nd          = $20
+//   3rd → 7th    = $10 each (5 × 10 = 50)
+//   total        = 30 + 20 + 50 = 100 USDC
 const PRIZE_TIERS = [
-  { name: "Champion", ranks: "1st", rangeStart: 1, rangeEnd: 1, usd: 50, pct: 17.86, winners: 1, Icon: Crown, accent: "amber" as const },
-  { name: "Podium", ranks: "2nd - 3rd", rangeStart: 2, rangeEnd: 3, usd: 35, pct: 12.50, winners: 2, Icon: Medal, accent: "zinc" as const },
-  { name: "Top", ranks: "4th - 8th", rangeStart: 4, rangeEnd: 8, usd: 18, pct: 6.43, winners: 5, Icon: Zap, accent: "brand" as const },
-  { name: "Qualified", ranks: "9th - 15th", rangeStart: 9, rangeEnd: 15, usd: 10, pct: 3.57, winners: 7, Icon: CheckCircle, accent: "brand" as const },
+  { name: "Champion", ranks: "1st", rangeStart: 1, rangeEnd: 1, usd: 30, pct: 30, winners: 1, Icon: Crown, accent: "amber" as const },
+  { name: "Runner-up", ranks: "2nd", rangeStart: 2, rangeEnd: 2, usd: 20, pct: 20, winners: 1, Icon: Medal, accent: "zinc" as const },
+  { name: "Top 7", ranks: "3rd - 7th", rangeStart: 3, rangeEnd: 7, usd: 10, pct: 10, winners: 5, Icon: Zap, accent: "brand" as const },
 ];
 
-const PRIZE_CUTOFF = 15;
+const PRIZE_CUTOFF = 7;
+const PRIZE_POOL_USD = 100;
 
 function getPrize(rank: number) {
   const tier = PRIZE_TIERS.find((t) => rank >= t.rangeStart && rank <= t.rangeEnd);
@@ -41,12 +46,16 @@ function getTierForRank(rank: number) {
 }
 
 /* ── Prize Pool Tokens ───────────────────────────────────── */
+// Season 03 prize pool is paid 100% in USDC. One single line — no
+// mixed token bag this season.
 const PRIZE_TOKENS = [
-  { name: "SAUCE", symbol: "SAUCE", amount: "2,400", usd: 50, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.731861.png" },
-  { name: "BONZO", symbol: "BONZO", amount: "1,970", usd: 40, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.8279134.png" },
-  { name: "CANDY", symbol: "CANDY", amount: "25,065", usd: 30, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.4571363.png" },
-  { name: "SENTX", symbol: "SENTX", amount: "68", usd: 20, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.2672057.png" },
-  { name: "HPRIME", symbol: "HPRIME", amount: "86,352", usd: 140, icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.10000022.png" },
+  {
+    name: "USDC",
+    symbol: "USDC",
+    amount: "100",
+    usd: 100,
+    icon: "https://dwk1opv266jxs.cloudfront.net/icons/tokens/0.0.456858.png",
+  },
 ];
 
 const TIER_ACCENT = {
@@ -213,43 +222,86 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-        {/* Prize Pool Tokens */}
+        {/* Prize Pool — Season 03: 100 USDC, top 7 contributors */}
         <div ref={prizesRef} className="reveal mb-8">
-          <div className="p-4 sm:p-5 rounded-[14px] bg-bg-card border border-[var(--card-border)]">
-            <div className="flex items-center justify-between mb-3 reveal-delay-1">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-[7px] bg-brand/10 border border-brand/20 flex items-center justify-center">
-                  <TrendingUp className="h-3 w-3 text-brand" />
-                </div>
-                <span className="text-[10px] uppercase tracking-[0.16em] text-text-tertiary font-medium">Season Prize Pool</span>
-              </div>
-              <span className="inline-flex items-center px-2 h-6 rounded-[6px] bg-brand/10 border border-brand/20 text-brand text-[12px] font-semibold tabular-nums">$280</span>
-            </div>
-            <div className="grid grid-cols-5 gap-1.5 reveal-delay-2">
-              {PRIZE_TOKENS.map((token, i) => (
-                <div
-                  key={token.symbol}
-                  className={cn(
-                    "flex flex-col items-center text-center py-2.5 px-1.5 rounded-[10px] border transition-colors",
-                    i === 0
-                      ? "bg-amber-400/5 border-amber-400/25"
-                      : "bg-bg-secondary/40 border-[var(--border-subtle)] hover:border-[var(--card-border)]"
-                  )}
-                >
-                  <div className="w-6 h-6 rounded-full overflow-hidden bg-bg-secondary ring-1 ring-[var(--card-border)] mb-1">
-                    <img src={token.icon} alt={token.symbol} className="w-6 h-6 object-cover" />
+          <div className="relative p-5 sm:p-6 rounded-[14px] bg-bg-card border border-[var(--card-border)] overflow-hidden">
+            {/* Subtle teal glow behind the headline figure */}
+            <div
+              aria-hidden
+              className="absolute -top-12 left-1/2 -translate-x-1/2 w-[420px] h-[260px] opacity-50 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(58,204,184,0.18), transparent 70%)",
+                filter: "blur(40px)",
+              }}
+            />
+
+            <div className="relative">
+              {/* Header row */}
+              <div className="flex items-center justify-between mb-5 reveal-delay-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-[7px] bg-brand/10 border border-brand/20 flex items-center justify-center">
+                    <TrendingUp className="h-3 w-3 text-brand" />
                   </div>
-                  <span className="font-semibold text-text-primary text-[10px] leading-tight tracking-tight">{token.name}</span>
-                  <span className={cn(
-                    "text-sm font-black font-mono",
-                    i === 0 ? "text-amber-400" : "text-brand"
-                  )}>${token.usd}</span>
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-text-tertiary font-medium">
+                    Season Prize Pool
+                  </span>
                 </div>
-              ))}
+                <span className="inline-flex items-center gap-1.5 px-2 h-6 rounded-[6px] bg-brand/10 border border-brand/20 text-brand text-[11px] font-semibold tabular-nums">
+                  Top {PRIZE_CUTOFF}
+                </span>
+              </div>
+
+              {/* Hero figure */}
+              <div className="text-center mb-6 reveal-delay-2">
+                <div className="inline-flex items-center gap-3">
+                  {PRIZE_TOKENS[0]?.icon && (
+                    <div className="w-9 h-9 rounded-full overflow-hidden bg-bg-secondary ring-1 ring-[var(--card-border)]">
+                      <img src={PRIZE_TOKENS[0].icon} alt="USDC" className="w-9 h-9 object-cover" />
+                    </div>
+                  )}
+                  <div className="text-left">
+                    <p className="text-[34px] sm:text-[42px] font-semibold text-text-primary tracking-[-0.025em] leading-none tabular-nums">
+                      {PRIZE_POOL_USD} <span className="text-text-secondary text-[22px] sm:text-[26px] font-semibold">USDC</span>
+                    </p>
+                  </div>
+                </div>
+                <p className="text-[12px] text-text-tertiary mt-2">
+                  Top {PRIZE_CUTOFF} contributors get rewarded
+                </p>
+              </div>
+
+              {/* Tier breakdown — 3 cards */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 reveal-delay-3">
+                {PRIZE_TIERS.map((tier) => {
+                  const accent = TIER_ACCENT[tier.accent];
+                  return (
+                    <div
+                      key={tier.name}
+                      className={cn(
+                        "flex flex-col items-center text-center py-3.5 px-2 rounded-[12px] border transition-colors",
+                        accent.bg,
+                        accent.border
+                      )}
+                    >
+                      <span className="text-[10px] uppercase tracking-[0.12em] text-text-tertiary font-medium mb-1.5">
+                        {tier.ranks}
+                      </span>
+                      <span className="text-[22px] sm:text-[26px] font-semibold text-text-primary tabular-nums leading-none">
+                        ${tier.usd}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-[0.12em] text-text-tertiary font-medium mt-1.5">
+                        USDC{tier.winners > 1 ? " · each" : ""}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <p className="text-[10px] text-text-tertiary mt-4 text-center">
+                Paid in USDC at the end of the season · No fees from Hashly
+              </p>
             </div>
-            <p className="text-[9px] text-text-tertiary mt-1.5 text-center">
-              Based on Season 1 most voted tokens · USD as of March 27, 2025
-            </p>
           </div>
         </div>
 
